@@ -33,5 +33,31 @@ Sprint planing, review and retrospective are not done as separate meetings but a
 Direct push into the main branch are forbidden. Exception can be made for minor modification to markdown files. The rest of the changes have to be made in a "issue-brnach" and after completation the branch can be merged into the main branch with a merge request. A new branch and a merge request for a specific issue can be created directly from the issues page in gitlab.
 
 ## Project Milestones
+
+1. Konzept Phase (3 Wochen)
+    - Lösungsvorschläge erstellen
+    - Detailreiches Systemdiagramm
+    - PoC gewisser Technologien
+    - Datendiagramm
+2. Infrastruktur (3 Wochen)
+    - Dev Umgebung einrichten (Docker Infrastruktur)
+    - Live-Daten von Sensorknoten bis in den Triplestore mit Flatbuffers
+    - Kompilieren und und Flashen der Firmware über Browser
+3. Frontend & Backend (4 Wochen)
+    - User-Auth
+    - Frontend Masken zur Erfassung und Anzeige der Daten
+    - Backend als Middleware zwischen den Services
+    - Implementation REST-Schittstelle
+4. End-to-End Testing (2 Wochen)
+    - Integration aller Systemteile, Services wie Grafana, Sparnatural etc.
+    - Deployment in produktiver Umgebung
+    - Testing des Systems durch Stakeholders
+5. Feedback-Integration, Optionale Features (2 Wochen)
+    - Implementation/Anpassung gewisser Systemkomponenten aufgrund Rückmeldung
+    - Technischer Abschluss
+6. Projekt Deadline (2 Wochen)
+    - Fokus auf Abschluss der Dokumentation
+    - Plakat, Bucheintrag, Präsentation, Film abschliessen
+
 ## Requirements
 //TODO
