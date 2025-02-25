@@ -15,4 +15,5 @@
 | 2025-02-20 | 16:30 - 18:00 | 1,5   | CIRIE1, DEGEL2 |  1    | Meeting bei der AHB mit Nikita                    |
 | 2025-02-24 | 09:00 - 13:00 | 4,0   | CIRIE1, DEGEL2 | 1,2,4 | Brainstorming, Projektplanung, Milestones         |
 | 2025-02-24 | 14:00 - 15:30 | 1.5   | CIRIE1         | 9     | Diagrammen herstellen                             |
-| 2025-02-25 | 09:00 - 15:30 |    | CIRIE1, DEGEL2         |      | herstellen                             |
+| 2025-02-24 | 14:00 - 15:00 | 1.0   | DEGEL2         | 1,7   | Milestones ausschreiben, Ontologien rechechieren  |
+| 2025-02-25 | 09:00 - 15:30 |       | CIRIE1, DEGEL2 |       |                                                   |
