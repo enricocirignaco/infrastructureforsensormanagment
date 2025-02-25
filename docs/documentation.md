@@ -60,4 +60,27 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
     - Plakat, Bucheintrag, Präsentation, Film abschliessen
 
 ## Requirements
-//TODO
+### Funcional Requirements
+- Verwaltung und darstellung von Sensorentypen und Ihre Attributen (z.B. Model, Datasheet, datenformat, lagerbestand)
+- Verwaltung und darstellung von Sensorknoten die aus mehrere Sensoren bestehen (z.B. Standort, Sensoren, Projektzugehörigkeit)
+- Verwaltung und darstellung von Projekten die aus mehrere Sensorknoten bestehen (z.B. Projektname, Projektbeschreibung)
+- Die Webapplikation soll durch zwei verschiedenen Benutzerprofile benutzt werden können: *Researcher* und *Data Analyst*. Der *Researcher* soll Sensoren, Sensorknoten und Projekte erstellen, bearbeiten und löschen können. Der *Data Analyst* soll Sensoren, Sensorknoten und Projekte nur lesen können.
+- Die Webapplikation soll nur durch eine Authentifizierung benutzt werden können; ein Authhentifizierung und Authorizierungskonzept soll erarbeitet und implementiert werden.
+- Benutzer sollen ihre Passwort zurücksetzen können.
+- Das Firmware soll mittels *WebSerial API* direkt vom browser/webapplikation auf den Sensorknoten geflash werden können.
+- Optional kann der Benutzer das parametrisierte Firmware auch als Arduino Code heruntergeladen und in eine spätere Zeitpunkt manuell mittels Arduino IDE geflashen.
+- Die Webapplikation soll eine REST API zur Verfügung stellen, die die CRUD Operationen für Sensoren, Sensorknoten und Projekte ermöglicht.
+- Sensorknoten und Projekten sollen auf TTN automatisch über die REST API provisioniert werden.
+- Die Sensordaten sollen vom Sensorknoten über LoRaWAN und *The Things Network* erhoben werden und über MQTT an das Backend gesendet werden.
+- Alle Projektdaten sollen in ein Linked Data Triple Store persistiert werden.
+in ein InfluxDB gelangen.
+- Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden; Der Benutzer soll die Firmware über die Webapplikation auf den Sensorknoten flashen oder Herunterladen Können.
+- Bei der herstellung ein neues Projektes muss eine Gitlab repo angebunden werden. Die Firmware soll vor dem kompilieren aus diesem Repo bezogen werden.
+### Non-Functional Requirements
+- Die Webapplikation soll auf ein moderne "Single Page Architekture" aufgebaut werden.
+- Die REST API soll möglichst unabhängig von der Webapplikation aufgebaut werden und nach denRESTful prinzipien aufgebaut werden.
+- Für die Vewaltung von Linked Date sollen geegnete Ontologien und Schemas verwendet werden.
+### Optionale Features
+- Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können.
+- Admin Benutzer um Benutzern zu verwalten und Passwörter zurückzusetzen.
+- Sensordaten sollen nicht nur über MQTT aber auch über Webhooks an das Backend gesendet werden können.
