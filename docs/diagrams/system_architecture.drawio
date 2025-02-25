@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2025-02-25T09:02:02.107Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.1 Chrome/112.0.5615.204 Electron/24.6.1 Safari/537.36" etag="SI4uP0XcpjYL5QXHT8MR" version="21.6.1" type="device">
+<mxfile host="Electron" modified="2025-02-25T11:59:52.270Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.1 Chrome/112.0.5615.204 Electron/24.6.1 Safari/537.36" etag="OeLerqcwDcYCklhfg0wo" version="21.6.1" type="device">
   <diagram name="Page-1" id="LTGe0UZw8G0_6CDL_D9R">
     <mxGraphModel dx="984" dy="679" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
@@ -18,11 +18,6 @@
         </mxCell>
         <mxCell id="SgTAuPVwlzynZpMagi0a-9" value="Compile Engine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="520" y="290" width="150" height="69" as="geometry" />
-        </mxCell>
-        <mxCell id="SgTAuPVwlzynZpMagi0a-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;strokeWidth=2;" parent="1" source="SgTAuPVwlzynZpMagi0a-14" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1130" y="325.9047619047619" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="SgTAuPVwlzynZpMagi0a-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="SgTAuPVwlzynZpMagi0a-14" target="SgTAuPVwlzynZpMagi0a-43" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -82,7 +77,7 @@
           <mxGeometry x="105.44" y="35.13" width="26.63" height="29.08" as="geometry" />
         </mxCell>
         <mxCell id="SgTAuPVwlzynZpMagi0a-46" value="MQTT" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="1030" y="290" width="60" height="30" as="geometry" />
+          <mxGeometry x="1030" y="280" width="60" height="30" as="geometry" />
         </mxCell>
         <mxCell id="SgTAuPVwlzynZpMagi0a-50" value="" style="group" parent="1" vertex="1" connectable="0">
           <mxGeometry x="708.75" y="580" width="160" height="60" as="geometry" />
@@ -154,6 +149,21 @@
         </mxCell>
         <mxCell id="2WoqCV1sr2KskyZm6Th9-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;dashed=1;" parent="1" source="SgTAuPVwlzynZpMagi0a-15" target="SgTAuPVwlzynZpMagi0a-16" edge="1">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="KXa-Rk25QpfISuItWbiI-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;strokeWidth=2;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1130" y="310.00476190476195" as="targetPoint" />
+            <mxPoint x="960" y="310.1" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KXa-Rk25QpfISuItWbiI-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;startArrow=none;startFill=0;endArrow=classic;endFill=1;strokeWidth=2;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1130" y="340.00476190476195" as="targetPoint" />
+            <mxPoint x="960" y="340.1" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="KXa-Rk25QpfISuItWbiI-3" value="REST TTN API" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="1010" y="309.5" width="100" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
