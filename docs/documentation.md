@@ -60,27 +60,43 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
     - Plakat, Bucheintrag, Präsentation, Film abschliessen
 
 ## Requirements
-### Funcional Requirements
-- Verwaltung und darstellung von Sensorentypen und Ihre Attributen (z.B. Model, Datasheet, datenformat, lagerbestand)
-- Verwaltung und darstellung von Sensorknoten die aus mehrere Sensoren bestehen (z.B. Standort, Sensoren, Projektzugehörigkeit)
-- Verwaltung und darstellung von Projekten die aus mehrere Sensorknoten bestehen (z.B. Projektname, Projektbeschreibung)
-- Die Webapplikation soll durch zwei verschiedenen Benutzerprofile benutzt werden können: *Researcher* und *Data Analyst*. Der *Researcher* soll Sensoren, Sensorknoten und Projekte erstellen, bearbeiten und löschen können. Der *Data Analyst* soll Sensoren, Sensorknoten und Projekte nur lesen können.
-- Die Webapplikation soll nur durch eine Authentifizierung benutzt werden können; ein Authhentifizierung und Authorizierungskonzept soll erarbeitet und implementiert werden.
-- Benutzer sollen ihre Passwort zurücksetzen können.
-- Das Firmware soll mittels *WebSerial API* direkt vom browser/webapplikation auf den Sensorknoten geflash werden können.
-- Optional kann der Benutzer das parametrisierte Firmware auch als Arduino Code heruntergeladen und in eine spätere Zeitpunkt manuell mittels Arduino IDE geflashen.
-- Die Webapplikation soll eine REST API zur Verfügung stellen, die die CRUD Operationen für Sensoren, Sensorknoten und Projekte ermöglicht.
-- Sensorknoten und Projekten sollen auf TTN automatisch über die REST API provisioniert werden.
-- Die Sensordaten sollen vom Sensorknoten über LoRaWAN und *The Things Network* erhoben werden und über MQTT an das Backend gesendet werden.
-- Alle Projektdaten sollen in ein Linked Data Triple Store persistiert werden.
-in ein InfluxDB gelangen.
-- Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden; Der Benutzer soll die Firmware über die Webapplikation auf den Sensorknoten flashen oder Herunterladen Können.
-- Bei der herstellung ein neues Projektes muss eine Gitlab repo angebunden werden. Die Firmware soll vor dem kompilieren aus diesem Repo bezogen werden.
-### Non-Functional Requirements
-- Die Webapplikation soll auf ein moderne "Single Page Architekture" aufgebaut werden.
-- Die REST API soll möglichst unabhängig von der Webapplikation aufgebaut werden und nach denRESTful prinzipien aufgebaut werden.
-- Für die Vewaltung von Linked Date sollen geegnete Ontologien und Schemas verwendet werden.
+### Funktionale Anforderungen
+
+#### Verwaltung und Darstellung von Sensorknoten und Projekten
+- Die Webapplikation soll eine zentrale Verwaltung der Sensorknoten und Projekte ermöglichen und diese übersichtlich darstellen.
+- Sensorknoten sollen mit relevanten Informationen verwaltet werden (z.B. Standort, Firmware-Version, Projektzugehörigkeit).
+- Projekte sollen als Organisationseinheit für Sensorknoten verwaltet werden.
+- (**Sensorverwaltung?**)
+
+#### Benutzer- und Zugriffsverwaltung
+- Die Webapplikation soll zwei spezifische Benutzer unterstützen:
+    - *Researcher*: Write-Access, kann Sensorknoten und Projekte erstellen und bearbeiten.
+    - *Data Analyst*: Read-Access, kann die erstellten Daten nur lesen.
+- Die Nutzung der Webapplikation und der unterliegenden REST-Schnittstelle erfordert eine Authentifizierung.
+- Ein Authentifizierungs- und Autorisierungskonzept soll implementiert werden.
+- Benutzer sollen ihre Passwörter ändern können.
+
+#### Firmware-Management und Deployment
+- Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden.
+- Benutzer sollen Firmware über die Webapplikation direkt auf den Sensorknoten flashen können (WebSerial API).
+- Alternativ soll die parametrisierte Firmware als Arduino-Code heruntergeladen und später manuell über die Arduino IDE geflasht werden können (z.B. bei fehlender Internetverbindung).
+- Beim Erfassen eines neuen Projekts (**Sensorknotens?**) muss ein GitLab-Repository angegeben. Die Firmware soll vor dem Kompilieren aus diesem Repository bezogen werden.
+- (**params.hpp**? Die zu setzenden Parameter sind Projektspezifisch und können in einer Konfigurationsdatei festgelegt werden)
+
+#### Schnittstelle zu The Things Network (TTN)
+- Projekte (Applikationen) und Sensorknoten (End Devices) sollen automatisch über die REST API von TTn provisioniert werden.
+- Erfasste Sensordaten sollen über LoRaWAN und TTN übertragen und per MQTT an das Backend (**besserer Begriff**) übertragen werden.
+
+#### Datenpersitenz und -verarbeitung
+- Alle (**vorsichtiger formulieren**) Projektdaten sollen in einem Linked Data Triple Store gespeichert werden.
+- Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden.
+- Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht.
+
+### Nicht-funktionale Anforderungen
+- Die Webapplikation soll als moderne *Single Page Application (SPA)* aufgebaut werden.
+- Die REST API soll unabhängig von der Webapplikation entwickelt und nach RESTful-Prinzipien gestaltet werden.
+- Beim Einsatz von Linked Data sollen geeignete Ontologien und Schemas verwendet werden.
 ### Optionale Features
 - Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können.
-- Admin Benutzer um Benutzern zu verwalten und Passwörter zurückzusetzen.
-- Sensordaten sollen nicht nur über MQTT aber auch über Webhooks an das Backend gesendet werden können.
+- Ein Admin-Benutzer soll Passwörter von Benutzer verwalten können und den API-Key für TTN setzen.
+- Sensordaten sollen nicht nur über MQTT, sondern auch über Webhooks an das Backend gesendet werden können.
