@@ -1,0 +1,115 @@
+<mxfile host="Electron" modified="2025-03-05T10:11:20.613Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.1 Chrome/112.0.5615.204 Electron/24.6.1 Safari/537.36" etag="AshLY0l96E_sMFRJ_fm1" version="21.6.1" type="device">
+  <diagram name="Page-1" id="B0liYfvt0YTKg2CTTu5m">
+    <mxGraphModel dx="895" dy="1444" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="hOuclGLYZknApy_PcMDm-1" value="&lt;font style=&quot;font-size: 25px;&quot;&gt;Typical Workflow&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry y="-310" width="640" height="1590" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-5" target="8NKRSQqxYap2c9m0BW01-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-5" target="8NKRSQqxYap2c9m0BW01-16" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-5" value="Create new project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-6" target="8NKRSQqxYap2c9m0BW01-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-6" value="Create new sensor node template" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-8" target="8NKRSQqxYap2c9m0BW01-23" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-8" value="Create new sensor node" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-12" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;- Project name&lt;br&gt;&lt;/font&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;- Description&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- Abbreviation&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- Image&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- TTN application is created&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="40" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-13" value="&lt;p style=&quot;line-height: 90%;&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;- Name&lt;br&gt;- Description&lt;br&gt;- Firmware (dropdown)&lt;br&gt;- Sensors (name, type, unit)&lt;br&gt;- Configurable parameters (dropdown)&lt;/font&gt;&lt;/p&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="180" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-16" target="8NKRSQqxYap2c9m0BW01-18" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-16" value="Initial setup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="-100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-18" value="Researcher login" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="-240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-20" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- TTN API Key&lt;br&gt;- GitLab Repo Key&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="-100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-21" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- User&lt;br&gt;&lt;/span&gt;- Password" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="-240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-23" target="8NKRSQqxYap2c9m0BW01-27" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-23" target="8NKRSQqxYap2c9m0BW01-29" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-23" value="Compile firmware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-25" value="&lt;p style=&quot;line-height: 20%;&quot;&gt;- Name&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- Configurable parameters&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- UID and URL are generated&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- TTN End Device is created&lt;/p&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="320" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-26" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;Firmware is supplemented with config.h file and UID, compiled with arduino-cli in the backend. The binary is available in the frontend.&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="460" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-27" value="Download firmware as .ino file" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="40" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-29" target="8NKRSQqxYap2c9m0BW01-32" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-29" value="Flash firmware" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-31" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;Firmware is flashed onto the hardware via WebSerial&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="600" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-36" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-32" target="8NKRSQqxYap2c9m0BW01-35" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-32" value="Sensor Node NFC/QR Code mit Handy Scannen&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="200" y="740" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-34" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;URL opens in browser. Sensor node data is displayed. Node can be identified.&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="740" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-35" target="8NKRSQqxYap2c9m0BW01-38" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-35" value="Sensor node is online and transmitting data to TTN" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="200" y="880" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-37" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;TTN receives data from each sensor node and forwards it to the application’s backend.&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="880" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-38" target="xuYnujYFgXMgOsugo6h7-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-38" value="Data packet is parsed and stored in the triplestore" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+          <mxGeometry x="200" y="1020" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-1" value="Data is available via SparQL, InfluxDB, and WebUI" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+          <mxGeometry x="200" y="1160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-3" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- Parsing based on ProtoBuf schema&lt;br&gt;- Storage in Triplestore and InfluxDB&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="1020" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-4" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- SparQL API&lt;br&gt;- InfluxDB API &amp;amp; Web UI&lt;br&gt;- WebUI / SparQL Web UI&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
+          <mxGeometry x="360" y="1160" width="240" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
