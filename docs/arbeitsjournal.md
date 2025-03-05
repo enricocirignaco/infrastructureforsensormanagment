@@ -20,3 +20,4 @@
 | 2025-02-25 | 09:30 - 10:15 | 0,75  | DEGEL2         | 1     | Requirements sortieren, genauer ausschreiben      |
 | 2025-03-04 | 09:30 - 15:30 | 6,0   | CIRIE1, DEGEL2 | 7,11  | Datenmodell und Workflow spezifizieren            |
 | 2025-03-05 | 10:00 - 12:00 | 2,0   | DEGEL2         | 7,12  | Ontologien kombinieren, Wireframes bauen          |
+| 2025-03-05 | 10:00 - 12:30 | 2,3   | CIRIE1         | 3,11  | Deployment Workflow, Firmware Toolchain,          |
