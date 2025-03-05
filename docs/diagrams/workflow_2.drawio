@@ -1,0 +1,112 @@
+<mxfile host="Electron" modified="2025-03-05T09:54:18.942Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.1 Chrome/112.0.5615.204 Electron/24.6.1 Safari/537.36" etag="TRvhVLq8nMKoxy36GLLX" version="21.6.1" type="device">
+  <diagram name="Page-1" id="B0liYfvt0YTKg2CTTu5m">
+    <mxGraphModel dx="1230" dy="1676" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="8NKRSQqxYap2c9m0BW01-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-5" target="8NKRSQqxYap2c9m0BW01-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-5" target="8NKRSQqxYap2c9m0BW01-16" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-5" value="Neue Projekt herstellen" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-6" target="8NKRSQqxYap2c9m0BW01-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-6" value="Neue Sensor Node Vorlage herstellen" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-8" target="8NKRSQqxYap2c9m0BW01-23" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-8" value="Neue Sensor Node herstellen" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-12" value="&lt;font style=&quot;font-size: 11px;&quot;&gt;- Projektname&lt;br&gt;&lt;/font&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;- Beschreibung&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- Kürzel&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- Bild&lt;/div&gt;&lt;div style=&quot;font-size: 11px; line-height: 90%;&quot;&gt;- TTN Apprication wird hergestellt&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="40" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-13" value="&lt;p style=&quot;line-height: 90%;&quot;&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;- Name&lt;br&gt;- Beschreibung&lt;br&gt;- Firmware (dropdown)&lt;br&gt;- Sensoren (name, typ, einheit)&lt;br&gt;- Konfigurierbarer Parametern (dropdown)&lt;/font&gt;&lt;/p&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="180" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-16" target="8NKRSQqxYap2c9m0BW01-18" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-16" value="Erste aufstellen" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="-100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-18" value="Forscher Login" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="-240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-20" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- TTN API Key&lt;br&gt;- Gitlab Repo Key&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="-100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-21" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- Benutzer&lt;br&gt;&lt;/span&gt;- Password" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="-240" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-28" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-23" target="8NKRSQqxYap2c9m0BW01-27" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-23" target="8NKRSQqxYap2c9m0BW01-29" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-23" value="Firmware kompilieren" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-25" value="&lt;p style=&quot;line-height: 20%;&quot;&gt;- Name&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- Konfigurierbarer Parametern&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- UID und URL werden generiert&lt;/p&gt;&lt;p style=&quot;line-height: 20%;&quot;&gt;- TTN End Device wird hergestellt&lt;/p&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="320" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-26" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;Firmware wird mit config.h file und UID ergänzt und mit arduino-cli im backend kompiliert. Das Binary steht im Frontend zur verfügung.&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="460" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-27" value="Firmware als .ino Datei Herunterladen" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="40" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;endFill=0;" parent="1" source="8NKRSQqxYap2c9m0BW01-29" target="8NKRSQqxYap2c9m0BW01-32" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-29" value="Firmware Flashen" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-31" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;Firmware wird über WebSerial auf dem HW geflasht&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="600" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-36" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-32" target="8NKRSQqxYap2c9m0BW01-35" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-32" value="Sensor Node NFC/QR Code mit Handy Scannen&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="740" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-34" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;URL wird in browser geöffnet. Sensor Node Daten werden angezeigt. Node kann identifiziert werden.&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="740" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="8NKRSQqxYap2c9m0BW01-35" target="8NKRSQqxYap2c9m0BW01-38" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-35" value="Sensor Node ist Online und Daten werden an TTN übermittelt" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="880" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-37" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;TTN erhält Daten von jede sensor node und leitet diese an das Backend der Applikation&amp;nbsp;&lt;/span&gt;weiter." style="rounded=1;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="360" y="880" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="8NKRSQqxYap2c9m0BW01-38" target="xuYnujYFgXMgOsugo6h7-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8NKRSQqxYap2c9m0BW01-38" value="Datenpacket wird geparsed und im Triplestore abgelegt&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="200" y="1020" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-1" value="Daten sind über SparQL, InfluxDB und WebUI verfügbar" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-3" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- Parsing anhnad der ProtoBuf schema&lt;br&gt;- Ablage im Triplestore und InfluxDB&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1020" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="xuYnujYFgXMgOsugo6h7-4" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;- SparQL API&lt;br&gt;- InfluxDB API &amp;amp; Web UI&lt;br&gt;- WebUI / SparQL Web UI&lt;br&gt;&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="360" y="1160" width="240" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
