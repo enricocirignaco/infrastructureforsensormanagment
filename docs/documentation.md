@@ -59,6 +59,12 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
     - Fokus auf Abschluss der Dokumentation
     - Plakat, Bucheintrag, Präsentation, Film abschliessen
 
+## Deadlines
+- **Abgabe Book-Eintrag noch unklar**
+- 26.05.25 12:00 Abgabe Poster
+- 12.06.25 18:00 Abgabe Film
+- 12.06.25 18:00 Abgabe Dokumentation
+
 ## Requirements
 ### Funktionale Anforderungen
 
