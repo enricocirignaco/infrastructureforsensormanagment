@@ -66,48 +66,52 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
 - 12.06.25 18:00 Abgabe Dokumentation
 
 ## Requirements
+
 ### Funktionale Anforderungen
 
-#### Verwaltung und Darstellung von Sensorknoten und Projekten
-- Die Webapplikation soll eine zentrale Verwaltung der Sensorknoten und Projekte ermöglichen und diese übersichtlich darstellen.
-- Projekte sollen als zentrale Organisationseinheit für Sensorknoten und Vorlagen verwendet werden.
-- Sensorknoten-Vorlagen sollen die einheitliche Erfassung von Sensorknoten gewährleisten und bieten die Möglichkeit Sensorknoten-spezifischen Konfiguration.
-- Sensorknoten sollen anhand von Vorlagen erstellt und mit relevanten Informationen verwaltet werden (z.B. Standort, Kalibrationsdaten).
+Prioritäten:
+- Hoch
+- Mittel
+- Niedrig
+- Optional
 
-#### Benutzer- und Zugriffsverwaltung
-- Die Webapplikation soll zwei spezifische Benutzer unterstützen:
-    - *Researcher*: Write-Access, kann Sensorknoten und Projekte erstellen und bearbeiten.
-    - *Data Analyst*: Read-Access, kann die erstellten Daten nur lesen.
-- Die Nutzung der Webapplikation und der unterliegenden REST-Schnittstelle erfordert eine Authentifizierung.
-- Ein Authentifizierungs- und Autorisierungskonzept soll implementiert werden.
-- Benutzer sollen ihre Passwörter ändern können.
-
-#### Firmware-Management und Deployment
-- Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden.
-- Benutzer sollen Firmware über die Webapplikation direkt auf den Sensorknoten flashen können (WebSerial API).
-- Alternativ soll die parametrisierte Firmware als Arduino-Code heruntergeladen und später manuell über die Arduino IDE geflasht werden können (z.B. bei fehlender Internetverbindung).
-- Beim Erfassen einer neuen Sensorknoten-Vorlage muss ein GitLab-Repository, sowie ein spezifischer Git-Tag angegeben werden. Die Firmware soll vor dem Kompilieren aus diesem Repository bezogen werden.
-
-#### Schnittstelle zu The Things Network (TTN)
-- Projekte (Applikationen) und Sensorknoten (End Devices) sollen automatisch über die REST API von TTn provisioniert werden.
-- Erfasste Sensordaten sollen über LoRaWAN und TTN übertragen und per MQTT an das System übertragen werden.
-
-#### Datenpersitenz und -verarbeitung
-- Relevante Projektdaten sollen in einem Linked Data Triple Store gespeichert werden.
-- Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden.
-- Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht.
+| Priorität | Requirement |
+|-----------|------------|
+|           | **Verwaltung und Darstellung von Sensorknoten und Projekten** |
+| Hoch      | Die Webapplikation soll eine zentrale Verwaltung der Sensorknoten und Projekte ermöglichen und diese übersichtlich darstellen. |
+| Mittel    | Projekte sollen als zentrale Organisationseinheit für Sensorknoten und Vorlagen verwendet werden. |
+| Mittel    | Sensorknoten-Vorlagen sollen die einheitliche Erfassung von Sensorknoten gewährleisten und bieten die Möglichkeit Sensorknoten-spezifischen Konfiguration. |
+| Hoch      | Sensorknoten sollen anhand von Vorlagen erstellt und mit relevanten Informationen verwaltet werden (z.B. Standort, Kalibrationsdaten). |
+| Optional  | Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können. |
+|           | **Benutzer- und Zugriffsverwaltung** |
+| Mittel    | In der Webapplikation werden zwischen drei verschiedenen Rollen unterschieden: <ul><li><i>Admin</i>: Kann neue Benutzer erfassen, Passwörter von Benutzern setzen und Rollen den Benutzern zuweisen.</li><li><i>Technician</i>: Write-Access, kann Sensorknoten und Projekte erstellen und bearbeiten.</li><li><i>Researcher</i>: Read-Access, kann die erstellten Daten nur lesen.</li></ul> |
+| Mittel    | Die Nutzung der Webapplikation und der unterliegenden REST-Schnittstelle erfordert eine Authentifizierung. |
+| Niedrig   | Ein Authentifizierungs- und Autorisierungskonzept soll implementiert werden. |
+| Niedrig   | Benutzer sollen ihre Passwörter ändern können. |
+|           | **Firmware-Management und Deployment** |
+| Hoch      | Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden. |
+| Niedrig   | Die Compile-Engine soll auch für das Kompilieren von Firmware mit anderen Toolchains eingesetzt werden können. Das generische Kompilieren erfolgt über die Angabe eines konkreten Dockerbefehls. |
+| Niedrig   | Die projektspezifische und die generische Kompilationsvarianten werden über separate Endpoints angesprochen. |
+| Hoch      | Benutzer sollen Firmware über die Webapplikation direkt auf den Sensorknoten flashen können (WebSerial API). |
+| Mittel    | Alternativ soll die parametrisierte Firmware heruntergeladen (Arduino-Code und Binary) und später manuell über die Arduino IDE geflasht werden können (z.B. bei fehlender Internetverbindung). |
+| Hoch      | Beim Erfassen einer neuen Sensorknoten-Vorlage muss ein GitLab-Repository, sowie ein spezifischer Git-Tag als Default angegeben werden. Der Sourcecode soll vor dem Kompilieren aus diesem Repository bezogen werden. |
+| Niedrig   | Beim Erfassen eines Sensorknoten kann die Version der Firmware (Git-Tag in der Vorlage) übersteuert werden. |
+| Optional  | Ein Sensorknoten kann ein Update auf eine neue Firmware-Version erhalten. Die Messdaten sind an eine bestimmte Firmware-Version gebunden. |
+|           | **Schnittstelle zu The Things Network (TTN)** |
+| Hoch      | Projekte (Applikationen) und Sensorknoten (End Devices) sollen automatisch über die REST API von TTN provisioniert werden. |
+| Hoch      | Erfasste Sensordaten sollen über LoRaWAN und TTN übertragen und per MQTT an das System übertragen werden. |
+| Optional  | Sensordaten sollen nicht nur über MQTT, sondern auch über Webhooks an das Backend gesendet werden können. |
+|           | **Datenpersistenz und -verarbeitung** |
+| Mittel    | Relevante Projektdaten sollen in einem Linked Data Triple Store gespeichert werden. |
+| Mittel    | Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden. |
+| Mittel    | Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht. |
+| Optional  | Änderungen von Entitäten werden mit Zeitpunkt und Benutzer in einem Logbook im Triple Store gespeichert. |
 
 ### Nicht-funktionale Anforderungen
 - Die Webapplikation soll als moderne *Single Page Application (SPA)* aufgebaut werden.
 - Die REST API soll unabhängig von der Webapplikation entwickelt und nach RESTful-Prinzipien gestaltet werden.
 - Beim Einsatz von Linked Data sollen geeignete Ontologien und Schemas verwendet werden.
 
-### Optionale Features
-- Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können.
-- Ein Admin-Benutzer soll über die Webapplikation Passwörter von Benutzer verwalten können und den API-Key für TTN setzen.
-- Sensordaten sollen nicht nur über MQTT, sondern auch über Webhooks an das Backend gesendet werden können.
-
 ### Abgrenzung
-- Hardware-Identifikation um Error-History zu verfolgen
-- Update im Feld? Kann ja eh nur die Software verändert werden
+- Hardware-Identifikation von einzelnen Sensoren um Error-History zu verfolgen
 - Daten-Löschung von nicht gebrauchten Entitäten / Fälschlicherweise erstellt
