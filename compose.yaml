@@ -12,6 +12,8 @@ services:
       - compiler-engine-source:/source
       - compiler-engine-output:/output
       - compiler-engine-config:/config
+    env_file:
+      - .env
 
 volumes:
   compiler-engine-source:
