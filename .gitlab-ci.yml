@@ -1,0 +1,18 @@
+stages:
+  - build
+
+variables:
+  IMAGE_NAME: "arduino-compiler"
+  IMAGE_TAG: "latest"
+
+build-arduino-compiler:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind  # Enable Docker inside GitLab CI/CD runner
+  script:
+    - echo "Building Arduino Compiler Image..."
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
+  only:
+    - main  # Run this job only on the `main` branch
+  
