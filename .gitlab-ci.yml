@@ -13,6 +13,4 @@ build-arduino-compiler:
   script:
     - echo "Building Arduino Compiler Image..."
     - docker build -t $IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
-  only:
-    - main  # Run this job only on the `main` branch
-  
+ 
