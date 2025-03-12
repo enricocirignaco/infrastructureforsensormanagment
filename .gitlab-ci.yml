@@ -4,13 +4,19 @@ stages:
 variables:
   IMAGE_NAME: "arduino-compiler"
   IMAGE_TAG: "latest"
+  REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE"
 
 build-arduino-compiler:
   stage: build
   image: docker:latest
   services:
     - docker:dind  # Enable Docker inside GitLab CI/CD runner
+  before_script:
+    - echo "Logging into GitLab Container Registry..."
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - echo "GitLab Registry: $CI_REGISTRY_IMAGE"
   script:
     - echo "Building Arduino Compiler Image..."
-    - docker build -t $IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
- 
+    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
