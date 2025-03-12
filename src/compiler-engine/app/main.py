@@ -1,0 +1,15 @@
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Compiler Engine API is running"}
+
+@app.post("/compile")
+def compile_code():
+    return {"message": "Compilation triggered (dummy response)"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

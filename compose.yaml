@@ -1,0 +1,19 @@
+services:
+  compiler-engine:
+    container_name: compiler-engine
+    build:
+      context: src/compiler-engine
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-config:/config
+
+volumes:
+  compiler-engine-source:
+  compiler-engine-output:
+  compiler-engine-config:

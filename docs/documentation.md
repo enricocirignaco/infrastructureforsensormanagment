@@ -187,7 +187,7 @@ container_output = client.containers.run(
             detach=False
         )
 ```
-
+- logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
 
 # Evaluation
 
@@ -214,3 +214,5 @@ Auch effizient bei grösseren Datenmengen. Die Nachrichten sind read-only, könn
 
 ### Resultat
 Es wird Protobufs (und Nanopb auf dem Board) eingesetzt. Der Standard wir gut unterstützt und die Code-Integration sollte einfach sein. Das Schema liegt in einem textuellen Format vor, welches einfach generiert werden kann. Es ist darauf ausgelegt mit wenig Overhead kleine Mengen an Daten zu übermitteln und der Einhaltung eines Schemas. Das ist genau unser Use-Case.
+
+
