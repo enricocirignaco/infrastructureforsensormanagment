@@ -23,11 +23,11 @@ def test_compile():
     try:
         # Run the Arduino compiler container
         container = client.containers.run(
-            "test1",  # Name of the compiler image
+            "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",  # Name of the compiler image
             "arduino-cli",  # Command to run inside the container
             remove=True,  # Automatically remove the container after execution
             detach=False  # Run synchronously (wait for output)
         )
-        return {"message": "Arduino CLI ran successfully", "output": container.decode()}
+        return {"message": "Arduino CLI ran from gitlab CICDsuccessfully", "output": container.decode()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
