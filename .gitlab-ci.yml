@@ -14,7 +14,6 @@ build-arduino-compiler:
   before_script:
     - echo "Logging into GitLab Container Registry..."
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    - echo "GitLab Registry: $CI_REGISTRY_IMAGE"
   script:
     - echo "Building Arduino Compiler Image..."
     - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
