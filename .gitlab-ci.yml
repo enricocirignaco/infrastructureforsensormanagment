@@ -5,6 +5,7 @@ variables:
   IMAGE_NAME: "arduino-compiler"
   IMAGE_TAG: "latest"
   REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE"
+  DOCKER_BUILDKIT: 1  # Enables BuildKit for caching
 
 build-arduino-compiler:
   stage: build
