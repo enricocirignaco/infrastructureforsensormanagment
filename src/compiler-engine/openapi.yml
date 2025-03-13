@@ -1,0 +1,354 @@
+openapi: '3.0.3'
+info:
+  title: Compiler Engine - OpenAPI 3.1
+  version: '1.0'
+servers:
+  - url: http://localhost:8000/api/v1
+tags:
+  - name: Compile standard
+    description: This endpoint can be used to compile source code with the built-in toolchain (arduino-cli).
+
+  - name: Compile custom
+    description: This endpoint can be used to compile source code with any custom toolchain by providing a compatible docker image.
+paths:
+  /compile:
+    post:
+      tags:
+        - Compile standard
+      description: This endpoint can be used to initiate a compile job with the built-in toolchain (arduino-cli).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StadardCompileRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2021-10-10T10:10:10Z
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+  /compile/{job_id}/status:
+    get:
+      tags:
+        - Compile standard
+      description: Get the status of a compile job
+      parameters:
+        - name: job_id
+          in: path
+          description: ID of the compile job
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+  /compile/{job_id}/artefacts:
+    get:
+      tags:
+        - Compile standard
+      description: Download the artefacts of a compile job
+      parameters:
+        - name: job_id
+          in: path
+          description: ID of the compile job
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: get_source_code
+          in: query
+          description: Include the source code in the artefacts
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: get_logs
+          in: query
+          description: Include the logs in the artefacts
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+  /custom-compile:
+    post:
+      tags:
+        - Compile custom
+      description: This endpoint can be used to initiate a compile job with a custom toolchain by providing a compatible docker image.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomCompileRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: 2021-10-10T10:10:10Z
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+  /custom-compile/{job_id}/status:
+    get:
+      tags:
+        - Compile custom
+      description: Get the status of a compile job
+      parameters:
+        - name: job_id
+          in: path
+          description: ID of the compile job
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+  /custom-compile/{job_id}/artefacts:
+    get:
+      tags:
+        - Compile custom
+      description: Download the artefacts of a compile job
+      parameters:
+        - name: job_id
+          in: path
+          description: ID of the compile job
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+
+components:
+  schemas:
+    StadardCompileRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          format: binary
+        board:
+          type: string
+        sketch:
+          type: string
+        libraries:
+          type: array
+          items:
+            type: string
+        options:
+          type: object
+          properties:
+            key:
+              type: string
+    CustomCompileRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          format: binary
+        board:
+          type: string
+        sketch:
+          type: string
+        libraries:
+          type: array
+          items:
+            type: string
+        options:
+          type: object
+          properties:
+            key:
+              type: string
+    Status:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Order Status
+          example: approved
+          enum:
+            - placed
+            - approved
+            - delivered
