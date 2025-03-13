@@ -306,18 +306,23 @@ components:
     StadardCompileRequest:
       type: object
       properties:
-        source:
+        git_repo_url:
           type: string
-          format: binary
+          example: https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt
         board:
-          type: string
-        sketch:
-          type: string
+          type: object
+          properties:
+            core:
+              type: string
+              example: arduino:avr
+            variant:
+              type: string
+              example: uno
         libraries:
           type: array
           items:
             type: string
-        options:
+        custom_flags:
           type: object
           properties:
             key:
@@ -325,18 +330,16 @@ components:
     CustomCompileRequest:
       type: object
       properties:
-        source:
+        git_repo_url:
           type: string
-          format: binary
-        board:
+          example: https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt
+        docker_image:
           type: string
-        sketch:
+          example: arduino-cli:latest
+        registry_auth_token:
           type: string
-        libraries:
-          type: array
-          items:
-            type: string
-        options:
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QifQ.3Jv5
+        custom_flags:
           type: object
           properties:
             key:
@@ -346,9 +349,10 @@ components:
       properties:
         status:
           type: string
-          description: Order Status
-          example: approved
+          example: running
           enum:
-            - placed
-            - approved
+            - pending
+            - running
+            - error
+            - successful
             - delivered
