@@ -226,6 +226,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Status'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                    example: 10
         '404':
           description: Job not found
           content:
