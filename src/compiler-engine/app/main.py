@@ -13,6 +13,23 @@ GITLAB_TOKEN = os.getenv("GROUP_ACCESS_TOKEN")  # Read GitLab token from environ
 GITLAB_PROJECT_ID = "46416"  # Replace with the actual numeric Project ID
 GITLAB_API_URL = f"https://gitlab.ti.bfh.ch/api/v4/projects/{GITLAB_PROJECT_ID}/repository/files"
 SOURCE_DIR = "/source/main"
+BOARD_CORE = "arduino:avr"
+BOARD = "uno"
+LIBRARY_LIST = "ArduinoJson@6.17.3"
+SKETCH_NAME = "main/main.ino"
+COMPILATION_TAG = "test"
+compile_command = f"""bash -c "
+    mkdir -p /cache/boards /cache/arduino && \
+    arduino-cli core install {BOARD_CORE} && \
+    arduino-cli lib install {LIBRARY_LIST} && \
+    arduino-cli core update-index && \
+    arduino-cli compile \
+    --fqbn {BOARD_CORE}:{BOARD} \
+    --output-dir /output/{COMPILATION_TAG} \
+    --log-file /logs/{COMPILATION_TAG}.log \
+    --verbose \
+    /source/{SKETCH_NAME}
+" """
 
 @app.get("/")
 def read_root():
@@ -54,8 +71,13 @@ def test_compile(file_path: str = "main/main.ino", ref: str = "main"):
         # Step 3: Run the Arduino compiler container with the same volume
         container_output = client.containers.run(
             "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",
-            f"arduino-cli compile --fqbn arduino:avr:uno /source/main/{os.path.basename(file_path)}",
-            volumes={"source-volume": {"bind": "/source", "mode": "rw"}},  # Bind the same volume
+            compile_command,
+            volumes={
+                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
+                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
+                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
+                "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
+            },
             remove=True,
             detach=False
         )

@@ -12,8 +12,6 @@ RUN mkdir -p /source /output /logs /cache/arduino /cache/boards
 
 
 # system wide configuation for arduino-cli
-ENV DIRECTORIES_DATA=/cache/boards
-ENV DIRECTORIES_USER=/cache/arduino
 ENV LOGGING_FORMAT=json
 ENV LOGGING_LEVEL=info
 ENV METRICS_ENABLED=false

@@ -11,11 +11,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - compiler-engine-source:/source
       - compiler-engine-output:/output
-      - compiler-engine-config:/config
+      - compiler-engine-logs:/logs
+      - compiler-engine-cache:/cache
     env_file:
       - .env
 
 volumes:
   compiler-engine-source:
+    name: compiler-engine-source
   compiler-engine-output:
-  compiler-engine-config:
+    name: compiler-engine-output
+  compiler-engine-logs:
+    name: compiler-engine-logs
+  compiler-engine-cache:
+    name: compiler-engine-cache
