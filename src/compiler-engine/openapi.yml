@@ -76,10 +76,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Invalid request
+ 
         '404':
           description: Job not found
           content:
@@ -87,10 +87,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Job not found
         '500':
           description: Internal server error
           content:
@@ -143,10 +142,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Invalid request
         '404':
           description: Job not found
           content:
@@ -154,10 +152,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Job not found
         '500':
           description: Internal server error
           content:
@@ -233,10 +230,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Invalid request
         '404':
           description: Job not found
           content:
@@ -244,10 +240,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Job not found
         '500':
           description: Internal server error
           content:
@@ -286,10 +281,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Invalid request
         '404':
           description: Job not found
           content:
@@ -297,10 +291,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                  message:
+                    type: string
+                    example: Job not found
         '500':
           description: Internal server error
           content:
