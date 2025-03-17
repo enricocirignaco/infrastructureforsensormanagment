@@ -27,3 +27,4 @@
 | 2025-03-11 | 09:00 - 16:00 | 7,0   | CIRIE1, DEGEL2 | 1,7      | Sprint-Planing, Requirements, Daten-Modell, Compile-Engine Design |
 | 2025-03-12 | 09:00 - 10:00 | 1,0   | CIRIE1, DEGEL2 |          | Meeting                                                           |
 | 2025-03-12 | 15:30 - 17:30 | 2,0   | DEGEL2         | 18       | Datenmodell konkretisieren in rdf-playground repository           |
+| 2025-03-17 | 09:00 - 11:00 | 2,0   | DEGEL2         | 13       | Evaluation Serialisierungs-Bibliothek                             |

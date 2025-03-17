@@ -115,3 +115,102 @@ Prioritäten:
 ### Abgrenzung
 - Hardware-Identifikation von einzelnen Sensoren um Error-History zu verfolgen
 - Daten-Löschung von nicht gebrauchten Entitäten / Fälschlicherweise erstellt
+
+## Development
+### Compiler Engine
+#### Container Architecture
+Docker in Docker vs multiple containers approach
+- Docker in Docker: The compiler engine is running inside a docker container and the docker daemon is running inside this container. This approach is not recommended because of security reasons and the complexity of the setup.
+- Multiple containers: The compiler engine is running inside a docker container and the docker daemon is running on the host machine. The docker socket is mounted into the compiler container. This approach is recommended because of the security and the simplicity of the setup.
+#### docker compiler
+The main compiler container is based on the arduino-cli software and its used to comppile arduino sketches. This container/image should be interchangeable with other toolchain images. For this reason the docker command used to start the compilation should follow a specified structure so that those images can be interchanged and compiler engine itself will still works correctly.
+Docker command structure:
+```bash
+docker run --rm \
+  -v path_to_source_code:/source \
+  -v path_to_output_folder:/output \
+  -v path_to_logs:/logs \
+  -v path_to_cache:/cache \
+  image:tag \
+  compile_command
+```
+- source code folder: is the folder where the source code is located
+- output folder: is the folder where the compiled binaries are stored (this files are then returned over REST)
+- config folder: is the folder where the configuration files that can be used to fine tune the compilation process are stored
+- logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
+**Arduino cli commands needed to compile**:
+```bash
+arduino-cli core install ${BOARD_CORE}
+arduino-cli lib install ${LIBRARY_LIST}
+arduino-cli core update-index
+arduino-cli compile \
+  --fqbn ${BOARD_CORE}:${BOARD} \
+  --output-dir /output/${COMPILATION_TAG} \
+  --log /logs/${COMPILATION_TAG}.log \
+  --verbose \
+  /source/${SKETCH_NAME}
+```
+Env Variables:
+- BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand)
+- LIBRARY_LIST: A list of libraries that are needed to compile the source code
+- BOARD: The board that the firmware is for
+- COMPILATION_TAG: A tag that is used to identify the compilation job
+- SKETCH_NAME: The name of the source folder that should be compiled
+
+Possible compilation command:
+```python
+# Define the compile command with variables using f-string for interpolation
+compile_command = f"""bash -c "
+    mkdir -p /cache/boards /cache/arduino && \
+    arduino-cli core install {BOARD_CORE} && \
+    arduino-cli lib install {LIBRARY_LIST} && \
+    arduino-cli core update-index && \
+    arduino-cli compile \
+    --fqbn {BOARD_CORE}:{BOARD} \
+    --output-dir /output/{COMPILATION_TAG} \
+    --log-file /logs/{COMPILATION_TAG}.log \
+    --verbose \
+    /source/{SKETCH_NAME}
+" """
+
+# Running the command inside the Docker container
+container_output = client.containers.run(
+            "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",
+            compile_command,
+            volumes={
+                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
+                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
+                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
+                "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
+            },
+            remove=True,
+            detach=False
+        )
+```
+
+
+# Evaluation
+
+## Binäre Serialisierung
+Statt ein eigenes Byte-array zu schreiben oder beispielsweise JSON anzuwenden, sollte ein binäres Serialisierungsformat verwendet werden.
+Dies hat einige klare Vorteile:
+- Effizienz, das Serialisieren und Deserialisieren von Daten ist deutlich schneller als z.B. bei JSON
+- Entwicklungsgeschwindigkeit: Sobald das Schema definiert ist, kann Sourcecode für diverse Sprachen generiert werden, welche das lesen und schreiben der Daten handhabt.
+- Strongly Typed: Bereits bei der Kompilierung können Fehler im Code erkannt werden, da Typen klar definiert sind.
+- Schema: Das klar definierte Schema zeigt auf, welche Daten in welchem Format vorliegen. Die Schemas können mit definierten Mechanismen erweitert werden, sind also versionerbar.
+
+### Protobufs
+Der ältere Standard (ursprünglich aus den 2000er Jahren), set 2008 als Open-Source-Standard. Darum auch eine sehr breite Community und umfangreiche Tooling-Unterstützung. Etablierter Standard. Die Schema-Evoluation ist relativ einfach, Anpassungen am Datenformat können also leicht gemacht werden. Es wird immer die ganze Nachricht ausgelesen. Funktioniert am besten mit kleinen Datenmengen (wenig MBs). Es soll verglichen zu FlatBuffers deutlich benutzerfreundlicher sein (Einfache Installation des Compilers, Tutorials etc.). Es ist etwas langsamer als Flatbuffers.
+
+### Nanopb
+Ist eine sehr schmale, C-Implementation von Protobufs. Es ist optimiert für 32-bit embedded systeme mit sehr wenig resourcen (<1kB RAM). Es ist optimiert für wenig Speicherbedarf und Resourcenverbrauch. Die Schema-Definition von Protobufs kann direkt übernommen werden.
+
+### FlatBuffers
+Auch effizient bei grösseren Datenmengen. Die Nachrichten sind read-only, können nicht mehr geändert werden. Es kann bei Wunsch nur ein Teil des Datensets deserialisiert werden. Wird oft bei Mobile Gaming eingesetzt, wo performance sehr wichtig ist und begrenzte Resourcen zur Verfügung stehen. Für das Bauen eines Datenset wird mehr Code als im Vergleich zu Protobufs benötigt. Defintiv eine der besten Bibliotheken wenn der Fokus auf Effizienz liegt.
+
+### Weitere Optionen
+- Apache Avro: JSON-basiertes Schema. Zentraler Einsatz im Big Data Gebiet, bietet jedoch native Funktionalität für Datenversionierung. Nicht für IoT optimiert, kann zu grösserem Overhead führen und Integration auf ressourcenbeschränkte Umgebungen mühsam.
+- MessagePack: Sehr einfaches Protokoll. Es basiert nicht auf einem externen Schema, was die Definition anhand von Datentypen erschweren würde. Sehr JSON-ähnlich, würde sich also in vielen Programmiersprachen integrieren lassen. Aufgrund des fehlenden Schemas wäre die Validierung und Versionierung der Daten schwierig, auch die Evoluation des Schemas wäre mühsam.
+
+### Resultat
+Es wird Protobufs (und Nanopb auf dem Board) eingesetzt. Der Standard wir gut unterstützt und die Code-Integration sollte einfach sein. Das Schema liegt in einem textuellen Format vor, welches einfach generiert werden kann. Es ist darauf ausgelegt mit wenig Overhead kleine Mengen an Daten zu übermitteln und der Einhaltung eines Schemas. Das ist genau unser Use-Case.
