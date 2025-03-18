@@ -87,13 +87,13 @@ async def get_compile_status(job_id: str):
         "message": jobs_status_map[job_id]["message"]
     }
 
+# Endpoints to get the artefacts of a standard compile job
 @app.get("/compile/{job_id}/artefacts", tags=["Compile standard"])
 async def get_compile_artefacts(
     job_id: str,
     get_source_code: bool = Query(False, description="Include the source code in the artefacts"),
     get_logs: bool = Query(False, description="Include the logs in the artefacts")
 ):
-    
     if job_id not in jobs_status_map:
         raise HTTPException(status_code=404, detail="Job ID not found")
     if jobs_status_map[job_id]["status"] != CompileStatus.successful and jobs_status_map[job_id]["status"] != CompileStatus.delivered:
@@ -117,6 +117,8 @@ async def get_compile_artefacts(
                     zipf.write(log_file_path, arcname="compilation.log")
             if get_source_code:
                 source_folder = f"/source/{job_id}/main"
+                if not os.path.isdir(source_folder):
+                    raise HTTPException(status_code=404, detail="Source code folder not found")
                 for root, _, files in os.walk(source_folder):
                     for file in files:
                         full_path = os.path.join(root, file)
