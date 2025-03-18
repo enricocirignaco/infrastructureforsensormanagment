@@ -187,7 +187,10 @@ container_output = client.containers.run(
             detach=False
         )
 ```
+
 - logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
+
+GitLab’s archive endpoint doesn’t necessarily validate the ref strictly. If you provide an invalid ref, GitLab will often default to the repository’s default branch when generating the archive. That’s why you still get back a ZIP file even if the ref you provided (e.g., maidgdgbensss) doesn’t exist.
 
 # Evaluation
 

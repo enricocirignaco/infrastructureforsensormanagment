@@ -93,19 +93,42 @@ async def get_compile_artefacts(
     get_source_code: bool = Query(False, description="Include the source code in the artefacts"),
     get_logs: bool = Query(False, description="Include the logs in the artefacts")
 ):
-    # Business logic placeholder:
-    # - Retrieve artefacts for the given job_id.
-    # - Optionally include source code and logs based on query parameters.
-    # - Package artefacts into a zip file.
-    dummy_zip_path = "dummy.zip"  # Replace with the actual artefact zip file path.
+    
+    if job_id not in jobs_status_map:
+        raise HTTPException(status_code=404, detail="Job ID not found")
+    if jobs_status_map[job_id]["status"] != CompileStatus.successful and jobs_status_map[job_id]["status"] != CompileStatus.delivered:
+        raise HTTPException(status_code=400, detail="Job is not successful, use GET /status to get more informations")
+    
+    jobs_status_map[job_id]["status"] = CompileStatus.delivered
+    binary_path = f"/output/{job_id}/main.ino.hex"
+    if not os.path.isfile(binary_path):
+        raise HTTPException(status_code=404, detail="Compiled hex file not found")
     try:
-        return FileResponse(dummy_zip_path, media_type="application/zip", filename="artefacts.zip")
+        # Return only the compiled hex file if no additional artefacts are requested
+        if not get_source_code and not get_logs:
+            return FileResponse(binary_path, media_type="application/octet-stream", filename="main.ino.hex")
+        # Package the compiled hex file, source code, and logs into a ZIP archive
+        zip_path = f"/output/{job_id}/artefacts.zip"
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            zipf.write(binary_path, arcname="main.ino.hex")
+            if get_logs:
+                log_file_path = f"/logs/{job_id}.log"
+                if os.path.isfile(log_file_path):
+                    zipf.write(log_file_path, arcname="compilation.log")
+            if get_source_code:
+                source_folder = f"/source/{job_id}/main"
+                for root, _, files in os.walk(source_folder):
+                    for file in files:
+                        full_path = os.path.join(root, file)
+                        arcname = os.path.relpath(full_path, start=source_folder)
+                        zipf.write(full_path, arcname=os.path.join("source", arcname))
+
+        return FileResponse(zip_path, media_type="application/zip", filename="artefacts.zip")
     except Exception:
-        raise HTTPException(status_code=500, detail="Internal server error")
+                raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # Endpoints for custom compile
-
 @app.post("/custom-compile", tags=["Compile custom"])
 async def compile_custom(request: CustomCompileRequest):
     # Business logic placeholder:
