@@ -76,6 +76,7 @@ async def compile_standard(request: StadardCompileRequest, background_tasks: Bac
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         }
 
+# Endpoints to get the status of a standard compile job
 @app.get("/compile/{job_id}/status", tags=["Compile standard"])
 async def get_compile_status(job_id: str):
     # check if the job_id exists in the jobs_status_map
@@ -88,7 +89,7 @@ async def get_compile_status(job_id: str):
 
 @app.get("/compile/{job_id}/artefacts", tags=["Compile standard"])
 async def get_compile_artefacts(
-    job_id: int,
+    job_id: str,
     get_source_code: bool = Query(False, description="Include the source code in the artefacts"),
     get_logs: bool = Query(False, description="Include the logs in the artefacts")
 ):
@@ -131,9 +132,10 @@ async def get_custom_compile_artefacts(job_id: int):
         raise HTTPException(status_code=500, detail="Internal server error")
     
 ############################################################################################################
-def download_source_code(gitlab_url: str, ref: str = "main"):
+def download_source_code(gitlab_url: str, job_id: str, sha: str = "main"):
     encoded_repo_path = quote(gitlab_url.split("gitlab.ti.bfh.ch/")[1], safe="")
-    request_url = f"{os.getenv("GITLAB_API_URL")}/{encoded_repo_path}/repository/archive.zip?ref={ref}"
+    GITLAB_API_URL = os.getenv("GITLAB_API_URL")
+    request_url = f"{GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?sha={sha}&path={os.getenv('DEFAULT_ARDUINO_FOLDER')}"
     response = requests.get(request_url, headers=GITLAB_API_HEADER)
 
     if response.status_code != 200:
@@ -143,12 +145,21 @@ def download_source_code(gitlab_url: str, ref: str = "main"):
     # Ensure the destination folder exists
     os.makedirs(destination_folder, exist_ok=True)
     # Save the ZIP content to a file
-    zip_file_path = f"{destination_folder}/repo_archive.zip"
+    zip_file_path = f"{destination_folder}/{job_id}.zip"
+    folder_name = None
     with open(zip_file_path, "wb") as zip_file:
         zip_file.write(response.content)
-    # Unzip the archive
+    # Get name of unzipped folder and then unzip the archive
     with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        files_name = zip_ref.namelist()
+        # Assume the top-level folder is the first name ending with '/'
+        folder_name = next((name for name in files_name if name.endswith('/')), None)
+        # Unzip the archive
         zip_ref.extractall(destination_folder)
+    # Rename the top-level folder to the job_id
+    if folder_name:
+        os.rename(f"{destination_folder}/{folder_name}", f"{destination_folder}/{job_id}")
+    # Remove the ZIP file
     os.remove(zip_file_path)
 ############################################################################################################
 def default_compile_task(job_id: str, request: StadardCompileRequest):
@@ -158,7 +169,7 @@ def default_compile_task(job_id: str, request: StadardCompileRequest):
     }
     # Download the source code from the GitLab repository
     try:
-        download_source_code(request.git_repo_url, request.firmware_tag)
+        download_source_code(request.git_repo_url, job_id, request.firmware_tag)
     except Exception as e:
         jobs_status_map[job_id] = {
             "status": CompileStatus.error,
@@ -177,7 +188,7 @@ def default_compile_task(job_id: str, request: StadardCompileRequest):
             --output-dir /output/{job_id} \
             --log-file /logs/{job_id}.log \
             --verbose \
-            /source/{os.getenv("DEFAULT_ARDUINO_FOLDER")} \
+            /source/{job_id}/{os.getenv("DEFAULT_ARDUINO_FOLDER")} \
             {request.custom_flags if request.custom_flags else ""}
         " """
         container_output = docker_client.containers.run(
