@@ -313,6 +313,9 @@ components:
         git_repo_url:
           type: string
           example: https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt
+        firmware_tag:
+          type: string
+          example: v1.0.0
         board:
           type: object
           properties:
@@ -326,6 +329,7 @@ components:
           type: array
           items:
             type: string
+            example: "ArduinoJson@6.17.3"
         custom_flags:
           type: object
           properties:

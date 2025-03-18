@@ -7,20 +7,19 @@ import os
 import requests
 import docker
 from urllib.parse import quote
-import base64
 from urllib.parse import quote, urlparse
 import zipfile
 import uuid
 from datetime import datetime, timezone
 
-app = FastAPI(
-    title="Compiler Engine",
-    version="1.0",
-)
-docker_client = docker.from_env()  # Connect to the host Docker daemon
-jobs_status_map = {}  # In-memory store for compile job statuses
-GITLAB_API_URL = os.getenv("GITLAB_API_URL")
-gitlab_api_headers = {"PRIVATE-TOKEN": os.getenv("GROUP_ACCESS_TOKEN")}
+# Initialize the FastAPI app
+app = FastAPI(title="Compiler Engine",version="1.0")
+# Connect to the host Docker daemon
+docker_client = docker.from_env()
+# In-memory store for compile job statuses
+jobs_status_map = {}  
+# GitLab API header with the access token
+GITLAB_API_HEADER = {"PRIVATE-TOKEN": os.getenv("GROUP_ACCESS_TOKEN")}
 
 # Pydantic models for request bodies and responses
 class Board(BaseModel):
@@ -29,6 +28,7 @@ class Board(BaseModel):
 
 class StadardCompileRequest(BaseModel):
     git_repo_url: str
+    firmware_tag: str
     board: Board
     libraries: List[str]
     custom_flags: Optional[Dict[str, str]] = None
@@ -49,7 +49,7 @@ class CompileStatus(str, Enum):
 class Status(BaseModel):
     status: CompileStatus
 
-# Endpoints for standard compile
+# Endpoints to start a standard compile job with ardunio-cli
 @app.post("/compile", tags=["Compile standard"])
 async def compile_standard(request: StadardCompileRequest, background_tasks: BackgroundTasks):
     try:
@@ -133,8 +133,8 @@ async def get_custom_compile_artefacts(job_id: int):
 ############################################################################################################
 def download_source_code(gitlab_url: str, ref: str = "main"):
     encoded_repo_path = quote(gitlab_url.split("gitlab.ti.bfh.ch/")[1], safe="")
-    request_url = f"{GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?ref={ref}"
-    response = requests.get(request_url, headers=gitlab_api_headers)
+    request_url = f"{os.getenv("GITLAB_API_URL")}/{encoded_repo_path}/repository/archive.zip?ref={ref}"
+    response = requests.get(request_url, headers=GITLAB_API_HEADER)
 
     if response.status_code != 200:
         raise Exception(f"Error downloading repository archive: {response.text}")
@@ -152,10 +152,13 @@ def download_source_code(gitlab_url: str, ref: str = "main"):
     os.remove(zip_file_path)
 ############################################################################################################
 def default_compile_task(job_id: str, request: StadardCompileRequest):
+    jobs_status_map[job_id] = {
+        "status": CompileStatus.running,
+        "message": "Compilation in progress"
+    }
     # Download the source code from the GitLab repository
     try:
-        # download_source_code(request.git_repo_url, request.firmwareTag)
-        download_source_code(request.git_repo_url)
+        download_source_code(request.git_repo_url, request.firmware_tag)
     except Exception as e:
         jobs_status_map[job_id] = {
             "status": CompileStatus.error,
@@ -164,18 +167,18 @@ def default_compile_task(job_id: str, request: StadardCompileRequest):
         return
     # Compile source code in the Docker container
     try:
-        request.libraries = " ".join(request.libraries)
         compile_command = f"""bash -c "
             mkdir -p /cache/boards /cache/arduino && \
             arduino-cli core install {request.board.core} && \
-            arduino-cli lib install {request.libraries} && \
+            arduino-cli lib install {" ".join(request.libraries)} && \
             arduino-cli core update-index && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
             --output-dir /output/{job_id} \
             --log-file /logs/{job_id}.log \
             --verbose \
-            /source/{os.getenv("DEFAULT_ARDUINO_FOLDER")}
+            /source/{os.getenv("DEFAULT_ARDUINO_FOLDER")} \
+            {request.custom_flags if request.custom_flags else ""}
         " """
         container_output = docker_client.containers.run(
             os.getenv("DEFAULT_COMPILER_REGISTRY_URL"),
