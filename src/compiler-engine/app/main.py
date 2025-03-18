@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -9,16 +9,20 @@ import docker
 from urllib.parse import quote
 import base64
 from urllib.parse import quote, urlparse
+import zipfile
+import uuid
+from datetime import datetime, timezone
 
 app = FastAPI(
     title="Compiler Engine",
     version="1.0",
 )
+docker_client = docker.from_env()  # Connect to the host Docker daemon
+jobs_status_map = {}  # In-memory store for compile job statuses
 GITLAB_API_URL = os.getenv("GITLAB_API_URL")
 gitlab_api_headers = {"PRIVATE-TOKEN": os.getenv("GROUP_ACCESS_TOKEN")}
 
 # Pydantic models for request bodies and responses
-
 class Board(BaseModel):
     core: str
     variant: str
@@ -45,23 +49,42 @@ class CompileStatus(str, Enum):
 class Status(BaseModel):
     status: CompileStatus
 
-
 # Endpoints for standard compile
 @app.post("/compile", tags=["Compile standard"])
-async def compile_standard(request: StadardCompileRequest):
-    request.git_repo_url = convert_gilab_url(request.git_repo_url)
-    # Business logic placeholder:
-    # - Clone the repo from request.git_repo_url
-    # - Use request.board, request.libraries, and request.custom_flags with the built-in toolchain (arduino-cli)
-    # - Initiate a compile job and generate a job_id and timestamp.
-    return {"job_id": 10, "timestamp": "2021-10-10T10:10:10Z", "gitlab_url": request.git_repo_url}
+async def compile_standard(request: StadardCompileRequest, background_tasks: BackgroundTasks):
+    try:
+        # Generate a unique job ID; if something goes wrong here, it will be caught.
+        job_id = str(uuid.uuid4())
+        jobs_status_map[job_id] = CompileStatus.pending
+        jobs_status_map[job_id] = {
+            "status": CompileStatus.pending,
+            "message": "Compilation started in background"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate job ID: {str(e)}")
+
+    try:
+        # Schedule the background task; if this fails, catch and return an error.
+        background_tasks.add_task(default_compile_task, job_id, request)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to schedule compile task: {str(e)}")
+    
+    return {
+        "job_id": job_id,
+        "status": jobs_status_map[job_id]["status"],
+        "message": jobs_status_map[job_id]["message"],
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        }
 
 @app.get("/compile/{job_id}/status", tags=["Compile standard"])
-async def get_compile_status(job_id: int):
-    # Business logic placeholder:
-    # - Retrieve the status of the compile job from your database or in-memory store.
-    # - Validate job_id and return appropriate status.
-    return {"status": CompileStatus.running}
+async def get_compile_status(job_id: str):
+    # check if the job_id exists in the jobs_status_map
+    if job_id not in jobs_status_map:
+        raise HTTPException(status_code=404, detail="Job ID not found")
+    return {
+        "status": jobs_status_map[job_id]["status"],
+        "message": jobs_status_map[job_id]["message"]
+    }
 
 @app.get("/compile/{job_id}/artefacts", tags=["Compile standard"])
 async def get_compile_artefacts(
@@ -108,20 +131,73 @@ async def get_custom_compile_artefacts(job_id: int):
         raise HTTPException(status_code=500, detail="Internal server error")
     
 ############################################################################################################
-def get_source_code(gitlab_url: str, ref: str = "main"):
+def download_source_code(gitlab_url: str, ref: str = "main"):
     encoded_repo_path = quote(gitlab_url.split("gitlab.ti.bfh.ch/")[1], safe="")
-    encoded_source_path = quote(os.getenv("DEFAULT_SOURCE_PATH"), safe="")
-    request_url = f"{GITLAB_API_URL}/{encoded_repo_path}/repository/files/{encoded_source_path}?ref={ref}"
     request_url = f"{GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?ref={ref}"
     response = requests.get(request_url, headers=gitlab_api_headers)
 
-    if response.status_code == 200:
-        print("Repository archive downloaded successfully")
-        return response.content
-    else:
-        print("Error downloading repository archive:", response.text)
-        return None
+    if response.status_code != 200:
+        raise Exception(f"Error downloading repository archive: {response.text}")
+    
+    destination_folder = os.getenv("SOURCE_DIR")
+    # Ensure the destination folder exists
+    os.makedirs(destination_folder, exist_ok=True)
+    # Save the ZIP content to a file
+    zip_file_path = f"{destination_folder}/repo_archive.zip"
+    with open(zip_file_path, "wb") as zip_file:
+        zip_file.write(response.content)
+    # Unzip the archive
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(destination_folder)
+    os.remove(zip_file_path)
 ############################################################################################################
+def default_compile_task(job_id: str, request: StadardCompileRequest):
+    # Download the source code from the GitLab repository
+    try:
+        # download_source_code(request.git_repo_url, request.firmwareTag)
+        download_source_code(request.git_repo_url)
+    except Exception as e:
+        jobs_status_map[job_id] = {
+            "status": CompileStatus.error,
+            "message": f"Error downloading source code: {str(e)}"
+        }
+        return
+    # Compile source code in the Docker container
+    try:
+        request.libraries = " ".join(request.libraries)
+        compile_command = f"""bash -c "
+            mkdir -p /cache/boards /cache/arduino && \
+            arduino-cli core install {request.board.core} && \
+            arduino-cli lib install {request.libraries} && \
+            arduino-cli core update-index && \
+            arduino-cli compile \
+            --fqbn {request.board.core}:{request.board.variant} \
+            --output-dir /output/{job_id} \
+            --log-file /logs/{job_id}.log \
+            --verbose \
+            /source/{os.getenv("DEFAULT_ARDUINO_FOLDER")}
+        " """
+        container_output = docker_client.containers.run(
+            os.getenv("DEFAULT_COMPILER_REGISTRY_URL"),
+            compile_command,
+            volumes={
+                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
+                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
+                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
+                "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
+            },
+            remove=True,
+            detach=False
+        )
+        jobs_status_map[job_id] = {
+            "status": CompileStatus.successful,
+            "message": f"Compilation successful: {container_output.decode('utf-8')}"
+        }
+    except Exception as e:
+        jobs_status_map[job_id] = {
+            "status": CompileStatus.error,
+            "message": f"Error compiling source code: {str(e)}"
+        }
 
 
 if __name__ == "__main__":
