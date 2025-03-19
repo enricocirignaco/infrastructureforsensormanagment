@@ -15,6 +15,19 @@ services:
       - compiler-engine-cache:/cache
     env_file:
       - .env
+  volumes-cleaner:
+    image: python:3.10-slim
+    container_name: volumes-cleaner
+    volumes:
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-logs:/logs
+      - ./src/compiler-engine/app/cleaner.py:/app/cleaner.py
+    working_dir: /app
+    entrypoint: ["python", "/app/cleaner.py"]
+    env_file:
+      - .env
+    # restart: unless-stopped
 
 volumes:
   compiler-engine-source:
