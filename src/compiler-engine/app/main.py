@@ -135,13 +135,13 @@ async def get_compile_status(job_id: str):
         "message": jobs_status_map[job_id]["message"]
     }
 ############################################################################################################
-# Endpoint to get the artefacts of a compile job
+# Endpoint to get the artifacts of a compile job
 ############################################################################################################
-@app.get("/compile/{job_id}/artefacts", tags=["Compile standard"])
-async def get_compile_artefacts(
+@app.get("/compile/{job_id}/artifacts", tags=["Compile standard"])
+async def get_compile_artifacts(
     job_id: str,
-    get_source_code: bool = Query(False, description="Include the source code in the artefacts"),
-    get_logs: bool = Query(False, description="Include the logs in the artefacts"),
+    get_source_code: bool = Query(False, description="Include the source code in the artifacts"),
+    get_logs: bool = Query(False, description="Include the logs in the artifacts"),
     hex_only: bool = Query(False, description="Return only the compiled hex file")
 ):
     if job_id not in jobs_status_map:
@@ -160,7 +160,7 @@ async def get_compile_artefacts(
             except Exception:
                 raise HTTPException(status_code=404, detail="Compiled hex file not found")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
-        zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artefacts.zip"
+        zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artifacts.zip"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             # package output folder
             output_folder = f"{DEFAULT_OUTPUT_DIR}/{job_id}"
@@ -169,6 +169,9 @@ async def get_compile_artefacts(
             for root, _, files in os.walk(output_folder):
                 for file in files:
                     full_path = os.path.join(root, file)
+                    # Skip the artifacts.zip file to prevent recursive zipping crash
+                    if full_path == zip_path:
+                        continue
                     arcname = os.path.relpath(full_path, start=output_folder)
                     zipf.write(full_path, arcname=os.path.join("output", arcname))
             # package source code
@@ -188,48 +191,10 @@ async def get_compile_artefacts(
                     zipf.write(log_file_path, arcname="compilation.log")
 
         jobs_status_map[job_id]["status"] = CompileStatus.delivered
-        return FileResponse(zip_path, media_type="application/zip", filename="artefacts.zip")
+        return FileResponse(zip_path, media_type="application/zip", filename="artifacts.zip")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
-############################################################################################################
-# @app.get("/custom-compile/{job_id}/artefacts", tags=["Compile custom"])
-# async def get_custom_compile_artefacts(
-#     job_id: str,
-#     get_source_code: bool = Query(False, description="Include the source code in the artefacts"),
-#     get_logs: bool = Query(False, description="Include the logs in the artefacts")
-# ):
-#     try:
-#         output_folder = f"{DEFAULT_OUTPUT_DIR}/{job_id}"
-#         if not os.path.isdir(output_folder):
-#             raise HTTPException(status_code=404, detail="Output folder not found")
-
-#         zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artefacts.zip"
-#         with zipfile.ZipFile(zip_path, 'w') as zipf:
-#             for root, _, files in os.walk(output_folder):
-#                 for file in files:
-#                     full_path = os.path.join(root, file)
-#                     arcname = os.path.relpath(full_path, start=output_folder)
-#                     zipf.write(full_path, arcname=os.path.join("output", arcname))
-
-#             if get_logs:
-#                 log_file_path = f"/logs/{job_id}.log"
-#                 if os.path.isfile(log_file_path):
-#                     zipf.write(log_file_path, arcname="compilation.log")
-
-#             if get_source_code:
-#                 source_folder = f"{DEFAULT_SOURCE_DIR}/{job_id}"
-#                 if os.path.isdir(source_folder):
-#                     for root, _, files in os.walk(source_folder):
-#                         for file in files:
-#                             full_path = os.path.join(root, file)
-#                             arcname = os.path.relpath(full_path, start=source_folder)
-#                             zipf.write(full_path, arcname=os.path.join("source", arcname))
-
-#         return FileResponse(zip_path, media_type="application/zip", filename="artefacts.zip")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-    
 ############################################################################################################
 def download_source_code(request_url: str, job_id: str, repo_auth_token: str):
     response = requests.get(request_url, headers={"PRIVATE-TOKEN": repo_auth_token})
@@ -269,7 +234,7 @@ def default_compile_task(job_id: str, request: StadardCompileRequest):
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
-            --log-file /{DEFAULT_LOG_DIR}/{job_id}.log \
+            --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
             --verbose \
             {DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}
         " """
@@ -312,9 +277,9 @@ def generic_compile_task(
             compiler_registry_url,
             compiler_command,
             volumes={
-                "compiler-engine-source": {"bind": f"{DEFAULT_SOURCE_DIR}", "mode": "rw"},
-                "compiler-engine-output": {"bind": f"{DEFAULT_OUTPUT_DIR}", "mode": "rw"},
-                "compiler-engine-logs": {"bind": f"/{DEFAULT_LOG_DIR}", "mode": "rw"},
+                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
+                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
+                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
                 "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
             },
             remove=True,
