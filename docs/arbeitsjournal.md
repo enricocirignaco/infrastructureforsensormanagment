@@ -28,3 +28,7 @@
 | 2025-03-12 | 09:00 - 10:00 | 1,0   | CIRIE1, DEGEL2 |          | Meeting                                                           |
 | 2025-03-12 | 15:30 - 17:30 | 2,0   | DEGEL2         | 18       | Datenmodell konkretisieren in rdf-playground repository           |
 | 2025-03-17 | 09:00 - 11:00 | 2,0   | DEGEL2         | 13       | Evaluation Serialisierungs-Bibliothek                             |
+| 2025-03-17 | 13:00 - 15:00 | 2,0   | DEGEL2         | 13       | Testing von Nanopb                                                |
+| 2025-03-18 | 10:00 - 14:00 | 4,0   | DEGEL2         | 33       | Nanopb Integration in Dummy Projekt                               |
+| 2025-03-19 | 09:00 - 12:00 | 3,0   | DEGEL2         | 40       | MQTT-Broker Bridge für TTN konfigurieren                          |
+| 2025-03-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting                                                           |
