@@ -31,9 +31,14 @@ paths:
                 type: object
                 properties:
                   job_id:
-                    type: integer
-                    format: int64
-                    example: 10
+                    type: string
+                    example: 98b7ac42-1e25-4628-b516-75bb4aa7b0a2
+                  status:
+                    type: string
+                    example: pending
+                  message: 
+                    type: string
+                    example: Compilation started in background
                   timestamp:
                     type: string
                     format: date-time
@@ -357,10 +362,13 @@ components:
       properties:
         status:
           type: string
-          example: running
+          example: error
           enum:
             - pending
             - running
             - error
             - successful
             - delivered
+        message:
+          type: string
+          example: Error compiling source code
