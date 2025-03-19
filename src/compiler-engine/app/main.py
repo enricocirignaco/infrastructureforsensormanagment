@@ -39,7 +39,7 @@ class StadardCompileRequest(BaseModel):
 
 class CustomCompileRequest(BaseModel):
     git_repo_url: str
-    repo_auth_token: str
+    git_repo_auth_token: str
     firmware_tag: str
     compiler_registry_url: str
     registry_auth_token: str
@@ -57,7 +57,9 @@ class Status(BaseModel):
     status: CompileStatus
 
 # Endpoints to start a standard compile job with ardunio-cli
-@app.post(["/compile", "/custom-compile"], tags=["Compile custom", "Compile standard"])
+# @app.post(["/compile", "/custom-compile"], tags=["Compile custom", "Compile standard"])
+@app.post("/compile", tags=["Compile standard"])
+@app.post("/custom-compile", tags=["Compile custom"])
 async def compile(request_data: StadardCompileRequest, background_tasks: BackgroundTasks, request: Request,):
     try:
         # Generate a unique job ID; if something goes wrong here, it will be caught.
@@ -74,7 +76,16 @@ async def compile(request_data: StadardCompileRequest, background_tasks: Backgro
         if(request.url.path == "/compile"):
             background_tasks.add_task(default_compile_task, job_id, request_data)
         elif(request.url.path == "/custom-compile"):
-            background_tasks.add_task(custom_compile_task, job_id, request_data)
+            background_tasks.add_task(
+                generic_compile_task,
+                job_id,
+                request_data.git_repo_url,
+                request_data.git_repo_auth_token,
+                request_data.compiler_registry_url,
+                request_data.compiler_command,
+                request_data.registry_auth_token,
+                request_data.registry_auth_username
+                )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to schedule compile task: {str(e)}")
     
@@ -246,6 +257,13 @@ def generic_compile_task(
         return
     # Compile source code in the Docker container
     try:
+        docker_client.images.pull(
+            compiler_registry_url,
+            auth_config={
+                "username": registry_auth_username,
+                "password": registry_auth_token
+            }
+)
         container_output = docker_client.containers.run(
             compiler_registry_url,
             compiler_command,
@@ -256,11 +274,7 @@ def generic_compile_task(
                 "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
             },
             remove=True,
-            detach=False,
-            auth_config={
-                "username": registry_auth_username,
-                "password": registry_auth_token
-            }
+            detach=False
         )
         message = container_output.decode('utf-8') if isinstance(container_output, bytes) else container_output
         jobs_status_map[job_id] = {
