@@ -6,7 +6,6 @@ from datetime import datetime
 LOG_FILE_PATH = os.path.join(os.getenv("DEFAULT_LOG_DIR"), "cleaner.log")
 DIRS_TO_CLEAN = [os.getenv("DEFAULT_SOURCE_DIR"), os.getenv("DEFAULT_OUTPUT_DIR"), os.getenv("DEFAULT_LOG_DIR")]
 CLEAN_INTERVAL = os.getenv("CLEANING_INTERVAL_HOURS") * 3600  # Convert to seconds
-CLEAN_INTERVAL = 5
 
 # Log messages to a log file situated in /logs/cleaner.log
 def log_message(message):
