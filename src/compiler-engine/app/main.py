@@ -26,7 +26,7 @@ DEFAULT_SOURCE_DIR = os.getenv("DEFAULT_SOURCE_DIR")
 DEFAULT_OUTPUT_DIR = os.getenv("DEFAULT_OUTPUT_DIR")
 DEFAULT_LOG_DIR = os.getenv("DEFAULT_LOG_DIR")
 DEFAULT_ARDUINO_DIR = os.getenv("DEFAULT_ARDUINO_DIR")
-DEFAULT_ARUINO_BINARY = os.getenv("DEFAULT_ARUINO_BINARY")
+DEFAULT_ARDUINO_BINARY = os.getenv("DEFAULT_ARDUINO_BINARY")
 DEFAULT_COMPILER_REGISTRY_URL = os.getenv("DEFAULT_COMPILER_REGISTRY_URL")
 
 # Pydantic models for request bodies and responses
@@ -36,7 +36,7 @@ class Board(BaseModel):
 class ConfigProperty(BaseModel):
     key: str
     value: str
-class StadardCompileRequest(BaseModel):
+class StandardCompileRequest(BaseModel):
     git_repo_url: str
     firmware_tag: str
     board: Board
@@ -63,7 +63,7 @@ class CompileStatus(str, Enum):
 # Endpoints to start a standard compile job with ardunio-cli
 ############################################################################################################
 @app.post("/compile", tags=["Compile standard"])
-async def compile(request_data: StadardCompileRequest, background_tasks: BackgroundTasks):
+async def compile(request_data: StandardCompileRequest, background_tasks: BackgroundTasks):
     try:
         # Generate a unique job ID; if something goes wrong here, it will be caught.
         job_id = str(uuid.uuid4())
@@ -154,7 +154,7 @@ async def get_compile_artifacts(
         if hex_only:
             try:
                 jobs_status_map[job_id]["status"] = CompileStatus.delivered
-                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARUINO_BINARY)
+                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARDUINO_BINARY)
             except Exception:
                 raise HTTPException(status_code=404, detail="Compiled hex file not found")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
@@ -221,7 +221,7 @@ def download_source_code(request_url: str, job_id: str, repo_auth_token: str):
     os.remove(zip_file_path)
 
 ############################################################################################################
-def default_compile_task(job_id: str, request: StadardCompileRequest):
+def default_compile_task(job_id: str, request: StandardCompileRequest):
     encoded_repo_path = quote(request.git_repo_url.split("gitlab.ti.bfh.ch/")[1], safe="")
     git_repo_url = f"{DEFAULT_GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?sha={request.firmware_tag}&path={DEFAULT_ARDUINO_DIR}"
     compile_command = f"""bash -c "
