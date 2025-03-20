@@ -27,7 +27,7 @@ services:
     entrypoint: ["python", "/app/cleaner.py"]
     env_file:
       - .env
-    # restart: unless-stopped
+    restart: unless-stopped
 
 volumes:
   compiler-engine-source:
