@@ -1,374 +1,277 @@
-openapi: '3.0.3'
+openapi: "3.0.3"
 info:
-  title: Compiler Engine - OpenAPI 3.1
-  version: '1.0'
+  title: "Compiler Engine"
+  version: "1.0"
 servers:
-  - url: http://localhost:8000/api/v1
+  - url: "http://localhost:8000"
 tags:
-  - name: Compile standard
-    description: This endpoint can be used to compile source code with the built-in toolchain (arduino-cli).
-
-  - name: Compile custom
-    description: This endpoint can be used to compile source code with any custom toolchain by providing a compatible docker image.
+  - name: "Build"
+    description: "Endpoints for initiating standard build jobs using ardunio-cli"
+  - name: "Generic Build"
+    description: "Endpoints for initiating build jobs using a custom compiler"
+  - name: "Build Job"
+    description: "Endpoints for retrieving build job status and artifacts"
 paths:
-  /compile:
+  /build:
     post:
       tags:
-        - Compile standard
-      description: This endpoint can be used to initiate a compile job with the built-in toolchain (arduino-cli).
+        - "Build"
+      summary: "Initiate a standard build job"
+      description: "Starts a build job using ardunio-cli."
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StadardCompileRequest'
+              $ref: "#/components/schemas/StandardBuildRequest"
+      responses:
+        "200":
+          description: "Build job started successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuildJobResponse"
+        "500":
+          description: "Internal server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /generic-build:
+    post:
+      tags:
+        - "Generic Build"
+      summary: "Initiate a custom build job"
+      description: "Starts a build job using a custom compiler toolchain."
+      requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomBuildRequest"
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: "Build job started successfully"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  job_id:
-                    type: string
-                    example: 98b7ac42-1e25-4628-b516-75bb4aa7b0a2
-                  status:
-                    type: string
-                    example: pending
-                  message: 
-                    type: string
-                    example: Compilation started in background
-                  timestamp:
-                    type: string
-                    format: date-time
-                    example: 2021-10-10T10:10:10Z
-        '500':
-          description: Internal server error
+                $ref: "#/components/schemas/BuildJobResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /compile/{job_id}/status:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/{job_id}/status:
     get:
       tags:
-        - Compile standard
-      description: Get the status of a compile job
+        - "Build Job"
+      summary: "Get build job status"
+      description: "Retrieves the status and message for a build job identified by its job ID."
       parameters:
         - name: job_id
           in: path
-          description: ID of the compile job
+          description: "Unique identifier for the build job"
           required: true
           schema:
-            type: integer
-            format: int64
-            example: 10
+            type: string
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: "Build job status retrieved successfully"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Status'
-        '400':
-          description: Invalid request
+                $ref: "#/components/schemas/BuildStatusResponse"
+        "404":
+          description: "Job ID not found"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid request
- 
-        '404':
-          description: Job not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Job not found
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /compile/{job_id}/artefacts:
+                $ref: "#/components/schemas/ErrorResponse"
+  /job/{job_id}/artifacts:
     get:
       tags:
-        - Compile standard
-      description: Download the artefacts of a compile job
+        - "Build Job"
+      summary: "Get build job artifacts"
+      description: "Downloads the build artifacts as a ZIP archive or only the compiled hex file based on query parameters."
       parameters:
         - name: job_id
           in: path
-          description: ID of the compile job
+          description: "Unique identifier for the build job"
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
         - name: get_source_code
           in: query
-          description: Include the source code in the artefacts
+          description: "Include the source code in the artifacts"
           required: false
           schema:
             type: boolean
             default: false
         - name: get_logs
           in: query
-          description: Include the logs in the artefacts
+          description: "Include the logs in the artifacts"
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: hex_only
+          in: query
+          description: "Return only the compiled hex file"
           required: false
           schema:
             type: boolean
             default: false
       responses:
-        '200':
-          description: Successful operation
+        "200":
+          description: "Artifacts file returned successfully"
           content:
             application/zip:
               schema:
                 type: string
                 format: binary
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid request
-        '404':
-          description: Job not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Job not found
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /custom-compile:
-    post:
-      tags:
-        - Compile custom
-      description: This endpoint can be used to initiate a compile job with a custom toolchain by providing a compatible docker image.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomCompileRequest'
-        required: true
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  job_id:
-                    type: integer
-                    format: int64
-                    example: 10
-                  timestamp:
-                    type: string
-                    format: date-time
-                    example: 2021-10-10T10:10:10Z
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /custom-compile/{job_id}/status:
-    get:
-      tags:
-        - Compile custom
-      description: Get the status of a compile job
-      parameters:
-        - name: job_id
-          in: path
-          description: ID of the compile job
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 10
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Status'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid request
-        '404':
-          description: Job not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Job not found
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-  /custom-compile/{job_id}/artefacts:
-    get:
-      tags:
-        - Compile custom
-      description: Download the artefacts of a compile job
-      parameters:
-        - name: job_id
-          in: path
-          description: ID of the compile job
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/zip:
+            application/octet-stream:
               schema:
                 type: string
                 format: binary
-        '400':
-          description: Invalid request
+        "400":
+          description: "Bad request - invalid parameters or job not ready"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Invalid request
-        '404':
-          description: Job not found
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "Job or file not found"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Job not found
-        '500':
-          description: Internal server error
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: "Internal server error"
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Internal server error
-
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
-    StadardCompileRequest:
+    Board:
+      type: object
+      properties:
+        core:
+          type: string
+          example: "arduino:avr"
+        variant:
+          type: string
+          example: "uno"
+      required:
+        - core
+        - variant
+    ConfigProperty:
+      type: object
+      properties:
+        key:
+          type: string
+          example: "UUID"
+        value:
+          type: string
+          example: "fa7fd395-526f-4762-94b8-ad67886fcc52"
+      required:
+        - key
+        - value
+    StandardBuildRequest:
       type: object
       properties:
         git_repo_url:
           type: string
-          example: https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt
+          example: "https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt"
         firmware_tag:
           type: string
-          example: v1.0.0
+          example: "v1.0.0"
         board:
-          type: object
-          properties:
-            core:
-              type: string
-              example: arduino:avr
-            variant:
-              type: string
-              example: uno
+          $ref: "#/components/schemas/Board"
         libraries:
           type: array
           items:
             type: string
-            example: "ArduinoJson@6.17.3"
-        custom_flags:
-          type: object
-          properties:
-            key:
-              type: string
-    CustomCompileRequest:
+          example: ["ArduinoJson@6.17.3"]
+        config:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfigProperty"
+      required:
+        - git_repo_url
+        - firmware_tag
+        - board
+    CustomBuildRequest:
       type: object
       properties:
         git_repo_url:
           type: string
-          example: https://gitlab.ti.bfh.ch/internetofsoils/dummy-2temp-1hum-snt
-        docker_image:
+          example: "https://gitlab.example.com/your-repo.git"
+        git_repo_auth_token:
           type: string
-          example: arduino-cli:latest
+          example: "your_gitlab_token"
+        firmware_tag:
+          type: string
+          example: "v1.0.0"
+        compiler_registry_url:
+          type: string
+          example: "your-compiler-registry-url"
         registry_auth_token:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QifQ.3Jv5
-        custom_flags:
-          type: object
-          properties:
-            key:
-              type: string
-    Status:
+          example: "your_registry_token"
+        registry_auth_username:
+          type: string
+          example: "your_registry_username"
+        compiler_command:
+          type: string
+          example: "arduino-cli compile --fqbn arduino:avr:uno ..."
+      required:
+        - git_repo_url
+        - git_repo_auth_token
+        - firmware_tag
+        - compiler_registry_url
+        - registry_auth_token
+        - registry_auth_username
+        - compiler_command
+    BuildJobResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        status:
+          type: string
+          example: "pending"
+        message:
+          type: string
+          example: "Building process started in background"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2021-10-10T10:10:10Z"
+      required:
+        - job_id
+        - status
+        - message
+        - timestamp
+    BuildStatusResponse:
       type: object
       properties:
         status:
           type: string
-          example: error
-          enum:
-            - pending
-            - running
-            - error
-            - successful
-            - delivered
+          example: "running"
         message:
           type: string
-          example: Error compiling source code
+          example: "Building process in progress"
+      required:
+        - status
+        - message
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Job ID not found"
+      required:
+        - detail

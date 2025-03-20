@@ -16,7 +16,7 @@ import uvicorn
 app = FastAPI(title="Compiler Engine",version="1.0")
 # Connect to the host Docker daemon
 docker_client = docker.from_env()
-# In-memory store for compile job statuses
+# In-memory store for build job statuses
 jobs_status_map = {}  
 # Load environment variables
 DEFAULT_GROUP_ACCESS_TOKEN= os.getenv("DEFAULT_GROUP_ACCESS_TOKEN")
@@ -36,14 +36,14 @@ class Board(BaseModel):
 class ConfigProperty(BaseModel):
     key: str
     value: str
-class StandardCompileRequest(BaseModel):
+class StandardBuildRequest(BaseModel):
     git_repo_url: str
     firmware_tag: str
     board: Board
     libraries: Optional[List[str]] = None
     config: Optional[List[ConfigProperty]] = None
 
-class CustomCompileRequest(BaseModel):
+class CustomBuildRequest(BaseModel):
     git_repo_url: str
     git_repo_auth_token: str
     firmware_tag: str
@@ -52,7 +52,7 @@ class CustomCompileRequest(BaseModel):
     registry_auth_username: str
     compiler_command: str
 
-class CompileStatus(str, Enum):
+class BuildStatus(str, Enum):
     pending = "pending"
     running = "running"
     error = "error"
@@ -60,16 +60,16 @@ class CompileStatus(str, Enum):
     delivered = "delivered"
 
 ############################################################################################################
-# Endpoints to start a standard compile job with ardunio-cli
+# Endpoints to start a standard build job with ardunio-cli
 ############################################################################################################
-@app.post("/compile", tags=["Compile standard"])
-async def compile(request_data: StandardCompileRequest, background_tasks: BackgroundTasks):
+@app.post("/build", tags=["Build"])
+async def build(request_data: StandardBuildRequest, background_tasks: BackgroundTasks):
     try:
         # Generate a unique job ID; if something goes wrong here, it will be caught.
         job_id = str(uuid.uuid4())
         jobs_status_map[job_id] = {
-            "status": CompileStatus.pending,
-            "message": "Compilation started in background"}
+            "status": BuildStatus.pending,
+            "message": "Building process started in background"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate job ID: {str(e)}")
 
@@ -77,7 +77,7 @@ async def compile(request_data: StandardCompileRequest, background_tasks: Backgr
         # Schedule the background task; if this fails, catch and return an error.
         background_tasks.add_task(default_compile_task, job_id, request_data)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to schedule compile task: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to schedule build task: {str(e)}")
     
     return {
         "job_id": job_id,
@@ -86,16 +86,16 @@ async def compile(request_data: StandardCompileRequest, background_tasks: Backgr
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         }
 ############################################################################################################
-# Endpoints to start a custom compile job with a custom compiler
+# Endpoints to start a custom build job with a custom compiler
 ############################################################################################################
-@app.post("/custom-compile", tags=["Compile custom"])
-async def custom_compile(request_data: CustomCompileRequest, background_tasks: BackgroundTasks):
+@app.post("/generic-build", tags=["Generic Build"])
+async def generic_build(request_data: CustomBuildRequest, background_tasks: BackgroundTasks):
     try:
         # Generate a unique job ID; if something goes wrong here, it will be caught.
         job_id = str(uuid.uuid4())
         jobs_status_map[job_id] = {
-            "status": CompileStatus.pending,
-            "message": "Compilation started in background"}
+            "status": BuildStatus.pending,
+            "message": "Building process started in background"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate job ID: {str(e)}")
 
@@ -112,7 +112,7 @@ async def custom_compile(request_data: CustomCompileRequest, background_tasks: B
             request_data.registry_auth_username
             )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to schedule compile task: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to schedule build task: {str(e)}")
     
     return {
         "job_id": job_id,
@@ -121,10 +121,10 @@ async def custom_compile(request_data: CustomCompileRequest, background_tasks: B
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         }
 ############################################################################################################
-# Endpoint to get the status of a compile job
+# Endpoint to get the status of a build job
 ############################################################################################################
-@app.get("/compile/{job_id}/status", tags=["Compile standard"])
-async def get_compile_status(job_id: str):
+@app.get("/job/{job_id}/status", tags=["Build Job"])
+async def get_buil_status(job_id: str):
     # check if the job_id exists in the jobs_status_map
     if job_id not in jobs_status_map:
         raise HTTPException(status_code=404, detail="Job ID not found")
@@ -133,10 +133,10 @@ async def get_compile_status(job_id: str):
         "message": jobs_status_map[job_id]["message"]
     }
 ############################################################################################################
-# Endpoint to get the artifacts of a compile job
+# Endpoint to get the artifacts of a build job
 ############################################################################################################
-@app.get("/compile/{job_id}/artifacts", tags=["Compile standard"])
-async def get_compile_artifacts(
+@app.get("/job/{job_id}/artifacts", tags=["Build Job"])
+async def get_build_artifacts(
     job_id: str,
     get_source_code: bool = Query(False, description="Include the source code in the artifacts"),
     get_logs: bool = Query(False, description="Include the logs in the artifacts"),
@@ -144,7 +144,7 @@ async def get_compile_artifacts(
 ):
     if job_id not in jobs_status_map:
         raise HTTPException(status_code=404, detail="Job ID not found")
-    if jobs_status_map[job_id]["status"] != CompileStatus.successful and jobs_status_map[job_id]["status"] != CompileStatus.delivered:
+    if jobs_status_map[job_id]["status"] != BuildStatus.successful and jobs_status_map[job_id]["status"] != BuildStatus.delivered:
         raise HTTPException(status_code=400, detail="Job is not successful, use GET /status to get more informations")
     if hex_only and (get_source_code or get_logs):
         raise HTTPException(status_code=400, detail="Cannot include source code or logs when hex_only is set to true")
@@ -153,7 +153,7 @@ async def get_compile_artifacts(
         # Return only the compiled hex file if hex_only is set to true
         if hex_only:
             try:
-                jobs_status_map[job_id]["status"] = CompileStatus.delivered
+                jobs_status_map[job_id]["status"] = BuildStatus.delivered
                 return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARDUINO_BINARY)
             except Exception:
                 raise HTTPException(status_code=404, detail="Compiled hex file not found")
@@ -188,7 +188,7 @@ async def get_compile_artifacts(
                 if os.path.isfile(log_file_path):
                     zipf.write(log_file_path, arcname="compilation.log")
 
-        jobs_status_map[job_id]["status"] = CompileStatus.delivered
+        jobs_status_map[job_id]["status"] = BuildStatus.delivered
         return FileResponse(zip_path, media_type="application/zip", filename="artifacts.zip")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
@@ -221,8 +221,15 @@ def download_source_code(request_url: str, job_id: str, repo_auth_token: str):
     os.remove(zip_file_path)
 
 ############################################################################################################
-def default_compile_task(job_id: str, request: StandardCompileRequest):
-    encoded_repo_path = quote(request.git_repo_url.split("gitlab.ti.bfh.ch/")[1], safe="")
+def default_compile_task(job_id: str, request: StandardBuildRequest):
+    try:
+        encoded_repo_path = quote(request.git_repo_url.split("gitlab.ti.bfh.ch/")[1], safe="")
+    except IndexError:
+        jobs_status_map[job_id] = {
+            "status": BuildStatus.error,
+            "message": "Invalid GitLab repository URL"
+        }
+        return
     git_repo_url = f"{DEFAULT_GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?sha={request.firmware_tag}&path={DEFAULT_ARDUINO_DIR}"
     compile_command = f"""bash -c "
             mkdir -p /cache/boards /cache/arduino && \
@@ -246,13 +253,13 @@ def default_compile_task(job_id: str, request: StandardCompileRequest):
             config_file += "\n#endif // CONFIG_H\n"
         except Exception as e:
             jobs_status_map[job_id] = {
-                "status": CompileStatus.error,
+                "status": BuildStatus.error,
                 "message": f"Error generating config.h content: {str(e)}"
             }
             return
     else:
         config_file = None
-    # compile the source code
+    # build the source code
     generic_compile_task(
         job_id, git_repo_url,
         DEFAULT_GROUP_ACCESS_TOKEN,
@@ -276,15 +283,15 @@ def generic_compile_task(
         ):
     # Set the job status to running
     jobs_status_map[job_id] = {
-        "status": CompileStatus.running,
-        "message": "Compilation in progress"
+        "status": BuildStatus.running,
+        "message": "Building process in progress"
     }
     # Download the source code from the GitLab repository
     try:
         download_source_code(git_repo_url, job_id, git_repo_auth_token)
     except Exception as e:
         jobs_status_map[job_id] = {
-            "status": CompileStatus.error,
+            "status": BuildStatus.error,
             "message": f"Error downloading source code: {str(e)}"
         }
         return
@@ -295,7 +302,7 @@ def generic_compile_task(
                 f.write(config_file)
         except Exception as e:
             jobs_status_map[job_id] = {
-                "status": CompileStatus.error,
+                "status": BuildStatus.error,
                 "message": f"Error writing config.h file: {str(e)}"
             }
             return
@@ -308,12 +315,12 @@ def generic_compile_task(
                 f.write('#include "config.h"\n\n' + content)
         except Exception as e:
             jobs_status_map[job_id] = {
-                "status": CompileStatus.error,
+                "status": BuildStatus.error,
                 "message": f"Error including config.h in main.ino: {str(e)}"
             }
             return
 
-    # Compile source code in the Docker container
+    # Build source code in the Docker container
     try:
         docker_client.images.pull(
             compiler_registry_url,
@@ -336,12 +343,12 @@ def generic_compile_task(
         )
         message = container_output.decode('utf-8') if isinstance(container_output, bytes) else container_output
         jobs_status_map[job_id] = {
-            "status": CompileStatus.successful,
-            "message": f"Compilation successful: {message}"
+            "status": BuildStatus.successful,
+            "message": f"Building process successful: {message}"
         }
     except Exception as e:
         jobs_status_map[job_id] = {
-            "status": CompileStatus.error,
+            "status": BuildStatus.error,
             "message": f"Error compiling source code: {str(e)}"
         }
 
