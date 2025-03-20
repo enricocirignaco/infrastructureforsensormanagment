@@ -58,9 +58,7 @@ class CompileStatus(str, Enum):
     error = "error"
     successful = "successful"
     delivered = "delivered"
-# TODO
-# class Status(BaseModel):
-#     status: CompileStatus
+
 ############################################################################################################
 # Endpoints to start a standard compile job with ardunio-cli
 ############################################################################################################
@@ -238,7 +236,32 @@ def default_compile_task(job_id: str, request: StadardCompileRequest):
             --verbose \
             {DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}
         " """
-    generic_compile_task(job_id, git_repo_url, DEFAULT_GROUP_ACCESS_TOKEN, DEFAULT_COMPILER_REGISTRY_URL, compile_command, DEFAULT_GROUP_ACCESS_TOKEN, DEFAULT_GROUP_BOT_USERNAME)
+    # generate config.h file content
+    if request.config:
+        try:
+            config_file = "// Auto-generated config.h\n"
+            config_file += "#ifndef CONFIG_H\n#define CONFIG_H\n\n"
+            for prop in request.config:
+                config_file += f"#define {prop.key} {prop.value}\n"
+            config_file += "\n#endif // CONFIG_H\n"
+        except Exception as e:
+            jobs_status_map[job_id] = {
+                "status": CompileStatus.error,
+                "message": f"Error generating config.h content: {str(e)}"
+            }
+            return
+    else:
+        config_file = None
+    # compile the source code
+    generic_compile_task(
+        job_id, git_repo_url,
+        DEFAULT_GROUP_ACCESS_TOKEN,
+        DEFAULT_COMPILER_REGISTRY_URL,
+        compile_command,
+        DEFAULT_GROUP_ACCESS_TOKEN,
+        DEFAULT_GROUP_BOT_USERNAME,
+        config_file
+        )
 
 ############################################################################################################
 def generic_compile_task(
@@ -248,7 +271,8 @@ def generic_compile_task(
         compiler_registry_url: str,
         compiler_command: str,
         registry_auth_token: str,
-        registry_auth_username: str
+        registry_auth_username: str,
+        config_file: str = None
         ):
     # Set the job status to running
     jobs_status_map[job_id] = {
@@ -264,6 +288,31 @@ def generic_compile_task(
             "message": f"Error downloading source code: {str(e)}"
         }
         return
+    if config_file:
+        # Write the config.h file to the source code folder
+        try:
+            with open(f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/config.h", "w") as f:
+                f.write(config_file)
+        except Exception as e:
+            jobs_status_map[job_id] = {
+                "status": CompileStatus.error,
+                "message": f"Error writing config.h file: {str(e)}"
+            }
+            return
+        # include the config.h file in the source code
+        try:
+            ino_file_path = f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/main.ino"
+            with open(ino_file_path, "r+") as f:
+                content = f.read()
+                f.seek(0, 0)
+                f.write('#include "config.h"\n\n' + content)
+        except Exception as e:
+            jobs_status_map[job_id] = {
+                "status": CompileStatus.error,
+                "message": f"Error including config.h in main.ino: {str(e)}"
+            }
+            return
+
     # Compile source code in the Docker container
     try:
         docker_client.images.pull(
