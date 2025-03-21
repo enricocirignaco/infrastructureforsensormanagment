@@ -1,8 +1,5 @@
 # Documentation Draft
-## Initial Situation
-//TODO
-## Product deliverables
-//TODO
+---
 ## Project Management
 Project members:
 - Linus Deggen - Developer
@@ -33,7 +30,6 @@ Sprint planing, review and retrospective are not done as separate meetings but a
 Direct push into the main branch are forbidden. Exception can be made for minor modification to markdown files. The rest of the changes have to be made in a "issue-brnach" and after completation the branch can be merged into the main branch with a merge request. A new branch and a merge request for a specific issue can be created directly from the issues page in gitlab.
 
 ## Project Milestones
-
 1. Konzept Phase (3 Wochen)
     - Lösungsvorschläge erstellen
     - Detailreiches Systemdiagramm
@@ -58,17 +54,13 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
 6. Projekt Deadline (2 Wochen)
     - Fokus auf Abschluss der Dokumentation
     - Plakat, Bucheintrag, Präsentation, Film abschliessen
-
 ## Deadlines
 - **Abgabe Book-Eintrag noch unklar**
 - 26.05.25 12:00 Abgabe Poster
 - 12.06.25 18:00 Abgabe Film
 - 12.06.25 18:00 Abgabe Dokumentation
-
 ## Requirements
-
 ### Funktionale Anforderungen
-
 Prioritäten:
 - Hoch
 - Mittel
@@ -115,6 +107,7 @@ Prioritäten:
 ### Abgrenzung
 - Hardware-Identifikation von einzelnen Sensoren um Error-History zu verfolgen
 - Daten-Löschung von nicht gebrauchten Entitäten / Fälschlicherweise erstellt
+---
 
 ## Development
 ### Compiler Engine
@@ -192,6 +185,7 @@ container_output = client.containers.run(
 
 GitLab’s archive endpoint doesn’t necessarily validate the ref strictly. If you provide an invalid ref, GitLab will often default to the repository’s default branch when generating the archive. That’s why you still get back a ZIP file even if the ref you provided (e.g., maidgdgbensss) doesn’t exist.
 
+---
 # Evaluation
 
 ## Binäre Serialisierung
