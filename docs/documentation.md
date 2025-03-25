@@ -111,12 +111,73 @@ Prioritäten:
 
 ## Development
 ### Compiler Engine
-#### Container Architecture
+The job of the compiler engine is to take the source code from a git repository, enrich the source code with additional informations gathered from the user and build the firmware. The firmware is then returned to the user in form of a binary. Additionally if requested by the user a compilation log and the enriched source code will also be provided by the compiler engine. The compiler engine is a dockerized standalone service that can be used through its REST api. The main puspose of this service is to compile arduino source code, but was designed to be able to compile source code with other toolchains as well. The idea is to dokcerize the toolchain needed to compile the source code. Then images for specific toolchains can be built and given over to the compiler engine. This way the compiler engine can be used to compile soource code for many differet projects, like for example, STM32, ESP32, Microchip, etc. Another key feature of this service is that that stores the built binaries for the user to request for them eliminating the need for webhooks or some other sort of asyncronous commuication. At the same time a garbage collector is implemented to delete old binaries that are too old.
+
+<!-- #### Container Architecture
 Docker in Docker vs multiple containers approach
 - Docker in Docker: The compiler engine is running inside a docker container and the docker daemon is running inside this container. This approach is not recommended because of security reasons and the complexity of the setup.
-- Multiple containers: The compiler engine is running inside a docker container and the docker daemon is running on the host machine. The docker socket is mounted into the compiler container. This approach is recommended because of the security and the simplicity of the setup.
-#### docker compiler
+- Multiple containers: The compiler engine is running inside a docker container and the docker daemon is running on the host machine. The docker socket is mounted into the compiler container. This approach is recommended because of the security and the simplicity of the setup. -->
+#### Arduino toolchain image
+The main focus of this service is to be able to compile arduino sketches (source code), for this purpose a specific toolchain is needed. An evaluation of the different methods to build arduino sketches into binary files was conducted. The following requirements were identified:
+- **Headless**: The toolchain should be able to run without a GUI and be easyly automated
+- **Docker** compatibility: The toolchain should be able to run inside a docker container
+- **Libraries support**: The toolchain should be able to install libraries from the arduino library manager
+- **Board support**: The toolchain should be able to compile for different boards
+- **Open Source**: If possible the software used be open source and free to use
+
+Several toolchains were considered for compiling Arduino sketches, evaluated based on the previously defined requirements.
+### Arduino IDE  
+**Pros**:  
+- Official support  
+- Compatible with all Arduino boards and libraries  
+**Cons**:  
+- GUI-based  
+- Not suitable for automation or Docker environments [1]  
+
+### PlatformIO  
+**Pros**:  
+- Powerful and cross-platform  
+- Supports many boards and frameworks beyond Arduino  
+**Cons**:  
+- Primarily designed for interactive development  
+- Complex setup  
+- Limited headless and Docker support without workarounds [2]  
+
+### Arduino CLI  
+**Pros**:  
+- Official headless toolchain  
+- Designed for automation  
+- Supports board and library management  
+- Easy Docker integration [3]  
+**Cons**:  
+- Limited advanced build customization compared to PlatformIO  
+
+### Makefile-based Toolchains (e.g., Arduino-Makefile)  
+**Pros**:  
+- Lightweight  
+- Fully customizable  
+- Docker-friendly [4]  
+**Cons**:  
+- Manual setup for boards and libraries  
+- Lacks official support  
+- Higher maintenance  
+
+## References
+[1] Arduino, “Arduino IDE,” [Online]. Available: https://www.arduino.cc/en/software  
+[2] PlatformIO, “PlatformIO Documentation,” [Online]. Available: https://docs.platformio.org  
+[3] Arduino, “Arduino CLI,” [Online]. Available: https://arduino.github.io/arduino-cli  
+[4] Sudar, “Arduino Makefile,” [Online]. Available: https://github.com/sudar/Arduino-Makefile  
+
+Arduino-cli was choosen because of its official support, easy docker integration and the support for board and library management. The limited support advanced features are not needed for the scope of this project. Once that the main toolchain was definted a research had to be made to look into the best way to dockerize the toolchain. After a brief search on docker hub and github several images for arduino-cli were found. Saddly non of them were akltively mantained. The best maintained project found by the research was the solarbotics/arduino-cli on dokcer hub that was not updated for more than 2 years. This was unaccettable and thus was decided to build a new image from scratch. This move also enabled the developers to ensure compability and control over the enviroment.
+
 The main compiler container is based on the arduino-cli software and its used to comppile arduino sketches. This container/image should be interchangeable with other toolchain images. For this reason the docker command used to start the compilation should follow a specified structure so that those images can be interchanged and compiler engine itself will still works correctly.
+### Docker Image
+As base image **debian:stable-slim** was choosen because the developers have already experience with debian and the stable-slim tag offers a good compromise between size and stability. To install arduino-cli the official documentation was followed.[Docs](https://docs.arduino.cc/arduino-cli/installation/). The steps described in the official documentation made use of the linux utility *curl*. This utility is not available in the slim version of debian and thus instructions to install *curl* before installing arduino-cli had to be added to the Dockerfile.
+After the installation the apt repositories and also curl were deleted to keep the size of the image to a minimum. Folders where while using the image volumes are mounted were created and the entrypoint was set to return the arduino-cli version. The entrypoint can be overwritten by the user to run the right arduino-cli command.
+Lastly a minimal toolchain configuration was done. This was done after studying the COnfiguration keys described in the [official documentation](https://docs.arduino.cc/arduino-cli/configuration/). The exact configuration can be directly read from the Dockerfile.
+
+
+
 Docker command structure:
 ```bash
 docker run --rm \
