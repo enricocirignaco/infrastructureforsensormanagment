@@ -117,7 +117,7 @@ The job of the compiler engine is to take the source code from a git repository,
 Docker in Docker vs multiple containers approach
 - Docker in Docker: The compiler engine is running inside a docker container and the docker daemon is running inside this container. This approach is not recommended because of security reasons and the complexity of the setup.
 - Multiple containers: The compiler engine is running inside a docker container and the docker daemon is running on the host machine. The docker socket is mounted into the compiler container. This approach is recommended because of the security and the simplicity of the setup. -->
-#### Arduino toolchain image
+#### Arduino toolchain
 The main focus of this service is to be able to compile arduino sketches (source code), for this purpose a specific toolchain is needed. An evaluation of the different methods to build arduino sketches into binary files was conducted. The following requirements were identified:
 - **Headless**: The toolchain should be able to run without a GUI and be easyly automated
 - **Docker** compatibility: The toolchain should be able to run inside a docker container
@@ -126,7 +126,7 @@ The main focus of this service is to be able to compile arduino sketches (source
 - **Open Source**: If possible the software used be open source and free to use
 
 Several toolchains were considered for compiling Arduino sketches, evaluated based on the previously defined requirements.
-### Arduino IDE  
+##### Arduino IDE  
 **Pros**:  
 - Official support  
 - Compatible with all Arduino boards and libraries  
@@ -134,7 +134,7 @@ Several toolchains were considered for compiling Arduino sketches, evaluated bas
 - GUI-based  
 - Not suitable for automation or Docker environments [1]  
 
-### PlatformIO  
+##### PlatformIO  
 **Pros**:  
 - Powerful and cross-platform  
 - Supports many boards and frameworks beyond Arduino  
@@ -143,7 +143,7 @@ Several toolchains were considered for compiling Arduino sketches, evaluated bas
 - Complex setup  
 - Limited headless and Docker support without workarounds [2]  
 
-### Arduino CLI  
+##### Arduino CLI  
 **Pros**:  
 - Official headless toolchain  
 - Designed for automation  
@@ -152,7 +152,7 @@ Several toolchains were considered for compiling Arduino sketches, evaluated bas
 **Cons**:  
 - Limited advanced build customization compared to PlatformIO  
 
-### Makefile-based Toolchains (e.g., Arduino-Makefile)  
+##### Makefile-based Toolchains (e.g., Arduino-Makefile)  
 **Pros**:  
 - Lightweight  
 - Fully customizable  
@@ -162,7 +162,7 @@ Several toolchains were considered for compiling Arduino sketches, evaluated bas
 - Lacks official support  
 - Higher maintenance  
 
-## References
+##### References
 [1] Arduino, “Arduino IDE,” [Online]. Available: https://www.arduino.cc/en/software  
 [2] PlatformIO, “PlatformIO Documentation,” [Online]. Available: https://docs.platformio.org  
 [3] Arduino, “Arduino CLI,” [Online]. Available: https://arduino.github.io/arduino-cli  
@@ -171,7 +171,7 @@ Several toolchains were considered for compiling Arduino sketches, evaluated bas
 Arduino-cli was choosen because of its official support, easy docker integration and the support for board and library management. The limited support advanced features are not needed for the scope of this project. Once that the main toolchain was definted a research had to be made to look into the best way to dockerize the toolchain. After a brief search on docker hub and github several images for arduino-cli were found. Saddly non of them were akltively mantained. The best maintained project found by the research was the solarbotics/arduino-cli on dokcer hub that was not updated for more than 2 years. This was unaccettable and thus was decided to build a new image from scratch. This move also enabled the developers to ensure compability and control over the enviroment.
 
 The main compiler container is based on the arduino-cli software and its used to comppile arduino sketches. This container/image should be interchangeable with other toolchain images. For this reason the docker command used to start the compilation should follow a specified structure so that those images can be interchanged and compiler engine itself will still works correctly.
-### Docker Image
+##### Docker Image
 As base image **debian:stable-slim** was choosen because the developers have already experience with debian and the stable-slim tag offers a good compromise between size and stability. To install arduino-cli the official documentation was followed.[Docs](https://docs.arduino.cc/arduino-cli/installation/). The steps described in the official documentation made use of the linux utility *curl*. This utility is not available in the slim version of debian and thus instructions to install *curl* before installing arduino-cli had to be added to the Dockerfile.
 After the installation the apt repositories and also curl were deleted to keep the size of the image to a minimum. Folders where while using the image volumes are mounted were created and the entrypoint was set to return the arduino-cli version. The entrypoint can be overwritten by the user to run the right arduino-cli command.
 Lastly a minimal toolchain configuration was done. This was done after studying the COnfiguration keys described in the [official documentation](https://docs.arduino.cc/arduino-cli/configuration/). The exact configuration can be directly read from the Dockerfile.
@@ -189,9 +189,10 @@ docker run --rm \
 - output folder: is the folder where the compiled binaries will be stored
 - logs folder: is the folder where the logs of the compilation process are stored
 - cache folder: is the folder where the cache of the toolchain is stored to allow faster repeated compilation
-#### Docker Compile Command
-A dockerized arduino-cli enviroment was succeffully built, but at the moment can only return the version of the arduino-cli programm. The next step is to build the docker command that will be used to compile the source code. Variables shpuld be used extensively to be able to integrate this command in the main service and compile all possible source code. Note that the syntax of this variable injection is python because the main service is written in python.
-**Arduino cli commands needed to compile**:
+If a custom image for another toolchain has to be made it has to follow this command structure. This allow the main service to use different toolchains for different projects without having to to be modified.
+##### Docker Compile Command
+A dockerized arduino-cli enviroment was succeffully built, but at the moment can only return the version of the arduino-cli programm. The next step is to build the docker command that will be used to compile the source code. Variables should be used extensively to be able to integrate this command in the main service and compile all possible source code.
+**Example command to compile arduino source code**:
 ```bash
 mkdir -p /cache/boards /cache/arduino && \
 arduino-cli core install $BOARD_CORE && \
@@ -204,7 +205,6 @@ arduino-cli compile \
   --verbose \
   $SOURCE_FOLDER
 ```
-
 The following variables are used:
 - BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand). FOr example arduino:avr or esp32:esp32.
 - LIBRARY_LIST: A list of libraries that are used in the source code and need to be installed beforehand.
@@ -213,28 +213,84 @@ The following variables are used:
 - LOG_FOLDER: The folder where the logs of the compilation process are stored.
 - SOURCE_FOLDER: The folder where the source code is located.
 The command above can be used to compile arduino source code manually but in a cli enviroment. The next step is to be able to use this command from within the main application.
+#### Main Compiler Engine Service
+After source code could successfully be built using the toolchain image made available in the gitlab registry of the project, a main service responsible for managing the compilation process was developed. The service consists of a docker container running two python script. One is used as garbage collector to delete old generated files and the other is the main service implementing a REST API that enable the user or another service to interface with the compiler engine service.
+##### REST Frameworks Evaluation
+To implement a simple REST service, several technologies were evaluated, focusing on performance, ease of use, community support, and Docker compatibility. While the programming language was not a strict requirement, the development team is comfortable with Python, Java, Rust, and JavaScript. The following frameworks were considered:
 
-# TODO
-# custom images
-# rest api
-# Running the command inside the Docker container
-container_output = client.containers.run(
-            "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",
-            compile_command,
-            volumes={
-                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
-                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
-                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
-                "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
-            },
-            remove=True,
-            detach=False
-        )
+###### Express.js (JavaScript)  
+**Pros**:
+- Lightweight and minimalistic  
+- Large ecosystem and community  
+- Fast prototyping  
+**Cons**:
+- Lacks built-in type safety  
+- Requires manual setup for validation and documentation [1]
+
+###### Spring Boot (Java)  
+**Pros**:
+- Enterprise-grade features  
+- Mature ecosystem and tooling  
+- Built-in validation and dependency injection  
+**Cons**:
+- Heavy for simple services  
+- Slower startup time [2]
+
+###### Actix-Web (Rust)  
+**Pros**:
+- High performance and low memory usage  
+- Strong type safety  
+**Cons**:
+- Steep learning curve  
+- Smaller ecosystem  
+- Tooling not as mature [3]
+
+###### FastAPI (Python)  
+**Pros**:
+- Simple and clean syntax  
+- Automatic OpenAPI documentation  
+- Asynchronous by default  
+- Strong typing with Pydantic  
+- Fast development cycle  
+**Cons**:
+- Slightly slower than Actix or Spring in raw performance [4]
+
+FastAPI was ultimately chosen due to its excellent balance of developer ergonomics, async support, built-in documentation, and suitability for quick iteration. It aligned well with the team's Python experience and the simplicity of the service.
+###### References
+[1] Express, “Express - Node.js web application framework,” [Online]. Available: https://expressjs.com  
+[2] Spring, “Spring Boot,” [Online]. Available: https://spring.io/projects/spring-boot  
+[3] Actix Project, “Actix Web,” [Online]. Available: https://actix.rs  
+[4] FastAPI, “FastAPI - The modern Python web framework,” [Online]. Available: https://fastapi.tiangolo.com  
+
+FastAPI is very straightforward to use, a simple dockerfile was written that used python:3.10-slim as a base image and then fast api dependencies were installed with pip and filally the main script was copied into the image. Note that is not advised to use the *latest* when choosing the base image because new versions can introduce braking changes to the system. Before an API specification could be written using the OpenAPI stadard, some experimenting had to be done to understand how the FastAPI framework works and how this could be integrated with the compiler toolchain.
+##### DinD vs Docker Socket Binding
+To enable the main Python script to spawn a Docker container for the compiler engine, two primary approaches were considered: Docker-in-Docker (DinD) and Docker socket binding. DinD runs a full Docker daemon inside a container, allowing full isolation and independence from the host’s Docker engine. However, it introduces significant complexity, requires privileged mode, and suffers from stability issues in production environments. In contrast, Docker socket binding mounts the host’s Docker socket (/var/run/docker.sock) into the container, allowing it to control the host Docker daemon directly. While this approach is simpler and more performant, it poses serious security risks: any process inside the container can fully control the host Docker engine, effectively granting root access to the host. Given these trade-offs, Docker socket binding was chosen for its simplicity and lower resource overhead, with the understanding that it must only be exposed to trusted code and isolated carefully from untrusted input. In a later phase of the project, a detailed risk assessment should be conducted to fully evaluate and mitigate the risk of infrastructure compromise. This security analysis is considered out of scope for the current implementation.
+##### What is Docker Socket Binding?
+Docker exposes its API via a Unix domain socket located at `/var/run/docker.sock`. By **binding** this socket (i.e., mounting it into a container or making it accessible to a local script), an application can communicate directly with the Docker daemon on the host.
+This allows any client with access to the socket to perform operations such as:
+- Running new containers  
+- Stopping or removing containers  
+- Building images  
+- Accessing container logs  
+This is the same interface used by the `docker` CLI and the official Docker SDKs.
+Using the official Docker SDK for Python (docker-py), the script can create a new container on the host system as follows:
+``` python
+import docker
+
+client = docker.from_env()
+client.containers.run("alpine", ["echo", "hello world"])
 ```
-
-- logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
-
+##### Source code download from Gitlab
 GitLab’s archive endpoint doesn’t necessarily validate the ref strictly. If you provide an invalid ref, GitLab will often default to the repository’s default branch when generating the archive. That’s why you still get back a ZIP file even if the ref you provided (e.g., maidgdgbensss) doesn’t exist.
+##### Integration of additional metadata
+#### Garbage Collector Service
+
+
+
+
+
+
+
 
 ---
 # Evaluation
