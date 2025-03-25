@@ -175,58 +175,48 @@ The main compiler container is based on the arduino-cli software and its used to
 As base image **debian:stable-slim** was choosen because the developers have already experience with debian and the stable-slim tag offers a good compromise between size and stability. To install arduino-cli the official documentation was followed.[Docs](https://docs.arduino.cc/arduino-cli/installation/). The steps described in the official documentation made use of the linux utility *curl*. This utility is not available in the slim version of debian and thus instructions to install *curl* before installing arduino-cli had to be added to the Dockerfile.
 After the installation the apt repositories and also curl were deleted to keep the size of the image to a minimum. Folders where while using the image volumes are mounted were created and the entrypoint was set to return the arduino-cli version. The entrypoint can be overwritten by the user to run the right arduino-cli command.
 Lastly a minimal toolchain configuration was done. This was done after studying the COnfiguration keys described in the [official documentation](https://docs.arduino.cc/arduino-cli/configuration/). The exact configuration can be directly read from the Dockerfile.
-
-
-
-Docker command structure:
+At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project. The dokcer image can be used with the following command structure:
 ```bash
 docker run --rm \
-  -v path_to_source_code:/source \
-  -v path_to_output_folder:/output \
-  -v path_to_logs:/logs \
-  -v path_to_cache:/cache \
+  -v <path_to_source_code>:/source \
+  -v <path_to_output_folder>:/output \
+  -v <path_to_logs>:/logs \
+  -v <path_to_cache>:/cache \
   image:tag \
   compile_command
 ```
 - source code folder: is the folder where the source code is located
-- output folder: is the folder where the compiled binaries are stored (this files are then returned over REST)
-- config folder: is the folder where the configuration files that can be used to fine tune the compilation process are stored
-- logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
+- output folder: is the folder where the compiled binaries will be stored
+- logs folder: is the folder where the logs of the compilation process are stored
+- cache folder: is the folder where the cache of the toolchain is stored to allow faster repeated compilation
+#### Docker Compile Command
+A dockerized arduino-cli enviroment was succeffully built, but at the moment can only return the version of the arduino-cli programm. The next step is to build the docker command that will be used to compile the source code. Variables shpuld be used extensively to be able to integrate this command in the main service and compile all possible source code. Note that the syntax of this variable injection is python because the main service is written in python.
 **Arduino cli commands needed to compile**:
 ```bash
-arduino-cli core install ${BOARD_CORE}
-arduino-cli lib install ${LIBRARY_LIST}
-arduino-cli core update-index
+mkdir -p /cache/boards /cache/arduino && \
+arduino-cli core install $BOARD_CORE && \
+arduino-cli lib install $LIBRARY_LIST && \
+arduino-cli core update-index && \
 arduino-cli compile \
-  --fqbn ${BOARD_CORE}:${BOARD} \
-  --output-dir /output/${COMPILATION_TAG} \
-  --log /logs/${COMPILATION_TAG}.log \
+  --fqbn $BOARD_CORE:$BOARD \
+  --output-dir $OUTPUT_FOLDER \
+  --log $LOG_FOLDER \
   --verbose \
-  /source/${SKETCH_NAME}
+  $SOURCE_FOLDER
 ```
-Env Variables:
-- BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand)
-- LIBRARY_LIST: A list of libraries that are needed to compile the source code
-- BOARD: The board that the firmware is for
-- COMPILATION_TAG: A tag that is used to identify the compilation job
-- SKETCH_NAME: The name of the source folder that should be compiled
 
-Possible compilation command:
-```python
-# Define the compile command with variables using f-string for interpolation
-compile_command = f"""bash -c "
-    mkdir -p /cache/boards /cache/arduino && \
-    arduino-cli core install {BOARD_CORE} && \
-    arduino-cli lib install {LIBRARY_LIST} && \
-    arduino-cli core update-index && \
-    arduino-cli compile \
-    --fqbn {BOARD_CORE}:{BOARD} \
-    --output-dir /output/{COMPILATION_TAG} \
-    --log-file /logs/{COMPILATION_TAG}.log \
-    --verbose \
-    /source/{SKETCH_NAME}
-" """
+The following variables are used:
+- BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand). FOr example arduino:avr or esp32:esp32.
+- LIBRARY_LIST: A list of libraries that are used in the source code and need to be installed beforehand.
+- BOARD: The board that the firmware is for. For example uno or nodemcu.
+- OUTPUT_FOLDER: The folder where the compiled binaries will be stored.
+- LOG_FOLDER: The folder where the logs of the compilation process are stored.
+- SOURCE_FOLDER: The folder where the source code is located.
+The command above can be used to compile arduino source code manually but in a cli enviroment. The next step is to be able to use this command from within the main application.
 
+# TODO
+# custom images
+# rest api
 # Running the command inside the Docker container
 container_output = client.containers.run(
             "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",
