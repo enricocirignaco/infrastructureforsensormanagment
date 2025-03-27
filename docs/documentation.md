@@ -299,7 +299,55 @@ A key requirement of the compiler engine is to enrich the source code with addit
 This changes are not saved back into the repository but the source code with the changes can be downloaded using the right REST endpoint.
 #### Volume cleaner service
 The generated data should be provided for a give period by the Compiler Service. When this period has ellapsed it can't be garantied anymore by the service that the data is still available. For the purpose of deleting old generated data the volume cleaner service was developed. This is a simple python script running in a docker container that is started when the main service is started. This service run a check on all the following vomus once an hour: *output*, *logs* and *cache*. If the files in the volume are older than the specified time the files are deleted. A logfile is created in the logs volume to keep track of the deleted files and abviously it ignored by the cleaning service. The time after which the files are deleted and the check interval can be set with enviroment variables.
+### Firmware Flashing
+A strategy for flashing the compiled firmware on the hardware should be developed. The hardware used thougout the project is the CubeCell – AB01 Dev-Board (V2) based on the ASR6502 Chip made by the cinese company heltec.[9] The board can act as a LoRa Node and it is fully arduino compatible. The board comes with a bootloader preinstalled so that it can be programmed via USB/Serial interface just like an arduino board.
+#### Requirements
+- The compilation process should be as straightforward as possible because the user most likely has no technical experience.
+- **If possible**:The firmware should be flashed on the hardware without the need of any additional software. (irectly over the browser).
+- In case the adopted solution (via browser) requires internet connection, an alternative solution that works offline should be also provided.
+#### Research
+After reading the poorly documented documentation of the CubeCell board if was discovered that neigher the bootloader that works with the arduino enviroment nor the utility to flash the arduino code on the board are open source. Only their binaries are provided. This complicate the work of the developers a lot.
+As described here [10] the Cubecell in question supports two different bootloaders, one of them is arduino compatible but as can be seen from the screenshoot on the same page this bootloader is closed source and it's not avalable to the public. Different issues on the matter were already started on github like this [11]. In this gitlab issue[12] someone is even accusing Heltec of misusing the GCC compiler that is under GPL license. So it's clear that this company is not interrested in open sourcing it's development tools and thus aworkaround should be found.
+To better understand what exactly it's missing to be able to flash a firmware on the cubecell board the compilation and flashing process via the arduino IDE was closely investigated. Before any code can be compiled for this board the Hardware-specific files must be installed to the Arduino IDE using its board manager. The Board manange does nothing else than downloading the content of the following gitlab repository [13]. By getting a look at the get.py file in the tools folder the following line can be seen:
+```python
+tools_to_download = load_tools_list(current_dir + '/../package/package_CubeCell_index.template.json', identified_platform)
+```
+This hints that the links to the files to be downloaded are in the package_CubeCell_index.template.json file.
+In this json file multiple url pointing to a download server hosted by heltec automation can be found. As for example:
+```json
+    "url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0-BoardManager.zip",
+```
+This file server reveal interesting findings over what's available for download for the users. Not only that by multiple PDFs are scattered all over the place with maybe usefull information.
 
+As far as understood ( not official documentation was found) there are three propetary tools that are used by the arduino IDE to compile and flash the firmware on the board:
+- **CubeCellelftool**: it's used to convert the hex file compiled by the gcc / arduino IDE to a 
+- **CubeCellflash**: This tool is usedd to flash boards with a ASR650x series chip [14]
+- **flash6601**: This tool is used to flash boards with a ASR6601 series chip [14]
+Those tools are provided as binaries for linux and macos and as exe for windows but only for x86 CPU architecture. Additionally a arm binary compatible with raspberry Pi is provided for the CubeCellflash utility.
+There is some sparse informations on how to use those tools in different forum posts like this[15] and this [16] but no official documentation was found. The exact usage can be reverse engineered by looking enabling verbose logging in the arduino IDE and trying to compile and flash a test firmware on the board.
+<!-- write here your findings with arduino ide -->
+
+Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
+
+Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[17]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
+If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
+
+The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
+
+
+
+#### References
+[9]  https://heltec.org/project/htcc-ab01-v2/
+[10] https://docs.heltec.org/en/node/asr650x/htcc_am01/programming_cubecell.html
+[11] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/80
+[12] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/281
+[13] https://github.com/HelTecAutomation/CubeCell-Arduino/tree/master
+[14] http://community.heltec.cn/t/cubecell-download-tool-for-raspberry-pi/2522/12
+[15] http://community.heltec.cn/t/cubecellflash-tool/1953/3
+[16] http://community.heltec.cn/t/cubecell-firmware-upload/1063
+[17] https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
+
+https://github.com/arduino/arduino-create-agent
 
 
 
