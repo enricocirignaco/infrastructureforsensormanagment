@@ -80,7 +80,7 @@ Prioritäten:
 |           | **Verwaltung und Darstellung von Sensorknoten und Projekten** |
 | Hoch      | Die Webapplikation soll eine zentrale Verwaltung der Sensorknoten und Projekte ermöglichen und diese übersichtlich darstellen. |
 | Mittel    | Projekte sollen als zentrale Organisationseinheit für Sensorknoten und Vorlagen verwendet werden. |
-| Mittel    | Sensorknoten-Vorlagen sollen die einheitliche Erfassung von Sensorknoten gewährleisten und bieten die Möglichkeit Sensorknoten-spezifischen Konfiguration. |
+| Hoch      | Sensorknoten-Vorlagen sollen die einheitliche Erfassung von Sensorknoten gewährleisten und bieten die Möglichkeit Sensorknoten-spezifischen Konfiguration. |
 | Hoch      | Sensorknoten sollen anhand von Vorlagen erstellt und mit relevanten Informationen verwaltet werden (z.B. Standort, Kalibrationsdaten). |
 | Optional  | Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können. |
 |           | **Benutzer- und Zugriffsverwaltung** |
@@ -102,8 +102,8 @@ Prioritäten:
 | Hoch      | Erfasste Sensordaten sollen über LoRaWAN und TTN übertragen und per MQTT an das System übertragen werden. |
 | Optional  | Sensordaten sollen nicht nur über MQTT, sondern auch über Webhooks an das Backend gesendet werden können. |
 |           | **Datenpersistenz und -verarbeitung** |
-| Mittel    | Relevante Projektdaten sollen in einem Linked Data Triple Store gespeichert werden. |
-| Mittel    | Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden. |
+| Hoch      | Relevante Projektdaten sollen in einem Linked Data Triple Store gespeichert werden. |
+| Hoch      | Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden. |
 | Mittel    | Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht. |
 | Optional  | Änderungen von Entitäten werden mit Zeitpunkt und Benutzer in einem Logbook im Triple Store gespeichert. |
 
