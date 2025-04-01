@@ -1,11 +1,13 @@
-
-compiler.mip3-cirie1 {
-  reverse_proxy compiler-engine:8000
-  tls internal
+http://mip3-cirie1.tail60817a.ts.net {
+	root * /srv
+	file_server {
+      hide .git
+  }
+  try_files {path} /index.html
 }
 
-mip3-cirie1 {
-  root * /srv
-  try_files {path} /index.html
-  file_server
+http://mip3-cirie1.tail60817a.ts.net/compiler/* {
+  reverse_proxy compiler-engine:8000
+}
+http://mip3-cirie1.tail60817a.ts.net/api/* {
 }
