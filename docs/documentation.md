@@ -348,11 +348,12 @@ The idea would be to create an application that exposes a rest api that can be u
 [17] https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
 
 https://github.com/arduino/arduino-create-agent
-
-
-
-
-
+https://github.com/HelTecAutomation/CubeCell-Arduino
+https://github.com/kaelhem/avrbro
+https://resource.heltec.cn/download/
+https://github.com/arduino/arduino-create-agent/issues/150
+### Frontend webserver and reverse proxy
+It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already has some experience deploying caddy. 
 
 ---
 # Evaluation
