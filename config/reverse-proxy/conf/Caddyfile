@@ -1,0 +1,11 @@
+
+compiler.mip3-cirie1 {
+  reverse_proxy compiler-engine:8000
+  tls internal
+}
+
+mip3-cirie1 {
+  root * /srv
+  try_files {path} /index.html
+  file_server
+}

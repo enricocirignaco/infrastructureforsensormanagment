@@ -29,6 +29,23 @@ services:
       - .env
     restart: unless-stopped
 
+  reverse-proxy:
+    image: caddy:2.9.1
+    container_name: reverse-proxy
+    restart: unless-stopped
+    cap_add:  # improve QUIC speeds
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./config/reverse-proxy/conf:/etc/caddy
+      - ./src/webapp-frontend/www:/srv
+      - ./config/reverse-proxy/_data:/data
+      - ./config/reverse-proxy/_config:/config
+      # - ./config/reverse-proxy/certs:/certs
+
 volumes:
   compiler-engine-source:
     name: compiler-engine-source
