@@ -24,8 +24,13 @@
 | 2025-03-05 | 14:00 - 16:00 | 2,0   | CIRIE1, DEGEL2 | 1,12     | Requirements überarbeiten, Wireframes                             |
 | 2025-03-05 | 16:00 - 18:00 | 2,0   | CIRIE1, DEGEL2 |          | Meeting                                                           |
 | 2025-03-10 | 13:30 - 14:00 | 0,5   | DEGEL2         | 24       | Lokal Setup von Triplestore, MQTT-Broker, Sensor                  |
-| 2025-03-11 | 09:00 - 16:00 | 7,0   | CIRIE1, DEGEL2 | 1,7      | Sprint-Planing, Requirements, Daten-Modell, Compile-Engine Design |
+| 2025-03-11 | 09:00 - 16:00 | 7,0   | CIRIE1, DEGEL2 |1,7,2     | Sprint-Planing, Requirements, Daten-Modell, Compile-Engine Design |
 | 2025-03-12 | 09:00 - 10:00 | 1,0   | CIRIE1, DEGEL2 |          | Meeting                                                           |
+| 2025-03-12 | 12:00 - 16:00 | 4,0   | CIRIE1         | 37, 20   | Proof of concept compile engine, deploying docker images with CICD|
+| 2025-03-13 | 09:00 - 12:00 | 3,0   | CIRIE1         | 20, 16   | Download source code from gitlab and compile with arduino-cli image|
+| 2025-03-18 | 09:00 - 16:00 | 7,0   | CIRIE1         | 21, 23   | Engineering compile rest api, open api documentation              |
+| 2025-03-19 | 12:00 - 16:00 | 4,0   | CIRIE1         | 21, 23   | Engineering compile rest api, open api documentation              |
+| 2025-03-20 | 09:00 - 12:00 | 3,0   | CIRIE1         | 15,25    | integration templating von source code, artifacts cleaning        |
 | 2025-03-12 | 15:30 - 17:30 | 2,0   | DEGEL2         | 18       | Datenmodell konkretisieren in rdf-playground repository           |
 | 2025-03-17 | 09:00 - 11:00 | 2,0   | DEGEL2         | 13       | Evaluation Serialisierungs-Bibliothek                             |
 | 2025-03-17 | 13:00 - 15:00 | 2,0   | DEGEL2         | 13       | Testing von Nanopb                                                |

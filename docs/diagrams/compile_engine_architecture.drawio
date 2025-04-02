@@ -1,0 +1,66 @@
+<mxfile host="Electron" modified="2025-03-26T10:55:47.241Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.6.1 Chrome/112.0.5615.204 Electron/24.6.1 Safari/537.36" etag="X8V4iHGidLlBq76Liemm" version="21.6.1" type="device">
+  <diagram name="Page-1" id="FZzpXEkaSqu192U64kkH">
+    <mxGraphModel dx="1230" dy="1676" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-4" value="Compile Engine" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="450" y="-70" width="810" height="530" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-25" value="Volume Cleaner Container" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="500" width="190" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-26" value="Compile Engine Container" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="760" width="190" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-27" value="Compiler Toolchain Container" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" width="190" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="uF3ZDH1APTc9zOK4VuJD-6" target="uF3ZDH1APTc9zOK4VuJD-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1115" y="350" />
+              <mxPoint x="855" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-6" value="Compile Firmware with arduino-cli" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="123" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="uF3ZDH1APTc9zOK4VuJD-12" target="uF3ZDH1APTc9zOK4VuJD-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-12" value="Prepare Building environment:&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- install new boards&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- install new libraries&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1027.5" y="40" width="172.5" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="uF3ZDH1APTc9zOK4VuJD-14" target="uF3ZDH1APTc9zOK4VuJD-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-14" value="Download Source code from Gitlab" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="123" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-15" value="Make generated files available over REST endpoint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="370" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="uF3ZDH1APTc9zOK4VuJD-23" target="uF3ZDH1APTc9zOK4VuJD-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-23" value="REST API Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="40" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-24" value="&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Periodically delete old artifacts:&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- downloaded source code&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- generated binaries&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;- generated logs&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;" vertex="1" parent="1">
+          <mxGeometry x="510" y="40" width="170" height="97.5" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-10" value="Generate config.h file with configuration information" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="210" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="uF3ZDH1APTc9zOK4VuJD-33" target="uF3ZDH1APTc9zOK4VuJD-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uF3ZDH1APTc9zOK4VuJD-33" value="Build binaries in a dedicated docker container" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="770" y="290" width="170" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

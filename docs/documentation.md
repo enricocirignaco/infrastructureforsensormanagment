@@ -1,8 +1,5 @@
 # Documentation Draft
-## Initial Situation
-//TODO
-## Product deliverables
-//TODO
+---
 ## Project Management
 Project members:
 - Linus Deggen - Developer
@@ -33,7 +30,6 @@ Sprint planing, review and retrospective are not done as separate meetings but a
 Direct push into the main branch are forbidden. Exception can be made for minor modification to markdown files. The rest of the changes have to be made in a "issue-brnach" and after completation the branch can be merged into the main branch with a merge request. A new branch and a merge request for a specific issue can be created directly from the issues page in gitlab.
 
 ## Project Milestones
-
 1. Konzept Phase (3 Wochen)
     - Lösungsvorschläge erstellen
     - Detailreiches Systemdiagramm
@@ -58,17 +54,13 @@ Direct push into the main branch are forbidden. Exception can be made for minor 
 6. Projekt Deadline (2 Wochen)
     - Fokus auf Abschluss der Dokumentation
     - Plakat, Bucheintrag, Präsentation, Film abschliessen
-
 ## Deadlines
 - **Abgabe Book-Eintrag noch unklar**
 - 26.05.25 12:00 Abgabe Poster
 - 12.06.25 18:00 Abgabe Film
 - 12.06.25 18:00 Abgabe Dokumentation
-
 ## Requirements
-
 ### Funktionale Anforderungen
-
 Prioritäten:
 - Hoch
 - Mittel
@@ -115,80 +107,206 @@ Prioritäten:
 ### Abgrenzung
 - Hardware-Identifikation von einzelnen Sensoren um Error-History zu verfolgen
 - Daten-Löschung von nicht gebrauchten Entitäten / Fälschlicherweise erstellt
+---
 
 ## Development
-### Compiler Engine
-#### Container Architecture
-Docker in Docker vs multiple containers approach
-- Docker in Docker: The compiler engine is running inside a docker container and the docker daemon is running inside this container. This approach is not recommended because of security reasons and the complexity of the setup.
-- Multiple containers: The compiler engine is running inside a docker container and the docker daemon is running on the host machine. The docker socket is mounted into the compiler container. This approach is recommended because of the security and the simplicity of the setup.
-#### docker compiler
+### Compile Engine
+The job of the compile engine is to take the source code from a git repository, enrich the source code with additional informations gathered from the user and build the firmware. The firmware is then returned to the user in form of a binary. Additionally if requested by the user a compilation log and the enriched source code will also be provided by the compiler engine. The compiler engine is a dockerized standalone service that can be used through its REST api. The main puspose of this service is to compile arduino source code, but was designed to be able to compile source code with other toolchains as well. The idea is to dokcerize the toolchain needed to compile the source code. Then images for specific toolchains can be built and given over to the compiler engine. This way the compiler engine can be used to compile soource code for many differet projects, like for example, STM32, ESP32, Microchip, etc. Another key feature of this service is that that stores the built binaries for the user to request for them eliminating the need for webhooks or some other sort of asyncronous commuication. At the same time a garbage collector is implemented to delete old binaries that are too old.
+
+#### Service Architecture
+The system is comprised of two always running dokcer containers and a third dokcer container responsible for the compilation. The main service is responsible for providing a REST API with which an user or an external service can communicate with the compile engine and for example start a new build job. The main service must also be able to download the source code from a gitlab repository given the repository link and a valid access token. Also the main serice must be able to enrich the source code via variables provided via the REST request. Finally the main service is responsible for starting the build process in a separate container. By default arduino code must be able to be compiled but there must also be the possibily to interchange the compiler image. The main service is also responsible for storing the compiled binaries and the logs of the compilation process. 
+The second service is the Volume cleaner. This service service starts togehter with the main service and is responsible for deleting old generated and downloaded files. Finally the third container is the compiler toolchain itself. This container is started by the main service and is responsible for compiling the source code. The compiler container is started with a docker command that is provided by the main service. This way the main service can use different compiler images for different projects without having to be modified. 
+![Service Architecture](./images/compile_engine_architecture.svg)
+#### Arduino toolchain
+The main focus of this service is to be able to compile arduino sketches (source code), for this purpose a specific toolchain is needed. An evaluation of the different methods to build arduino sketches into binary files was conducted. The following requirements were identified:
+- **Headless**: The toolchain should be able to run without a GUI and be easyly automated
+- **Docker** compatibility: The toolchain should be able to run inside a docker container
+- **Libraries support**: The toolchain should be able to install libraries from the arduino library manager
+- **Board support**: The toolchain should be able to compile for different boards
+- **Open Source**: If possible the software used be open source and free to use
+
+Several toolchains were considered for compiling Arduino sketches, evaluated based on the previously defined requirements.
+##### Arduino IDE  
+**Pros**:  
+- Official support  
+- Compatible with all Arduino boards and libraries  
+**Cons**:  
+- GUI-based  
+- Not suitable for automation or Docker environments [1]  
+
+##### PlatformIO  
+**Pros**:  
+- Powerful and cross-platform  
+- Supports many boards and frameworks beyond Arduino  
+**Cons**:  
+- Primarily designed for interactive development  
+- Complex setup  
+- Limited headless and Docker support without workarounds [2]  
+
+##### Arduino CLI  
+**Pros**:  
+- Official headless toolchain  
+- Designed for automation  
+- Supports board and library management  
+- Easy Docker integration [3]  
+**Cons**:  
+- Limited advanced build customization compared to PlatformIO  
+
+##### Makefile-based Toolchains (e.g., Arduino-Makefile)  
+**Pros**:  
+- Lightweight  
+- Fully customizable  
+- Docker-friendly [4]  
+**Cons**:  
+- Manual setup for boards and libraries  
+- Lacks official support  
+- Higher maintenance  
+
+##### References
+[1] Arduino, “Arduino IDE,” [Online]. Available: https://www.arduino.cc/en/software  
+[2] PlatformIO, “PlatformIO Documentation,” [Online]. Available: https://docs.platformio.org  
+[3] Arduino, “Arduino CLI,” [Online]. Available: https://arduino.github.io/arduino-cli  
+[4] Sudar, “Arduino Makefile,” [Online]. Available: https://github.com/sudar/Arduino-Makefile  
+
+Arduino-cli was choosen because of its official support, easy docker integration and the support for board and library management. The limited support advanced features are not needed for the scope of this project. Once that the main toolchain was definted a research had to be made to look into the best way to dockerize the toolchain. After a brief search on docker hub and github several images for arduino-cli were found. Saddly non of them were akltively mantained. The best maintained project found by the research was the solarbotics/arduino-cli on dokcer hub that was not updated for more than 2 years. This was unaccettable and thus was decided to build a new image from scratch. This move also enabled the developers to ensure compability and control over the enviroment.
+
 The main compiler container is based on the arduino-cli software and its used to comppile arduino sketches. This container/image should be interchangeable with other toolchain images. For this reason the docker command used to start the compilation should follow a specified structure so that those images can be interchanged and compiler engine itself will still works correctly.
-Docker command structure:
+##### Docker Image
+As base image **debian:stable-slim** was choosen because the developers have already experience with debian and the stable-slim tag offers a good compromise between size and stability. To install arduino-cli the official documentation was followed.[Docs](https://docs.arduino.cc/arduino-cli/installation/). The steps described in the official documentation made use of the linux utility *curl*. This utility is not available in the slim version of debian and thus instructions to install *curl* before installing arduino-cli had to be added to the Dockerfile.
+After the installation the apt repositories and also curl were deleted to keep the size of the image to a minimum. Folders where while using the image volumes are mounted were created and the entrypoint was set to return the arduino-cli version. The entrypoint can be overwritten by the user to run the right arduino-cli command.
+Lastly a minimal toolchain configuration was done. This was done after studying the COnfiguration keys described in the [official documentation](https://docs.arduino.cc/arduino-cli/configuration/). The exact configuration can be directly read from the Dockerfile.
+At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project. The dokcer image can be used with the following command structure:
 ```bash
 docker run --rm \
-  -v path_to_source_code:/source \
-  -v path_to_output_folder:/output \
-  -v path_to_logs:/logs \
-  -v path_to_cache:/cache \
+  -v <path_to_source_code>:/source \
+  -v <path_to_output_folder>:/output \
+  -v <path_to_logs>:/logs \
+  -v <path_to_cache>:/cache \
   image:tag \
   compile_command
 ```
 - source code folder: is the folder where the source code is located
-- output folder: is the folder where the compiled binaries are stored (this files are then returned over REST)
-- config folder: is the folder where the configuration files that can be used to fine tune the compilation process are stored
-- logs folder: is the folder where the logs of the compilation process are stored, this logs can be returned in case of an error instead of the binaries
-**Arduino cli commands needed to compile**:
+- output folder: is the folder where the compiled binaries will be stored
+- logs folder: is the folder where the logs of the compilation process are stored
+- cache folder: is the folder where the cache of the toolchain is stored to allow faster repeated compilation
+If a custom image for another toolchain has to be made it has to follow this command structure. This allow the main service to use different toolchains for different projects without having to to be modified.
+##### Docker Compile Command
+A dockerized arduino-cli enviroment was succeffully built, but at the moment can only return the version of the arduino-cli programm. The next step is to build the docker command that will be used to compile the source code. Variables should be used extensively to be able to integrate this command in the main service and compile all possible source code.
+**Example command to compile arduino source code**:
 ```bash
-arduino-cli core install ${BOARD_CORE}
-arduino-cli lib install ${LIBRARY_LIST}
-arduino-cli core update-index
+mkdir -p /cache/boards /cache/arduino && \
+arduino-cli core install $BOARD_CORE && \
+arduino-cli lib install $LIBRARY_LIST && \
+arduino-cli core update-index && \
 arduino-cli compile \
-  --fqbn ${BOARD_CORE}:${BOARD} \
-  --output-dir /output/${COMPILATION_TAG} \
-  --log /logs/${COMPILATION_TAG}.log \
+  --fqbn $BOARD_CORE:$BOARD \
+  --output-dir $OUTPUT_FOLDER \
+  --log $LOG_FOLDER \
   --verbose \
-  /source/${SKETCH_NAME}
+  $SOURCE_FOLDER
 ```
-Env Variables:
-- BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand)
-- LIBRARY_LIST: A list of libraries that are needed to compile the source code
-- BOARD: The board that the firmware is for
-- COMPILATION_TAG: A tag that is used to identify the compilation job
-- SKETCH_NAME: The name of the source folder that should be compiled
+The following variables are used:
+- BOARD_CORE: The core of the board that the firmware is for (need to be installed beforehand). FOr example arduino:avr or esp32:esp32.
+- LIBRARY_LIST: A list of libraries that are used in the source code and need to be installed beforehand.
+- BOARD: The board that the firmware is for. For example uno or nodemcu.
+- OUTPUT_FOLDER: The folder where the compiled binaries will be stored.
+- LOG_FOLDER: The folder where the logs of the compilation process are stored.
+- SOURCE_FOLDER: The folder where the source code is located.
+The command above can be used to compile arduino source code manually but in a cli enviroment. The next step is to be able to use this command from within the main application.
+#### Main Compiler Engine Service
+After source code could successfully be built using the toolchain image made available in the gitlab registry of the project, a main service responsible for managing the compilation process was developed. The service consists of a docker container running two python script. One is used as garbage collector to delete old generated files and the other is the main service implementing a REST API that enable the user or another service to interface with the compiler engine service.
+##### REST Frameworks Evaluation
+To implement a simple REST service, several technologies were evaluated, focusing on performance, ease of use, community support, and Docker compatibility. While the programming language was not a strict requirement, the development team is comfortable with Python, Java, Rust, and JavaScript. The following frameworks were considered:
 
-Possible compilation command:
-```python
-# Define the compile command with variables using f-string for interpolation
-compile_command = f"""bash -c "
-    mkdir -p /cache/boards /cache/arduino && \
-    arduino-cli core install {BOARD_CORE} && \
-    arduino-cli lib install {LIBRARY_LIST} && \
-    arduino-cli core update-index && \
-    arduino-cli compile \
-    --fqbn {BOARD_CORE}:{BOARD} \
-    --output-dir /output/{COMPILATION_TAG} \
-    --log-file /logs/{COMPILATION_TAG}.log \
-    --verbose \
-    /source/{SKETCH_NAME}
-" """
+###### Express.js (JavaScript)  
+**Pros**:
+- Lightweight and minimalistic  
+- Large ecosystem and community  
+- Fast prototyping  
+**Cons**:
+- Lacks built-in type safety  
+- Requires manual setup for validation and documentation [1]
 
-# Running the command inside the Docker container
-container_output = client.containers.run(
-            "registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/arduino-compiler:latest",
-            compile_command,
-            volumes={
-                "compiler-engine-source": {"bind": "/source", "mode": "rw"},
-                "compiler-engine-output": {"bind": "/output", "mode": "rw"},
-                "compiler-engine-logs": {"bind": "/logs", "mode": "rw"},
-                "compiler-engine-cache": {"bind": "/root/.arduino15", "mode": "rw"}
-            },
-            remove=True,
-            detach=False
-        )
+###### Spring Boot (Java)  
+**Pros**:
+- Enterprise-grade features  
+- Mature ecosystem and tooling  
+- Built-in validation and dependency injection  
+**Cons**:
+- Heavy for simple services  
+- Slower startup time [2]
+
+###### Actix-Web (Rust)  
+**Pros**:
+- High performance and low memory usage  
+- Strong type safety  
+**Cons**:
+- Steep learning curve  
+- Smaller ecosystem  
+- Tooling not as mature [3]
+
+###### FastAPI (Python)  
+**Pros**:
+- Simple and clean syntax  
+- Automatic OpenAPI documentation  
+- Asynchronous by default  
+- Strong typing with Pydantic  
+- Fast development cycle  
+**Cons**:
+- Slightly slower than Actix or Spring in raw performance [4]
+
+FastAPI was ultimately chosen due to its excellent balance of developer ergonomics, async support, built-in documentation, and suitability for quick iteration. It aligned well with the team's Python experience and the simplicity of the service.
+###### References
+[1] Express, “Express - Node.js web application framework,” [Online]. Available: https://expressjs.com  
+[2] Spring, “Spring Boot,” [Online]. Available: https://spring.io/projects/spring-boot  
+[3] Actix Project, “Actix Web,” [Online]. Available: https://actix.rs  
+[4] FastAPI, “FastAPI - The modern Python web framework,” [Online]. Available: https://fastapi.tiangolo.com  
+
+FastAPI is very straightforward to use, a simple dockerfile was written that used python:3.10-slim as a base image and then fast api dependencies were installed with pip and filally the main script was copied into the image. Note that is not advised to use the *latest* when choosing the base image because new versions can introduce braking changes to the system. Before an API specification could be written using the OpenAPI stadard, some experimenting had to be done to understand how the FastAPI framework works and how this could be integrated with the compiler toolchain.
+##### DinD vs Docker Socket Binding
+To enable the main Python script to spawn a Docker container for the compiler engine, two primary approaches were considered: Docker-in-Docker (DinD) and Docker socket binding. DinD runs a full Docker daemon inside a container, allowing full isolation and independence from the host’s Docker engine. However, it introduces significant complexity, requires privileged mode, and suffers from stability issues in production environments. In contrast, Docker socket binding mounts the host’s Docker socket (/var/run/docker.sock) into the container, allowing it to control the host Docker daemon directly. While this approach is simpler and more performant, it poses serious security risks: any process inside the container can fully control the host Docker engine, effectively granting root access to the host. Given these trade-offs, Docker socket binding was chosen for its simplicity and lower resource overhead, with the understanding that it must only be exposed to trusted code and isolated carefully from untrusted input. In a later phase of the project, a detailed risk assessment should be conducted to fully evaluate and mitigate the risk of infrastructure compromise. This security analysis is considered out of scope for the current implementation.
+##### What is Docker Socket Binding?
+Docker exposes its API via a Unix domain socket located at `/var/run/docker.sock`. By **binding** this socket (i.e., mounting it into a container or making it accessible to a local script), an application can communicate directly with the Docker daemon on the host.
+This allows any client with access to the socket to perform operations such as:
+- Running new containers  
+- Stopping or removing containers  
+- Building images  
+- Accessing container logs  
+This is the same interface used by the `docker` CLI and the official Docker SDKs.
+Using the official Docker SDK for Python (docker-py), the script can create a new container on the host system as follows:
+``` python
+import docker
+
+client = docker.from_env()
+client.containers.run("alpine", ["echo", "hello world"])
 ```
+###### Open API Specification
+After the experimental phase was completed and a profe of concept was developed, the next step was to write the OpenAPI specification for the REST API. The OpenAPI specification is a standard for defining RESTful APIs, providing a machine-readable description of the API's endpoints, request/response formats, and authentication requirements. This specification can be used to generate documentation, client libraries, and server stubs automatically. The FastAPI framework natively supports OpenAPI, automatically generating code and documentation based on the specification. Great care was taken to ensure the specification was accurate and complete, as it would serve as the primary reference for the API's behavior and capabilities. Several iterations were needed in order to define a capable and user-friendly API that met the project's requirements. The following endpoints were defined in the OpenAPI specification:
+- POST /build: initiate a standard build job
+- POST /generic-build: initiate a custom build job
+- GET /job/{job_id}/status: retrieve the status of a build job
+- GET /job/{job_id}/artifacts: retrieve the artifacts of a build job
+After the specification was written a FastAPI basic framework was generated from the specification. Of course the business logic and additional functions had to be written manually by the developers.
+Pydantic played a key role in defining the request and response schemas used by the REST API. It is a data validation and parsing library that uses Python type hints to enforce strict structure and types for incoming and outgoing data. FastAPI integrates Pydantic natively, allowing developers to define models that serve as both documentation and validation logic. This significantly reduced the risk of inconsistent or ambiguous API behavior, as each endpoint's inputs and outputs were explicitly defined and validated at runtime. Additionally, Pydantic models are automatically included in the OpenAPI schema, ensuring that the documentation and actual implementation remain synchronized. This helped streamline the development process and allowed for faster iteration on the API design.
+##### Source code download from Gitlab
+The source code to compile should be automatically gathererd by the compile service from gitlab using the gitlab API. The main service can access the source code using an access token. The *archive* endpoint was used to return a zip file of only the specific folder in which the source code is located. This avoid cloning the whole repository with its history and reduce the time needed to download the source code. This endpoint of the gitlab api also supports specifying a specific version of the code by specifynig a *sha* value. The *sha* value can be a commit hash, a branch name or a tag name. GitLab’s archive endpoint doesn’t necessarily validate the sha strictly. If you provide an invalid sha, GitLab will often default to the repository’s default branch when generating the archive. This can lead to confusion and should be taken into account when using the compile service.
+The main service use a group access token to access source code and the docker registry. This means that all repositories in the group can be accessed by the service and thus all project that have to be compile with the default compiler must be in the same group as this project: **InternetOfSoils**. To compile source code that is not part of this group the custom endpoint should be used. With this enpoint the access token can be specified along with the repository url.
+##### Integration of additional metadata
+A key requirement of the compiler engine is to enrich the source code with additional metadata before compilation. This metadata includes but should not be limited to TNN identification values and Firmware UUID. The idea is that body of compile endpoint has an optional *config* parameter. This is an array of key value pairs. The key is the name of the variable that has to be replaced in the source code and the value is the value of the variable. This way maximum flexibility is achieved if the more variables need to be set dynamically at compile time. The json body of the REST request is then parsed and a *config.h* file is generated. This file is then copied into the source code folder and its included in the main source file by  adding the line at the beginning of the file:
+```c
+#include "config.h"
+```
+This changes are not saved back into the repository but the source code with the changes can be downloaded using the right REST endpoint.
+#### Volume cleaner service
+The generated data should be provided for a give period by the Compiler Service. When this period has ellapsed it can't be garantied anymore by the service that the data is still available. For the purpose of deleting old generated data the volume cleaner service was developed. This is a simple python script running in a docker container that is started when the main service is started. This service run a check on all the following vomus once an hour: *output*, *logs* and *cache*. If the files in the volume are older than the specified time the files are deleted. A logfile is created in the logs volume to keep track of the deleted files and abviously it ignored by the cleaning service. The time after which the files are deleted and the check interval can be set with enviroment variables.
 
 
+
+
+
+
+
+---
 # Evaluation
 
 ## Binäre Serialisierung
@@ -214,3 +332,5 @@ Auch effizient bei grösseren Datenmengen. Die Nachrichten sind read-only, könn
 
 ### Resultat
 Es wird Protobufs (und Nanopb auf dem Board) eingesetzt. Der Standard wir gut unterstützt und die Code-Integration sollte einfach sein. Das Schema liegt in einem textuellen Format vor, welches einfach generiert werden kann. Es ist darauf ausgelegt mit wenig Overhead kleine Mengen an Daten zu übermitteln und der Einhaltung eines Schemas. Das ist genau unser Use-Case.
+
+

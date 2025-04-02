@@ -1,0 +1,40 @@
+services:
+  compiler-engine:
+    container_name: compiler-engine
+    build:
+      context: src/compiler-engine
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-logs:/logs
+      - compiler-engine-cache:/cache
+    env_file:
+      - .env
+  volumes-cleaner:
+    build:
+      context: src/volumes-cleaner
+      dockerfile: Dockerfile
+    container_name: volumes-cleaner
+    volumes:
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-logs:/logs
+      - ./src/compiler-engine/app/cleaner.py:/app/cleaner.py
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  compiler-engine-source:
+    name: compiler-engine-source
+  compiler-engine-output:
+    name: compiler-engine-output
+  compiler-engine-logs:
+    name: compiler-engine-logs
+  compiler-engine-cache:
+    name: compiler-engine-cache
