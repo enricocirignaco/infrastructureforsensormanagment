@@ -30,7 +30,9 @@ services:
     restart: unless-stopped
 
   reverse-proxy:
-    image: caddy:2.9.1
+    build:
+      context: .
+      dockerfile: src/webapp-frontend/Dockerfile
     container_name: reverse-proxy
     restart: unless-stopped
     cap_add:  # improve QUIC speeds
@@ -40,13 +42,14 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./config/reverse-proxy/conf:/etc/caddy
-      - ./src/webapp-frontend/www:/srv
-      - ./config/reverse-proxy/_data:/data
-      - ./config/reverse-proxy/_config:/config
-      # - ./config/reverse-proxy/certs:/certs
+      - reverse-proxy-conf:/etc/caddy
+      - reverse-proxy-data:/data
+      - reverse-proxy-config:/config
 
 volumes:
+  reverse-proxy-conf:
+  reverse-proxy-data:
+  reverse-proxy-config:
   compiler-engine-source:
     name: compiler-engine-source
   compiler-engine-output:
