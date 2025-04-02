@@ -375,9 +375,8 @@ The application can be built with the following command: `npm run build`. This w
     outDir: '../www',
   },
 ```
-This folder has then to be added to the gitignore file because should not be version controlled.
-
-```caddy
+For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
+The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
 # Evaluation
 
 ## Binäre Serialisierung
