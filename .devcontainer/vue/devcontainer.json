@@ -1,0 +1,17 @@
+{
+  "name": "vue-dev-container",
+  "image": "node:lts",
+  "runArgs": ["-p", "5173:5173"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Vue.volar",
+        "esbenp.prettier-vscode",
+        "GitHub.copilot"
+      ]
+    }
+  }
+}
+// npm install
+// npm run dev -- --host 0.0.0.0
+// npm run format (if prettier is installed)

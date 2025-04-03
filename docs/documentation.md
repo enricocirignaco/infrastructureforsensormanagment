@@ -299,14 +299,84 @@ A key requirement of the compiler engine is to enrich the source code with addit
 This changes are not saved back into the repository but the source code with the changes can be downloaded using the right REST endpoint.
 #### Volume cleaner service
 The generated data should be provided for a give period by the Compiler Service. When this period has ellapsed it can't be garantied anymore by the service that the data is still available. For the purpose of deleting old generated data the volume cleaner service was developed. This is a simple python script running in a docker container that is started when the main service is started. This service run a check on all the following vomus once an hour: *output*, *logs* and *cache*. If the files in the volume are older than the specified time the files are deleted. A logfile is created in the logs volume to keep track of the deleted files and abviously it ignored by the cleaning service. The time after which the files are deleted and the check interval can be set with enviroment variables.
+### Firmware Flashing
+A strategy for flashing the compiled firmware on the hardware should be developed. The hardware used thougout the project is the CubeCell – AB01 Dev-Board (V2) based on the ASR6502 Chip made by the cinese company heltec.[9] The board can act as a LoRa Node and it is fully arduino compatible. The board comes with a bootloader preinstalled so that it can be programmed via USB/Serial interface just like an arduino board.
+#### Requirements
+- The compilation process should be as straightforward as possible because the user most likely has no technical experience.
+- **If possible**:The firmware should be flashed on the hardware without the need of any additional software. (irectly over the browser).
+- In case the adopted solution (via browser) requires internet connection, an alternative solution that works offline should be also provided.
+#### Research
+After reading the poorly documented documentation of the CubeCell board if was discovered that neigher the bootloader that works with the arduino enviroment nor the utility to flash the arduino code on the board are open source. Only their binaries are provided. This complicate the work of the developers a lot.
+As described here [10] the Cubecell in question supports two different bootloaders, one of them is arduino compatible but as can be seen from the screenshoot on the same page this bootloader is closed source and it's not avalable to the public. Different issues on the matter were already started on github like this [11]. In this gitlab issue[12] someone is even accusing Heltec of misusing the GCC compiler that is under GPL license. So it's clear that this company is not interrested in open sourcing it's development tools and thus aworkaround should be found.
+To better understand what exactly it's missing to be able to flash a firmware on the cubecell board the compilation and flashing process via the arduino IDE was closely investigated. Before any code can be compiled for this board the Hardware-specific files must be installed to the Arduino IDE using its board manager. The Board manange does nothing else than downloading the content of the following gitlab repository [13]. By getting a look at the get.py file in the tools folder the following line can be seen:
+```python
+tools_to_download = load_tools_list(current_dir + '/../package/package_CubeCell_index.template.json', identified_platform)
+```
+This hints that the links to the files to be downloaded are in the package_CubeCell_index.template.json file.
+In this json file multiple url pointing to a download server hosted by heltec automation can be found. As for example:
+```json
+    "url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0-BoardManager.zip",
+```
+This file server reveal interesting findings over what's available for download for the users. Not only that by multiple PDFs are scattered all over the place with maybe usefull information.
+
+As far as understood ( not official documentation was found) there are three propetary tools that are used by the arduino IDE to compile and flash the firmware on the board:
+- **CubeCellelftool**: it's used to convert the hex file compiled by the gcc / arduino IDE to a 
+- **CubeCellflash**: This tool is usedd to flash boards with a ASR650x series chip [14]
+- **flash6601**: This tool is used to flash boards with a ASR6601 series chip [14]
+Those tools are provided as binaries for linux and macos and as exe for windows but only for x86 CPU architecture. Additionally a arm binary compatible with raspberry Pi is provided for the CubeCellflash utility.
+There is some sparse informations on how to use those tools in different forum posts like this[15] and this [16] but no official documentation was found. The exact usage can be reverse engineered by looking enabling verbose logging in the arduino IDE and trying to compile and flash a test firmware on the board.
+<!-- write here your findings with arduino ide -->
+
+Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
+
+Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[17]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
+If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
+
+The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
 
 
 
+#### References
+[9]  https://heltec.org/project/htcc-ab01-v2/
+[10] https://docs.heltec.org/en/node/asr650x/htcc_am01/programming_cubecell.html
+[11] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/80
+[12] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/281
+[13] https://github.com/HelTecAutomation/CubeCell-Arduino/tree/master
+[14] http://community.heltec.cn/t/cubecell-download-tool-for-raspberry-pi/2522/12
+[15] http://community.heltec.cn/t/cubecellflash-tool/1953/3
+[16] http://community.heltec.cn/t/cubecell-firmware-upload/1063
+[17] https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
 
+https://github.com/arduino/arduino-create-agent
+https://github.com/HelTecAutomation/CubeCell-Arduino
+https://github.com/kaelhem/avrbro
+https://resource.heltec.cn/download/
+https://github.com/arduino/arduino-create-agent/issues/150
+### Frontend webserver and reverse proxy
+It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Thus is was decided to separate this two components. This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
+After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
+#### Frontend Framework
+It was clear from the beginning that a frontend framework should be used for the development of the web application. Modern frameworks are:
+- React: 
+    - upsides: popular, large community, many libraries and tools available, good documentation
+    - downsides: large bundle size, complex state management, steep learning curve
+- Vue: 
+    - upsides: easy to learn, good documentation, small bundle size, good performance
+    - downsides: smaller community than React, less libraries and tools available
+- Angular:
+    - upsides: large community, good documentation, many libraries and tools available, good performance
+    - downsides: large bundle size, complex state management, steep learning curve
 
-
-
----
+The team was already leaning toward Vue but the fact than one team member cover Vue in the "Javascript Frameworks" class made the decision easier. Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
+#### Deployment
+The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
+```javascript
+  build: {
+    outDir: '../www',
+  },
+```
+For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
+The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
 # Evaluation
 
 ## Binäre Serialisierung

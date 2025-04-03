@@ -1,0 +1,13 @@
+http://mip3-cirie1.tail60817a.ts.net {
+	root * /srv
+	file_server {
+      hide .git
+  }
+  try_files {path} /index.html
+}
+
+http://mip3-cirie1.tail60817a.ts.net/compiler/* {
+  reverse_proxy compiler-engine:8000
+}
+http://mip3-cirie1.tail60817a.ts.net/api/* {
+}
