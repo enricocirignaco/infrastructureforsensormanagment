@@ -55,14 +55,15 @@ services:
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
     env_file:
-      - .env
+      - .env-mosquitto
     entrypoint: ["/mosquitto/config/start-env.sh"]
+
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
-    restart: unless-stopped
     ports:
       - "3030:3030"
+    restart: unless-stopped
     volumes:
       - fuseki-data:/fuseki
     environment:
