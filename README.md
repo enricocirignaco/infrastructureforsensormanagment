@@ -15,8 +15,9 @@ Fuseki: **.env-fuseki** to define the admin password of the triplestore
 ADMIN_PASSWORD=
 ```
 
-Influxdb: **.env-influxdb** to define the admin password of the tsdb
+Influxdb: **.env-influxdb** to define the username and password (admin) of the tsdb
 ```
+DOCKER_INFLUXDB_INIT_USERNAME=
 DOCKER_INFLUXDB_INIT_PASSWORD=
 ```
 

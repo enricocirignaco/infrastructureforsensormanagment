@@ -1,6 +1,6 @@
 {
   "end_device_ids": {
-    "device_id": "cubecell-1",
+    "device_id": "",
     "application_ids": {
       "application_id": "internet-of-soils-playground"
     },
@@ -11,7 +11,7 @@
   "correlation_ids": [
     "gs:uplink:01JPQ0BQAY87FG2H7CQ1EAGETP"
   ],
-  "received_at": "2025-03-19T10:49:35.020175858Z",
+  "received_at": "",
   "uplink_message": {
     "session_key_id": "AZWt2wnUyDIkdjhij7UBwQ==",
     "f_port": 1,

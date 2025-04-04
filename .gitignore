@@ -5,11 +5,9 @@
 
 **/.env
 **/.env-*
+!**/.env-*.example
 **/*.pem
 
 **/__pycache__/
-
-# This file gets populated with the TTN password
-src/mqtt-broker/mosquitto.conf
 
 src/webapp-frontend/www/
