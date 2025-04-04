@@ -8,8 +8,8 @@ This command downloads the ISRG Root X1 certificate to ensure secure TLS/SSL com
 wget https://letsencrypt.org/certs/isrgrootx1.pem -O ttn-ca.pem
 ```
 
-## Configure .env
-In the main folder of this project, the following two variables have to be set in the  **.env** file:
+## Configure .env-mosquitto
+In the main folder of this project, the following two variables have to be set in the  **.env-mosquitto** file to authenticate against the TTN MQTT-broker:
 ```
 TTN_USERNAME=
 TTN_PASSWORD=

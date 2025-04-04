@@ -122,4 +122,3 @@ volumes:
     name: fuseki-data
   influxdb-data:
     name: influxdb-data
-

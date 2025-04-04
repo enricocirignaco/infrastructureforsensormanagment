@@ -7,6 +7,26 @@
 ## Protocols
 Meetings protocols can be found in this [directory](./docs).
 
+## Env Files
+The following **.env** files are needed in this directory to populate the compose.yaml with mostly passwords.
+
+Fuseki: **.env-fuseki** to define the admin password of the triplestore
+```
+ADMIN_PASSWORD=
+```
+
+Influxdb: **.env-influxdb** to define the admin password of the tsdb
+```
+DOCKER_INFLUXDB_INIT_PASSWORD=
+```
+
+Mosquitto: **.env-mosquitto** to authenticate against the TTN MQTT-broker
+```
+TTN_USERNAME=
+TTN_PASSWORD=
+
+```
+
 ## How to merge a feature branch
 > **_IMPORTANT:_** The feature branch must be updated with main before merging!
 #### Update feature branch with main
