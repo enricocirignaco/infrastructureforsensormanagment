@@ -28,7 +28,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
-
   reverse-proxy:
     build:
       context: .
@@ -45,6 +44,64 @@ services:
       - reverse-proxy-conf:/etc/caddy
       - reverse-proxy-data:/data
       - reverse-proxy-config:/config
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0.21
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    restart: unless-stopped
+    volumes:
+      - ./mqtt-broker:/mosquitto/config
+      - mqtt-broker-data:/mosquitto/data
+      - mqtt-broker-logs:/mosquitto/log
+    env_file:
+      - .env
+    entrypoint: ["/mosquitto/config/start-env.sh"]
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki-triplestore
+    restart: unless-stopped
+    ports:
+      - "3030:3030"
+    volumes:
+      - fuseki-data:/fuseki
+    environment:
+      - ENABLE_DATA_WRITE=true
+      - ENABLE_UPDATE=true
+      - ENABLE_SHACL=false # Used for rdf-structure validation
+      - TDB=2
+      - FUSEKI_DATASET_1=core # Creates empty dataset with given name
+      - FUSEKI_DATASET_2=testing
+    env_file:
+      - .env-fuseki
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_ORG=bfh
+      - DOCKER_INFLUXDB_INIT_BUCKET=default
+    env_file:
+      - .env-influxdb
+  ttn-mock:
+    build: src/ttn-mock
+    container_name: ttn-mock
+    restart: unless-stopped
+    depends_on:
+      - mqtt-broker
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
+      - PUBLISH_INTERVAL_SEC=5
+      - PYTHONUNBUFFERED=1
+
 
 volumes:
   reverse-proxy-conf:
@@ -58,3 +115,12 @@ volumes:
     name: compiler-engine-logs
   compiler-engine-cache:
     name: compiler-engine-cache
+  mqtt-broker-data:
+    name: mqtt-broker-data
+  mqtt-broker-logs:
+    name: mqtt-broker-logs
+  fuseki-data:
+    name: fuseki-data
+  influxdb-data:
+    name: influxdb-data
+

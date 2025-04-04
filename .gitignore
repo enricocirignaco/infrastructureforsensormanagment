@@ -2,5 +2,11 @@
 **/.DS_Store
 **/.$*.bkp
 **/.$s*.dtmp
-.env
+
+**/.env
+**/*.pem
+
+# This file gets populated with the TTN password
+mqtt-broker/mosquitto.conf
+
 src/webapp-frontend/www/
