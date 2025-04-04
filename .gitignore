@@ -7,6 +7,8 @@
 **/.env-*
 **/*.pem
 
+**/__pycache__/
+
 # This file gets populated with the TTN password
 mqtt-broker/mosquitto.conf
 

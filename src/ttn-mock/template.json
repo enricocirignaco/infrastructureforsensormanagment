@@ -1,0 +1,91 @@
+{
+  "end_device_ids": {
+    "device_id": "cubecell-1",
+    "application_ids": {
+      "application_id": "internet-of-soils-playground"
+    },
+    "dev_eui": "1111111111111111",
+    "join_eui": "0000000000000000",
+    "dev_addr": "11111111"
+  },
+  "correlation_ids": [
+    "gs:uplink:01JPQ0BQAY87FG2H7CQ1EAGETP"
+  ],
+  "received_at": "2025-03-19T10:49:35.020175858Z",
+  "uplink_message": {
+    "session_key_id": "AZWt2wnUyDIkdjhij7UBwQ==",
+    "f_port": 1,
+    "f_cnt": 8,
+    "frm_payload": "",
+    "rx_metadata": [
+      {
+        "gateway_ids": {
+          "gateway_id": "hb9ono-gw-1-port",
+          "eui": "A840411EDE256255"
+        },
+        "time": "2025-03-19T10:49:34.787994Z",
+        "timestamp": 2947556851,
+        "rssi": -123,
+        "channel_rssi": -123,
+        "snr": -4.2,
+        "location": {
+          "latitude": 47.11235527,
+          "longitude": 7.25045339,
+          "altitude": 492,
+          "source": "SOURCE_REGISTRY"
+        },
+        "uplink_token": "Ch4KHAoQaGI5b25vLWd3LTEtcG9ydBIIqEBBHt4lYlUQ88vA/QoaDAi+wuq+BhDY17GDAyC4+tDA5Iy8Ag==",
+        "channel_index": 2,
+        "received_at": "2025-03-19T10:49:34.791753460Z"
+      },
+      {
+        "gateway_ids": {
+          "gateway_id": "bfh-biel-hoehenweg",
+          "eui": "00800000A000003F"
+        },
+        "time": "2025-03-19T14:56:11.127148Z",
+        "timestamp": 871087531,
+        "rssi": -106,
+        "channel_rssi": -106,
+        "snr": 6.2,
+        "location": {
+          "latitude": 47.1426073,
+          "longitude": 7.2434501,
+          "altitude": 500,
+          "source": "SOURCE_REGISTRY"
+        },
+        "uplink_token": "CiAKHgoSYmZoLWJpZWwtaG9laGVud2VnEggAgAAAoAAAPxCr+66fAxoMCL7C6r4GELyo04kDIPjH84atwHA=",
+        "channel_index": 2,
+        "received_at": "2025-03-19T10:49:34.825545788Z"
+      }
+    ],
+    "settings": {
+      "data_rate": {
+        "lora": {
+          "bandwidth": 125000,
+          "spreading_factor": 7,
+          "coding_rate": "4/5"
+        }
+      },
+      "frequency": "868500000",
+      "timestamp": 2947556851,
+      "time": "2025-03-19T10:49:34.787994Z"
+    },
+    "received_at": "2025-03-19T10:49:34.815284030Z",
+    "consumed_airtime": "0.056576s",
+    "version_ids": {
+      "brand_id": "heltec",
+      "model_id": "cubecell-dev-board-class-a-otaa",
+      "hardware_version": "_unknown_hw_version_",
+      "firmware_version": "1.0",
+      "band_id": "EU_863_870"
+    },
+    "network_ids": {
+      "net_id": "000013",
+      "ns_id": "EC656E0000000181",
+      "tenant_id": "ttn",
+      "cluster_id": "eu1",
+      "cluster_address": "eu1.cloud.thethings.network"
+    }
+  }
+}

@@ -51,7 +51,7 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./mqtt-broker:/mosquitto/config
+      - ./src/mqtt-broker:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
     env_file:
