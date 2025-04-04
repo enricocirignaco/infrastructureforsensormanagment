@@ -47,9 +47,9 @@ services:
   mqtt-broker:
     image: eclipse-mosquitto:2.0.21
     container_name: mqtt-broker
+    restart: unless-stopped
     ports:
       - "1883:1883"
-    restart: unless-stopped
     volumes:
       - ./mqtt-broker:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
@@ -57,13 +57,12 @@ services:
     env_file:
       - .env-mosquitto
     entrypoint: ["/mosquitto/config/start-env.sh"]
-
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
+    restart: unless-stopped
     ports:
       - "3030:3030"
-    restart: unless-stopped
     volumes:
       - fuseki-data:/fuseki
     environment:
@@ -102,7 +101,6 @@ services:
       - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
       - PUBLISH_INTERVAL_SEC=5
       - PYTHONUNBUFFERED=1
-
 
 volumes:
   reverse-proxy-conf:
