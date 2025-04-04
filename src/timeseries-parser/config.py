@@ -6,7 +6,7 @@ MQTT_TOPIC = os.getenv('MQTT_TOPIC', 'mock-v3/internet-of-soils-playground@ttn/d
 
 FUSEKI_ENDPOINT = os.getenv('FUSEKI_ENDPOINT', 'http://localhost:3030/testing/update')
 FUSEKI_USER = os.getenv('FUSEKI_USER', 'admin')
-FUSEKI_PASSWORD = os.getenv('FUSEKI_PASSWORD', 'admin1234')
+FUSEKI_PASSWORD = os.getenv('FUSEKI_PASSWORD', '')
 
 INFLUX_URL = os.getenv('INFLUX_URL', 'http://localhost:8086')
 INFLUX_TOKEN = os.getenv('INFLUX_TOKEN', '')
