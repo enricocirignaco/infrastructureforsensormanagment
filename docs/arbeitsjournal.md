@@ -37,3 +37,10 @@
 | 2025-03-18 | 10:00 - 14:00 | 4,0   | DEGEL2         | 33       | Nanopb Integration in Dummy Projekt                               |
 | 2025-03-19 | 09:00 - 12:00 | 3,0   | DEGEL2         | 40       | MQTT-Broker Bridge für TTN konfigurieren                          |
 | 2025-03-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting                                                           |
+| 2025-03-25 | 09:00 - 15:00 | 6,0   | DEGEL2         |          | Linked Data Entities, Protobuf                                    |
+| 2025-03-26 | 10:00 - 15:00 | 5,0   | DEGEL2         | 28, 40   | Docker Setup                                                      |
+| 2025-04-02 | 09:00 - 13:00 | 4,0   | DEGEL2         | 24       | TTN Mock, Mosquitto Setup                                         |
+| 2025-04-03 | 09:30 - 12:30 | 3     | CIRIE1, DEGEL2 |          | Sprint Planning                                                   |
+| 2025-04-03 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting                                                           |
+| 2025-04-04 | 09:00 - 12:00 | 3     | DEGEL2         | 29, 40   | Resolve Merge Request, Improve timeseries parser                  |
+| 2025-04-07 | 16:00 - 18:30 | 2,5   | DEGEL2         | 29, 40   | Improve mosquitto config, finish parser                           |
