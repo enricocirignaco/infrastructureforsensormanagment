@@ -30,7 +30,7 @@ docker compose restart mqtt-broker
 
 ## Configure Bridge to TTN
 
-To receive all events from TTN, our mqtt broker has to be configured as a bridge. Because the bridge configuration must not be spread over multiple files and we do not commit passwords, a new file **ttn-bridge.conf** has to be create in the *bridge/* subfolder.
+To receive all events from TTN, our mqtt broker has to be configured as a bridge. Because the bridge configuration must not be spread over multiple files and we do not commit passwords, a new file **ttn-bridge.conf** has to be create in the *bridges/* subfolder.
 
 Copy the following content into the newly created file and set both username and password.
 
