@@ -21,13 +21,6 @@ DOCKER_INFLUXDB_INIT_USERNAME=
 DOCKER_INFLUXDB_INIT_PASSWORD=
 ```
 
-Mosquitto: **.env-mosquitto** to authenticate against the TTN MQTT-broker
-```
-TTN_USERNAME=
-TTN_PASSWORD=
-
-```
-
 ## How to merge a feature branch
 > **_IMPORTANT:_** The feature branch must be updated with main before merging!
 #### Update feature branch with main
