@@ -53,7 +53,6 @@ services:
       - MQTT_PORT=1883
       - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
       - FUSEKI_ENDPOINT=http://fuseki:3030/testing/update
-      - FUSEKI_USER=admin
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_ORG=bfh
       - INFLUX_BUCKET=default
