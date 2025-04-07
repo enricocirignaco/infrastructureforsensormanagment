@@ -54,8 +54,6 @@ services:
       - ./config/mqtt-broker:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
-    env_file:
-      - .env-mosquitto
     entrypoint: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
   fuseki:
     image: stain/jena-fuseki:5.1.0
