@@ -87,5 +87,6 @@
       "cluster_id": "eu1",
       "cluster_address": "eu1.cloud.thethings.network"
     }
-  }
+  },
+  "simulated": true
 }
