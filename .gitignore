@@ -2,5 +2,15 @@
 **/.DS_Store
 **/.$*.bkp
 **/.$s*.dtmp
-.env
+
+**/.env
+**/.env-*
+!**/.env-*.example
+**/*.pem
+
+**/__pycache__/
+
+config/mqtt-broker/pwfile
+config/mqtt-broker/bridges/*.conf
+
 src/webapp-frontend/www/
