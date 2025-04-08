@@ -384,7 +384,9 @@ router/index.js: is the file where the routes are defined. The routes are then u
 - views are special type of components that rappresets a whole page. views can be constructed using multiple components. views are loaded by the router and are displayed in the routerview.
 
 
-
+## references:
+- https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/
+- https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/
 
 
 

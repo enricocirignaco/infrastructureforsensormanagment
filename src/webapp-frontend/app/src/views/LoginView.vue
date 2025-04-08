@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="background-image: url('/images/login.jpg'); background-size: cover; background-position: center;">
     <v-main>
       <v-container class="d-flex justify-center align-center" style="height: 100vh;">
         <v-card width="400" class="mx-auto mt-5">
