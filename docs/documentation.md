@@ -377,6 +377,22 @@ The application can be built with the following command: `npm run build`. This w
 ```
 For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
 The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
+## Info vue
+- main.js: is only for adding plugins
+- App.vue: is the main component of the application. can be used for addding global parts of the application like nav bar, header or footer. Routerview should be present (this is then replaced with the content of different components by the router).
+router/index.js: is the file where the routes are defined. The routes are then used by the router to display the right component.
+- views are special type of components that rappresets a whole page. views can be constructed using multiple components. views are loaded by the router and are displayed in the routerview.
+
+
+
+
+
+
+
+
+
+
+# Evaluation
 
 ## TTN-Mock
 
