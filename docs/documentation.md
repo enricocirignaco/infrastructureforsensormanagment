@@ -377,6 +377,29 @@ The application can be built with the following command: `npm run build`. This w
 ```
 For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
 The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
+
+
+## TTN-Mock
+
+For easier and more rapid development, we decided to create an additional microservice that mocks the timeseries data that would usually come from The Things Network over MQTT. There are multiple reasons why the use of "real data" that was sent from a microcontroller over LoraWAN is not really pratical during development:
+- The hardware has always to be carried around and installed at a place that offers stable radio connection to a nearby LoRaWAN Gateway. Depending were the team members currently work, this condition might either be satisfied or not
+- The duty cycle of *The Things Network* regulates how much airtime each device is allowed to occupy during a given time period. In most regions, the duty cycle is commonly defined as 1%. On top of that, there's also a fair use policy that limits the uplink airtime even further to **30 seconds per day and per node** [18]. During development the desired cadence of messages is about once per minutes as this allows to quickly adapt changes without flooding the system with messages. This frequency would violate the mentioned policies by far.
+- The configuration of such a microservice can be adapted on the fly and is much faster compared to flashing the hardware with new firmware and waiting until the connection to TTN is working again
+
+To follow the tech-stack that was already used in other microservices in this project, the TTN-Mock was developed with python, which enabled fast development of a first version. The idea of this microservice was to emulate a payload that is congruent to the one that the MQTT broker of TTN would provide. To achieve this, an actual uplink message, sent from our microcontroller, was extracted and slightly adapted. Specifically, the fields that later would be populated in the script were emptied (device_id, received_at and frm_payload) and the keys identifying the node were replaced with meaningless strings. The official documentation of TTN also states, that an additional field ``"simulated": true`` can be set to mark the message accordingly [19]. This message was then saved into a file called *template.json* to later get loaded by the python script.
+
+To publish over the MQTT protocol, the widespread library *paho-mqtt* was used. It offers an easy-to-use client to authenticate and communicate with a broker. The service is fully configurable, meaning which broker and what topic the microservice should publish to can be set over environment variables.
+
+notes:
+- python dependencies
+- protoc generated schema
+- Dockerfile, Deployment
+
+
+### References
+[18] https://www.thethingsnetwork.org/docs/lorawan/duty-cycle/  
+[19] https://www.thethingsindustries.com/docs/integrations/data-formats/  
+
 # Evaluation
 
 ## Binäre Serialisierung
