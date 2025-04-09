@@ -1,1 +1,3 @@
 fastapi[standard]==0.115.12
+SPARQLWrapper==2.0.0
+argon2-cffi==23.1.0

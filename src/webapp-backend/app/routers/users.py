@@ -1,22 +1,26 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from typing import List
+
+from ..dependencies import get_auth_service
+from app.services.auth_service import AuthService
+from app.models.user import UserIn, UserOut
 
 router = APIRouter(
     prefix="/users",
     tags=["user"],
+    dependencies=[],
     responses={404: {"description": "Not found"}},
 )
 
 
-@router.get("/")
-async def read_users():
-    return [{"username": "Rick"}, {"username": "Morty"}]
+@router.get("/", response_model=List[UserOut])
+async def read_users(auth_service: AuthService = Depends(get_auth_service)) -> List[UserOut]:
+    return auth_service.find_all_users()
 
+@router.get("/{username}", response_model=UserOut)
+async def read_user(username: str, auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
+    return auth_service.find_user(username)
 
-@router.get("/me")
-async def read_user_me():
-    return {"username": "fakecurrentuser"}
-
-
-@router.get("/{username}")
-async def read_user(username: str):
-    return {"username": username}
+@router.post("/", response_model=UserOut)
+async def create_user(user: UserIn, auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
+    return auth_service.create_user(user)
