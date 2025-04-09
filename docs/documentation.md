@@ -378,7 +378,6 @@ The application can be built with the following command: `npm run build`. This w
 For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
 The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
 
-
 ## TTN-Mock
 
 For easier and more rapid development, we decided to create an additional microservice that mocks the timeseries data that would usually come from The Things Network over MQTT. There are multiple reasons why the use of "real data" that was sent from a microcontroller over LoraWAN is not really pratical during development:
@@ -388,7 +387,7 @@ For easier and more rapid development, we decided to create an additional micros
 
 To follow the tech-stack that was already used in other microservices in this project, the TTN-Mock was developed with python, which enabled fast development of a first version. The idea of this microservice was to emulate a payload that is congruent to the one that the MQTT broker of TTN would provide. To achieve this, an actual uplink message, sent from our microcontroller, was extracted and slightly adapted. Specifically, the fields that later would be populated in the script were emptied (device_id, received_at and frm_payload) and the keys identifying the node were replaced with meaningless strings. The official documentation of TTN also states, that an additional field ``"simulated": true`` can be set to mark the message accordingly [19]. This message was then saved into a file called *template.json* to later get loaded by the python script.
 
-To publish over the MQTT protocol, the widespread library *paho-mqtt* was used. It offers an easy-to-use client to authenticate and communicate with a broker. The service is fully configurable, meaning which broker and what topic the microservice should publish to can be set over environment variables.
+To publish over the MQTT protocol, the widespread library *paho-mqtt* was used. It offers an easy-to-use client to authenticate and communicate with a broker. The service is fully configurable, meaning which broker and what topic the microservice should publish to can be set over environment variables at runtime.
 
 notes:
 - python dependencies
@@ -400,30 +399,72 @@ notes:
 [18] https://www.thethingsnetwork.org/docs/lorawan/duty-cycle/  
 [19] https://www.thethingsindustries.com/docs/integrations/data-formats/  
 
-# Evaluation
+## Binary serialization
+Instead of writing your own byte array or using JSON, for example, a binary serialization format should be used.
+This has several clear advantages:
+- Efficiency, serializing and deserializing data is significantly faster than with JSON, for example
+- Development speed: As soon as the schema is defined, source code can be generated for various languages that handle reading and writing the data.
+- Strongly Typed: Errors in the code can already be detected during compilation, as types are clearly defined.
+- Schema: The clearly defined schema shows which data is available in which format. The schemas can be extended with defined mechanisms and are therefore versionable.
 
-## Binäre Serialisierung
-Statt ein eigenes Byte-array zu schreiben oder beispielsweise JSON anzuwenden, sollte ein binäres Serialisierungsformat verwendet werden.
-Dies hat einige klare Vorteile:
-- Effizienz, das Serialisieren und Deserialisieren von Daten ist deutlich schneller als z.B. bei JSON
-- Entwicklungsgeschwindigkeit: Sobald das Schema definiert ist, kann Sourcecode für diverse Sprachen generiert werden, welche das lesen und schreiben der Daten handhabt.
-- Strongly Typed: Bereits bei der Kompilierung können Fehler im Code erkannt werden, da Typen klar definiert sind.
-- Schema: Das klar definierte Schema zeigt auf, welche Daten in welchem Format vorliegen. Die Schemas können mit definierten Mechanismen erweitert werden, sind also versionerbar.
+### Comparison
+
+#### Protobufs
+The older standard (originally from the 2000s), set in 2008 as an open source standard. Therefore also a very broad community and extensive tooling support. Established standard. The schema evolution is relatively simple, so adjustments to the data format can be made easily. The entire message is always read. Works best with small amounts of data (few MBs). Compared to FlatBuffers, it should be much more user-friendly (simple installation of the compiler, tutorials etc.). It is somewhat slower than FlatBuffers.
+
+#### Nanopb
+Is a very narrow, C implementation of Protobufs. It is optimized for 32-bit embedded systems with very few resources (<1kB RAM). It is optimized for low memory requirements and resource consumption. The schema definition of Protobufs can be adopted directly.
+
+#### FlatBuffers
+Also efficient with large amounts of data. The messages are read-only and can no longer be changed. If desired, only part of the data set can be deserialized. Often used in mobile gaming, where performance is very important and limited resources are available. More code is required to build a dataset compared to protobufs. Definitely one of the best libraries if the focus is on efficiency.
+
+#### Further options
+- Apache Avro: JSON-based schema. Central use in the Big Data area, but offers native functionality for data versioning. Not optimized for IoT, can lead to higher overhead and integration into resource-constrained environments can be cumbersome.
+- MessagePack: Very simple protocol. It is not based on an external schema, which would make it difficult to define using data types. Very JSON-like, so would integrate with many programming languages. Due to the lack of a schema, validation and versioning of the data would be difficult, and the evolution of the schema would also be laborious.
+
+#### Result
+Protobufs (and Nanopb on the board) is used. The standard is well supported and code integration should be simple. The schema is in a textual format that can be easily generated. It is designed to transmit small amounts of data with little overhead and to comply with a schema. This is exactly our use case.
 
 ### Protobufs
-Der ältere Standard (ursprünglich aus den 2000er Jahren), set 2008 als Open-Source-Standard. Darum auch eine sehr breite Community und umfangreiche Tooling-Unterstützung. Etablierter Standard. Die Schema-Evoluation ist relativ einfach, Anpassungen am Datenformat können also leicht gemacht werden. Es wird immer die ganze Nachricht ausgelesen. Funktioniert am besten mit kleinen Datenmengen (wenig MBs). Es soll verglichen zu FlatBuffers deutlich benutzerfreundlicher sein (Einfache Installation des Compilers, Tutorials etc.). Es ist etwas langsamer als Flatbuffers.
 
-### Nanopb
-Ist eine sehr schmale, C-Implementation von Protobufs. Es ist optimiert für 32-bit embedded systeme mit sehr wenig resourcen (<1kB RAM). Es ist optimiert für wenig Speicherbedarf und Resourcenverbrauch. Die Schema-Definition von Protobufs kann direkt übernommen werden.
+### Protoc
 
-### FlatBuffers
-Auch effizient bei grösseren Datenmengen. Die Nachrichten sind read-only, können nicht mehr geändert werden. Es kann bei Wunsch nur ein Teil des Datensets deserialisiert werden. Wird oft bei Mobile Gaming eingesetzt, wo performance sehr wichtig ist und begrenzte Resourcen zur Verfügung stehen. Für das Bauen eines Datenset wird mehr Code als im Vergleich zu Protobufs benötigt. Defintiv eine der besten Bibliotheken wenn der Fokus auf Effizienz liegt.
+The protobuf compiler (protoc) is mostly used to read `.proto` files and generating specific source code in various programming languages to either encode or decode protobuf messages. It is written in C++ an can either be manually compiled or be downloaded as a pre-built binary from the Github release page. [20]
 
-### Weitere Optionen
-- Apache Avro: JSON-basiertes Schema. Zentraler Einsatz im Big Data Gebiet, bietet jedoch native Funktionalität für Datenversionierung. Nicht für IoT optimiert, kann zu grösserem Overhead führen und Integration auf ressourcenbeschränkte Umgebungen mühsam.
-- MessagePack: Sehr einfaches Protokoll. Es basiert nicht auf einem externen Schema, was die Definition anhand von Datentypen erschweren würde. Sehr JSON-ähnlich, würde sich also in vielen Programmiersprachen integrieren lassen. Aufgrund des fehlenden Schemas wäre die Validierung und Versionierung der Daten schwierig, auch die Evoluation des Schemas wäre mühsam.
+Once the compiler is installed, it can be used to generate for example python code as following:
 
-### Resultat
-Es wird Protobufs (und Nanopb auf dem Board) eingesetzt. Der Standard wir gut unterstützt und die Code-Integration sollte einfach sein. Das Schema liegt in einem textuellen Format vor, welches einfach generiert werden kann. Es ist darauf ausgelegt mit wenig Overhead kleine Mengen an Daten zu übermitteln und der Einhaltung eines Schemas. Das ist genau unser Use-Case.
+```bash
+protoc --python_out=schema/ schema.proto
+```
+
+In this case, the generated file with the name *schema/schema_pb2.py*, 
+
+The compiler will create a new file in the defined subfolder *schema/*, in this case with the name *schema_pb2.py*. Inside this newly created source file, the compiler will generate a module with static descriptors for each defined message type. With the help of python reflection / metaclasses, this will then provide a Python data access class at runtime. [21]  
+More precisely, the .proto file lives as a binary string inside the generated module.
+
+```python
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cschema.proto\....)
+```
+
+Therefore, the schema itself is not needed at runtime. But of course it should be kept because changing requirements may require adapting the message format and regenerating the python code.
 
 
+
+```python
+from schema import schema_pb2
+
+sensor_data = schema_pb2.SensorData()
+```
+
+
+```bash
+protoc --proto_path=. --descriptor_set_out=schema.desc schema1.proto schema2.proto
+```
+
+### Version
+Add chapter about backwards compatibility of messages
+
+
+### References
+[20] https://github.com/protocolbuffers/protobuf
+[21] https://protobuf.dev/programming-guides/editions/
