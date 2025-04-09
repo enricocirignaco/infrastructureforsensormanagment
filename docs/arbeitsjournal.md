@@ -46,3 +46,4 @@
 | 2025-04-07 | 16:00 - 18:30 | 2,5   | DEGEL2         | 29, 40   | Improve mosquitto config, finish parser                           |
 | 2025-04-08 | 10:30 - 12:30 | 2,0   | DEGEL2         |          | Docs TTN-Mock                                                     |
 | 2025-04-08 | 09:30 - 12:30 | 3,0   | DEGEL2         | 31       | Docs, Setup Backend                                               |
+| 2025-04-08 | 13:30 - 17:00 | 3,5   | DEGEL2         | 53       | Create application layers of backend                              |
