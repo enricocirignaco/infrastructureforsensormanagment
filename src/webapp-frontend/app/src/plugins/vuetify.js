@@ -21,11 +21,13 @@ export default createVuetify({
         }
       },
       dark: {
-        primary: '#030100',
-        secondary: '#7B7653',
-        accent: '#344738',
-        background: '#F7B232',
-        surface: '#16332D',
+        colors: {
+          primary: '#030100',
+          secondary: '#7B7653',
+          accent: '#344738',
+          background: '#F7B232',
+          surface: '#16332D',
+        }
       }
     },
   },
