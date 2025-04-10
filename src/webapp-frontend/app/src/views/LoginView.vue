@@ -10,7 +10,7 @@
 
           <!-- Slogan -->
           <v-card-subtitle class="text-center mb-4">
-            <span v-html="textStore.slogan"></span>
+            <span v-html="textStore.sloganMultiLine"></span>
           </v-card-subtitle>
 
           <!-- Form -->
