@@ -7,7 +7,7 @@ from .services.auth_service import AuthService
 # Utils
 
 def get_triplestore_client() -> TripleStoreClient:
-    return TripleStoreClient(endpoint_url="http://localhost:3030/testing/sparql")
+    return TripleStoreClient(endpoint_url="http://localhost:3030/testing/")
 
 
 # Repositories
