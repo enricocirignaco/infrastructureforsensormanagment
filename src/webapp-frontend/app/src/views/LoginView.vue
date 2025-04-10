@@ -2,36 +2,47 @@
   <v-app style="background-image: url('/images/login.jpg'); background-size: cover; background-position: center;">
     <v-main>
       <v-container class="d-flex justify-center align-center" style="height: 100vh;">
-        <v-card width="400" class="mx-auto mt-5">
-          <v-card-title class="text-h5 text-center">Login</v-card-title>
+        <v-card class="rounded-lg" width="400" elevation="10">
+          <!-- Logo -->
+          <v-card-title class="text-center">
+            <v-img src="/images/logo.svg" alt="Logo" height="100" />
+          </v-card-title>
+
+          <!-- Slogan -->
+          <v-card-subtitle class="text-center mb-4">
+            <span v-html="textStore.slogan"></span>
+          </v-card-subtitle>
+
+          <!-- Form -->
           <v-card-text>
-            <v-form @submit.prevent="submit">
+            <v-form ref="loginForm" @submit.prevent="submit">
+              <!-- Display error message if login fails -->
+              <v-alert v-if="loginError" type="error" class="mb-4">
+                {{ loginError }}
+              </v-alert>
               <v-text-field
                 v-model="username"
                 label="Username"
                 prepend-icon="mdi-account"
                 required
                 autocomplete="username"
+                :rules="[v => !!v || 'Username is required']"
               />
-
               <v-text-field
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 label="Password"
+                :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                @click:append-inner="showPassword = !showPassword"
                 prepend-icon="mdi-lock"
-                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                @click:append="showPassword = !showPassword"
-                required
                 autocomplete="current-password"
+                required
+                :rules="[v => !!v || 'Password is required']"
               />
-
+              <v-btn type="submit" color="primary" block class="my-2">Login</v-btn>
+              <v-btn variant="outlined" color="secondary"block @click="register">Register</v-btn>
             </v-form>
           </v-card-text>
-          <v-divider></v-divider>
-            <v-card-actions>
-              <v-btn color="success">Register</v-btn>
-              <v-btn color="info">Login</v-btn>
-            </v-card-actions>
         </v-card>
       </v-container>
     </v-main>
@@ -40,23 +51,43 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTextStore } from '@/stores/textStore'
+import { useAuthStore } from '@/stores/authStore'
+import authService from '@/services/authService'
 
+const router = useRouter()
+const textStore = useTextStore()
+const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const loginError = ref(null)
 
+// Submit function to handle login
 function submit() {
-  console.log('Login:', { username: username.value, password: password.value })
+  if (username.value && password.value) {
+    // Perform login action
+    const user = {
+      username: username.value,
+      password: password.value
+    }
+    authService.getAuthToken(user)
+      .then(token => {
+        // Store the token in the auth store
+        authStore.setToken(token)
+        router.push('/home')
+      })
+      .catch(error => {
+        // TODO: test
+        loginError.value = error.response.data.message || 'Login failed. Please try again.'
+      })
+  }
 }
 
+// Register function to handle user registration
 function register() {
+  // TODO: Implement registration logic
   console.log('Go to registration page')
 }
 </script>
-
-<style scoped>
-.v-input__append-inner .v-icon {
-  color: rgba(0, 0, 0, 0.6); /* adjust for visibility */
-  cursor: pointer;
-}
-</style>
