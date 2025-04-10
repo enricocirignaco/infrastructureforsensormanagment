@@ -8,7 +8,10 @@
         "Vue.volar",
         "esbenp.prettier-vscode",
         "GitHub.copilot"
-      ]
+      ],
+      "settings": {
+        "terminal.integrated.cwd": "src/webapp-frontend/app/"
+      }
     }
   }
 }
