@@ -2,7 +2,7 @@
   <v-app style="background-image: url('/images/login.jpg'); background-size: cover; background-position: center;">
     <v-main>
       <v-container class="d-flex justify-center align-center" style="height: 100vh;">
-        <v-card class="rounded-lg" width="400" elevation="10">
+        <v-card class="rounded-lg" width="400" elevation="10" color="primary">
           <!-- Logo -->
           <v-card-title class="text-center">
             <v-img src="/images/logo.svg" alt="Logo" height="100" />
@@ -39,7 +39,7 @@
                 required
                 :rules="[v => !!v || 'Password is required']"
               />
-              <v-btn type="submit" color="primary" block class="my-2">Login</v-btn>
+              <v-btn type="submit" color="secondary" block class="my-2">Login</v-btn>
               <v-btn variant="outlined" color="secondary"block @click="register">Register</v-btn>
             </v-form>
           </v-card-text>
