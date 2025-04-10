@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,7 +12,7 @@ const router = createRouter({
     },
     {
       path: '/',
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
       component: () => import('@/views/MainLayout.vue'),
       children: [
         { path: 'home', component: () => import('@/views/HomeView.vue') },
@@ -34,10 +35,11 @@ const router = createRouter({
 
 // Navigation guard to check authentication. Redirect to login if not authenticated
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = false // TODO: <-- replace this with your real auth check
-
-  if (to.meta.requiresAuth && !isLoggedIn) {
+  const authStore = useAuthStore()
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
+  } else if (to.path === '/login' && authStore.isAuthenticated) {
+    next('/')
   } else {
     next()
   }
