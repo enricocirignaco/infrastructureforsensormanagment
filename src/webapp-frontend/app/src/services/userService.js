@@ -44,7 +44,7 @@ export default {
         // return fetch(url, options)
         //     .then(response => response.ok ? response.json() : Promise.reject(response));
         // }
-        return new Promise((resolve) => {resolve('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJ1dWlkIjoiM2ZhODVmNjQtNTcxNy00NTYyLWIzZmMtMmM5NjNmNjZhZmE2In0.ywmpquYsSdIxNttr8kKbxmzklZtisgaLD42LIvbaPGg')});
+        return new Promise((resolve) => {resolve('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRvZUBleGFtcGxlLmNvbSIsImZ1bGxfbmFtZSI6IkpvaG4gRG9lIiwidXVpZCI6IjNmYTg1ZjY0LTU3MTctNDU2Mi1iM2ZjLTJjOTYzZjY2YWZhNiIsInJvbGUiOiJBZG1pbiJ9.VsAmTMl6Bzn_V7sqT4k77e2lTjGpNxn2zgYHhUrExJE')});
     },
     postUser: function (user) {
         let url = BASE_URL + '/users';
