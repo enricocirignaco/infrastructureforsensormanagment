@@ -6,7 +6,7 @@
         nav
         style="cursor: pointer"
         @click="rail = !rail"
-        :title="authStore.getUser.full_name"
+        :title="authStore.getUser?.full_name || ''"
       >
         <template #prepend>
           <v-avatar size="48">
@@ -98,7 +98,6 @@ const authStore = useAuthStore()
 // Logout Functionality
 const logout = () => {
   // Remove user session and redirect to login page
-  console.log(authStore.getUser)
   authStore.clearToken()
   router.push('/login')
 }
