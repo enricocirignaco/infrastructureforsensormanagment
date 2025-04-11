@@ -15,8 +15,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
       component: () => import('@/views/MainLayout.vue'),
       children: [
-        { path: 'home', component: () => import('@/views/HomeView.vue') },
-        { path: 'about', component: () => import('@/views/AboutView.vue') },
+        { path: 'settings', component: () => import('@/views/SettingsView.vue') },
       ]
     },
     // Redirect not registered routes to notfound page

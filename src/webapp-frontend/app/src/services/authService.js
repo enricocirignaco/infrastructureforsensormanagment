@@ -20,6 +20,6 @@ export default {
         // return fetch(url, options)
         //     .then(response => response.ok ? response.json() : Promise.reject(response));
         // }
-        return new Promise((resolve) => {resolve('mock-jwt-token-12345')});
+        return new Promise((resolve) => {resolve('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJ1dWlkIjoiM2ZhODVmNjQtNTcxNy00NTYyLWIzZmMtMmM5NjNmNjZhZmE2In0.ywmpquYsSdIxNttr8kKbxmzklZtisgaLD42LIvbaPGg')});
     }
 }

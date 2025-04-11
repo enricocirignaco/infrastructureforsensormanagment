@@ -16,12 +16,19 @@ export const useAuthStore = defineStore('auth', {
   },
   getters: {
     isAuthenticated: (state) => !!state.token,  // Returns true if token exists
-    getAuthHeader: (state) => (header) => {
+    getAuthHeader: (state) => (header = {}) => {
       if (state.isAuthenticated) {
         // Assign the token to the Authorization header if it exists
         header['Authorization'] = 'Bearer ' + state.token
       }
       return header
-    }
+    },
+    getUserId: (state) => (userId) => {
+      if (state.isAuthenticated) {
+        // Decode the JWT token to get the user ID
+        userId = JSON.parse(atob(state.token.split('.')[1]))
+      }
+      return userId
+    },
 }
 })
