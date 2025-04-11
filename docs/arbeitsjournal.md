@@ -36,9 +36,14 @@
 | 2025-03-17 | 13:00 - 15:00 | 2,0   | DEGEL2         | 13       | Testing von Nanopb                                                |
 | 2025-03-18 | 10:00 - 14:00 | 4,0   | DEGEL2         | 33       | Nanopb Integration in Dummy Projekt                               |
 | 2025-03-19 | 09:00 - 12:00 | 3,0   | DEGEL2         | 40       | MQTT-Broker Bridge für TTN konfigurieren                          |
-| 2025-03-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting                                                           |
+| 2025-03-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting       
+| 2025-03-21 | 09:00 - 12:00 | 3     | CIRIE1         |          | Documentation, Refactoring, Testing                               |
 | 2025-03-25 | 09:00 - 15:00 | 6,0   | DEGEL2         |          | Linked Data Entities, Protobuf                                    |
+| 2025-03-25 | 09:00 - 17:00 | 7,0   | CIRIE1         |          | Compiler Engine Documentation                                     |
 | 2025-03-26 | 10:00 - 15:00 | 5,0   | DEGEL2         | 28, 40   | Docker Setup                                                      |
+| 2025-03-26 | 09:00 - 12:00 | 3,0   | CIRIE1         |          | Compiler Engine Documentation                                     |
+| 2025-04-01 | 13:00 - 19:00 | 6,0   | CIRIE1         | 30, 26   | Research & Deployment Frontend Webserver & Reverse Proxy          |
+| 2025-04-02 | 09:00 - 17:00 | 7,0   | CIRIE1         | 30, 26   | Deployment Webserver Local/Server. Documentation Infrastructur    |
 | 2025-04-02 | 09:00 - 13:00 | 4,0   | DEGEL2         | 24       | TTN Mock, Mosquitto Setup                                         |
 | 2025-04-03 | 09:30 - 12:30 | 3,0   | CIRIE1, DEGEL2 |          | Sprint Planning                                                   |
 | 2025-04-03 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting                                                           |
@@ -52,3 +57,12 @@
 | 2025-04-13 | 21:30 - 22:30 | 1,0   | CIRIE1, DEGEL2 | 61, 54   | Discuss project endpoints and payloads                            |
 | 2025-04-13 | 09:30 - 12:30 | 3,0   | DEGEL2         | 31, 65   | Docker-Setup Backend, Admin init on startup                       |
 | 2025-04-13 | 15:00 - 19:00 | 3,0   | DEGEL2         | 66, 54   | Role based access, JWT generation, project setup                  |
+| 2025-04-04 | 09:00 - 12:00 | 3     | DEGEL2         | 29, 40   | Resolve Merge Request, Improve timeseries parser                  |
+| 2025-04-07 | 16:00 - 18:30 | 2,5   | DEGEL2         | 29, 40   | Improve mosquitto config, finish parser                           |
+| 2025-04-07 | 09:00 - 11:00 | 2,0   | CIRIE1         |          | Review Merge Requests                                             |
+| 2025-04-08 | 10:00 - 22:00 | 10,0  | CIRIE1         | 43, 51   | Frontend development, Research component framework, vue initialization|
+| 2025-04-10 | 10:00 - 17:30 | 7,0   | CIRIE1         | 43, 51   | Frontend development, vue Trobleshooting                          |
+| 2025-04-11 | 09:00 - 17:00 | 7.0   | CIRIE1         | 52, 51   | Frontend development, Setting Page, Rest Services, Review MR, journal|
+
+
+
