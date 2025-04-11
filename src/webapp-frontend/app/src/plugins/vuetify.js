@@ -18,7 +18,7 @@ export default createVuetify({
           accent: '#F38A00',
           background: '#FBF3EA',
           surface: '#490E00',
-        }
+        },
       },
       dark: {
         colors: {
@@ -27,8 +27,8 @@ export default createVuetify({
           accent: '#344738',
           background: '#16332D',
           surface: '#7B7653',
-        }
-      }
+        },
+      },
     },
   },
 })

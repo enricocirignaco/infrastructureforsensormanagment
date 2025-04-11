@@ -1,7 +1,13 @@
 <template>
-  <v-app style="background-image: url('/images/login.jpg'); background-size: cover; background-position: center;">
+  <v-app
+    style="
+      background-image: url('/images/login.jpg');
+      background-size: cover;
+      background-position: center;
+    "
+  >
     <v-main>
-      <v-container class="d-flex justify-center align-center" style="height: 100vh;">
+      <v-container class="d-flex justify-center align-center" style="height: 100vh">
         <v-card class="rounded-lg" width="400" elevation="10" color="primary">
           <!-- Logo -->
           <v-card-title class="text-center">
@@ -26,7 +32,7 @@
                 prepend-icon="mdi-account"
                 required
                 autocomplete="username"
-                :rules="[v => !!v || 'Username is required']"
+                :rules="[(v) => !!v || 'Username is required']"
               />
               <v-text-field
                 v-model="password"
@@ -37,10 +43,10 @@
                 prepend-icon="mdi-lock"
                 autocomplete="current-password"
                 required
-                :rules="[v => !!v || 'Password is required']"
+                :rules="[(v) => !!v || 'Password is required']"
               />
               <v-btn type="submit" color="secondary" block class="my-2">Login</v-btn>
-              <v-btn variant="outlined" color="secondary"block @click="register">Register</v-btn>
+              <v-btn variant="outlined" color="secondary" block @click="register">Register</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -70,15 +76,16 @@ function submit() {
     // Perform login action
     const user = {
       username: username.value,
-      password: password.value
+      password: password.value,
     }
-    authService.getAuthToken(user)
-      .then(token => {
+    authService
+      .getAuthToken(user)
+      .then((token) => {
         // Store the token in the auth store
         authStore.setToken(token)
         router.push('/home')
       })
-      .catch(error => {
+      .catch((error) => {
         // TODO: test
         loginError.value = error.response.data.message || 'Login failed. Please try again.'
       })

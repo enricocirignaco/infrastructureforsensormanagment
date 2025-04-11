@@ -1,71 +1,102 @@
 <template>
+  <v-card>
+    <v-card-title>Change Password</v-card-title>
+
+    <!-- Password Change Form -->
+    <v-form ref="passwordForm" @submit.prevent="submitPasswordForm">
+      <!-- Needed for autofill functionality -->
+      <input type="text" name="username" autocomplete="username" hidden />
+      <v-text-field
+        v-model="currentPassword"
+        :type="showCurrentPassword ? 'text' : 'password'"
+        label="Current Password"
+        :append-inner-icon="showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye'"
+        @click:append-inner="showCurrentPassword = !showCurrentPassword"
+        autocomplete="current-password"
+        required
+        :rules="[(v) => !!v || 'Password is required']"
+      />
+
+      <v-text-field
+        v-model="newPassword"
+        :type="showNewPassword ? 'text' : 'password'"
+        label="New Password"
+        :append-inner-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
+        @click:append-inner="showNewPassword = !showNewPassword"
+        autocomplete="new-password"
+        required
+        :rules="[(v) => !!v || 'New Password is required']"
+      />
+
+      <v-text-field
+        v-model="confirmPassword"
+        :type="showConfirmPassword ? 'text' : 'password'"
+        label="Confirm New Password"
+        :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+        @click:append-inner="showConfirmPassword = !showConfirmPassword"
+        autocomplete="new-password"
+        required
+        :rules="[
+          (v) => !!v || 'Confirm Password is required',
+          (v) => v === newPassword || 'Passwords must match',
+        ]"
+      />
+      <v-btn type="submit" color="primary">Submit</v-btn>
+    </v-form>
+
+    <!-- Error Messages -->
+    <v-alert v-if="errorMessage" type="error" class="mt-4">{{ errorMessage }}</v-alert>
+    <v-alert v-if="successMessage" type="success" class="mt-4">{{ successMessage }}</v-alert>
+  </v-card>
+  <v-container v-if="authStore.getUser.role === 'Admin'">
+    <v-divider class="my-4"></v-divider>
+    <!-- Admin Only Section -->
+    <v-card-title>Admin Section</v-card-title>
+    <v-divider class="my-4"></v-divider>
+
     <v-card>
-        <v-card-title>Change Password</v-card-title>
+      <v-card-title>Create New User</v-card-title>
+      <!-- Create new user -->
+      <v-card>
+        <v-card-title>Create New User</v-card-title>
+        <v-form @submit.prevent="createNewUser">
+          <v-text-field
+            v-model="newUser.email"
+            type="email"
+            label="Email"
+            required
+            :rules="[(v) => !!v || 'Email address is required']"
+          />
+          <v-text-field
+            v-model="newUser.fullname"
+            label="Full Name"
+            required
+            :rules="[(v) => !!v || 'Full name is required']"
+          />
+          <v-select
+            v-model="newUser.role"
+            :items="roles"
+            label="Role"
+            :rules="[(v) => !!v || 'User role is required']"
+            required
+          />
 
-        <!-- Password Change Form -->
-        <v-form ref="passwordForm" @submit.prevent="submitPasswordForm">
-            <!-- Needed for autofill functionality -->
-            <input type="text" name="username" autocomplete="username" hidden />
-            <v-text-field v-model="currentPassword" :type="showCurrentPassword ? 'text' : 'password'"
-                label="Current Password" :append-inner-icon="showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showCurrentPassword = !showCurrentPassword" autocomplete="current-password"
-                required :rules="[v => !!v || 'Password is required']" />
-
-            <v-text-field v-model="newPassword" :type="showNewPassword ? 'text' : 'password'" label="New Password"
-                :append-inner-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showNewPassword = !showNewPassword" autocomplete="new-password" required
-                :rules="[v => !!v || 'New Password is required']" />
-
-            <v-text-field v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
-                label="Confirm New Password" :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="showConfirmPassword = !showConfirmPassword" autocomplete="new-password" required
-                :rules="[
-                    v => !!v || 'Confirm Password is required',
-                    v => v === newPassword || 'Passwords must match'
-]" />
-            <v-btn type="submit" color="primary">Submit</v-btn>
+          <v-btn type="submit" color="primary">Create User</v-btn>
         </v-form>
 
-        <!-- Error Messages -->
-        <v-alert v-if="errorMessage" type="error" class="mt-4">{{ errorMessage }}</v-alert>
-        <v-alert v-if="successMessage" type="success" class="mt-4">{{ successMessage }}</v-alert>
+        <v-alert v-if="adminSuccessMessage" type="info" class="mt-4">
+          <span>{{ adminSuccessMessage }}<br />Generated Password: {{ generatedPassword }}</span>
+          <v-icon class="ml-2 cursor-pointer" size="18" @click="copyPassword">
+            mdi-content-copy
+          </v-icon>
+          <span v-if="passwordCopied" class="ml-2"><br />Password Copied Successfully!</span>
+        </v-alert>
+        <v-alert v-if="adminErrorMessage" type="error" class="mt-4">{{
+          adminErrorMessage
+        }}</v-alert>
+      </v-card>
     </v-card>
-    <v-container v-if="authStore.getUser.role === 'Admin'">
-        <v-divider class="my-4"></v-divider>
-        <!-- Admin Only Section -->
-        <v-card-title>Admin Section</v-card-title>
-        <v-divider class="my-4"></v-divider>
-
-        <v-card>
-            <v-card-title>Create New User</v-card-title>
-            <!-- Create new user -->
-            <v-card>
-                <v-card-title>Create New User</v-card-title>
-                <v-form @submit.prevent="createNewUser">
-
-                    <v-text-field v-model="newUser.email" type="email" label="Email" required
-                        :rules="[v => !!v || 'Email address is required']" />
-                    <v-text-field v-model="newUser.fullname" label="Full Name" required
-                        :rules="[v => !!v || 'Full name is required']" />
-                    <v-select v-model="newUser.role" :items="roles" label="Role"
-                        :rules="[v => !!v || 'User role is required']" required />
-
-                    <v-btn type="submit" color="primary">Create User</v-btn>
-                </v-form>
-
-                <v-alert v-if="adminSuccessMessage" type="info" class="mt-4">
-                    <span>{{adminSuccessMessage}}<br>Generated Password: {{ generatedPassword }}</span>
-                    <v-icon class="ml-2 cursor-pointer" size="18" @click="copyPassword">
-                        mdi-content-copy
-                    </v-icon>
-                    <span v-if="passwordCopied" class="ml-2"><br>Password Copied Successfully!</span>
-
-                </v-alert>
-                <v-alert v-if="adminErrorMessage" type="error" class="mt-4">{{ adminErrorMessage }}</v-alert>
-
-            </v-card>
-        </v-card>
-    </v-container>
+  </v-container>
 </template>
 
 <script setup>
@@ -86,9 +117,9 @@ const passwordForm = ref(null)
 const authStore = useAuthStore()
 // State for creating a new user (visible only for admins)
 const newUser = ref({
-    email: '',
+  email: '',
   fullname: '',
-  role: ''
+  role: '',
 })
 
 const roles = ['Admin', 'Researcher', 'Technician'] // Example roles for user creation
@@ -97,59 +128,59 @@ const passwordCopied = ref(false)
 const adminSuccessMessage = ref('')
 const adminErrorMessage = ref('')
 
-
 // Handle form submission for personal password change
 const submitPasswordForm = () => {
-    // Validate the password change form
-    if (currentPassword.value && newPassword.value && newPassword.value === confirmPassword.value) {
-        // Update Password
-        userService.patchUserPassword(authStore.getUser().uuid, currentPassword.value, newPassword.value)
-            .then((token) => {
-                authStore.setToken(token)
-                successMessage.value = 'Your password has been successfully changed.'
-                errorMessage.value = ''
-            })
-            .catch((error) => {
-                errorMessage.value = 'Failed to change password: ' + error.message
-                successMessage.value = ''
-            })
+  // Validate the password change form
+  if (currentPassword.value && newPassword.value && newPassword.value === confirmPassword.value) {
+    // Update Password
+    userService
+      .patchUserPassword(authStore.getUser.uuid, currentPassword.value, newPassword.value)
+      .then((token) => {
+        authStore.setToken(token)
+        successMessage.value = 'Your password has been successfully changed.'
+        errorMessage.value = ''
+      })
+      .catch((error) => {
+        errorMessage.value = 'Failed to change password: ' + error.message
+        successMessage.value = ''
+      })
 
-        passwordForm.value.reset()
-        passwordForm.value.resetValidation()
-    }
+    passwordForm.value.reset()
+    passwordForm.value.resetValidation()
+  }
 }
 // Handle new user creation
 const createNewUser = () => {
-    if (newUser.value.email && newUser.value.fullname && newUser.value.role) {
-        // Generate a random password for the new user
-        generatedPassword.value = utils.generateRandomPassword()
-        const user = {
-            email: newUser.value.email,
-            fullname: newUser.value.fullname,
-            role: newUser.value.role,
-            password: generatedPassword.value
-        }
-        userService.postUser(user)
-            .then(() => {
-                adminSuccessMessage.value = 'New user created successfully.'
-                adminErrorMessage.value = ''
-            })
-            .catch((error) => {
-                adminErrorMessage.value = 'Failed to create new user: ' + error.message
-                adminSuccessMessage.value = ''
-            })
-
-        passwordForm.value.reset()
-        passwordForm.value.resetValidation()
+  if (newUser.value.email && newUser.value.fullname && newUser.value.role) {
+    // Generate a random password for the new user
+    generatedPassword.value = utils.generateRandomPassword()
+    const user = {
+      email: newUser.value.email,
+      fullname: newUser.value.fullname,
+      role: newUser.value.role,
+      password: generatedPassword.value,
     }
+    userService
+      .postUser(user)
+      .then(() => {
+        adminSuccessMessage.value = 'New user created successfully.'
+        adminErrorMessage.value = ''
+      })
+      .catch((error) => {
+        adminErrorMessage.value = 'Failed to create new user: ' + error.message
+        adminSuccessMessage.value = ''
+      })
+
+    passwordForm.value.reset()
+    passwordForm.value.resetValidation()
+  }
 }
 
 // Copy the password to the clipboard
 const copyPassword = () => {
-    navigator.clipboard.writeText(generatedPassword.value)
-        .then(() => {
-            passwordCopied.value = true
-        })
+  navigator.clipboard.writeText(generatedPassword.value).then(() => {
+    passwordCopied.value = true
+  })
 }
 </script>
 

@@ -25,9 +25,9 @@ const isDarkMode = ref(settingsStore.isDarkMode)
 
 // set right theme before loading the app
 theme.global.name.value = settingsStore.isDarkMode ? 'dark' : 'light'
-function toggleTheme () {
-    settingsStore.toggleDarkMode()
-    theme.global.name.value = settingsStore.isDarkMode ? 'dark' : 'light'
+function toggleTheme() {
+  settingsStore.toggleDarkMode()
+  theme.global.name.value = settingsStore.isDarkMode ? 'dark' : 'light'
 }
 </script>
 

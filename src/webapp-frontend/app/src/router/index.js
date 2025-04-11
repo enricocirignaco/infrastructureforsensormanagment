@@ -8,27 +8,25 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       meta: { requiresAuth: false },
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/LoginView.vue'),
     },
     {
       path: '/',
       meta: { requiresAuth: true },
       component: () => import('@/views/MainLayout.vue'),
-      children: [
-        { path: 'settings', component: () => import('@/views/SettingsView.vue') },
-      ]
+      children: [{ path: 'settings', component: () => import('@/views/SettingsView.vue') }],
     },
     // Redirect not registered routes to notfound page
     {
       path: '/notfound',
       name: 'NotFound',
       meta: { requiresAuth: false },
-      component: () => import('../views/NotFound.vue')
+      component: () => import('../views/NotFound.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
-      redirect: '/notfound'
-    }
+      redirect: '/notfound',
+    },
   ],
 })
 
