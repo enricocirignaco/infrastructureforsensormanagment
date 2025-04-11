@@ -48,18 +48,17 @@
     <v-alert v-if="errorMessage" type="error" class="mt-4">{{ errorMessage }}</v-alert>
     <v-alert v-if="successMessage" type="success" class="mt-4">{{ successMessage }}</v-alert>
   </v-card>
-  <v-container v-if="authStore.getUser.role === 'Admin'">
+
+<!-- Admin Only Section -->
+  <v-container v-if="authStore.getUser?.role === 'Admin'">
     <v-divider class="my-4"></v-divider>
-    <!-- Admin Only Section -->
     <v-card-title>Admin Section</v-card-title>
     <v-divider class="my-4"></v-divider>
-
+    <!-- Create new user section-->
     <v-card>
       <v-card-title>Create New User</v-card-title>
-      <!-- Create new user -->
       <v-card>
-        <v-card-title>Create New User</v-card-title>
-        <v-form @submit.prevent="createNewUser">
+        <v-form ref="newUserForm" @submit.prevent="createNewUser">
           <v-text-field
             v-model="newUser.email"
             type="email"
@@ -68,7 +67,7 @@
             :rules="[(v) => !!v || 'Email address is required']"
           />
           <v-text-field
-            v-model="newUser.fullname"
+            v-model="newUser.full_name"
             label="Full Name"
             required
             :rules="[(v) => !!v || 'Full name is required']"
@@ -91,9 +90,7 @@
           </v-icon>
           <span v-if="passwordCopied" class="ml-2"><br />Password Copied Successfully!</span>
         </v-alert>
-        <v-alert v-if="adminErrorMessage" type="error" class="mt-4">{{
-          adminErrorMessage
-        }}</v-alert>
+        <v-alert v-if="adminErrorMessage" type="error" class="mt-4">{{adminErrorMessage}}</v-alert>
       </v-card>
     </v-card>
   </v-container>
@@ -104,7 +101,7 @@ import { ref } from 'vue'
 import userService from '@/services/userService'
 import { useAuthStore } from '@/stores/authStore'
 import utils from '@/utils/utils'
-// State for password change
+
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
@@ -114,20 +111,20 @@ const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
 const passwordForm = ref(null)
-const authStore = useAuthStore()
-// State for creating a new user (visible only for admins)
-const newUser = ref({
-  email: '',
-  fullname: '',
-  role: '',
-})
-
-const roles = ['Admin', 'Researcher', 'Technician'] // Example roles for user creation
+const newUserForm = ref(null)
 const generatedPassword = ref('')
 const passwordCopied = ref(false)
 const adminSuccessMessage = ref('')
 const adminErrorMessage = ref('')
+const roles = ['Admin', 'Researcher', 'Technician'] // Example roles for user creation
+const newUser = ref({
+  email: '',
+  full_name: '',
+  role: '',
+})
 
+const authStore = useAuthStore()
+console.log(authStore.getUser)
 // Handle form submission for personal password change
 const submitPasswordForm = () => {
   // Validate the password change form
@@ -151,17 +148,16 @@ const submitPasswordForm = () => {
 }
 // Handle new user creation
 const createNewUser = () => {
-  if (newUser.value.email && newUser.value.fullname && newUser.value.role) {
+  if (newUser.value.email && newUser.value.full_name && newUser.value.role) {
     // Generate a random password for the new user
     generatedPassword.value = utils.generateRandomPassword()
     const user = {
       email: newUser.value.email,
-      fullname: newUser.value.fullname,
+      full_name: newUser.value.full_name,
       role: newUser.value.role,
       password: generatedPassword.value,
     }
-    userService
-      .postUser(user)
+    userService.postUser(user)
       .then(() => {
         adminSuccessMessage.value = 'New user created successfully.'
         adminErrorMessage.value = ''
@@ -171,8 +167,9 @@ const createNewUser = () => {
         adminSuccessMessage.value = ''
       })
 
-    passwordForm.value.reset()
-    passwordForm.value.resetValidation()
+    newUserForm.value.reset()
+    newUserForm.value.resetValidation()
+    newUser.value = { email: '', full_name: '', role: '' }
   }
 }
 
