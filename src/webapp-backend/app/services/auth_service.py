@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from typing import List
 from pydantic import EmailStr
 
-from app.models.user import UserIn, UserInDB, UserPatch, UserLogin, RoleEnum
+from app.models.user import UserIn, UserInDB, UserBase, UserLogin, UserChangePw, RoleEnum
 from app.repositories.user_repository import UserRepository
 
 class AuthService:
@@ -33,11 +33,13 @@ class AuthService:
         user_db = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=pw_hash, role=RoleEnum.RESEARCHER)
         return self._user_repository.create_user(user_db)
     
-    def update_user(self, uuid: UUID, user: UserPatch) -> UserInDB:
+    def update_user(self, uuid: UUID, user: UserBase) -> UserInDB:
+        pass
+
+    def change_password(self, uuid: UUID, user: UserChangePw) -> UserInDB:
         pass
     
     def find_user_uuid(self, uuid: UUID) -> UserInDB:
-        print("test")
         return self._user_repository.find_user_by_uuid(uuid)
 
     def find_user_email(self, email: EmailStr) -> UserInDB:

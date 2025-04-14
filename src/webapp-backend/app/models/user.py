@@ -29,6 +29,7 @@ class RoleEnum(str, Enum):
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
+    role: RoleEnum
 
 
 class UserIn(UserBase):
@@ -39,23 +40,25 @@ class UserIn(UserBase):
 class UserOut(UserBase):
     """Model used to send data back over API"""
     uuid: UUID
-    role: RoleEnum
 
 
 class UserInDB(UserBase):
     """Model used internally to handle auth logic"""
     uuid: UUID
     hashed_password: str
-    role: RoleEnum
 
 
-class UserPatch(UserBase):
+class UserUpdate(UserBase):
     """Model used when some field on an user get updated"""
     email: Optional[EmailStr] = None
     full_name: Optional[str] = None
-    password: Optional[str] = None
     role: Optional[RoleEnum] = None
     
+
+class UserChangePw(BaseModel):
+    """Model used when some field on an user get updated"""
+    current_password: str
+    new_password: str
 
 class UserLogin(BaseModel):
     """Model used when user tries to login over API"""
