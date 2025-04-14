@@ -30,7 +30,7 @@ class AuthService:
     def create_user(self, user: UserIn) -> UserInDB:
         uuid = uuid4()
         pw_hash = self._hasher.hash_password(user.password)
-        user_db = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=pw_hash, role=RoleEnum.RESEARCHER)
+        user_db = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=pw_hash)
         return self._user_repository.create_user(user_db)
     
     def update_user(self, uuid: UUID, user: UserBase) -> UserInDB:
@@ -48,5 +48,11 @@ class AuthService:
     def find_all_users(self) -> List[UserInDB]:
         return self._user_repository.find_all_users()
 
-    def login(self, user: UserLogin):
-        user_db = self._user_repository.find_user_by_email(user.email)
+    def login(self, user_login: UserLogin):
+        user_db = self._user_repository.find_user_by_email(user_login.email)
+        # TODO improve error handling
+        if not user_db:
+            raise Exception("Incorrect username or password")
+        if not self._hasher.verify_password(user_db.hashed_password, user_login.password):
+            raise Exception("Incorrect username or password")
+        return user_db
