@@ -50,3 +50,4 @@
 | 2025-04-10 | 12:30 - 17:30 | 5,0   | DEGEL2         | 60, 53   | Write and read users from API to triplestore                      |
 | 2025-04-11 | 15:30 - 16:30 | 1,0   | DEGEL2         | 60, 53   | Extend user endpoints                                             |
 | 2025-04-13 | 21:30 - 22:30 | 1,0   | CIRIE1, DEGEL2 | 61, 54   | Discuss project endpoints and payloads                            |
+| 2025-04-13 | 09:30 - 12:30 | 3,0   | DEGEL2         | 31, 65   | Docker-Setup Backend, Admin init on startup                       |
