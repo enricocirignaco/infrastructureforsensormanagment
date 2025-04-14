@@ -17,7 +17,7 @@ export default createVuetify({
           secondary: '#F3B33C',
           accent: '#F38A00',
           background: '#FBF3EA',
-          surface: '#490E00',
+          surface: '#bf5836',
         },
       },
       dark: {

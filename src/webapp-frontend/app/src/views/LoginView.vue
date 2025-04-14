@@ -83,9 +83,9 @@ function submit() {
       .then((token) => {
         // Store the token in the auth store
         authStore.setToken(token)
-        router.push('/home')
+        router.push('/')
       })
-      .catch((error) => {
+      .catch((error) => { 
         // TODO: test
         loginError.value = error.response.data.message || 'Login failed. Please try again.'
       })

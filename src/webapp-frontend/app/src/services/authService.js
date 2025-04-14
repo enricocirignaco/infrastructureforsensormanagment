@@ -1,5 +1,5 @@
-// TODO
-const BASE_URL = 'https://your-api-url.com/login'
+import { useTextStore } from "@/stores/textStore"
+const BASE_URL = useTextStore().restApiBaseUrl
 
 export default {
   getAuthToken: function (user) {
