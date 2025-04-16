@@ -23,12 +23,15 @@ class ProjectLink(BaseModel):
 
 
 class ProjectBase(BaseModel):
-    id: UUID
     name: str
     short_name: str
     description: str
     external_props: List[ProjectLink]
 
 
-class ProjectOut(ProjectBase):
+class ProjectInDB(ProjectBase):
+    id: UUID
     state: ProjectStateEnum
+   
+class ProjectOut(ProjectInDB):
+    pass

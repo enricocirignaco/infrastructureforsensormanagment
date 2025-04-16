@@ -4,7 +4,9 @@ from typing import List, Callable
 from .models.user import UserInDB
 from .utils.triplestore_client import TripleStoreClient
 from .repositories.user_repository import UserRepository
+from .repositories.project_repository import ProjectRepository
 from .services.auth_service import AuthService, oauth2_scheme
+from .services.project_service import ProjectService
 
 # Utils
 
@@ -19,6 +21,10 @@ def get_user_repository(
 ) -> UserRepository:
     return UserRepository(triplestore_client)
 
+def get_project_repository(
+    triplestore_client: TripleStoreClient = Depends(get_triplestore_client),
+) -> ProjectRepository:
+    return ProjectRepository(triplestore_client)
 
 # Services
 
@@ -26,6 +32,12 @@ def get_auth_service(
         user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
     return AuthService(user_repository)
+
+def get_project_service(
+        project_repository: ProjectRepository = Depends(get_project_repository),
+) -> ProjectService:
+    return ProjectService(project_repository)
+
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
