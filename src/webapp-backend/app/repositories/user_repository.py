@@ -24,6 +24,50 @@ class UserRepository:
         self.triplestore_client.update(sparql_update)
 
         return self.find_user_by_uuid(user.uuid)
+    
+    def update_user(self, user: UserInDB) -> UserInDB:
+        sparql_update = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://ld.bfh.ch/>
+
+        DELETE {{
+            <http://ld.bfh.ch/users/{user.uuid}> schema:name ?name ;
+                                            schema:email ?email ;
+                                            bfh:hasRole ?role .
+        }}
+        INSERT {{
+            <http://ld.bfh.ch/users/{user.uuid}> schema:name "{user.full_name}" ;
+                                            schema:email "{user.email}" ;
+                                            bfh:hasRole {user.role.rdf_uri} .
+        }}
+        WHERE {{
+            <http://ld.bfh.ch/users/{user.uuid}> schema:name ?name ;
+                                            schema:email ?email ;
+                                            bfh:hasRole ?role .
+        }}
+        """
+        self.triplestore_client.update(sparql_update)
+
+        return self.find_user_by_uuid(user.uuid)
+    
+    def change_password(self, user: UserInDB) -> UserInDB:
+        sparql_update = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://ld.bfh.ch/>
+
+        DELETE {{
+            <http://ld.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
+        }}
+        INSERT {{
+            <http://ld.bfh.ch/users/{user.uuid}> bfh:password "{user.hashed_password}" .
+        }}
+        WHERE {{
+            <http://ld.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
+        }}
+        """
+        self.triplestore_client.update(sparql_update)
+
+        return self.find_user_by_uuid(user.uuid)
 
     def find_all_users(self) -> List[UserInDB]:
         sparql_query = """

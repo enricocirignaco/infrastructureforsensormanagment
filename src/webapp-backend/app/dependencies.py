@@ -1,8 +1,10 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status, Request
+from typing import List, Callable
 
+from .models.user import UserInDB
 from .utils.triplestore_client import TripleStoreClient
 from .repositories.user_repository import UserRepository
-from .services.auth_service import AuthService
+from .services.auth_service import AuthService, oauth2_scheme
 
 # Utils
 
@@ -24,3 +26,40 @@ def get_auth_service(
         user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
     return AuthService(user_repository)
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(get_auth_service)
+):
+    return await auth_service.get_current_user(token)
+
+
+# Direct Callables
+
+def require_roles_or_owner(
+    allowed_roles: List[str],
+    check_ownership: bool = False
+) -> Callable:
+    async def _check_user(
+        request: Request,
+        token: str = Depends(oauth2_scheme),
+        auth_service: AuthService = Depends(get_auth_service),
+    ) -> UserInDB:
+        user = await auth_service.get_current_user(token)
+
+        # Rolle erlaubt?
+        if user.role in allowed_roles:
+            return user
+
+        # Optionaler Owner-Check
+        if check_ownership:
+            path_uuid = request.path_params.get("uuid")
+            if path_uuid and str(user.uuid) == str(path_uuid):
+                return user
+
+        # Kein Zugriff
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+        )
+    return _check_user
