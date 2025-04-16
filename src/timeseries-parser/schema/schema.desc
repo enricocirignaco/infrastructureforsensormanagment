@@ -1,0 +1,10 @@
+
+“
+schema.proto"v
+
+SensorData(
+firmwareVersion (RfirmwareVersion
+temp1
+ (Rtemp1
+temp2 (Rtemp2
+hum1 (Rhum1beditionspè

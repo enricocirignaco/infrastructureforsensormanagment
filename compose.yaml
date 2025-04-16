@@ -44,6 +44,25 @@ services:
       - reverse-proxy-conf:/etc/caddy
       - reverse-proxy-data:/data
       - reverse-proxy-config:/config
+  timeseries-parser:
+    build: src/timeseries-parser
+    container_name: timeseries-parser
+    restart: always
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
+      - FUSEKI_ENDPOINT=http://fuseki:3030/testing/update
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_ORG=bfh
+      - INFLUX_BUCKET=default
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env-parser
+    depends_on:
+      - mqtt-broker
+      - fuseki
+      - influxdb
   mqtt-broker:
     image: eclipse-mosquitto:2.0.21
     container_name: mqtt-broker
