@@ -40,14 +40,14 @@
           prepend-icon="mdi-test-tube-empty"
           title="Sensors"
           value="sensors"
-          @click="router.push('/snesors')"
+          @click="router.push('/sensors')"
         ></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <!-- Header (Navbar) -->
     <v-app-bar app color="primary">
-      <v-toolbar-title style="cursor: pointer" @click="router.push('/')">{{
+      <v-toolbar-title style="cursor: pointer" @click="router.push('/projects')">{{
         textStore.applicationName
       }}</v-toolbar-title>
       <v-spacer></v-spacer>
