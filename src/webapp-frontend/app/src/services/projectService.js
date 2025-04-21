@@ -64,7 +64,37 @@ export default {
               type: "Website"
             }
           ],
-          state: "Active"
+          state: "Active",
+          sensor_nodes: [
+            {
+              id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              name: "Node 1",
+              type: "Temperature Sensor",
+              location: "Stadt Bern",
+              status: "Active"
+            },
+            {
+              id: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+              name: "Node 2",
+              type: "Humidity Sensor",
+              location: "Stadt Bern",
+              status: "Inactive"
+            },
+            {
+              id: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
+              name: "Node 3",
+              type: "Soil Moisture Sensor",
+              location: "Stadt Bern",
+              status: "Active"
+            },
+            {
+              id: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
+              name: "Node 4",
+              type: "Light Sensor",
+              location: "Stadt Bern",
+              status: "Inactive"
+            },
+          ],
         })
       })
   }
