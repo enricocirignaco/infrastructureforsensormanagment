@@ -124,7 +124,6 @@ const newUser = ref({
 })
 
 const authStore = useAuthStore()
-console.log(authStore.getUser)
 // Handle form submission for personal password change
 const submitPasswordForm = () => {
   // Validate the password change form

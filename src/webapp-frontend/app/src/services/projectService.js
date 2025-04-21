@@ -97,5 +97,49 @@ export default {
           ],
         })
       })
-  }
+  },
+  createProject: function (project) {
+    let url = BASE_URL + '/projects'
+    const options = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...authStore.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(project),
+    }
+    // return fetch(url, options)
+    //   .then(response => response.ok ? response.json() : Promise.reject(response));
+    return new Promise((resolve) => {
+        resolve({
+            id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+            name: 'Internet of Soils',
+            short_name: 'IoS',
+            state: 'Active',
+        })
+      })
+  },
+  editProject: function (project) {
+    let url = BASE_URL + '/projects/' + project.id
+    const options = {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        ...authStore.getAuthHeader(),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(project),
+    }
+    // return fetch(url, options)
+    //   .then(response => response.ok ? response.json() : Promise.reject(response));
+    return new Promise((resolve) => {
+        resolve({
+            id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+            name: 'Internet of Soils',
+            short_name: 'IoS',
+            state: 'Active',
+        })
+      })
+  },
 }

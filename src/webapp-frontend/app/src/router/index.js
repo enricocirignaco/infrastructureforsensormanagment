@@ -20,7 +20,7 @@ const router = createRouter({
         { path: 'projects', component: () => import('@/views/ProjectsView.vue') },
         { path: 'project/:id', component: () => import('@/views/ProjectView.vue')},
         { path: 'new-project', component: () => import('@/views/NewProjectView.vue') },
-        { path: '/project/:id/edit', component: () => import('@/views/NewProjectView.vue') },
+        { path: '/project/:id/edit', component: () => import('@/views/EditProjectView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page

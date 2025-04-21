@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-4">
+  <v-card class="pa-4" v-if="project">
     <v-card-title>{{ isEditMode ? 'Edit Project' : 'Create New Project' }}</v-card-title>
 
     <v-form ref="projectForm" @submit.prevent="submitProject">
@@ -60,7 +60,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <v-btn type="submit" color="primary" class="mt-4" block @click="submitProject">
+            <v-btn type="submit" color="primary" class="mt-4" block>
               <v-icon start>mdi-content-save</v-icon>
               Save Project
             </v-btn>
@@ -69,6 +69,9 @@
       </v-container>
     </v-form>
   </v-card>
+  <v-container v-else class="d-flex justify-center align-center" style="min-height: 300px">
+    <v-progress-circular indeterminate color="primary" size="64" />
+  </v-container>
 </template>
 
 <script setup>
@@ -84,19 +87,34 @@ import { ref } from 'vue'
 import { computed } from 'vue'
 import { useTextStore} from '@/stores/textStore'
 import { useRouter } from 'vue-router'
+import projectService from '@/services/projectService'
 
 const isEditMode = computed(() => projectId !== null)
 const projectForm = ref(null)
 const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
-const project = ref({
-  name: '',
-  short_name: '',
-  description: '',
-  state: '',
-  external_props: []
-})
+const project = ref(null)
+
+// Define the project object from the project Id or from default values
+if(isEditMode.value) {
+    // Fetch project data
+    projectService.getProject(projectId)
+        .then((data) => project.value = data)
+        .catch((error) => {
+        // TODO: Handle error
+        console.error(`Error fetching project ${projectId}:`, error)
+    })
+} else {
+  project.value = {
+    name: '',
+    short_name: '',
+    description: '',
+    state: '',
+    external_props: []
+  }
+}
+
 
 const addLink = () => {
   project.value.external_props.push({ name: '', url: '', type: '' })
@@ -104,15 +122,24 @@ const addLink = () => {
 
 const removeLink = (index) => {
   project.value.external_props.splice(index, 1)
+
 }
 
-
 const submitProject = () => {
-  if (projectForm.value?.validate()) {
-    console.log('Saving project:', project.value)
-    router.push('/projects')
-  } else {
-    console.warn('Form is invalid')
+  // check if any values of the project object are empty
+  if (project.value.name !== '' && project.value.short_name !== '' && project.value.description !== '' && project.value.state !== '') {
+    console.log('Project submitted:', project.value)
+    if(isEditMode){
+        //put request to update the project
+        projectService.editProject(project.value)
+            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .catch((error) => console.log('Error updating project:', error))
+    }else{
+        // post request to create the project
+        projectService.createProject(project.value)
+            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .catch((error) => console.log('Error creating project:', error))
+    }
   }
 }
 </script>
