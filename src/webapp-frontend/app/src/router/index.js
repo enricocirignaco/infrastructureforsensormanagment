@@ -18,8 +18,9 @@ const router = createRouter({
       children: [
         { path: 'settings', component: () => import('@/views/SettingsView.vue') },
         { path: 'projects', component: () => import('@/views/ProjectsView.vue') },
-        { path: 'projects/:id', component: () => import('@/views/ProjectView.vue')},
+        { path: 'project/:id', component: () => import('@/views/ProjectView.vue')},
         { path: 'new-project', component: () => import('@/views/NewProjectView.vue') },
+        { path: '/project/:id/edit', component: () => import('@/views/NewProjectView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page

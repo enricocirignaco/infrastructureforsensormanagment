@@ -13,7 +13,7 @@
     <v-data-table
       :items="projects"
       :headers="headers"
-      @click:row="(_, { item }) => router.push(`/projects/${item.id}`)"
+      @click:row="(_, { item }) => router.push(`/project/${item.id}`)"
       class="elevation-1 rounded-lg"
       hover
       rounded="lg"

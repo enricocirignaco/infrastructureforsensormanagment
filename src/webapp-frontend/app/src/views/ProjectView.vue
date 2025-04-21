@@ -22,7 +22,7 @@
                 <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
                   {{ project.state }}
                 </v-chip>
-                <v-btn color="primary" icon size="small" @click="editStatus">
+                <v-btn color="primary" icon size="small" @click="router.push(`/project/${projectId}/edit`)">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
             </v-col>
