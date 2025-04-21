@@ -1,24 +1,33 @@
 <template>
-  <v-container>
+  <v-container v-if="loading" class="d-flex justify-center align-center" style="min-height: 300px">
+    <v-progress-circular indeterminate color="primary" size="64" />
+  </v-container>
+  <v-container v-else>
     <!-- Project Details -->
     <v-card class="mb-4" rounded="lg">
       <v-card-title>
         <v-row class="w-100 align-center">
-          <v-col cols="auto">
-            <v-btn icon @click="$router.back()">
-              <v-icon>mdi-arrow-left</v-icon>
-            </v-btn>
-          </v-col>
-          <v-col>
-            <h2 class="mb-0">{{ project.name }} - {{ project.short_name }}</h2>
-          </v-col>
-          <v-col cols="auto">
-            <v-chip color="primary" variant="flat">{{ project.state }}</v-chip>
-          </v-col>
+            <!-- back button -->
+            <v-col cols="auto">
+                <v-btn icon @click="$router.back()">
+                <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+            </v-col>
+            <!-- title -->
+            <v-col>
+                <h2 class="mb-0">{{ project.name }} - {{ project.short_name }}</h2>
+            </v-col>
+            <!-- status & edit button -->
+            <v-col cols="auto" class="d-flex align-center">
+                <v-chip color="primary" variant="flat" class="me-2">{{ project.state }}</v-chip>
+                <v-btn color="primary" icon size="small" @click="editStatus">
+                    <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+            </v-col>
         </v-row>
       </v-card-title>
       <v-divider class="my-6" />
-
+      <!-- Project content -->
       <v-card-text>
         <div class="mb-6">
           <h3 class="text-h6 mb-2">Project Description</h3>
@@ -26,15 +35,15 @@
         </div>
         <h3 class="text-h6 mb-2">Project Resources</h3>
         <v-data-table
-          :headers="[
-            { title: 'Name', key: 'name' },
-            { title: 'Type', key: 'type' },
-            { title: 'URL', key: 'url' }
-          ]"
           :items="project.external_props"
+          :headers="headers"
           density="compact"
           class="rounded-lg elevation-1"
           hide-default-footer
+          :group-by="groupBy"
+          rounded="lg"
+          elevation="1"
+          show-group-by
         >
           <template #item.url="{ item }">
             <a :href="item.url" target="_blank">{{ item.url }}</a>
@@ -46,7 +55,7 @@
 
     <h2 class="text-h6 mb-2">Deployed Nodes</h2>
     <!-- Table -->
-    <v-data-table
+    <!-- <v-data-table
       :items="projects"
       :headers="headers"
       @click:row="(_, { item }) => router.push(`/projects/${item.id}`)"
@@ -56,23 +65,34 @@
       elevation="1"
       :loading="loading"
     >
-    </v-data-table>
+    </v-data-table> -->
   </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import projectService from '@/services/projectService'
 
-const project = ref({
-  name: 'Internet of Soils',
-  short_name: 'IoS',
-  description: 'A research project focused on soil monitoring using IoT sensors.',
-  external_props: [
-    { name: 'GitHub Repository', url: 'https://github.com/example/internet-of-soils', type: 'Repository' },
-    { name: 'Project Website', url: 'https://internetofsoils.example.org', type: 'Website' }
-  ],
-  state: 'Active'
-})
+const projectId = ref(useRoute().params.id)
+const router = useRouter()
+const project = ref(null)
+const headers = [
+    { title: 'Name', key: 'name' },
+    { title: 'URL', key: 'url' }
+]
+const groupBy = ref([{ key: 'type', order: 'asc' }])
+const loading = ref(true)
+// Fetch project data
+projectService.getProject(projectId.value)
+    .then((data) => project.value = data)
+    .catch((error) => {
+    // TODO: Handle error
+    console.error(`Error fetching project ${projectId.value}:`, error)
+  })
+  .finally(() => loading.value = false)
+
 
 const sensorHeaders = [
   { title: 'Node ID', key: 'id' },
@@ -85,4 +105,8 @@ const sensorNodes = ref([
   { id: 'node-02', location: 'Field B', status: 'Offline' },
   { id: 'node-03', location: 'Greenhouse', status: 'Online' },
 ])
+
+const editStatus = () => {
+  console.log('Edit status clicked')
+}
 </script>
