@@ -142,4 +142,19 @@ export default {
         })
       })
   },
+  deleteProject(id) {
+    let url = BASE_URL + '/projects/' + id
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+    }
+    // return fetch(url, options)
+    //   .then(response => response.ok ? response.json() : Promise.reject(response));
+    return new Promise((resolve) => {
+        resolve(true)
+      })
+  }
 }
