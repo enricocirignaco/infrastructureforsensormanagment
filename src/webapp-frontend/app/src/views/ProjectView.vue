@@ -19,7 +19,9 @@
             </v-col>
             <!-- status & edit button -->
             <v-col cols="auto" class="d-flex align-center">
-                <v-chip color="primary" variant="flat" class="me-2">{{ project.state }}</v-chip>
+                <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
+                  {{ project.state }}
+                </v-chip>
                 <v-btn color="primary" icon size="small" @click="editStatus">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
@@ -36,7 +38,7 @@
         <h3 class="text-h6 mb-2">Project Resources</h3>
         <v-data-table
           :items="project.external_props"
-          :headers="headers"
+          :headers="projectHeaders"
           density="compact"
           class="rounded-lg elevation-1"
           hide-default-footer
@@ -54,18 +56,22 @@
     <v-divider class="my-6" />
 
     <h2 class="text-h6 mb-2">Deployed Nodes</h2>
-    <!-- Table -->
-    <!-- <v-data-table
-      :items="projects"
-      :headers="headers"
-      @click:row="(_, { item }) => router.push(`/projects/${item.id}`)"
+    <!-- Table of deployed nodes -->
+    <v-data-table
+      :items="project.sensor_nodes"
+      :headers="sensorHeaders"
       class="elevation-1 rounded-lg"
       hover
+      density="compact"
       rounded="lg"
       elevation="1"
-      :loading="loading"
     >
-    </v-data-table> -->
+      <template #item.status="{ item }">
+        <v-chip :color="getStatusColor(item.status)" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+          {{ item.status }}
+        </v-chip>
+      </template>
+    </v-data-table>
   </v-container>
 </template>
 
@@ -78,9 +84,16 @@ import projectService from '@/services/projectService'
 const projectId = ref(useRoute().params.id)
 const router = useRouter()
 const project = ref(null)
-const headers = [
+const projectHeaders = [
     { title: 'Name', key: 'name' },
     { title: 'URL', key: 'url' }
+]
+const sensorHeaders = [
+  { title: 'Node ID', key: 'id' },
+  { title: 'Name', key: 'name'},
+  { title: 'Type', key: 'type' },
+  { title: 'Location', key: 'location' },
+  { title: 'Status', key: 'status' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])
 const loading = ref(true)
@@ -92,20 +105,13 @@ projectService.getProject(projectId.value)
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
   .finally(() => loading.value = false)
-
-
-const sensorHeaders = [
-  { title: 'Node ID', key: 'id' },
-  { title: 'Location', key: 'location' },
-  { title: 'Status', key: 'status' },
-]
-
-const sensorNodes = ref([
-  { id: 'node-01', location: 'Field A', status: 'Online' },
-  { id: 'node-02', location: 'Field B', status: 'Offline' },
-  { id: 'node-03', location: 'Greenhouse', status: 'Online' },
-])
-
+// render status color
+function getStatusColor (status) {
+    if (status === 'Active') return 'success'
+    else if (status === 'Inactive') return 'warning'
+    else if (status === 'Error') return 'error'
+    else return 'grey'
+  }
 const editStatus = () => {
   console.log('Edit status clicked')
 }
