@@ -17,10 +17,14 @@ const router = createRouter({
       redirect: 'projects',
       children: [
         { path: 'settings', component: () => import('@/views/SettingsView.vue') },
-        { path: 'projects', component: () => import('@/views/ProjectsView.vue') },
-        { path: 'project/:id', component: () => import('@/views/ProjectView.vue')},
-        { path: 'new-project', component: () => import('@/views/NewProjectView.vue') },
-        { path: '/project/:id/edit', component: () => import('@/views/EditProjectView.vue') },
+        { path: 'projects', component: () => import('@/views/Project/ProjectsView.vue') },
+        { path: 'project/:id', component: () => import('@/views/Project/ProjectView.vue')},
+        { path: '/project/:id/edit', component: () => import('@/views/Project/EditProjectView.vue') },
+        { path: 'project/new', component: () => import('@/views/Project/NewProjectView.vue') },
+        { path: '/commercialsensors', component: () => import('@/views/CommercialSensor/CommercialSensorsView.vue') },
+        { path: '/commercialsensor/:id', component: () => import('@/views/CommercialSensor/CommercialSensorView.vue') },
+        { path: '/commercialsensor/:id/edit', component: () => import('@/views/CommercialSensor/EditCommercialSensorView.vue') },
+        { path: '/commercialsensor/new', component: () => import('@/views/CommercialSensor/NewCommercialSensorView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page

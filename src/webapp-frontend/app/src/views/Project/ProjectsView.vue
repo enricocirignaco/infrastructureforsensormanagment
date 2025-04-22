@@ -6,7 +6,7 @@
         <h1>Projects</h1>
       </v-col>
       <v-col cols="auto">
-      <v-btn rounded="xl" class="text-none" @click="router.push('/new-project')">
+      <v-btn rounded="xl" class="text-none" @click="router.push('/project/new')">
         <v-icon start>mdi-plus</v-icon>
         New Project
       </v-btn>
