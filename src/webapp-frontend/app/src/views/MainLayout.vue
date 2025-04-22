@@ -38,16 +38,16 @@
         ></v-list-item>
         <v-list-item
           prepend-icon="mdi-test-tube-empty"
-          title="Sensors"
+          title="Commercial Sensors"
           value="sensors"
-          @click="router.push('/sensors')"
+          @click="router.push('/commercial-sensors')"
         ></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <!-- Header (Navbar) -->
     <v-app-bar app color="primary">
-      <v-toolbar-title style="cursor: pointer" @click="router.push('/projects')">{{
+      <v-toolbar-title style="cursor: pointer" @click="router.push('/')">{{
         textStore.applicationName
       }}</v-toolbar-title>
       <v-spacer></v-spacer>
