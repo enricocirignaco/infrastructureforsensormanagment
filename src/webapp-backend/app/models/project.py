@@ -4,7 +4,7 @@ from enum import Enum
 from uuid import UUID
 
 
-class LinkTypeEnum(str, Enum):
+class ProjectLinkEnum(str, Enum):
     WEBSITE = 'Website'
     MS_TEAMS = 'MS Teams'
     REPORT = 'Report'
@@ -19,7 +19,7 @@ class ProjectStateEnum(str, Enum):
 class ProjectLink(BaseModel):
     name: Optional[str]
     url: str
-    type: LinkTypeEnum
+    type: ProjectLinkEnum
 
 
 class ProjectBase(BaseModel):
