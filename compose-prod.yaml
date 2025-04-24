@@ -1,6 +1,6 @@
 services:
   reverse-proxy:
-    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/webapp-frontend:${TAG}
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/reverse-proxy:${TAG}
     container_name: reverse-proxy
     restart: unless-stopped
     cap_add:  # improve QUIC speeds
