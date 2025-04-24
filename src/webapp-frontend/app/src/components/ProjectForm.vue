@@ -6,13 +6,13 @@
       <v-container>
         <v-row>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="project.name" label="Project Name" :rules="[required]" required />
+            <v-text-field v-model="project.name" label="Project Name" :rules="[required]" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="project.short_name" label="Short Name" :rules="[required]" required />
+            <v-text-field v-model="project.short_name" label="Short Name" :rules="[required]" />
           </v-col>
           <v-col cols="12">
-            <v-textarea v-model="project.description" label="Project Description" :rules="[required]" required />
+            <v-textarea v-model="project.description" label="Project Description" :rules="[required]" />
           </v-col>
           <!-- status dropdown -->
           <v-col cols="12" sm="6">
@@ -21,7 +21,6 @@
               :items="Object.values(textStore.statusEnum)"
               label="Status"
               :rules="[required]"
-              required
             />
           </v-col>
           <v-col cols="12">
@@ -32,10 +31,10 @@
               class="mb-2"
             >
               <v-col cols="4">
-                <v-text-field v-model="link.name" label="Name" :rules="[link.url || link.type ? required : () => true]" />
+                <v-text-field v-model="link.name" label="Name" :rules="[required]" />
               </v-col>
               <v-col cols="4">
-                <v-text-field v-model="link.url" label="URL" :rules="[link.name || link.type ? required : () => true]" />
+                <v-text-field v-model="link.url" label="URL" :rules="[required]" />
               </v-col>
               <v-col cols="3">
                 <!-- external resource type dropdown -->
@@ -43,7 +42,7 @@
                   v-model="link.type"
                   :items="Object.values(textStore.externalResourceTypeEnum)"
                   label="Type"
-                  :rules="[link.name || link.url ? required : () => true]"
+                  :rules="[required]"
                 />
               </v-col>
               <v-col cols="1" class="d-flex align-center">
@@ -126,9 +125,9 @@ const removeLink = (index) => {
 }
 
 const submitProject = () => {
-  // check if any values of the project object are empty
-  if (project.value.name !== '' && project.value.short_name !== '' && project.value.description !== '' && project.value.state !== '') {
-    console.log('Project submitted:', project.value)
+  // Validate Form
+  projectForm.value?.validate().then((isValid) => {
+    if (!isValid.valid) return
     if(isEditMode){
         //put request to update the project
         projectService.editProject(project.value)
@@ -140,6 +139,6 @@ const submitProject = () => {
             .then((projectDTO) => router.push('/project/' + projectDTO.id))
             .catch((error) => console.log('Error creating project:', error))
     }
-  }
+  })
 }
 </script>
