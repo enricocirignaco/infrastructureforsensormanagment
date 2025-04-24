@@ -63,6 +63,15 @@
 | 2025-04-08 | 10:00 - 22:00 | 10,0  | CIRIE1         | 43, 51   | Frontend development, Research component framework, vue initialization|
 | 2025-04-10 | 10:00 - 17:30 | 7,0   | CIRIE1         | 43, 51   | Frontend development, vue Trobleshooting                          |
 | 2025-04-11 | 09:00 - 17:00 | 7.0   | CIRIE1         | 52, 51   | Frontend development, Setting Page, Rest Services, Review MR, journal|
+| 2025-04-14 | 10:00 - 16:00 | 6.0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
+| 2025-04-20 | 17:00 - 20:00 | 3.0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
+| 2025-04-21 | 16:00 - 21:30 | 5.5   | CIRIE1         | 44, 45   | Frontend development, Project Page, Deployed Node view, Router refactoring|
+| 2025-04-22 | 10:00 - 16:00 | 5.5   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+| 2025-04-22 | 08:00 - 11:00 | 3     | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+
+
+
+
 
 
 
