@@ -1,4 +1,5 @@
 stages:
+  - test
   - build
 
 variables:
@@ -38,3 +39,17 @@ build-frontend:
     - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+
+
+# Test SSH connection job
+test-ssh-connection:
+  stage: test
+  image: alpine
+  before_script:
+    - apk add --no-cache openssh
+    - echo "$SSH_PRIVATE_KEY_B64" | base64 -d > id_rsa
+    - chmod 600 id_rsa
+  script:
+    - ssh -i id_rsa -o StrictHostKeyChecking=no bfh@mip3-cirie1 'echo "SSH connection successful"'
+  rules:
+    - when: always
