@@ -1,0 +1,20 @@
+services:
+  reverse-proxy:
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/webapp-frontend:latest
+    container_name: reverse-proxy
+    restart: unless-stopped
+    cap_add:  # improve QUIC speeds
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - reverse-proxy-conf:/etc/caddy
+      - reverse-proxy-data:/data
+      - reverse-proxy-config:/config
+  
+volumes:
+  reverse-proxy-conf:
+  reverse-proxy-data:
+  reverse-proxy-config:
