@@ -114,6 +114,44 @@ export default {
         return new Promise((resolve) => {
             resolve(true)
         })
+    },
+    editCommercialSensor(sensorId) {
+        let url = BASE_URL + '/commercial-sensors/' + sensorId
+        const options = {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+        }
+        // return fetch(url, options)
+        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+        // }
+        return new Promise((resolve) => {
+            resolve(true)
+        })
+    },
+    createCommercialSensor(sensor) {
+        let url = BASE_URL + '/commercial-sensors'
+        const options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sensor),
+        }
+        // return fetch(url, options)
+        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+        // }
+        return new Promise((resolve) => {
+            resolve({
+                id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                name: 'DHT22',
+                alias: 'Temperature and Humidity Sensor',
+            })
+        })
     }
 
 }
