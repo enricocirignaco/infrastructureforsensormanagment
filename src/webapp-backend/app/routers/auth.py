@@ -21,6 +21,3 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     except Exception as e:
         raise e
     return token
-
-
-# i8mO&/<Mt5r1_u[a

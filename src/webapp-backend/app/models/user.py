@@ -15,7 +15,7 @@ class RoleEnum(str, Enum):
     @classmethod
     def from_rdf_uri(cls, rdf_uri: str):
         """Create a RoleEnum from the RDF URI."""
-        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/Roles/<type>
+        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/Roles/<role>
         cleaned_uri = rdf_uri.strip('<>')
         role_name = cleaned_uri.split('/')[-1]
         try:

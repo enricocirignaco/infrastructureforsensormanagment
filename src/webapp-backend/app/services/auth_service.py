@@ -11,10 +11,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.models.user import UserIn, UserInDB, UserBase, UserLogin, UserChangePw, Token, RoleEnum
 from app.repositories.user_repository import UserRepository
+from app.config import settings
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+JWT_ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -44,9 +43,11 @@ class AuthService:
         user_db = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=pw_hash)
         return self._user_repository.create_user(user_db)
     
-    def update_user(self, uuid: UUID, user: UserBase) -> UserInDB:
+    def update_user(self, uuid: UUID, user: UserBase, logged_in_user: UserInDB) -> UserInDB:
         user_db = self._user_repository.find_user_by_uuid(uuid=uuid)
-        if user_db.role != user.role and user_db.role != RoleEnum.ADMIN:
+        if not user_db:
+            raise HTTPException(status_code=404, detail="User not found")
+        if user_db.role != user.role and logged_in_user.role != RoleEnum.ADMIN:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="The role can only be changed by an admin user",
@@ -55,8 +56,13 @@ class AuthService:
         user_new = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=user_db.hashed_password)
         return self._user_repository.update_user(user_new)
 
-    def change_password(self, uuid: UUID, user: UserChangePw) -> Token:
+    def change_password(self, uuid: UUID, user: UserChangePw, logged_in_user: UserInDB) -> Token:
         user_db = self._user_repository.find_user_by_uuid(uuid=uuid)
+        if logged_in_user.role != RoleEnum.ADMIN and logged_in_user.uuid != uuid:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Password can only be changed by own user or admin",
+            )
         if not self._hasher.verify_password(user_db.hashed_password, user.current_password):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -69,10 +75,16 @@ class AuthService:
         return Token(access_token=access_token, token_type="bearer")
     
     def find_user_uuid(self, uuid: UUID) -> UserInDB:
-        return self._user_repository.find_user_by_uuid(uuid)
+        user = self._user_repository.find_user_by_uuid(uuid)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
     def find_user_email(self, email: EmailStr) -> UserInDB:
-        return self._user_repository.find_user_by_email(email)
+        user = self._user_repository.find_user_by_email(email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
     
     def find_all_users(self) -> List[UserInDB]:
         return self._user_repository.find_all_users()
@@ -84,7 +96,7 @@ class AuthService:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[JWT_ALGORITHM])
             uuid = payload.get("sub")
             if uuid is None:
                 raise credentials_exception
@@ -111,7 +123,7 @@ class AuthService:
 
     def create_access_token(self, user: UserInDB, expires_delta: timedelta | None = None) -> str:
         if expires_delta is None:
-            expires_delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MIN)
 
         expire = datetime.now(timezone.utc) + expires_delta
         to_encode = {
@@ -121,4 +133,4 @@ class AuthService:
             "full_name": user.full_name,
             "exp": expire,
         }
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(to_encode, settings.JWT_SECRET, algorithm=JWT_ALGORITHM)

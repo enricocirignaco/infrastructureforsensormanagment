@@ -1,16 +1,16 @@
 import os
 import secrets
-import string
 from ..services.auth_service import AuthService
 from ..utils.triplestore_client import TripleStoreClient
 from ..repositories.user_repository import UserRepository
 from ..models.user import UserIn, RoleEnum
+from ..config import settings
 
 def create_init_admin():
     auth_service = _build_auth_service()
 
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@bfh.ch")
-    admin_password = os.environ.get("ADMIN_PASSWORD", _generate_secure_password())
+    admin_email = settings.INIT_ADMIN_MAIL
+    admin_password = settings.INIT_ADMIN_PW or _generate_secure_password()
 
     if not auth_service.find_user_email(admin_email):
         admin = UserIn(
@@ -32,18 +32,10 @@ def create_init_admin():
         print(f"Admin user with email {admin_email} already exists.")
 
 def _generate_secure_password(length: int = 16) -> str:
-    alphabet = string.ascii_letters + string.digits + string.punctuation
-    while True:
-        password = ''.join(secrets.choice(alphabet) for _ in range(length))
-        # Mindestens 1 Gross-, Kleinbuchstabe, Ziffer und Sonderzeichen
-        if (any(c.islower() for c in password)
-                and any(c.isupper() for c in password)
-                and any(c.isdigit() for c in password)
-                and any(c in string.punctuation for c in password)):
-            return password
+    return secrets.token_urlsafe(length)
 
 def _build_auth_service():
-    triplestore = TripleStoreClient(endpoint_url="http://localhost:3030/testing/")
+    triplestore = TripleStoreClient(endpoint_url=settings.TRIPLESTORE_ENDPOINT)
     user_repository = UserRepository(triplestore_client=triplestore)
     auth_service = AuthService(user_repository=user_repository)
     return auth_service

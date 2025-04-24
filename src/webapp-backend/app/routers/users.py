@@ -33,14 +33,14 @@ async def create_new_user(user: UserIn,
 @router.put("/{uuid}", response_model=UserOut)
 async def update_specific_user(uuid: UUID,
                                user: UserBase,
-                               _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
+                               logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
                                auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
-    return auth_service.update_user(uuid, user)
+    return auth_service.update_user(uuid, user, logged_in_user)
 
 @router.patch("/{uuid}")
 async def change_password(uuid: UUID,
                           user: UserChangePw,
-                          _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
+                          logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
                           auth_service: AuthService = Depends(get_auth_service)) -> Token:
-    return auth_service.change_password(uuid, user)
+    return auth_service.change_password(uuid, user, logged_in_user)
 

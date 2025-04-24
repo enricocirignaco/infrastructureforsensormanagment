@@ -7,11 +7,12 @@ from .repositories.user_repository import UserRepository
 from .repositories.project_repository import ProjectRepository
 from .services.auth_service import AuthService, oauth2_scheme
 from .services.project_service import ProjectService
+from .config import settings
 
 # Utils
 
 def get_triplestore_client() -> TripleStoreClient:
-    return TripleStoreClient(endpoint_url="http://localhost:3030/testing/")
+    return TripleStoreClient(endpoint_url=settings.TRIPLESTORE_ENDPOINT)
 
 
 # Repositories
