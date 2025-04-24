@@ -64,6 +64,21 @@
                 elevation="1"
                 hide-default-footer
             >
+              <template #item.precision="{ item }">
+                <span v-if="item.precision">
+                  ± {{ item.precision }} {{ item.unit }}
+                </span>
+              </template>
+              <template #item.range.min="{ item }">
+                <span v-if="item.range.min !== undefined && item.range.min !== null">
+                  {{ item.range.min }} {{ item.unit }}
+                </span>
+              </template>
+              <template #item.range.max="{ item }">
+                <span v-if="item.range.max !== undefined && item.range.max !== null">
+                  {{ item.range.max }} {{ item.unit }}
+                </span>
+              </template>
             </v-data-table>
         </v-card-text>
       </v-card>
@@ -115,7 +130,12 @@
     { title: 'Name', key: 'name', sortable: false},
     { title: 'Unit', key: 'unit' , sortable: false},
     { title: 'Precision', key: 'precision' , sortable: false},
-    { title: 'Range', key: 'range' , sortable: false},
+    { title: 'Range', align: 'center', sortable: false,
+      children: [
+        { title: 'Min', key: 'range.min', sortable: false},
+        { title: 'Max', key: 'range.max', sortable: false}
+      ]
+    }
   ]
   const groupBy = ref([{ key: 'type', order: 'asc' }])
   const loading = ref(true)

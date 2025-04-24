@@ -85,14 +85,22 @@ export default {
                     {
                         name: 'Temperature',
                         unit: '°C',
-                        precision: '0.1',
-                        range: '-40 to 80',
+                        precision: 0.1,
+                        range:
+                            {
+                                min: -40,
+                                max: 80,
+                            }
                     },
                     {
                         name: 'Humidity',
                         unit: '%',
-                        precision: '0.1',
-                        range: '0 to 100',
+                        precision: 0.1,
+                        range:
+                            {
+                                min: 0,
+                                max: 100,
+                            }
                     },
                 ],
             })
