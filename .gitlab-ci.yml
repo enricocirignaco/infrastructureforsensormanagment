@@ -25,9 +25,9 @@ build-arduino-compiler:
     IMAGE_NAME: "arduino-compiler"
   script:
     - echo "Building Arduino Compiler Image..."
-    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/compiler-engine/arduino-compiler/Dockerfile .
+    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
-    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
 
 build-frontend:
   <<: *docker-build
@@ -35,6 +35,6 @@ build-frontend:
     IMAGE_NAME: "reverse-proxy"
   script:
     - echo "Building Frontend Image..."
-    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile .
+    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/webapp-frontend/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
-    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
