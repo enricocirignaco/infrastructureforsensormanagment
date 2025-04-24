@@ -11,9 +11,9 @@ class UserRepository:
     def create_user(self, user: UserInDB) -> UserInDB:
         sparql_update = f"""
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
         INSERT DATA {{
-            <http://ld.bfh.ch/users/{user.uuid}> a schema:Person ;
+            <http://data.bfh.ch/users/{user.uuid}> a schema:Person ;
                 schema:identifier "{user.uuid}" ;
                 schema:name "{user.full_name}" ;
                 schema:email "{user.email}" ;
@@ -28,20 +28,20 @@ class UserRepository:
     def update_user(self, user: UserInDB) -> UserInDB:
         sparql_update = f"""
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
 
         DELETE {{
-            <http://ld.bfh.ch/users/{user.uuid}> schema:name ?name ;
+            <http://data.bfh.ch/users/{user.uuid}> schema:name ?name ;
                                             schema:email ?email ;
                                             bfh:hasRole ?role .
         }}
         INSERT {{
-            <http://ld.bfh.ch/users/{user.uuid}> schema:name "{user.full_name}" ;
+            <http://data.bfh.ch/users/{user.uuid}> schema:name "{user.full_name}" ;
                                             schema:email "{user.email}" ;
                                             bfh:hasRole {user.role.rdf_uri} .
         }}
         WHERE {{
-            <http://ld.bfh.ch/users/{user.uuid}> schema:name ?name ;
+            <http://data.bfh.ch/users/{user.uuid}> schema:name ?name ;
                                             schema:email ?email ;
                                             bfh:hasRole ?role .
         }}
@@ -53,16 +53,16 @@ class UserRepository:
     def change_password(self, user: UserInDB) -> UserInDB:
         sparql_update = f"""
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
 
         DELETE {{
-            <http://ld.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
+            <http://data.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
         }}
         INSERT {{
-            <http://ld.bfh.ch/users/{user.uuid}> bfh:password "{user.hashed_password}" .
+            <http://data.bfh.ch/users/{user.uuid}> bfh:password "{user.hashed_password}" .
         }}
         WHERE {{
-            <http://ld.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
+            <http://data.bfh.ch/users/{user.uuid}> bfh:password ?oldPassword .
         }}
         """
         self.triplestore_client.update(sparql_update)
@@ -72,7 +72,7 @@ class UserRepository:
     def find_all_users(self) -> List[UserInDB]:
         sparql_query = """
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
         SELECT ?uuid ?name ?email ?password ?role WHERE {{
             ?user a schema:Person ;
                 schema:identifier ?uuid ;
@@ -98,7 +98,7 @@ class UserRepository:
     def find_user_by_uuid(self, uuid: UUID) -> UserInDB:
         sparql_query = f"""
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
         SELECT ?name ?email ?password ?role WHERE {{
             ?user a schema:Person ;
                 schema:identifier "{uuid}" ;
@@ -123,7 +123,7 @@ class UserRepository:
     def find_user_by_email(self, email: str) -> UserInDB | None:
         sparql_query = f"""
         PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://ld.bfh.ch/>
+        PREFIX bfh: <http://data.bfh.ch/>
         SELECT ?uuid ?name ?password ?role WHERE {{
             ?user a schema:Person ;
                 schema:identifier ?uuid ;
