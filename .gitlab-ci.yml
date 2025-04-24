@@ -36,7 +36,7 @@ build-compiler-engine:
     IMAGE_NAME: "compiler-engine"
   script:
     - echo "Building Compiler Engine Image..."
-    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/compiler-engine/Dockerfile .
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/compiler-engine/Dockerfile src/compiler-engine
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 build-compiler-engine-cleaner:
@@ -45,7 +45,7 @@ build-compiler-engine-cleaner:
     IMAGE_NAME: "compiler-engine-cleaner"
   script:
     - echo "Building Compiler Engine Cleaner Image..."
-    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/volumes-cleaner/Dockerfile .
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/volumes-cleaner/Dockerfile src/volumes-cleaner
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 build-frontend:
@@ -54,7 +54,7 @@ build-frontend:
     IMAGE_NAME: "reverse-proxy"
   script:
     - echo "Building Frontend Image..."
-    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile .
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile src/webapp-frontend
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 

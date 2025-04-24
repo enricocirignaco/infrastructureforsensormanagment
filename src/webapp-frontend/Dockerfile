@@ -2,7 +2,7 @@
 FROM node:18-alpine AS builder
 
 WORKDIR /app
-COPY src/webapp-frontend/app /app
+COPY ./app /app
 RUN npm install
 RUN npm run build
 
