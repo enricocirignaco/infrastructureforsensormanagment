@@ -50,6 +50,6 @@ test-ssh-connection:
     - echo "$SSH_PRIVATE_KEY_B64" | base64 -d > id_rsa
     - chmod 600 id_rsa
   script:
-    - ssh -i id_rsa -o StrictHostKeyChecking=no bfh@mip3-cirie1 'echo "SSH connection successful"'
+    - ssh -i id_rsa -o StrictHostKeyChecking=no bfh@10.248.11.94 'echo "SSH connection successful"'
   rules:
     - when: always
