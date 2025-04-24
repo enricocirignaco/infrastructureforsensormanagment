@@ -2,39 +2,39 @@ stages:
   - build
 
 variables:
-  IMAGE_TAG: "latest"
-  REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE"
+  IMAGE_TAG: $CI_COMMIT_TAG
+  REGISTRY_IMAGE: ${CI_COMMIT_TAG:-latest}
   DOCKER_BUILDKIT: 1  # Enables BuildKit for caching
 
-build-arduino-compiler:
+# This is a template for building Docker images in GitLab CI/CD.
+.docker-build-template: &docker-build
   stage: build
   image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      command: ["--tls=false"]
+  before_script:
+    - echo "Logging into GitLab Container Registry..."
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  only:
+    - tags
+
+build-arduino-compiler:
+  <<: *docker-build
   variables:
     IMAGE_NAME: "arduino-compiler"
-  services:
-    - name: docker:20.10.16-dind
-      command: ["--tls=false"]
-  before_script:
-    - echo "Logging into GitLab Container Registry..."
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - echo "Building Arduino Compiler Image..."
-    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/compiler-engine/arduino-compiler/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
-    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+
 build-frontend:
-  stage: build
-  image: docker:20.10.16
+  <<: *docker-build
   variables:
-    IMAGE_NAME: "webapp-frontend"
-  services:
-    - name: docker:20.10.16-dind
-      command: ["--tls=false"]
-  before_script:
-    - echo "Logging into GitLab Container Registry..."
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    IMAGE_NAME: "reverse-proxy"
   script:
     - echo "Building Frontend Image..."
-    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/webapp-frontend/Dockerfile .
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
-    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
