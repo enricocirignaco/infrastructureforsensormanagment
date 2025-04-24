@@ -1,4 +1,29 @@
 services:
+  compiler-engine:
+    container_name: compiler-engine
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/compiler-engine:${TAG}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-logs:/logs
+      - compiler-engine-cache:/cache
+    env_file:
+      - .env
+  compiler-engine-cleaner:
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/compiler-engine-cleaner:${TAG}
+    container_name: compiler-engine-cleaner
+    volumes:
+      - compiler-engine-source:/source
+      - compiler-engine-output:/output
+      - compiler-engine-logs:/logs
+      - ./src/compiler-engine/app/cleaner.py:/app/cleaner.py
+    env_file:
+      - .env
+    restart: unless-stopped
   reverse-proxy:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/reverse-proxy:${TAG}
     container_name: reverse-proxy
@@ -18,3 +43,11 @@ volumes:
   reverse-proxy-conf:
   reverse-proxy-data:
   reverse-proxy-config:
+  compiler-engine-source:
+    name: compiler-engine-source
+  compiler-engine-output:
+    name: compiler-engine-output
+  compiler-engine-logs:
+    name: compiler-engine-logs
+  compiler-engine-cache:
+    name: compiler-engine-cache

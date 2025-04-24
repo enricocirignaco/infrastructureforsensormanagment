@@ -30,6 +30,24 @@ build-arduino-compiler:
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 
+build-compiler-engine:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "compiler-engine"
+  script:
+    - echo "Building Compiler Engine Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/compiler-engine/Dockerfile .
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+build-compiler-engine-cleaner:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "compiler-engine-cleaner"
+  script:
+    - echo "Building Compiler Engine Cleaner Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/volumes-cleaner/Dockerfile .
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 build-frontend:
   <<: *docker-build
   variables:
@@ -53,4 +71,4 @@ build-frontend:
 #     - ssh -i id_rsa -o StrictHostKeyChecking=no bfh@10.248.11.94 'echo "SSH connection successful"'
 #   rules:
 #     - when: always
-# Command to run: TAG=v0.0.1 docker compose -f compose-prod.yml pull && docker compose -f compose-prod.yml up -d
+# Command to run: export TAG=v0.0.4 && docker compose -f compose-prod.yaml pull && docker compose -f compose-prod.yaml up -d
