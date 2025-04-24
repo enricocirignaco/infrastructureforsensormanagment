@@ -2,7 +2,7 @@
 FROM node:18-alpine AS builder
 
 WORKDIR /app
-COPY ./app /app
+COPY src/webapp-frontend/app /app
 RUN npm install
 RUN npm run build
 
@@ -10,7 +10,7 @@ RUN npm run build
 FROM caddy:2.9.1-alpine
 
 # Copy Caddyfile
-COPY ../../config/Caddyfile /etc/caddy/Caddyfile
+COPY config/Caddyfile /etc/caddy/Caddyfile
 
 # Copy the built web app into the Caddy web root
 COPY --from=builder /app/dist /srv
