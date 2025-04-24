@@ -201,22 +201,6 @@ const addSensorProp = () => {
 const removeSensorProp = (index) => {
   sensor.value.sensor_props.splice(index, 1)
 }
-
-// const submitSensor = () => {
-//   // check if any values of the sensor object are empty
-//   if (sensor.value.name !== '' && sensor.value.alias !== '' && sensor.value.description !== '') {
-//     if(isEditMode){
-//         //put request to update the sensor
-//         commercialSensorService.editCommercialSensor(sensor.value)
-//             .then(() => router.push('/commercial-sensor/' + sensor.value.id))
-//             .catch((error) => console.log('Error updating sensor:', error))
-//     }else{
-//         commercialSensorService.createCommercialSensor(sensor.value)
-//             .then((sensorDTO) => router.push('/commercial-sensor/' + sensorDTO.id))
-//             .catch((error) => console.log('Error creating sensor:', error))
-//     }
-//   }
-// }
 const submitSensor = () => {
   // Validate Form
   sensorForm.value?.validate().then((isValid) => {
