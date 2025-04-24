@@ -2,21 +2,39 @@ stages:
   - build
 
 variables:
-  IMAGE_NAME: "arduino-compiler"
   IMAGE_TAG: "latest"
   REGISTRY_IMAGE: "$CI_REGISTRY_IMAGE"
   DOCKER_BUILDKIT: 1  # Enables BuildKit for caching
 
 build-arduino-compiler:
   stage: build
-  image: docker:latest
+  image: docker:20.10.16
+  variables:
+    IMAGE_NAME: "arduino-compiler"
   services:
-    - docker:dind  # Enable Docker inside GitLab CI/CD runner
+    - name: docker:20.10.16-dind
+      command: ["--tls=false"]
   before_script:
     - echo "Logging into GitLab Container Registry..."
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
   script:
     - echo "Building Arduino Compiler Image..."
     - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/compiler-engine/arduino-compiler/Dockerfile .
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
+build-frontend:
+  stage: build
+  image: docker:20.10.16
+  variables:
+    IMAGE_NAME: "webapp-frontend"
+  services:
+    - name: docker:20.10.16-dind
+      command: ["--tls=false"]
+  before_script:
+    - echo "Logging into GitLab Container Registry..."
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - echo "Building Frontend Image..."
+    - docker build -t $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG -f src/webapp-frontend/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
     - docker push $REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG
