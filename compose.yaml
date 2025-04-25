@@ -44,6 +44,19 @@ services:
       - reverse-proxy-conf:/etc/caddy
       - reverse-proxy-data:/data
       - reverse-proxy-config:/config
+  webapp-backend:
+    build:
+      context: src/webapp-backend/
+      dockerfile: Dockerfile
+    container_name: webapp-backend
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env-backend
   timeseries-parser:
     build: src/timeseries-parser
     container_name: timeseries-parser
