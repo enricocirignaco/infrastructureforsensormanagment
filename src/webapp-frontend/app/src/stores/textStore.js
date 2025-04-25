@@ -1,0 +1,51 @@
+import { defineStore } from 'pinia'
+
+export const useTextStore = defineStore('text', {
+  state: () => ({
+    sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
+    slogan: 'Innovating Nature-Care with Smart Technology',
+    applicationName: 'Internet of Soils',
+    restApiBaseUrl: 'https://api.example.com',
+    statusEnum: {
+      0: 'Active',
+      1: 'Archived',
+      2: 'Deleted',
+    },
+    externalResourceTypeEnum: {
+      0: 'Website',
+      1: 'MS Teams',
+      2: 'Report',
+      3: 'Documentation',
+      4: 'Misc',
+    },
+    sensorUnitsEnum: {
+      CELSIUS: '°C',
+      FAHRENHEIT: '°F',
+      KELVIN: 'K',
+      PERCENT: '%',
+      VOLT: 'V',
+      AMPERE: 'A',
+      LUX: 'lx',
+      PASCAL: 'Pa',
+      KILOPASCAL: 'kPa',
+      PH: 'pH',
+      MG_PER_L: 'mg/L',
+      UG_PER_L: 'µg/L',
+      MOL_PER_M2_S: 'mol/m²/s',
+      WATT_PER_M2: 'W/m²',
+      MS_PER_CM: 'mS/cm',
+      METER: 'm',
+      MILLIMETER: 'mm',
+      CM: 'cm',
+      GRAM: 'g',
+      KG: 'kg',
+      LITER: 'L',
+      CUBIC_METER: 'm³',
+      PARTS_PER_MILLION: 'ppm',
+      PARTS_PER_BILLION: 'ppb',
+      DEGREE: '°',
+      METERS_PER_SECOND: 'm/s',
+      HECTOPASCAL: 'hPa'
+    },
+  }),
+})

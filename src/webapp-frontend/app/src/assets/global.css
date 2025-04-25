@@ -1,0 +1,15 @@
+.v-card {
+  border-radius: 16px !important;
+}
+.v-btn {
+  border-radius: 8px;
+}
+.v-text-field {
+  margin-bottom: 16px;
+}
+.v-card-title {
+  padding-top: 16px;
+}
+.v-card-subtitle {
+  font-size: 1.1rem;
+}
