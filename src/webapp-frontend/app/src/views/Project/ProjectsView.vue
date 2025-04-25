@@ -16,7 +16,7 @@
     <v-data-table
       :items="projects"
       :headers="headers"
-      @click:row="(_, { item }) => router.push(`/project/${item.id}`)"
+      @click:row="(_, { item }) => router.push(`/project/${item.uuid}`)"
       class="elevation-1 rounded-lg"
       hover
       rounded="lg"
@@ -38,7 +38,7 @@ const headers = [
   { title: 'Name', key: 'name' },
   { title: 'Short Name', key: 'short_name' },
   { title: 'Status', key: 'state' },
-  { title: 'Project ID', key: 'id' }
+  { title: 'Project ID', key: 'uuid' }
 ]
 const loading = ref(true)
 // Fetch projects data
