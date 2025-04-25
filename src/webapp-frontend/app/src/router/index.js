@@ -14,8 +14,9 @@ const router = createRouter({
       path: '/',
       meta: { requiresAuth: true },
       component: () => import('@/views/MainLayout.vue'),
-      redirect: '/commercial-sensors',
+      redirect: '/dashboard',
       children: [
+        { path: 'dashboard', component: () => import('@/views/Dashboard.vue') },
         { path: 'settings', component: () => import('@/views/SettingsView.vue') },
         { path: 'projects', component: () => import('@/views/Project/ProjectsView.vue') },
         { path: 'project/:id', component: () => import('@/views/Project/ProjectView.vue')},
