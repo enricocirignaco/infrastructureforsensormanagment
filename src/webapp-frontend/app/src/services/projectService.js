@@ -48,7 +48,6 @@ export default {
   },
 
   editProject: function (project) {
-    console.log('editProject', project)
     let url = BASE_URL + '/projects/' + project.uuid
     const options = {
       method: 'PUT',
