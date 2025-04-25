@@ -131,8 +131,8 @@ const submitPasswordForm = () => {
     // Update Password
     userService
       .patchUserPassword(authStore.getUser.uuid, currentPassword.value, newPassword.value)
-      .then((token) => {
-        authStore.setToken(token)
+      .then((response) => {
+        authStore.setToken(response.access_token)
         successMessage.value = 'Your password has been successfully changed.'
         errorMessage.value = ''
       })

@@ -80,14 +80,13 @@ function submit() {
     }
     authService
       .getAuthToken(user)
-      .then((token) => {
+      .then((response) => {
         // Store the token in the auth store
-        authStore.setToken(token)
+        authStore.setToken(response.access_token)
         router.push('/')
       })
       .catch((error) => { 
-        // TODO: test
-        loginError.value = error.response.data.message || 'Login failed. Please try again.'
+        loginError.value = error.detail || 'Login failed. Please try again.'
       })
   }
 }

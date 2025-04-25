@@ -5,7 +5,7 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Internet of Soils',
-    restApiBaseUrl: 'https://api.example.com',
+    restApiBaseUrl: 'http://localhost:/api/v1',
     statusEnum: {
       0: 'Active',
       1: 'Archived',
