@@ -64,7 +64,10 @@
             type="email"
             label="Email"
             required
-            :rules="[(v) => !!v || 'Email address is required']"
+            :rules="[
+              (v) => !!v || 'Email address is required',
+              (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
+            ]"
           />
           <v-text-field
             v-model="newUser.full_name"
@@ -147,30 +150,34 @@ const submitPasswordForm = () => {
 }
 // Handle new user creation
 const createNewUser = () => {
-  if (newUser.value.email && newUser.value.full_name && newUser.value.role) {
+  // Validate Form
+  newUserForm.value?.validate().then((isValid) => {
+    if (!isValid.valid) return
+
     // Generate a random password for the new user
-    generatedPassword.value = utils.generateRandomPassword()
+    generatedPassword.value = utils.generateRandomPassword();
     const user = {
       email: newUser.value.email,
       full_name: newUser.value.full_name,
       role: newUser.value.role,
       password: generatedPassword.value,
-    }
+    };
+
     userService.postUser(user)
       .then(() => {
         adminSuccessMessage.value = 'New user created successfully.'
         adminErrorMessage.value = ''
       })
       .catch((error) => {
-        adminErrorMessage.value = 'Failed to create new user: ' + error.message
+        adminErrorMessage.value = 'Failed to create new user: ' + error.detail
         adminSuccessMessage.value = ''
       })
 
-    newUserForm.value.reset()
-    newUserForm.value.resetValidation()
-    newUser.value = { email: '', full_name: '', role: '' }
-  }
-}
+    newUserForm.value.reset();
+    newUserForm.value.resetValidation();
+    newUser.value = { email: '', full_name: '', role: '' };
+  });
+};
 
 // Copy the password to the clipboard
 const copyPassword = () => {

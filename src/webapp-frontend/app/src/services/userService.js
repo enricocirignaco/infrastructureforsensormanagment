@@ -41,7 +41,8 @@ export default {
       }),
     }
     return fetch(url, options)
-        .then(response => response.ok ? response.json() : Promise.reject(response));
+        .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)));
+
     // return new Promise((resolve) => {
     //   resolve(
     //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRvZUBleGFtcGxlLmNvbSIsImZ1bGxfbmFtZSI6IkpvaG4gRG9lIiwidXVpZCI6IjNmYTg1ZjY0LTU3MTctNDU2Mi1iM2ZjLTJjOTYzZjY2YWZhNiIsInJvbGUiOiJBZG1pbiJ9.VsAmTMl6Bzn_V7sqT4k77e2lTjGpNxn2zgYHhUrExJE',
@@ -54,16 +55,17 @@ export default {
       method: 'POST',
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/json',
         ...authStore.getAuthHeader(),
       },
       body: JSON.stringify(user),
     }
-    // return fetch(url, options)
-    //     .then(response => response.ok ? response.json() : Promise.reject(response));
+    return fetch(url, options)
+        .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)));
     // }
-    console.log('user:', user)
-    return new Promise((resolve) => {
-      resolve(user)
-    })
+    // console.log('user:', user)
+    // return new Promise((resolve) => {
+    //   resolve(user)
+    // })
   },
 }
