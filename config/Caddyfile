@@ -18,11 +18,11 @@ http://mip3-cirie1.tail60817a.ts.net/api/* {
 }
 
 # Local
-http://leaflink.ti.bfh.ch {
+https://leaflink.ti.bfh.ch {
 	import common_static
   tls_internal
 }
-http://10.248.11.94/ {
+https://10.248.11.94/ {
 	import common_static
   tls_internal
 }
