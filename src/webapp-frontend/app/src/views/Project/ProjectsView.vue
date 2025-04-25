@@ -45,7 +45,6 @@ const loading = ref(true)
 projectService.getProjectsDTO()
   .then((data) => projects.value = data)
   .catch((error) => {
-    // TODO: Handle error
     console.error('Error fetching projects:', error)
   })
   .finally(() => loading.value = false)

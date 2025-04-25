@@ -144,7 +144,6 @@ const deleteConfirmInput = ref('')
 projectService.getProject(projectId.value)
     .then((data) => project.value = data)
     .catch((error) => {
-    // TODO: Handle error
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
   .finally(() => loading.value = false)
