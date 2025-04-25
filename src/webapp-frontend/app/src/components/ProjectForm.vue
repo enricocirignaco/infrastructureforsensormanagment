@@ -131,12 +131,12 @@ const submitProject = () => {
     if(isEditMode.value){
         //put request to update the project
         projectService.editProject(project.value)
-            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .then((projectDTO) => router.push('/project/' + projectDTO.uuid))
             .catch((error) => console.log('Error updating project:', error))
     } else {
         // post request to create the project
         projectService.createProject(project.value)
-            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .then((projectDTO) => router.push('/project/' + projectDTO.uuid))
             .catch((error) => console.log('Error creating project:', error))
     }
   })

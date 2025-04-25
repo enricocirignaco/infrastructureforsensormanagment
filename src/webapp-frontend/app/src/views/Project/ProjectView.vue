@@ -164,7 +164,7 @@ const deleteProject = (id) => {
 }
 
 const performDelete = () => {
-  projectService.deleteProject()
+  projectService.deleteProject(projectToDelete.value)
     .then(() => {
         confirmDelete.value = false
         router.push('/projects')
