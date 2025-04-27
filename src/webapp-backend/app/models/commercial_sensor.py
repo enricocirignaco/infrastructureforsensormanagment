@@ -34,13 +34,13 @@ class CommercialSensorIn(CommercialSensorBase):
 # Model used internally
 
 class CommercialSensorInDB(CommercialSensorBase):
-    id: UUID
+    uuid: UUID
     #logbook: List[]
 
 # Models that get returned to the client
 
 class CommercialSensorOutSlim(BaseModel):
-    id: UUID
+    uuid: UUID
     name: str
     alias: str
 

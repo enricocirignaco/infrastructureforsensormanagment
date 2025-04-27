@@ -5,8 +5,10 @@ from .models.user import UserInDB
 from .utils.triplestore_client import TripleStoreClient
 from .repositories.user_repository import UserRepository
 from .repositories.project_repository import ProjectRepository
+from .repositories.commercial_sensor_repository import CommercialSensorRepository
 from .services.auth_service import AuthService, oauth2_scheme
 from .services.project_service import ProjectService
+from .services.commercial_sensor_service import CommercialSensorService
 from .config import settings
 
 # Utils
@@ -27,17 +29,27 @@ def get_project_repository(
 ) -> ProjectRepository:
     return ProjectRepository(triplestore_client)
 
+def get_commercial_sensor_repository(
+    triplestore_client: TripleStoreClient = Depends(get_triplestore_client),  
+) -> CommercialSensorRepository:
+    return CommercialSensorRepository(triplestore_client)
+
 # Services
 
 def get_auth_service(
-        user_repository: UserRepository = Depends(get_user_repository),
+    user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
     return AuthService(user_repository)
 
 def get_project_service(
-        project_repository: ProjectRepository = Depends(get_project_repository),
+    project_repository: ProjectRepository = Depends(get_project_repository),
 ) -> ProjectService:
     return ProjectService(project_repository)
+
+def get_commercial_sensor_service(
+    commercial_sensor_repository: CommercialSensorRepository = Depends(get_commercial_sensor_repository)
+) -> CommercialSensorService:
+    return CommercialSensorService(commercial_sensor_repository)
 
 
 async def get_current_user(

@@ -24,7 +24,7 @@ class ProjectService:
         project_db = ProjectInDB(**project.model_dump(), uuid=uuid, state=ProjectStateEnum.ACTIVE)
         return self._project_repository.create_project(project_db)
     
-    def update_project(self, uuid: UUID, project: ProjectOutFull) -> ProjectInDB | None:
+    def update_project(self, uuid: UUID, project: ProjectOutFull) -> ProjectInDB:
         project_db = self._project_repository.find_project_by_uuid(uuid=uuid)
         if not project_db:
             raise NotFoundError("Project not found")
