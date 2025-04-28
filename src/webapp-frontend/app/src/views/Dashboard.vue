@@ -22,11 +22,11 @@
             <v-card-title class="text-h6">Projects</v-card-title>
             
               <v-card-text>
-                <v-icon size="48" class="mb-2">mdi-folder</v-icon>
-                <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? 0 }}</div>
+                <v-icon size="48" class="mb-2" :icon="textStore.icons.projects" /> 
+                <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? -1 }}</div>
                 <div class="text-subtitle-2">Projects Total</div>
                 <div class="text-caption mt-1">
-                  {{ projectsStats?.active ?? 0 }} Active • {{ projectsStats?.updated ?? 0 }} Updated
+                  {{ projectsStats?.active ?? -1 }} Active • {{ projectsStats?.updated ?? -1 }} Updated
                 </div>
               </v-card-text>
             
@@ -43,10 +43,9 @@
           >
             <v-card-title class="text-h6">Commercial Sensors</v-card-title>
             <v-card-text>
-              <v-icon size="48" class="mb-2">mdi-chip</v-icon>
-              <div class="text-h4 font-weight-bold mb-2">24</div>
+              <v-icon size="48" class="mb-2" :icon="textStore.icons.commercialSensors" />              <div class="text-h4 font-weight-bold mb-2">{{ commercialSensorsStats?.total ?? -1 }}</div>
               <div class="text-subtitle-2">Commercial Sensors</div>
-              <div class="text-caption mt-1">8 Vendors • 2 Pending</div>
+              <div class="text-caption mt-1">8 Vendors • {{ commercialSensorsStats?.total ?? -1 }} In Use</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -61,7 +60,7 @@
           >
             <v-card-title class="text-h6">Sensor Nodes</v-card-title>
             <v-card-text>
-              <v-icon size="48" class="mb-2">mdi-wifi</v-icon>
+              <v-icon size="48" class="mb-2" :icon="textStore.icons.sensorNodes" /> 
               <div class="text-h4 font-weight-bold mb-2">40</div>
               <div class="text-subtitle-2">Sensor Nodes</div>
               <div class="text-caption mt-1">36 Online • 4 Offline</div>
@@ -77,11 +76,11 @@
             hover
             ripple
           >
-            <v-card-title class="text-h6">Sensor Templates</v-card-title>
+            <v-card-title class="text-h6">Node Templates</v-card-title>
             <v-card-text>
-              <v-icon size="48" class="mb-2">mdi-file-document-multiple</v-icon>
+              <v-icon size="48" class="mb-2" :icon="textStore.icons.nodeTemplates" /> 
               <div class="text-h4 font-weight-bold mb-2">15</div>
-              <div class="text-subtitle-2">Sensor Templates</div>
+              <div class="text-subtitle-2">Node Templates</div>
               <div class="text-caption mt-1">9 Used • 6 Unused</div>
             </v-card-text>
           </v-card>
@@ -94,10 +93,14 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
 import projectService from '@/services/projectService'
+import commercialSensorService from '@/services/commercialSensorService'
 import { ref } from 'vue'
+import { useTextStore } from '@/stores/textStore'
+
+const textStore = useTextStore()
 const authStore = useAuthStore()
 let projectsStats = ref(null)
-
+let commercialSensorsStats = ref(null)
 
 
 
@@ -107,12 +110,24 @@ projectService.getProjectsDTO()
     if (!projectsDTO) return Promise.reject('No projects data found')
     projectsStats.value = {
       total: projectsDTO.length,
-      active: projectsDTO.filter(project => project.state === 'active').length,
+      active: projectsDTO.filter(project => project.state === 'Active').length,
       updated: projectsDTO.filter(project => project.updated).length,
     }
     })
   .catch((error) => {
     console.error('Error fetching projects:', error)
   })
-  // .finally(() => loading.value = false)
+// Fetch commercial sensor data
+commercialSensorService.getCommercialSensorsDTO()
+  .then((commercialSensorsDTO) => {
+    if (!commercialSensorsDTO) return Promise.reject('No commercial sensors data found')
+    commercialSensorsStats.value = {
+      total: commercialSensorsDTO.length,
+      active: commercialSensorsDTO.filter(sensor => sensor.state === 'Active').length,
+      updated: commercialSensorsDTO.filter(sensor => sensor.updated).length,
+    }
+  })
+  .catch((error) => {
+    console.error('Error fetching commercial sensors:', error)
+  })
 </script>
