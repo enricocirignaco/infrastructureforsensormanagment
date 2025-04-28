@@ -19,17 +19,21 @@ http://mip3-cirie1.tail60817a.ts.net {
 
 # Serve production
 https://leaflink.bfh.ch {
-	import common_static
 	tls internal
 	handle_path /api/v1/* {
 		reverse_proxy webapp-backend:8000
 	}
+	handle {
+      import common_static
+  	}	
 }
 
 # Local dev testing
 http://localhost {
-	import common_static
 	handle_path /api/v1/* {
 		reverse_proxy webapp-backend:8000
 	}
+	  handle {
+      import common_static
+  }
 }
