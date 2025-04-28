@@ -11,7 +11,7 @@ http://mip3-cirie1.tail60817a.ts.net {
   handle_path /api/v1/* {
 	reverse_proxy webapp-backend:8000
 }
-  import common_static
+#   import common_static
 }
 
 
