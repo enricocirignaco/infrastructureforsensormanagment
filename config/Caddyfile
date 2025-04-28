@@ -1,39 +1,31 @@
-# (common_static) {
-# 	root * /srv
-# 	file_server {
-# 		hide .git
-# 	}
-# 	try_files {path} /index.html
-# }
+(common_static) {
+	root * /srv
+	file_server {
+		hide .git
+	}
+	try_files {path} /index.html
+}
 
-# # Tailscale Domain
-# http://mip3-cirie1.tail60817a.ts.net {
-# 	import common_static
-# }
+# Tailscale VPN
+http://mip3-cirie1.tail60817a.ts.net {
+	import common_static
+  handle_path /api/v1/* {
+  reverse_proxy webapp-backend:8000
+}
+}
 
-# http://mip3-cirie1.tail60817a.ts.net/compiler/* {
-#   reverse_proxy compiler-engine:8000
-# }
-# http://mip3-cirie1.tail60817a.ts.net/api/* {
-# }
+# Serve production
+https://leaflink.bfh.ch {
+	import common_static
+  tls_internal
+  handle_path /api/v1/* {
+    reverse_proxy webapp-backend:8000
+  }
+}
 
-# # Local
-# https://leaflink.ti.bfh.ch {
-# 	import common_static
-#   tls_internal
-# }
-# https://10.248.11.94/ {
-# 	import common_static
-#   tls_internal
-# http://localhost {
-# 	root * /srv
-# 	file_server {
-#       hide .git
-#   }
-#   try_files {path} /index.html
-# }
-
+# Local dev testing
 http://localhost {
+  import common_static
   handle_path /api/v1/* {
     reverse_proxy webapp-backend:8000
   }
