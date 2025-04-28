@@ -17,7 +17,7 @@ export default {
       // oauth2 request body
       body: new URLSearchParams({
         grant_type: 'password',
-        username: user.username,
+        username: user.email,
         password: user.password,
       }),
     }

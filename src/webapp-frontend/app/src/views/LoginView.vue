@@ -27,12 +27,12 @@
                 {{ loginError }}
               </v-alert>
               <v-text-field
-                v-model="username"
-                label="Username"
+                v-model="email"
+                label="Email"
                 prepend-icon="mdi-account"
                 required
-                autocomplete="username"
-                :rules="[(v) => !!v || 'Username is required']"
+                autocomplete="email"
+                :rules="[(v) => !!v || 'Email is required']"
               />
               <v-text-field
                 v-model="password"
@@ -65,17 +65,17 @@ import authService from '@/services/authService'
 const router = useRouter()
 const textStore = useTextStore()
 const authStore = useAuthStore()
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loginError = ref(null)
 
 // Submit function to handle login
 function submit() {
-  if (username.value && password.value) {
+  if (email.value && password.value) {
     // Perform login action
     const user = {
-      username: username.value,
+      email: email.value,
       password: password.value,
     }
     authService
