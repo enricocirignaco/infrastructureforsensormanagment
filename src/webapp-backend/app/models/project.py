@@ -1,7 +1,9 @@
 from pydantic import BaseModel
+from datetime import datetime
 from typing import Optional, List
 from enum import Enum
 from uuid import UUID
+from app.models.user import UserOut
 
 
 class ProjectLinkEnum(str, Enum):
@@ -14,7 +16,7 @@ class ProjectLinkEnum(str, Enum):
     @property
     def rdf_uri(self) -> str:
         """Return the RDF URI corresponding to the ProjectLinkType."""
-        return f'<http://data.bfh.ch/ProjectLinkType/{self.value}>'
+        return f'http://data.bfh.ch/ProjectLinkType/{self.value}'
 
     @classmethod
     def from_rdf_uri(cls, rdf_uri: str):
@@ -35,7 +37,7 @@ class ProjectStateEnum(str, Enum):
     @property
     def rdf_uri(self) -> str:
         """Return the RDF URI corresponding to the ProjectState."""
-        return f'<http://data.bfh.ch/ProjectState/{self.value}>'
+        return f'http://data.bfh.ch/ProjectState/{self.value}'
 
     @classmethod
     def from_rdf_uri(cls, rdf_uri: str):
@@ -48,11 +50,21 @@ class ProjectStateEnum(str, Enum):
         except ValueError:
             raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid ProjectState.")
 
+class ProjectLogbookEnum(str, Enum):
+    CREATED = 'Created'
+    UPDATED = 'Updated'
+
+
 class ProjectLink(BaseModel):
     name: Optional[str]
     url: str
     type: ProjectLinkEnum
 
+
+class ProjectLogbookEntry(BaseModel):
+    type: ProjectLogbookEnum
+    date: datetime
+    user: UserOut
 
 class ProjectBase(BaseModel):
     name: str
@@ -65,11 +77,16 @@ class ProjectBase(BaseModel):
 class ProjectIn(ProjectBase):
     pass
 
+class ProjectUpdate(ProjectBase):
+    uuid: Optional[UUID]
+    state: ProjectStateEnum
+
 # Model used internally
 
 class ProjectInDB(ProjectBase):
     uuid: UUID
     state: ProjectStateEnum
+    logbook: List[ProjectLogbookEntry]
    
 # Models used to send data back to user
 
