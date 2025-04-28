@@ -7,26 +7,28 @@
 }
 
 # Tailscale VPN
-http://mip3-cirie1.tail60817a.ts.net {
+https://mip3-cirie1.tail60817a.ts.net {
 	import common_static
-  handle_path /api/v1/* {
-  reverse_proxy webapp-backend:8000
-}
+	tls internal
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8001
+	}
 }
 
 # Serve production
 https://leaflink.bfh.ch {
 	import common_static
-  tls_internal
-  handle_path /api/v1/* {
-    reverse_proxy webapp-backend:8000
-  }
+	tls internal
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8001
+	}
 }
 
 # Local dev testing
 http://localhost {
-  import common_static
-  handle_path /api/v1/* {
-    reverse_proxy webapp-backend:8000
-  }
+	import common_static
+	tls internal
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8001
+	}
 }
