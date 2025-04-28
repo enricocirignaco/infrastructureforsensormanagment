@@ -8,7 +8,7 @@ from app.models.user import UserOut
 
 class ProjectLinkEnum(str, Enum):
     WEBSITE = 'Website'
-    MS_TEAMS = 'MS Teams'
+    MS_TEAMS = 'MS-Teams'
     REPORT = 'Report'
     DOCUMENTATION = 'Documentation'
     MISC = 'Misc'

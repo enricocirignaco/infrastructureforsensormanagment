@@ -13,7 +13,7 @@ export const useTextStore = defineStore('text', {
     },
     externalResourceTypeEnum: {
       0: 'Website',
-      1: 'MS Teams',
+      1: 'MS-Teams',
       2: 'Report',
       3: 'Documentation',
       4: 'Misc',
