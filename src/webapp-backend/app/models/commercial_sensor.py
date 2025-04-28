@@ -13,11 +13,15 @@ class CommercialSensorLink(BaseModel):
     url: str
     type: CommercialSensorLinkEnum
 
+class CommercialSensorRange(BaseModel):
+    min: int
+    max: int
+
 class CommercialSensorProps(BaseModel):
     name: str
     unit: str
-    precision: str
-    range: str
+    precision: int
+    range: CommercialSensorRange
 
 class CommercialSensorBase(BaseModel):
     name: str

@@ -12,6 +12,7 @@ from app.models.commercial_sensor import (
     CommercialSensorProps,
     CommercialSensorOutSlim,
     CommercialSensorOutFull,
+    CommercialSensorRange
 )
 from collections import defaultdict
 
@@ -22,16 +23,6 @@ BFH = Namespace("http://data.bfh.ch/")
 class CommercialSensorRepository:
     def __init__(self, triplestore_client: TripleStoreClient):
         self.triplestore_client = triplestore_client
-
-    def _serialize_graph_insert(self, graph: Graph) -> None:
-        # Serialize graph as N-Triples and wrap in SPARQL INSERT DATA
-        nt_data = graph.serialize(format='nt')
-        sparql_insert = f"""
-        INSERT DATA {{
-            {nt_data}
-        }}
-        """
-        self.triplestore_client.update(sparql_insert)
 
     def create_commercial_sensor(self, commercial_sensor: CommercialSensorInDB) -> CommercialSensorInDB:
         g = Graph()
@@ -64,10 +55,13 @@ class CommercialSensorRepository:
             g.add((bn, BFH.propName, Literal(prop.name)))
             g.add((bn, BFH.unit, Literal(prop.unit)))
             g.add((bn, BFH.precision, Literal(prop.precision)))
-            g.add((bn, BFH.range, Literal(prop.range)))
+            g.add((bn, BFH.rangeMin, Literal(prop.range.min)))
+            g.add((bn, BFH.rangeMax, Literal(prop.range.max)))
 
         # Persist graph
-        self._serialize_graph_insert(g)
+        query = f"""INSERT DATA {{ {g.serialize(format="nt")} }}"""
+        self.triplestore_client.update(query)
+
         return self.find_commercial_sensor_by_uuid(commercial_sensor.uuid)
 
     def find_all_commercial_sensors(self) -> List[CommercialSensorOutSlim]:
@@ -95,70 +89,87 @@ class CommercialSensorRepository:
         ]
 
     def find_commercial_sensor_by_uuid(self, uuid: UUID) -> CommercialSensorInDB | None:
-        sparql = f"""
+        sensor_uri = f"<http://data.bfh.ch/commercialSensors/{uuid}>"
+
+        # 1) Basisdaten abfragen
+        sparql_base = f"""
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?sensor ?name ?alias ?description ?linkName ?linkUrl ?linkType ?propName ?unit ?precision ?range
+        SELECT ?name ?alias ?description
         WHERE {{
-          ?sensor a bfh:CommercialSensor ;
-                  bfh:identifier "{uuid}" ;
-                  schema:name ?name ;
-                  schema:alternateName ?alias ;
-                  schema:description ?description .
-
-          OPTIONAL {{
-            ?sensor schema:hasPart ?link .
-            ?link a schema:WebPage ;
-                  schema:url ?linkUrl ;
-                  bfh:linkType ?linkType .
-            OPTIONAL {{ ?link schema:name ?linkName. }}
-          }}
-          OPTIONAL {{
-            ?sensor bfh:hasSensorProperty ?prop .
-            ?prop a bfh:SensorProperty ;
-                  bfh:propName ?propName ;
-                  bfh:unit ?unit ;
-                  bfh:precision ?precision ;
-                  bfh:range ?range .
-          }}
-        }}
-        """
-        res = self.triplestore_client.query(sparql)
-        bindings = res.get('results', {}).get('bindings', [])
-        if not bindings:
+          {sensor_uri} a bfh:CommercialSensor ;
+                         bfh:identifier "{uuid}" ;
+                         schema:name ?name ;
+                         schema:alternateName ?alias ;
+                         schema:description ?description .
+        }}"""
+        base_res = self.triplestore_client.query(sparql_base)
+        base_bindings = base_res.get("results", {}).get("bindings", [])
+        if not base_bindings:
             return None
-        grouped = defaultdict(list)
-        for row in bindings:
-            grouped[row['sensor']['value']].append(row)
-        _, rows = next(iter(grouped.items()))
-        first = rows[0]
+        base = base_bindings[0]
+
         sensor = CommercialSensorInDB(
-            uuid=UUID(first['sensor']['value'].split('/')[-1]),
-            name=first['name']['value'],
-            alias=first['alias']['value'],
-            description=first['description']['value'],
+            uuid=uuid,
+            name=base['name']['value'],
+            alias=base['alias']['value'],
+            description=base['description']['value'],
             external_props=[],
-            sensor_props=[],
+            sensor_props=[]
         )
-        for row in rows:
-            if 'linkUrl' in row and 'linkType' in row:
-                sensor.external_props.append(
-                    CommercialSensorLink(
-                        name=row.get('linkName', {}).get('value'),
-                        url=row['linkUrl']['value'],
-                        type=CommercialSensorLinkEnum(row['linkType']['value']),
+
+        # 2) Links abfragen
+        sparql_links = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?linkUrl ?linkName ?linkType
+        WHERE {{
+          {sensor_uri} schema:hasPart ?link .
+          ?link a schema:WebPage ;
+                schema:url ?linkUrl ;
+                bfh:linkType ?linkType .
+          OPTIONAL {{ ?link schema:name ?linkName . }}
+        }}"""
+        link_res = self.triplestore_client.query(sparql_links)
+        for row in link_res.get("results", {}).get("bindings", []):
+            sensor.external_props.append(
+                CommercialSensorLink(
+                    name=row.get('linkName', {}).get('value'),
+                    url=row['linkUrl']['value'],
+                    type=CommercialSensorLinkEnum.from_rdf_uri(row['linkType']['value'])
+                )
+            )
+
+        # 3) Sensor-Eigenschaften abfragen
+        sparql_props = f"""
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?propName ?unit ?precision ?rangeMin ?rangeMax
+        WHERE {{
+          {sensor_uri} bfh:hasSensorProperty ?prop .
+          ?prop a bfh:SensorProperty ;
+                bfh:propName ?propName ;
+                bfh:unit ?unit ;
+                bfh:precision ?precision ;
+                bfh:rangeMin ?rangeMin ;
+                bfh:rangeMax ?rangeMax .
+        }}"""
+        prop_res = self.triplestore_client.query(sparql_props)
+        for row in prop_res.get("results", {}).get("bindings", []):
+            sensor.sensor_props.append(
+                CommercialSensorProps(
+                    name=row['propName']['value'],
+                    unit=row['unit']['value'],
+                    precision=row['precision']['value'],
+                    range=CommercialSensorRange(
+                        min=row['rangeMin']['value'],
+                        max=row['rangeMax']['value']
                     )
                 )
-            if 'propName' in row and 'unit' in row:
-                sensor.sensor_props.append(
-                    CommercialSensorProps(
-                        name=row['propName']['value'],
-                        unit=row['unit']['value'],
-                        precision=row['precision']['value'],
-                        range=row['range']['value'],
-                    )
-                )
+            )
+
         return sensor
 
     def delete_commercial_sensor(self, uuid: UUID) -> None:
@@ -170,16 +181,7 @@ class CommercialSensorRepository:
         """
         self.triplestore_client.update(sparql)
 
-    def update_commercial_sensor(self, uuid: UUID, commercial_sensor: CommercialSensorOutFull) -> CommercialSensorInDB:
-        # Delete old
-        self.delete_commercial_sensor(uuid)
-        # Recreate new via graph
-        sensor_db = CommercialSensorInDB(
-            uuid=uuid,
-            name=commercial_sensor.name,
-            alias=commercial_sensor.alias,
-            description=commercial_sensor.description,
-            external_props=commercial_sensor.external_props,
-            sensor_props=commercial_sensor.sensor_props,
-        )
+    def update_commercial_sensor(self, commercial_sensor: CommercialSensorOutFull) -> CommercialSensorInDB:
+        self.delete_commercial_sensor(commercial_sensor.uuid)
+        sensor_db = CommercialSensorInDB(**commercial_sensor.model_dump())
         return self.create_commercial_sensor(sensor_db)

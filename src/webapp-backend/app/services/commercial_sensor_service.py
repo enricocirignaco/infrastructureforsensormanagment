@@ -30,7 +30,7 @@ class CommercialSensorService:
             raise NotFoundError("Commercial Sensor not found")
         if commercial_sensor_db.uuid != commercial_sensor.uuid:
             raise ValueError("UUID must not be changed in payload")
-        return self._commercial_sensor_repository.update_commercial_sensor(uuid=uuid, commercial_sensor=commercial_sensor)
+        return self._commercial_sensor_repository.update_commercial_sensor(commercial_sensor=commercial_sensor)
 
     def delete_commercial_sensor(self, uuid: UUID):
         commercial_sensor_db = self._commercial_sensor_repository.find_commercial_sensor_by_uuid(uuid=uuid)
