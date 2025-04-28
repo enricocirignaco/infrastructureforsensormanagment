@@ -173,13 +173,24 @@ class CommercialSensorRepository:
         return sensor
 
     def delete_commercial_sensor(self, uuid: UUID) -> None:
-        sparql = f"""
+        sparql_delete = f"""
+        PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
-        DELETE WHERE {{
-          <http://data.bfh.ch/commercialSensors/{uuid}> ?p ?o .
+
+        DELETE {{
+            ?s ?p ?o
+        }}
+        WHERE {{
+            ?s ?p ?o .
+            FILTER (
+                STRSTARTS(STR(?s), "http://data.bfh.ch/commercialSensors/{uuid}/link/") ||
+                STRSTARTS(STR(?s), "http://data.bfh.ch/commercialSensors/{uuid}/property/") ||
+                STR(?s) = "http://data.bfh.ch/commercialSensors/{uuid}"
+            )
         }}
         """
-        self.triplestore_client.update(sparql)
+        self.triplestore_client.update(sparql_delete)
+
 
     def update_commercial_sensor(self, commercial_sensor: CommercialSensorOutFull) -> CommercialSensorInDB:
         self.delete_commercial_sensor(commercial_sensor.uuid)

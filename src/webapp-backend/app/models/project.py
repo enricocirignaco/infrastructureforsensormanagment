@@ -20,7 +20,7 @@ class ProjectLinkEnum(str, Enum):
 
     @classmethod
     def from_rdf_uri(cls, rdf_uri: str):
-        """Create a RoleEnum from the RDF URI."""
+        """Create a ProjectLinkEnum from the RDF URI."""
         # The RDF URI structure is expected to be in the format: http://data.bfh.ch/ProjectLinkType/<type>
         cleaned_uri = rdf_uri.strip('<>')
         type_name = cleaned_uri.split('/')[-1]
@@ -41,7 +41,7 @@ class ProjectStateEnum(str, Enum):
 
     @classmethod
     def from_rdf_uri(cls, rdf_uri: str):
-        """Create a RoleEnum from the RDF URI."""
+        """Create a ProjectStateEnum from the RDF URI."""
         # The RDF URI structure is expected to be in the format: http://data.bfh.ch/ProjectState/<state>
         cleaned_uri = rdf_uri.strip('<>')
         state_name = cleaned_uri.split('/')[-1]
