@@ -20,12 +20,16 @@
             ripple
           >
             <v-card-title class="text-h6">Projects</v-card-title>
-            <v-card-text>
-              <v-icon size="48" class="mb-2">mdi-folder</v-icon>
-              <div class="text-h4 font-weight-bold mb-2">12</div>
-              <div class="text-subtitle-2">Projects Total</div>
-              <div class="text-caption mt-1">5 Active • 3 Updated</div>
-            </v-card-text>
+            
+              <v-card-text>
+                <v-icon size="48" class="mb-2">mdi-folder</v-icon>
+                <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? 0 }}</div>
+                <div class="text-subtitle-2">Projects Total</div>
+                <div class="text-caption mt-1">
+                  {{ projectsStats?.active ?? 0 }} Active • {{ projectsStats?.updated ?? 0 }} Updated
+                </div>
+              </v-card-text>
+            
           </v-card>
         </v-col>
         <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
@@ -89,7 +93,26 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore'
-
+import projectService from '@/services/projectService'
+import { ref } from 'vue'
 const authStore = useAuthStore()
+let projectsStats = ref(null)
 
+
+
+
+// Fetch projects data
+projectService.getProjectsDTO()
+  .then((projectsDTO) => {
+    if (!projectsDTO) return Promise.reject('No projects data found')
+    projectsStats.value = {
+      total: projectsDTO.length,
+      active: projectsDTO.filter(project => project.state === 'active').length,
+      updated: projectsDTO.filter(project => project.updated).length,
+    }
+    })
+  .catch((error) => {
+    console.error('Error fetching projects:', error)
+  })
+  // .finally(() => loading.value = false)
 </script>
