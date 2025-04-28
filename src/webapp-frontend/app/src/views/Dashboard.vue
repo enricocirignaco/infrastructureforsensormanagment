@@ -1,5 +1,6 @@
 <template>
   <div style="height: 75vh; overflow: hidden;">
+    <!-- Title -->
     <v-container class="pa-4">
       <v-row>
         <v-col cols="12">
@@ -7,7 +8,7 @@
         </v-col>
       </v-row>
     </v-container>
-
+    <!-- Loading Animation -->
     <v-container class="fill-height pa-4">
       <v-row v-if="loading" class="fill-height justify-center align-center">
         <v-col cols="12" class="text-center">
@@ -31,10 +32,10 @@
               
                 <v-card-text>
                   <v-icon size="48" class="mb-2" :icon="textStore.icons.projects" /> 
-                  <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? -1 }}</div>
+                  <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? '-' }}</div>
                   <div class="text-subtitle-2">Projects Total</div>
                   <div class="text-caption mt-1">
-                    {{ projectsStats?.active ?? -1 }} Active • {{ projectsStats?.updated ?? -1 }} Updated
+                    {{ projectsStats?.active ?? '-' }} Active • {{ projectsStats?.updated ?? '-' }} Updated
                   </div>
                 </v-card-text>
               
@@ -51,9 +52,9 @@
             >
               <v-card-title class="text-h6">Commercial Sensors</v-card-title>
               <v-card-text>
-                <v-icon size="48" class="mb-2" :icon="textStore.icons.commercialSensors" />              <div class="text-h4 font-weight-bold mb-2">{{ commercialSensorsStats?.total ?? -1 }}</div>
+                <v-icon size="48" class="mb-2" :icon="textStore.icons.commercialSensors" />              <div class="text-h4 font-weight-bold mb-2">{{ commercialSensorsStats?.total ?? '-' }}</div>
                 <div class="text-subtitle-2">Commercial Sensors</div>
-                <div class="text-caption mt-1">8 Vendors • {{ commercialSensorsStats?.total ?? -1 }} In Use</div>
+                <div class="text-caption mt-1">8 Vendors • {{ commercialSensorsStats?.total ?? '-' }} In Use</div>
               </v-card-text>
             </v-card>
           </v-col>
