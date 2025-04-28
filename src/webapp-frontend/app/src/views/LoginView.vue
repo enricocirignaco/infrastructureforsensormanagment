@@ -46,7 +46,7 @@
                 :rules="[(v) => !!v || 'Password is required']"
               />
               <v-btn type="submit" color="secondary" block class="my-2">Login</v-btn>
-              <v-btn variant="outlined" color="secondary" block @click="register">Register</v-btn>
+              <v-btn v-if=false variant="outlined" color="secondary" block @click="register">Register</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
