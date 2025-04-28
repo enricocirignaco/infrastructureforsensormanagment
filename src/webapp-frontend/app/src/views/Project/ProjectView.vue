@@ -11,8 +11,8 @@
             <v-row class="w-100 align-center">
                 <!-- back button -->
                 <v-col cols="auto">
-                    <v-btn icon @click="$router.back()">
-                    <v-icon>mdi-arrow-left</v-icon>
+                    <v-btn icon @click="router.push('/projects')">
+                        <v-icon>mdi-arrow-left</v-icon>
                     </v-btn>
                 </v-col>
                 <!-- title -->
@@ -24,10 +24,10 @@
                     <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
                       {{ project.state }}
                     </v-chip>
-                    <v-btn color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
+                    <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
-                    <v-btn color="error" icon size="small" @click="deleteProject(projectId)">
+                    <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="error" icon size="small" @click="deleteProject(projectId)">
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-col>
@@ -119,7 +119,9 @@ import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import projectService from '@/services/projectService'
 import Logbook from '@/components/Logbook.vue'
+import { useAuthStore } from '@/stores/authStore'
 
+const authStore = useAuthStore()
 const projectId = ref(useRoute().params.id)
 const router = useRouter()
 const project = ref(null)
@@ -144,7 +146,6 @@ const deleteConfirmInput = ref('')
 projectService.getProject(projectId.value)
     .then((data) => project.value = data)
     .catch((error) => {
-    // TODO: Handle error
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
   .finally(() => loading.value = false)
@@ -164,7 +165,7 @@ const deleteProject = (id) => {
 }
 
 const performDelete = () => {
-  projectService.deleteProject()
+  projectService.deleteProject(projectToDelete.value)
     .then(() => {
         confirmDelete.value = false
         router.push('/projects')

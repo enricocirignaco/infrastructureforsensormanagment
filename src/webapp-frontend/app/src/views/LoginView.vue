@@ -27,12 +27,12 @@
                 {{ loginError }}
               </v-alert>
               <v-text-field
-                v-model="username"
-                label="Username"
+                v-model="email"
+                label="Email"
                 prepend-icon="mdi-account"
                 required
-                autocomplete="username"
-                :rules="[(v) => !!v || 'Username is required']"
+                autocomplete="email"
+                :rules="[(v) => !!v || 'Email is required']"
               />
               <v-text-field
                 v-model="password"
@@ -46,7 +46,7 @@
                 :rules="[(v) => !!v || 'Password is required']"
               />
               <v-btn type="submit" color="secondary" block class="my-2">Login</v-btn>
-              <v-btn variant="outlined" color="secondary" block @click="register">Register</v-btn>
+              <v-btn v-if=false variant="outlined" color="secondary" block @click="register">Register</v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -65,29 +65,28 @@ import authService from '@/services/authService'
 const router = useRouter()
 const textStore = useTextStore()
 const authStore = useAuthStore()
-const username = ref('')
+const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const loginError = ref(null)
 
 // Submit function to handle login
 function submit() {
-  if (username.value && password.value) {
+  if (email.value && password.value) {
     // Perform login action
     const user = {
-      username: username.value,
+      email: email.value,
       password: password.value,
     }
     authService
       .getAuthToken(user)
-      .then((token) => {
+      .then((response) => {
         // Store the token in the auth store
-        authStore.setToken(token)
+        authStore.setToken(response.access_token)
         router.push('/')
       })
       .catch((error) => { 
-        // TODO: test
-        loginError.value = error.response.data.message || 'Login failed. Please try again.'
+        loginError.value = error.detail || 'Login failed. Please try again.'
       })
   }
 }

@@ -28,7 +28,10 @@ export const useAuthStore = defineStore('auth', {
     getUser: (state) => {
       if (state.token) {
         try {
-          return JSON.parse(atob(state.token.split('.')[1]))
+          let user = JSON.parse(atob(state.token.split('.')[1]))
+          user.uuid = user.sub
+          delete user.sub
+          return user
         } catch {
           return null
         }

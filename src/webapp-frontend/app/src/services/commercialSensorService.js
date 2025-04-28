@@ -98,7 +98,7 @@ export default {
                         precision: 0.1,
                         range:
                             {
-                                min: 0,
+                                min: 2,
                                 max: 100,
                             }
                     },

@@ -41,7 +41,6 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - reverse-proxy-conf:/etc/caddy
       - reverse-proxy-data:/data
       - reverse-proxy-config:/config
   webapp-backend:

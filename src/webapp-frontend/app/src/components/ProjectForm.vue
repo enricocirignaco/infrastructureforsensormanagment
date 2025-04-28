@@ -15,7 +15,7 @@
             <v-textarea v-model="project.description" label="Project Description" :rules="[required]" />
           </v-col>
           <!-- status dropdown -->
-          <v-col cols="12" sm="6">
+          <v-col v-if="isEditMode" cols="12" sm="6">
             <v-select
               v-model="project.state"
               :items="Object.values(textStore.statusEnum)"
@@ -128,15 +128,15 @@ const submitProject = () => {
   // Validate Form
   projectForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
-    if(isEditMode){
+    if(isEditMode.value){
         //put request to update the project
         projectService.editProject(project.value)
-            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .then((projectDTO) => router.push('/project/' + projectDTO.uuid))
             .catch((error) => console.log('Error updating project:', error))
-    }else{
+    } else {
         // post request to create the project
         projectService.createProject(project.value)
-            .then((projectDTO) => router.push('/project/' + projectDTO.id))
+            .then((projectDTO) => router.push('/project/' + projectDTO.uuid))
             .catch((error) => console.log('Error creating project:', error))
     }
   })

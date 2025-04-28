@@ -11,8 +11,8 @@
               <v-row class="w-100 align-center">
                   <!-- back button -->
                   <v-col cols="auto">
-                      <v-btn icon @click="$router.back()">
-                      <v-icon>mdi-arrow-left</v-icon>
+                      <v-btn icon @click="router.push('/commercial-sensors')">
+                        <v-icon>mdi-arrow-left</v-icon>
                       </v-btn>
                   </v-col>
                   <!-- title -->
@@ -21,10 +21,10 @@
                   </v-col>
                   <!-- status & edit button -->
                   <v-col cols="auto" class="d-flex align-center">
-                      <v-btn color="primary" icon size="small" class="me-1" @click="router.push(`/commercial-sensor/${sensorId}/edit`)">
+                      <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/commercial-sensor/${sensorId}/edit`)">
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
-                      <v-btn color="error" icon size="small" @click="deleteSensor(sensorId)">
+                      <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="error" icon size="small" @click="deleteSensor(sensorId)">
                         <v-icon>mdi-delete</v-icon>
                       </v-btn>
                   </v-col>
@@ -126,7 +126,9 @@
   import { useRoute } from 'vue-router'
   import commercialSensorService from '@/services/commercialSensorService'
   import Logbook from '@/components/Logbook.vue'
+  import { useAuthStore } from '@/stores/authStore'
 
+  const authStore = useAuthStore()
   const sensorId = ref(useRoute().params.id)
   const router = useRouter()
   const sensor = ref(null)
