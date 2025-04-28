@@ -48,6 +48,6 @@ const { logbook } = defineProps({
     default: () => []
   }
 })
-const updatedAtEntries = logbook.filter(entry => entry.type === 'updated')
-const createdAtEntry = logbook.find(entry => entry.type === 'created')
+const updatedAtEntries = logbook.filter(entry => entry.type === 'Updated')
+const createdAtEntry = logbook.find(entry => entry.type === 'Created')
 </script>
