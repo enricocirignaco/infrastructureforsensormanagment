@@ -7,7 +7,7 @@
 }
 
 # Tailscale VPN
-https://mip3-cirie1.tail60817a.ts.net {
+http://mip3-cirie1.tail60817a.ts.net {
 	import common_static
 	tls internal
 	handle_path /api/v1/* {
