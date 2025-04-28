@@ -6,12 +6,13 @@ from pydantic import EmailStr
 from datetime import datetime, timedelta, timezone
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from app.models.user import UserIn, UserInDB, UserBase, UserLogin, UserChangePw, Token, RoleEnum
 from app.repositories.user_repository import UserRepository
 from app.config import settings
+from app.utils.exceptions import AuthenticationError, AuthorizationError, NotFoundError, EmailAlreadyExists
 
 JWT_ALGORITHM = "HS256"
 
@@ -38,6 +39,10 @@ class AuthService:
         self._hasher = self._PasswordUtility()
 
     def create_user(self, user: UserIn) -> UserInDB:
+        user_db = self._user_repository.find_user_by_email(user.email)
+        if user_db:
+            raise EmailAlreadyExists("There already exists an user with the provided email")
+        
         uuid = uuid4()
         pw_hash = self._hasher.hash_password(user.password)
         user_db = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=pw_hash)
@@ -46,28 +51,22 @@ class AuthService:
     def update_user(self, uuid: UUID, user: UserBase, logged_in_user: UserInDB) -> UserInDB:
         user_db = self._user_repository.find_user_by_uuid(uuid=uuid)
         if not user_db:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise NotFoundError("User not found")
         if user_db.role != user.role and logged_in_user.role != RoleEnum.ADMIN:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="The role can only be changed by an admin user",
-            )
+            raise AuthorizationError("The role can only be changed by an admin user")
 
         user_new = UserInDB(**user.model_dump(), uuid=uuid, hashed_password=user_db.hashed_password)
         return self._user_repository.update_user(user_new)
 
     def change_password(self, uuid: UUID, user: UserChangePw, logged_in_user: UserInDB) -> Token:
         user_db = self._user_repository.find_user_by_uuid(uuid=uuid)
+        if not user_db:
+            raise NotFoundError("User not found")
         if logged_in_user.role != RoleEnum.ADMIN and logged_in_user.uuid != uuid:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Password can only be changed by own user or admin",
-            )
+            raise AuthorizationError("Password can only be changed by own user or admin")
         if not self._hasher.verify_password(user_db.hashed_password, user.current_password):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Provided password does not equal current password",
-            )
+            raise AuthenticationError("Provided password does not equal current password")
+           
         user_db.hashed_password = self._hasher.hash_password(user.new_password)
         user_db = self._user_repository.change_password(user_db)
 
@@ -75,21 +74,27 @@ class AuthService:
         return Token(access_token=access_token, token_type="bearer")
     
     def find_user_uuid(self, uuid: UUID) -> UserInDB:
-        user = self._user_repository.find_user_by_uuid(uuid)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
+        user_db = self._user_repository.find_user_by_uuid(uuid)
+        if not user_db:
+            raise NotFoundError("No user found with the specified uuid")
+        return user_db
+
 
     def find_user_email(self, email: EmailStr) -> UserInDB:
-        user = self._user_repository.find_user_by_email(email)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
+        user_db = self._user_repository.find_user_by_email(email)
+        if not user_db:
+            raise NotFoundError("There was not user with the specified email found")
+        return user_db
     
     def find_all_users(self) -> List[UserInDB]:
         return self._user_repository.find_all_users()
     
+
+
     async def get_current_user(self, token: Annotated[str, Depends(oauth2_scheme)]):
+        # HTTP should not be used in service layer. This method is directly called in REST calls so there is no other way
+        from fastapi import HTTPException, status
+
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -111,11 +116,7 @@ class AuthService:
         user_db = self._user_repository.find_user_by_email(user_login.email)
 
         if not user_db or not self._hasher.verify_password(user_db.hashed_password, user_login.password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            raise AuthenticationError("Incorrect username or password")
 
         access_token = self.create_access_token(user_db)
         return Token(access_token=access_token, token_type="bearer")

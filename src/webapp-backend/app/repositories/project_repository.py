@@ -95,7 +95,6 @@ class ProjectRepository:
         bindings = results.get("results", {}).get("bindings", [])
         if not bindings:
             return None
-            raise ValueError("No project with this uuid found")
         
         grouped = defaultdict(list)
         for row in bindings:
