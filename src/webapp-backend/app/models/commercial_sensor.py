@@ -8,16 +8,37 @@ class CommercialSensorLinkEnum(str, Enum):
     WEBSHOP = 'Webshop'
     MISC = 'Misc'
 
+    @property
+    def rdf_uri(self) -> str:
+        """Return the RDF URI corresponding to the CommercialSensorLinkEnum."""
+        return f'http://data.bfh.ch/CommercialSensorLinkType/{self.value}'
+
+    @classmethod
+    def from_rdf_uri(cls, rdf_uri: str):
+        """Create a CommercialSensorLinkEnum from the RDF URI."""
+        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/CommercialSensorLinkType/<type>
+        cleaned_uri = rdf_uri.strip('<>')
+        type_name = cleaned_uri.split('/')[-1]
+        try:
+            return cls(type_name)
+        except ValueError:
+            raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid CommercialSensorLinkType.")
+
+
 class CommercialSensorLink(BaseModel):
     name: Optional[str]
     url: str
     type: CommercialSensorLinkEnum
 
+class CommercialSensorRange(BaseModel):
+    min: int
+    max: int
+
 class CommercialSensorProps(BaseModel):
     name: str
     unit: str
-    precision: str
-    range: str
+    precision: int
+    range: CommercialSensorRange
 
 class CommercialSensorBase(BaseModel):
     name: str
@@ -34,13 +55,13 @@ class CommercialSensorIn(CommercialSensorBase):
 # Model used internally
 
 class CommercialSensorInDB(CommercialSensorBase):
-    id: UUID
+    uuid: UUID
     #logbook: List[]
 
 # Models that get returned to the client
 
 class CommercialSensorOutSlim(BaseModel):
-    id: UUID
+    uuid: UUID
     name: str
     alias: str
 

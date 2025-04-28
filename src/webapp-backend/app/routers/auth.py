@@ -22,7 +22,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     except AuthenticationError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=err,
+            detail=str(err),
             headers={"WWW-Authenticate": "Bearer"},
         )
     return token

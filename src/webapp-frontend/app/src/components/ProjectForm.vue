@@ -40,7 +40,7 @@
                 <!-- external resource type dropdown -->
                 <v-select
                   v-model="link.type"
-                  :items="Object.values(textStore.externalResourceTypeEnum)"
+                  :items="Object.values(textStore.externalResourceProjectEnum)"
                   label="Type"
                   :rules="[required]"
                 />

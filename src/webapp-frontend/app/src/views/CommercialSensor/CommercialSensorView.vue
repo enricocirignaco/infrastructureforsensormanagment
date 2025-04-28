@@ -86,7 +86,7 @@
           </v-card>
         </v-col>
         <v-col cols="3">
-          <Logbook :logbook="sensor.logbook" />
+          <Logbook v-if="sensor?.logbook" :logbook="sensor.logbook" />
         </v-col>
       </v-row>
     </v-container>
