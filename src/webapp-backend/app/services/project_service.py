@@ -36,7 +36,7 @@ class ProjectService:
         project_update = ProjectInDB(**project.model_dump(), logbook=project_db.logbook)
         project_update.uuid = uuid
         project_update.logbook.append(ProjectLogbookEntry(type=ProjectLogbookEnum.UPDATED, date=datetime.now(), user=UserOut(**logged_in_user.model_dump())))
-        return self._project_repository.update_project(project=project)
+        return self._project_repository.update_project(project=project_update)
 
     def delete_project(self, uuid: UUID):
         project_db = self._project_repository.find_project_by_uuid(uuid=uuid)
