@@ -4,7 +4,7 @@ export const useTextStore = defineStore('text', {
   state: () => ({
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
-    applicationName: 'LeafLink',
+    applicationName: 'Leaf Link',
     restApiBaseUrl: 'http://localhost:/api/v1',
     statusEnum: {
       0: 'Active',
@@ -52,5 +52,11 @@ export const useTextStore = defineStore('text', {
       METERS_PER_SECOND: 'm/s',
       HECTOPASCAL: 'hPa'
     },
+    icons: {
+      'projects': 'mdi-forest-outline',
+      'commercialSensors': 'mdi-chip',
+      'nodeTemplates': 'mdi-file-document-multiple',
+      'sensorNodes': 'mdi-wifi',
+    }
   }),
 })

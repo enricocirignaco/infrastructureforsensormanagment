@@ -19,25 +19,25 @@
 
       <v-list density="compact" nav>
         <v-list-item
-          prepend-icon="mdi-forest-outline"
+          :prepend-icon="textStore.icons.projects"
           title="Projects"
           value="projects"
           @click="router.push('/projects')"
         ></v-list-item>
         <v-list-item
-          prepend-icon="mdi-passport-biometric"
+          :prepend-icon="textStore.icons.sensorNodes"
           title="Sensor Nodes"
           value="sensorNodes"
           @click="router.push('/sensor-nodes')"
         ></v-list-item>
         <v-list-item
-          prepend-icon="mdi-plus-box-multiple"
+          :prepend-icon="textStore.icons.nodeTemplates"
           title="Node Templates"
           value="nodeTemplates"
           @click="router.push('/node-templates')"
         ></v-list-item>
         <v-list-item
-          prepend-icon="mdi-test-tube-empty"
+          :prepend-icon="textStore.icons.commercialSensors"
           title="Commercial Sensors"
           value="sensors"
           @click="router.push('/commercial-sensors')"
