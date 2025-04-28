@@ -77,3 +77,4 @@ volumes:
     name: compiler-engine-logs
   compiler-engine-cache:
     name: compiler-engine-cache
+  fuseki-data:
