@@ -57,7 +57,15 @@ build-frontend:
     - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-frontend/Dockerfile .
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
-
+build-backend:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "webapp-backend"
+  script:
+    - echo "Building Backend Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-backend/Dockerfile src/webapp-backend
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 
 # # Test SSH connection job
 # test-ssh-connection:
