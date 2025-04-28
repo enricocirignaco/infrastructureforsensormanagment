@@ -25,7 +25,7 @@
 
     <v-card-subtitle class="text-subtitle-1">Created</v-card-subtitle>
     <v-list dense>
-      <v-list-item>
+      <v-list-item v-if="createdAtEntry">
         <div>
           <strong>{{ createdAtEntry.user.full_name }}</strong>
           <br />
@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 // defineProps of the component
 const { logbook } = defineProps({
   logbook: {
@@ -48,6 +49,11 @@ const { logbook } = defineProps({
     default: () => []
   }
 })
-const updatedAtEntries = logbook.filter(entry => entry.type === 'Updated')
-const createdAtEntry = logbook.find(entry => entry.type === 'Created')
+const updatedAtEntries = computed(() =>
+  (logbook || []).filter(entry => entry.type === 'updated')
+)
+
+const createdAtEntry = computed(() =>
+  (logbook || []).find(entry => entry.type === 'created') || null
+)
 </script>

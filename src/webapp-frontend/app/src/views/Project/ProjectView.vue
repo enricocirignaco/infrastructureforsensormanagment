@@ -79,7 +79,7 @@
         </v-data-table>
       </v-col>
       <v-col cols="3">
-        <Logbook :logbook="project.logbook" />
+        <Logbook v-if="project?.logbook" :logbook="project.logbook" />
       </v-col>
     </v-row>
   </v-container>
