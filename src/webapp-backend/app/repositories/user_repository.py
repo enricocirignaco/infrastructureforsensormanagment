@@ -95,7 +95,7 @@ class UserRepository:
         ]
         return users
 
-    def find_user_by_uuid(self, uuid: UUID) -> UserInDB:
+    def find_user_by_uuid(self, uuid: UUID) -> UserInDB | None:
         sparql_query = f"""
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
