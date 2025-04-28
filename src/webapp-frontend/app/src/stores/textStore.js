@@ -52,5 +52,11 @@ export const useTextStore = defineStore('text', {
       METERS_PER_SECOND: 'm/s',
       HECTOPASCAL: 'hPa'
     },
+    icons: {
+      'projects': 'mdi-forest-outline',
+      'commercialSensors': 'mdi-chip',
+      'nodeTemplates': 'mdi-file-document-multiple',
+      'sensorNodes': 'mdi-wifi',
+    }
   }),
 })
