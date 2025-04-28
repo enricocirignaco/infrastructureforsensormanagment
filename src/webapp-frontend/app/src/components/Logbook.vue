@@ -50,10 +50,10 @@ const { logbook } = defineProps({
   }
 })
 const updatedAtEntries = computed(() =>
-  (logbook || []).filter(entry => entry.type === 'updated')
+  (logbook || []).filter(entry => entry.type === 'Updated')
 )
 
 const createdAtEntry = computed(() =>
-  (logbook || []).find(entry => entry.type === 'created') || null
+  (logbook || []).find(entry => entry.type === 'Created') || null
 )
 </script>
