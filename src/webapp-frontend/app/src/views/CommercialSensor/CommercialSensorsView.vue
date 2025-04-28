@@ -16,7 +16,7 @@
       <v-data-table
         :items="sensors"
         :headers="headers"
-        @click:row="(_, { item }) => router.push(`/commercial-sensor/${item.id}`)"
+        @click:row="(_, { item }) => router.push(`/commercial-sensor/${item.uuid}`)"
         class="elevation-1 rounded-lg"
         hover
         rounded="lg"
@@ -39,7 +39,7 @@
   const headers = [
     { title: 'Name', key: 'name' },
     { title: 'Alias', key: 'alias' },
-    { title: 'Sensor ID', key: 'id' }
+    { title: 'Sensor ID', key: 'uuid' }
   ]
   const loading = ref(true)
   // Fetch sensors data

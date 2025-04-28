@@ -207,11 +207,11 @@ const submitSensor = () => {
     if (!isValid.valid) return
     if (isEditMode.value) {
       commercialSensorService.editCommercialSensor(sensor.value)
-        .then(() => router.push('/commercial-sensor/' + sensor.value.id))
+        .then((sensorDTO) => router.push('/commercial-sensor/' + sensorDTO.uuid))
         .catch((error) => console.log('Error updating sensor:', error))
     } else {
       commercialSensorService.createCommercialSensor(sensor.value)
-        .then((sensorDTO) => router.push('/commercial-sensor/' + sensorDTO.id))
+        .then((sensorDTO) => router.push('/commercial-sensor/' + sensorDTO.uuid))
         .catch((error) => console.log('Error creating sensor:', error))
     }
   })

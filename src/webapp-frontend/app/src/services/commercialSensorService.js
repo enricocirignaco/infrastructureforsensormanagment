@@ -55,8 +55,8 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-        // return fetch(url, options)
-        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+        return fetch(url, options)
+            .then(response => response.ok ? response.json() : Promise.reject(response));
         // }
         return new Promise((resolve) => {
             resolve({
@@ -168,12 +168,12 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-        // return fetch(url, options)
-        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+        return fetch(url, options)
+            .then(response => response.ok ? response.json() : Promise.reject(response));
         // }
-        return new Promise((resolve) => {
-            resolve(true)
-        })
+        // return new Promise((resolve) => {
+        //     resolve(true)
+        // })
     },
     editCommercialSensor(sensorId) {
         let url = BASE_URL + '/commercial-sensors/' + sensorId
@@ -184,12 +184,12 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-        // return fetch(url, options)
-        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+        return fetch(url, options)
+            .then(response => response.ok ? response.json() : Promise.reject(response));
         // }
-        return new Promise((resolve) => {
-            resolve(true)
-        })
+        // return new Promise((resolve) => {
+        //     resolve(true)
+        // })
     },
     createCommercialSensor(sensor) {
         let url = BASE_URL + '/commercial-sensors'
