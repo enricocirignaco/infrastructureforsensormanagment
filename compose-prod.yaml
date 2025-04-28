@@ -35,12 +35,38 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - reverse-proxy-conf:/etc/caddy
       - reverse-proxy-data:/data
       - reverse-proxy-config:/config
-  
+
+  webapp-backend:
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/webapp-backend:${TAG}
+    container_name: webapp-backend
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env-backend
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki-triplestore
+    restart: unless-stopped
+    ports:
+      - "3030:3030"
+    volumes:
+      - fuseki-data:/fuseki
+    environment:
+      - ENABLE_DATA_WRITE=true
+      - ENABLE_UPDATE=true
+      - ENABLE_SHACL=false # Used for rdf-structure validation
+      - TDB=2
+      - FUSEKI_DATASET_1=core # Creates empty dataset with given name
+      - FUSEKI_DATASET_2=testing
+    env_file:
+      - .env-fuseki
 volumes:
-  reverse-proxy-conf:
   reverse-proxy-data:
   reverse-proxy-config:
   compiler-engine-source:
