@@ -95,6 +95,58 @@ export default {
               status: "Inactive"
             },
           ],
+          logbook: [
+            {
+              type: "created",
+              date: "2024-03-15T08:45:00Z",
+              user: {
+                email: "alice.researcher@example.com",
+                full_name: "Alice Researcher",
+                role: "Researcher",
+                uuid: "bba1f5aa-2b22-4f42-98ab-56f871414ffc"
+              }
+            },
+            {
+              type: "updated",
+              date: "2024-03-20T14:12:00Z",
+              user: {
+                email: "bob.technician@example.com",
+                full_name: "Bob Technician",
+                role: "Technician",
+                uuid: "f21a6ea7-0dfb-4d39-86c9-4cbe17d82388"
+              }
+            },
+            {
+              type: "updated",
+              date: "2024-04-01T09:30:00Z",
+              user: {
+                email: "carol.manager@example.com",
+                full_name: "Carol Manager",
+                role: "Project Manager",
+                uuid: "9a2152e5-03e9-4eb2-bef3-4e6dfcb7dfbb"
+              }
+            },
+            {
+              type: "updated",
+              date: "2024-04-10T16:45:00Z",
+              user: {
+                email: "alice.researcher@example.com",
+                full_name: "Alice Researcher",
+                role: "Researcher",
+                uuid: "bba1f5aa-2b22-4f42-98ab-56f871414ffc"
+              }
+            },
+            {
+              type: "updated",
+              date: "2024-04-22T11:05:00Z",
+              user: {
+                email: "bob.technician@example.com",
+                full_name: "Bob Technician",
+                role: "Technician",
+                uuid: "f21a6ea7-0dfb-4d39-86c9-4cbe17d82388"
+              }
+            }
+          ]
         })
       })
   },
