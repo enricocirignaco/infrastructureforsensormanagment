@@ -13,7 +13,6 @@
                 <v-col cols="auto">
                     <v-btn icon @click="router.push('/projects')">
                         <v-icon>mdi-arrow-left</v-icon>
-                    <v-icon>mdi-arrow-left</v-icon>
                     </v-btn>
                 </v-col>
                 <!-- title -->
