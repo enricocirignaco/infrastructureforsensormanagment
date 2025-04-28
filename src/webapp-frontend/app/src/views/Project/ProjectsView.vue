@@ -6,7 +6,7 @@
         <h1>Projects</h1>
       </v-col>
       <v-col cols="auto">
-      <v-btn rounded="xl" class="text-none" @click="router.push('/project/new')">
+      <v-btn v-if="authStore.getUser?.role !== 'Researcher'" rounded="xl" class="text-none" @click="router.push('/project/new')">
         <v-icon start>mdi-plus</v-icon>
         New Project
       </v-btn>
@@ -31,7 +31,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import projectService from '@/services/projectService'
+import { useAuthStore } from '@/stores/authStore'
 
+const authStore = useAuthStore()
 const router = useRouter()
 const projects = ref([])
 const headers = [

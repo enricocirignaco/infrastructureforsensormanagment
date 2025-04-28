@@ -24,10 +24,10 @@
                     <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
                       {{ project.state }}
                     </v-chip>
-                    <v-btn color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
+                    <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
-                    <v-btn color="error" icon size="small" @click="deleteProject(projectId)">
+                    <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="error" icon size="small" @click="deleteProject(projectId)">
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-col>
@@ -119,7 +119,9 @@ import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
 import projectService from '@/services/projectService'
 import Logbook from '@/components/Logbook.vue'
+import { useAuthStore } from '@/stores/authStore'
 
+const authStore = useAuthStore()
 const projectId = ref(useRoute().params.id)
 const router = useRouter()
 const project = ref(null)
