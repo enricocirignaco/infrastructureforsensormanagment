@@ -33,7 +33,7 @@
             class="d-flex flex-column justify-center align-center text-center"
             elevation="2"
             style="width: 100%; height: 100%"
-            to="/commercial-sensor"
+            to="/commercial-sensors"
             hover
             ripple
           >
