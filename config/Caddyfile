@@ -7,13 +7,22 @@
 }
 
 # Tailscale VPN
+# http://mip3-cirie1.tail60817a.ts.net {
+# 	import common_static
+# 	tls internal
+# 	handle_path /api/v1/* {
+# 		reverse_proxy webapp-backend:8001
+# 	}
+# }
+
 http://mip3-cirie1.tail60817a.ts.net {
-	import common_static
-	tls internal
-	handle_path /api/v1/* {
-		reverse_proxy webapp-backend:8001
-	}
+	root * /srv
+	file_server {
+      hide .git
+  }
+  try_files {path} /index.html
 }
+
 
 # Serve production
 https://leaflink.bfh.ch {
