@@ -3,7 +3,7 @@
     <v-container class="pa-4">
       <v-row>
         <v-col cols="12">
-          <h1 class="text-h5 mb-6">Welcome back, User!</h1>
+          <h1 class="text-h5 mb-6">Welcome back, {{ authStore.getUser?.full_name || '' }}</h1>
         </v-col>
       </v-row>
     </v-container>
@@ -86,3 +86,10 @@
     </v-container>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
+
+</script>
