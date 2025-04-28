@@ -16,50 +16,50 @@ from app.models.commercial_sensor import (
 )
 from collections import defaultdict
 
-
-SCHEMA = Namespace("http://schema.org/")
-BFH = Namespace("http://data.bfh.ch/")
-
 class CommercialSensorRepository:
     def __init__(self, triplestore_client: TripleStoreClient):
         self.triplestore_client = triplestore_client
+        self.schema = URIRef("http://schema.org/")
+        self.bfh = URIRef("http://data.bfh.ch/")
+
 
     def create_commercial_sensor(self, commercial_sensor: CommercialSensorInDB) -> CommercialSensorInDB:
         g = Graph()
-        g.bind('schema', SCHEMA)
-        g.bind('bfh', BFH)
+        g.bind('schema', self.schema)
+        g.bind('bfh', self.bfh)
 
-        subj = URIRef(f"http://data.bfh.ch/commercial_sensors/{commercial_sensor.uuid}")
-        # Core triples
-        g.add((subj, RDF.type, BFH.CommercialSensor))
-        g.add((subj, BFH.identifier, Literal(str(commercial_sensor.uuid))))
-        g.add((subj, SCHEMA.name, Literal(commercial_sensor.name)))
-        g.add((subj, SCHEMA.alternateName, Literal(commercial_sensor.alias)))
-        g.add((subj, SCHEMA.description, Literal(commercial_sensor.description)))
+        sensor_uri = URIRef(f"http://data.bfh.ch/commercialSensors/{commercial_sensor.uuid}")
+
+        # Basisdaten
+        g.add((sensor_uri, RDF.type, URIRef(self.bfh + "CommercialSensor")))
+        g.add((sensor_uri, URIRef(self.bfh + "identifier"), Literal(str(commercial_sensor.uuid))))
+        g.add((sensor_uri, URIRef(self.schema + "name"), Literal(commercial_sensor.name)))
+        g.add((sensor_uri, URIRef(self.schema + "alternateName"), Literal(commercial_sensor.alias)))
+        g.add((sensor_uri, URIRef(self.schema + "description"), Literal(commercial_sensor.description)))
 
         # External links
-        for link in commercial_sensor.external_props or []:
-            bn = BNode()
-            g.add((subj, SCHEMA.hasPart, bn))
-            g.add((bn, RDF.type, SCHEMA.WebPage))
+        for idx, link in enumerate(commercial_sensor.external_props or []):
+            link_uri = URIRef(f"http://data.bfh.ch/commercialSensors/{commercial_sensor.uuid}/link/{idx}")
+            g.add((sensor_uri, URIRef(self.schema + "hasPart"), link_uri))
+            g.add((link_uri, RDF.type, URIRef(self.schema + "WebPage")))
+            g.add((link_uri, URIRef(self.schema + "url"), Literal(link.url)))
+            g.add((link_uri, URIRef(self.bfh + "linkType"), URIRef(link.type.rdf_uri)))
             if link.name:
-                g.add((bn, SCHEMA.name, Literal(link.name)))
-            g.add((bn, SCHEMA.url, Literal(link.url)))
-            g.add((bn, BFH.linkType, Literal(link.type.value)))
+                g.add((link_uri, URIRef(self.schema + "name"), Literal(link.name)))
 
         # Sensor properties
-        for prop in commercial_sensor.sensor_props or []:
-            bn = BNode()
-            g.add((subj, BFH.hasSensorProperty, bn))
-            g.add((bn, RDF.type, BFH.SensorProperty))
-            g.add((bn, BFH.propName, Literal(prop.name)))
-            g.add((bn, BFH.unit, Literal(prop.unit)))
-            g.add((bn, BFH.precision, Literal(prop.precision)))
-            g.add((bn, BFH.rangeMin, Literal(prop.range.min)))
-            g.add((bn, BFH.rangeMax, Literal(prop.range.max)))
+        for idx, prop in enumerate(commercial_sensor.sensor_props or []):
+            prop_uri = URIRef(f"http://data.bfh.ch/commercialSensors/{commercial_sensor.uuid}/property/{idx}")
+            g.add((sensor_uri, URIRef(self.bfh + "hasSensorProperty"), prop_uri))
+            g.add((prop_uri, RDF.type, URIRef(self.bfh + "SensorProperty")))
+            g.add((prop_uri, URIRef(self.bfh + "propName"), Literal(prop.name)))
+            g.add((prop_uri, URIRef(self.bfh + "unit"), Literal(prop.unit)))
+            g.add((prop_uri, URIRef(self.bfh + "precision"), Literal(prop.precision)))
+            g.add((prop_uri, URIRef(self.bfh + "rangeMin"), Literal(prop.range.min)))
+            g.add((prop_uri, URIRef(self.bfh + "rangeMax"), Literal(prop.range.max)))
 
         # Persist graph
-        query = f"""INSERT DATA {{ {g.serialize(format="nt")} }}"""
+        query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
         self.triplestore_client.update(query)
 
         return self.find_commercial_sensor_by_uuid(commercial_sensor.uuid)
@@ -176,7 +176,7 @@ class CommercialSensorRepository:
         sparql = f"""
         PREFIX bfh: <http://data.bfh.ch/>
         DELETE WHERE {{
-          <http://data.bfh.ch/commercial_sensors/{uuid}> ?p ?o .
+          <http://data.bfh.ch/commercialSensors/{uuid}> ?p ?o .
         }}
         """
         self.triplestore_client.update(sparql)
