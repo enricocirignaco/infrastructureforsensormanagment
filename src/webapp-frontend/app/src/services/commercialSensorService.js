@@ -13,9 +13,9 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-  //   return fetch(url, options)
-  //     .then(response => response.ok ? response.json() : Promise.reject(response));
-  // }
+     return fetch(url, options)
+       .then(response => response.ok ? response.json() : Promise.reject(response));
+    //}
         return new Promise((resolve) => {
             resolve([
                 {
@@ -202,16 +202,16 @@ export default {
             },
             body: JSON.stringify(sensor),
         }
-        // return fetch(url, options)
-        //     .then(response => response.ok ? response.json() : Promise.reject(response));
-        // }
-        return new Promise((resolve) => {
-            resolve({
-                id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                name: 'DHT22',
-                alias: 'Temperature and Humidity Sensor',
-            })
-        })
+        return fetch(url, options)
+            .then(response => response.ok ? response.json() : Promise.reject(response));
+        
+        // return new Promise((resolve) => {
+        //     resolve({
+        //         id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        //         name: 'DHT22',
+        //         alias: 'Temperature and Humidity Sensor',
+        //     })
+        // })
     }
 
 }

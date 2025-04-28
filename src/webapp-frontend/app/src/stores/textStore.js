@@ -11,12 +11,17 @@ export const useTextStore = defineStore('text', {
       1: 'Archived',
       2: 'Deleted',
     },
-    externalResourceTypeEnum: {
+    externalResourceProjectEnum: {
       0: 'Website',
       1: 'MS-Teams',
       2: 'Report',
       3: 'Documentation',
       4: 'Misc',
+    },
+    externalResourceSensorEnum: {
+      0: 'Datasheet',
+      1: 'Webshop',
+      2: 'Misc'
     },
     sensorUnitsEnum: {
       CELSIUS: '°C',
