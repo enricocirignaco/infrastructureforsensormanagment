@@ -3,7 +3,7 @@
       <!-- Title & Button -->
       <v-row class="justify-space-between mb-4">
         <v-col cols="auto">
-          <h1>Sensors</h1>
+          <h1>Commercial Sensors</h1>
         </v-col>
         <v-col cols="auto">
         <v-btn v-if="authStore.getUser?.role !== 'Researcher'" rounded="xl" class="text-none" @click="router.push('/commercial-sensor/new')">
