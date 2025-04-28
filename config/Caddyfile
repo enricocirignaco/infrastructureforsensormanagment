@@ -1,9 +1,9 @@
 (common_static) {
 	root * /srv
 	file_server {
-		hide .git
-	}
-	try_files {path} /index.html
+      hide .git
+  }
+  try_files {path} /index.html
 }
 
 # Tailscale VPN
@@ -16,11 +16,7 @@
 # }
 
 http://mip3-cirie1.tail60817a.ts.net {
-	root * /srv
-	file_server {
-      hide .git
-  }
-  try_files {path} /index.html
+  import common_static
 }
 
 
