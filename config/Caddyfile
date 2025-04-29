@@ -15,6 +15,9 @@ http://mip3-cirie1.tail60817a.ts.net {
       import common_static
   }
 }
+http://fuseki.mip3-cirie1.tail60817a.ts.net {
+	reverse_proxy fuseki-triplestore:3030
+}
 # Serve production
 http://10.248.11.74 {
 	handle_path /api/v1/* {
