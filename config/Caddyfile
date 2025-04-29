@@ -15,10 +15,25 @@ http://mip3-cirie1.tail60817a.ts.net {
       import common_static
   }
 }
-
-
 # Serve production
+http://10.248.11.74 {
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8000
+	}
+	handle {
+      import common_static
+  	}	
+}
 https://leaflink.bfh.ch {
+	tls internal
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8000
+	}
+	handle {
+      import common_static
+  	}	
+}
+https://leaflink.ti.bfh.ch {
 	tls internal
 	handle_path /api/v1/* {
 		reverse_proxy webapp-backend:8000
