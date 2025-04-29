@@ -24,6 +24,15 @@ http://10.248.11.74 {
       import common_static
   	}	
 }
+https://10.248.11.74 {
+	tls internal
+	handle_path /api/v1/* {
+		reverse_proxy webapp-backend:8000
+	}
+	handle {
+      import common_static
+  	}	
+}
 https://leaflink.bfh.ch {
 	tls internal
 	handle_path /api/v1/* {
