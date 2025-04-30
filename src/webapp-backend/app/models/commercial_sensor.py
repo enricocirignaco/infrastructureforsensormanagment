@@ -1,7 +1,10 @@
 from pydantic import BaseModel
+from datetime import datetime
 from typing import Optional, List
 from enum import Enum
 from uuid import UUID
+from app.models.user import UserOut
+
 
 class CommercialSensorLinkEnum(str, Enum):
     DATASHEET = 'Datasheet'
@@ -25,10 +28,20 @@ class CommercialSensorLinkEnum(str, Enum):
             raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid CommercialSensorLinkType.")
 
 
+class CommercialSensorLogbookEnum(str, Enum):
+    CREATED = 'Created'
+    UPDATED = 'Updated'
+
 class CommercialSensorLink(BaseModel):
     name: Optional[str]
     url: str
     type: CommercialSensorLinkEnum
+
+class CommercialSensorLogbookEntry(BaseModel):
+    type: CommercialSensorLogbookEnum
+    date: datetime
+    user: UserOut
+
 
 class CommercialSensorRange(BaseModel):
     min: int
@@ -52,11 +65,14 @@ class CommercialSensorBase(BaseModel):
 class CommercialSensorIn(CommercialSensorBase):
     pass
 
+class CommercialSensorUpdate(CommercialSensorBase):
+    uuid: Optional[UUID]
+
 # Model used internally
 
 class CommercialSensorInDB(CommercialSensorBase):
     uuid: UUID
-    #logbook: List[]
+    logbook: List[CommercialSensorLogbookEntry]
 
 # Models that get returned to the client
 

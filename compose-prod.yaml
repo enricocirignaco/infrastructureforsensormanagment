@@ -47,6 +47,7 @@ services:
     environment:
       - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
       - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
     env_file:
       - .env-backend
   fuseki:

@@ -54,6 +54,7 @@ services:
     environment:
       - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
       - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
     env_file:
       - .env-backend
   timeseries-parser:
@@ -69,6 +70,7 @@ services:
       - INFLUX_ORG=bfh
       - INFLUX_BUCKET=default
       - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
     env_file:
       - .env-parser
     depends_on:
