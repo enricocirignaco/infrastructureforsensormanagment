@@ -26,6 +26,9 @@ class ProjectRepository:
 
     def create_project(self, project: ProjectInDB) -> ProjectInDB:
         g = Graph()
+        g.bind('schema', self.schema)
+        g.bind('bfh', self.bfh)
+        
         project_uri = URIRef(f"http://data.bfh.ch/projects/{project.uuid}")
 
         # Basisdaten

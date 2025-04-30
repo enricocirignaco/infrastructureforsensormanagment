@@ -1,8 +1,8 @@
 from typing import List
 from uuid import UUID
+from datetime import datetime
 
-from rdflib import Graph, Namespace, URIRef, BNode, Literal
-from rdflib.namespace import RDF
+from rdflib import Graph, URIRef, Literal, RDF
 
 from app.utils.triplestore_client import TripleStoreClient
 from app.models.commercial_sensor import (
@@ -12,9 +12,11 @@ from app.models.commercial_sensor import (
     CommercialSensorProps,
     CommercialSensorOutSlim,
     CommercialSensorOutFull,
-    CommercialSensorRange
+    CommercialSensorRange,
+    CommercialSensorLogbookEnum,
+    CommercialSensorLogbookEntry
 )
-from collections import defaultdict
+from app.models.user import UserOut, RoleEnum
 
 class CommercialSensorRepository:
     def __init__(self, triplestore_client: TripleStoreClient):
@@ -58,6 +60,15 @@ class CommercialSensorRepository:
             g.add((prop_uri, URIRef(self.bfh + "rangeMin"), Literal(prop.range.min)))
             g.add((prop_uri, URIRef(self.bfh + "rangeMax"), Literal(prop.range.max)))
 
+        # Logbuch
+        for idx, entry in enumerate(commercial_sensor.logbook):
+            log_uri = URIRef(f"http://data.bfh.ch/commercialSensors/{commercial_sensor.uuid}/log/{idx}")
+            g.add((sensor_uri, URIRef(self.bfh + "hasLogEntry"), log_uri))
+            g.add((log_uri, RDF.type, URIRef(self.bfh + "LogEntry")))
+            g.add((log_uri, URIRef(self.bfh + "logType"), Literal(entry.type.value)))
+            g.add((log_uri, URIRef(self.schema + "dateCreated"), Literal(entry.date.isoformat())))
+            g.add((log_uri, URIRef(self.schema + "creator"), URIRef(f"http://data.bfh.ch/users/{entry.user.uuid}")))
+
         # Persist graph
         query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
         self.triplestore_client.update(query)
@@ -65,8 +76,7 @@ class CommercialSensorRepository:
         return self.find_commercial_sensor_by_uuid(commercial_sensor.uuid)
 
     def find_all_commercial_sensors(self) -> List[CommercialSensorOutSlim]:
-        # Using SPARQL SELECT via triplestore
-        sparql = f"""
+        sparql_query = f"""
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
@@ -78,7 +88,7 @@ class CommercialSensorRepository:
              schema:alternateName ?alias .
         }}
         """
-        res = self.triplestore_client.query(sparql)
+        res = self.triplestore_client.query(sparql_query)
         return [
             CommercialSensorOutSlim(
                 uuid=UUID(b['uuid']['value']),
@@ -116,7 +126,8 @@ class CommercialSensorRepository:
             alias=base['alias']['value'],
             description=base['description']['value'],
             external_props=[],
-            sensor_props=[]
+            sensor_props=[],
+            logbook=[]
         )
 
         # 2) Links abfragen
@@ -170,6 +181,40 @@ class CommercialSensorRepository:
                 )
             )
 
+
+        # 3) Logbuch abfragen
+        sparql_logs = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?logType ?logDate ?creatorUuid ?creatorEmail ?creatorFullName ?creatorRole
+        WHERE {{
+            {sensor_uri} bfh:hasLogEntry ?logEntry .
+            ?logEntry a bfh:LogEntry ;
+                    bfh:logType ?logType ;
+                    schema:dateCreated ?logDate ;
+                    schema:creator ?creator .
+            ?creator a schema:Person ;
+                    schema:identifier ?creatorUuid ;
+                    schema:email ?creatorEmail ;
+                    schema:name ?creatorFullName ;
+                    bfh:hasRole ?creatorRole .
+        }}"""
+        log_res = self.triplestore_client.query(sparql_logs)
+        for row in log_res.get("results", {}).get("bindings", []):
+            sensor.logbook.append(
+                CommercialSensorLogbookEntry(
+                    type=CommercialSensorLogbookEnum(row['logType']['value']),
+                    date=datetime.fromisoformat(row['logDate']['value']),
+                    user=UserOut(
+                        uuid=row['creatorUuid']['value'],
+                        full_name=row['creatorFullName']['value'],
+                        email=row['creatorEmail']['value'],
+                        role=RoleEnum.from_rdf_uri(row['creatorRole']['value'])
+                    )
+                )
+            )
+
         return sensor
 
     def delete_commercial_sensor(self, uuid: UUID) -> None:
@@ -185,6 +230,7 @@ class CommercialSensorRepository:
             FILTER (
                 STRSTARTS(STR(?s), "http://data.bfh.ch/commercialSensors/{uuid}/link/") ||
                 STRSTARTS(STR(?s), "http://data.bfh.ch/commercialSensors/{uuid}/property/") ||
+                STRSTARTS(STR(?s), "http://data.bfh.ch/commercialSensors/{uuid}/log/") ||
                 STR(?s) = "http://data.bfh.ch/commercialSensors/{uuid}"
             )
         }}

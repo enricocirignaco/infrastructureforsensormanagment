@@ -5,7 +5,7 @@ from uuid import UUID
 from ..dependencies import require_roles_or_owner, get_commercial_sensor_service
 from app.utils.exceptions import NotFoundError
 from app.models.user import UserInDB, RoleEnum
-from app.models.commercial_sensor import CommercialSensorIn, CommercialSensorOutSlim, CommercialSensorOutFull
+from app.models.commercial_sensor import CommercialSensorIn, CommercialSensorOutSlim, CommercialSensorOutFull, CommercialSensorUpdate
 from app.services.commercial_sensor_service import CommercialSensorService
 
 router = APIRouter(
@@ -31,17 +31,17 @@ async def read_specific_commercial_sensors(uuid: UUID,
 
 @router.post("/", status_code=201, response_model=CommercialSensorOutFull)
 async def create_new_commercial_sensor(commercial_sensor: CommercialSensorIn,
-                             _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
+                             logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                              commercial_sensor_service: CommercialSensorService = Depends(get_commercial_sensor_service)) -> CommercialSensorOutFull:
-    return commercial_sensor_service.create_commercial_sensor(commercial_sensor)
+    return commercial_sensor_service.create_commercial_sensor(commercial_sensor, logged_in_user=logged_in_user)
 
 @router.put("/{uuid}", response_model=CommercialSensorOutFull)
 async def update_specific_commercial_sensor(uuid: UUID,
-                                  commercial_sensor: CommercialSensorOutFull,
-                                  _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
+                                  commercial_sensor: CommercialSensorUpdate,
+                                  logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                                   commercial_sensor_service: CommercialSensorService = Depends(get_commercial_sensor_service)) -> CommercialSensorOutFull:
     try:
-        return commercial_sensor_service.update_commercial_sensor(uuid=uuid, commercial_sensor=commercial_sensor)
+        return commercial_sensor_service.update_commercial_sensor(uuid=uuid, commercial_sensor=commercial_sensor, logged_in_user=logged_in_user)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:
