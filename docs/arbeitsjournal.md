@@ -75,3 +75,4 @@
 | 2025-04-28 | 09:00 - 21:00 | 12,0  | DEGEL2         | 57, 68   | Commercial Sensor, Project Logbook, Marriage                      |
 | 2025-04-29 | 09:00 - 15:30 | 6,5   | CIRIE1, DEGEL2 |          | Meeting, Experte-Meeting, Setup Infrastructure                    |
 | 2025-04-30 | 11:00 - 12:00 | 1,0   | DEGEL2         |          | Organisational work, Arbeitsjournal                               |
+| 2025-04-30 | 12:00 - 13:00 | 1,0   | DEGEL2         | 68, 61   | Logbook for commercial sensor                                     |
