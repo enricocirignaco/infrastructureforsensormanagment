@@ -57,8 +57,6 @@
 | 2025-04-13 | 21:30 - 22:30 | 1,0   | CIRIE1, DEGEL2 | 61, 54   | Discuss project endpoints and payloads                            |
 | 2025-04-13 | 09:30 - 12:30 | 3,0   | DEGEL2         | 31, 65   | Docker-Setup Backend, Admin init on startup                       |
 | 2025-04-13 | 15:00 - 19:00 | 3,0   | DEGEL2         | 66, 54   | Role based access, JWT generation, project setup                  |
-| 2025-04-04 | 09:00 - 12:00 | 3     | DEGEL2         | 29, 40   | Resolve Merge Request, Improve timeseries parser                  |
-| 2025-04-07 | 16:00 - 18:30 | 2,5   | DEGEL2         | 29, 40   | Improve mosquitto config, finish parser                           |
 | 2025-04-07 | 09:00 - 11:00 | 2,0   | CIRIE1         |          | Review Merge Requests                                             |
 | 2025-04-08 | 10:00 - 22:00 | 10,0  | CIRIE1         | 43, 51   | Frontend development, Research component framework, vue initialization|
 | 2025-04-10 | 10:00 - 17:30 | 7,0   | CIRIE1         | 43, 51   | Frontend development, vue Trobleshooting                          |
@@ -68,10 +66,12 @@
 | 2025-04-21 | 16:00 - 21:30 | 5.5   | CIRIE1         | 44, 45   | Frontend development, Project Page, Deployed Node view, Router refactoring|
 | 2025-04-22 | 10:00 - 16:00 | 5.5   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
 | 2025-04-22 | 08:00 - 11:00 | 3     | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
-
-
-
-
-
-
-
+| 2025-04-14 | 08:00 - 13:00 | 5,0   | DEGEL2         | 65       | Backend docker, init admin                                        |
+| 2025-04-16 | 12:00 - 19:30 | 7,5   | DEGEL2         | 65, 54   | Userhandling, password change, user update                        |
+| 2025-04-22 | 10:00 - 12:30 | 2,5   | DEGEL2         | 57       | Sketch out commercial sensor                                      |
+| 2025-04-24 | 13:00 - 20:00 | 7,0   | DEGEL2         | 53, 54   | Project CRUD, Cleanup in Backend                                  |
+| 2025-04-25 | 10:00 - 13:00 | 3,0   | DEGEL2         | 69       | Marriage Frontend, Backend (Login, User, Project)                 |
+| 2025-04-27 | 13:00 - 20:00 | 7,0   | DEGEL2         | 57, 72   | Commercial Sensor, Separation of Layers                           |
+| 2025-04-28 | 09:00 - 21:00 | 12,0  | DEGEL2         | 57, 68   | Commercial Sensor, Project Logbook, Marriage                      |
+| 2025-04-29 | 09:00 - 15:30 | 6,5   | CIRIE1, DEGEL2 |          | Meeting, Experte-Meeting, Setup Infrastructure                    |
+| 2025-04-30 | 11:00 - 12:00 | 1,0   | DEGEL2         |          | Organisational work, Arbeitsjournal                               |
