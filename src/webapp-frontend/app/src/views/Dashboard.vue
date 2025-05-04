@@ -63,7 +63,7 @@
               class="d-flex flex-column justify-center align-center text-center"
               elevation="2"
               style="width: 100%; height: 100%"
-              to="/sensor-node"
+              to="/sensor-nodes"
               hover
               ripple
             >
@@ -81,7 +81,7 @@
               class="d-flex flex-column justify-center align-center text-center"
               elevation="2"
               style="width: 100%; height: 100%"
-              to="/sensor-template"
+              to="/node-templates"
               hover
               ripple
             >
