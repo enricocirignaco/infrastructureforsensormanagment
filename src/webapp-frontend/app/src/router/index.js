@@ -26,6 +26,7 @@ const router = createRouter({
         { path: '/commercial-sensor/:id', component: () => import('@/views/CommercialSensor/CommercialSensorView.vue') },
         { path: '/commercial-sensor/:id/edit', component: () => import('@/views/CommercialSensor/EditCommercialSensorView.vue') },
         { path: '/commercial-sensor/new', component: () => import('@/views/CommercialSensor/NewCommercialSensorView.vue') },
+        { path: '/node-templates', component: () => import('@/views/NodeTemplate/NodeTemplatesView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page
