@@ -156,5 +156,43 @@ export default {
         })
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
+  },
+  editNodeTemplate(id){
+    let url = BASE_URL + '/node-templates/' + id
+    const options = {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+    }
+    return Promise.resolve(
+        {
+            "name": "Temperature Sensor Node",
+            "description": "A node template for monitoring ambient temperature using digital sensors.",
+            "fields": [
+                {
+                "field_name": "temperature",
+                "protbuf_datatype": "float",
+                "unit": "°C",
+                "commercial_sensor": "d7e3b9c4-2fa7-11ee-be56-0242ac120002"
+                },
+                {
+                "field_name": "battery_level",
+                "protbuf_datatype": "int32",
+                "unit": "%",
+                "commercial_sensor": "e5a1f7d8-2fa7-11ee-be56-0242ac120002"
+                }
+            ],
+            "status": "in-use",
+            "gitlab_url": "https://gitlab.example.com/sensor-nodes/temperature-sensor",
+            "git_ref": "main",
+            "hardware_type": "AVR:ESP32",
+            "uuid": id,
+            // other fields...
+        })
+    return fetch(url, options)
+      .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   }
 }
