@@ -107,10 +107,43 @@
                 </v-list-item-content>
               </v-list-item>
             </v-list>
+
+            <!-- Fields Table -->
+            <h3 class="text-h6 mb-2 mt-6">Node Template Fields</h3>
+            <v-data-table
+              :items="nodeTemplate.fields"
+              :headers="fieldHeaders"
+              density="compact"
+              class="elevation-1 rounded-lg"
+              hide-default-footer
+              rounded="lg"
+              elevation="1"
+              disable-sort
+            >
+            <template #item.commercial_sensor="{ item }">
+              <v-btn
+                variant="outlined"
+                color="secondary"
+                size="small"
+                rounded
+                :to="`/commercial-sensor/${item.commercial_sensor}`"
+                style="text-transform: none;"
+              >
+                <v-icon start class="me-1">mdi-link-variant</v-icon>
+                View Sensor
+              </v-btn>
+            </template>
+            </v-data-table>
+
+            <!-- protobuff schema to copy -->
+            <h3 class="text-h6 mb-2 mt-6">Protobuf Schema</h3>
+            
           </v-card-text>
+
+
         </v-card>
         <v-divider class="my-6" />
-        <!-- Node Template Fields -->
+        
 
         <h2 class="text-h6 mb-2">Deployed Nodes</h2>
         <!-- Table of deployed nodes -->
@@ -193,6 +226,12 @@ const sensorHeaders = [
   { title: 'Type', key: 'type' },
   { title: 'Location', key: 'location' },
   { title: 'Status', key: 'status' },
+]
+const fieldHeaders = [
+  { title: 'Field Name', key: 'field_name' },
+  { title: 'Data Type', key: 'protbuf_datatype' },
+  { title: 'Unit', key: 'unit' },
+  { title: 'Commercial Sensor', key: 'commercial_sensor' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])
 const loading = ref(true)
