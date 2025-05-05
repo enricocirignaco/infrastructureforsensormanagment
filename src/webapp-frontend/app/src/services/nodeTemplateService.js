@@ -103,4 +103,58 @@ export default {
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   },
+  getNodeTemplateSchema(id) {
+    let url = BASE_URL + '/node-templates/' + id + '/schema'
+    const options = {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+    }
+    return Promise.resolve(
+        {
+            "detail": [
+              {
+                "loc": ["body", "temperature"],
+                "msg": "Field must be a float representing degrees Celsius",
+                "type": "type_error.float"
+              },
+              {
+                "loc": ["body", "battery_level"],
+                "msg": "Value must be an integer between 0 and 100",
+                "type": "value_error.range"
+              },
+              {
+                "loc": ["body", "timestamp"],
+                "msg": "Invalid ISO 8601 datetime format",
+                "type": "value_error.datetime"
+              }
+            ],
+            "metadata": {
+              "schema_version": "v1.2.0",
+              "generated_at": "2025-05-04T18:30:00Z",
+              "author": "system"
+            }
+          })
+    return fetch(url, options)
+      .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
+  },
+  deleteNodeTemplate(id) {
+    let url = BASE_URL + '/node-template/' + id
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+    }
+    return Promise.resolve(
+        {
+        })
+    return fetch(url, options)
+      .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
+  }
 }

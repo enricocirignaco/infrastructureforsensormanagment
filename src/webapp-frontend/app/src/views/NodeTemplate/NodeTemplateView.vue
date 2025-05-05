@@ -44,7 +44,7 @@
                   v-if="authStore.getUser?.role !== 'Researcher' && !hasInheritedSensorNodes()"
                   color="error"
                   icon size="small"
-                  @click="deleteProject(nodeTemplateId)"
+                  @click="deletenodeTemplate(nodeTemplateId)"
                   >
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
@@ -120,20 +120,42 @@
             </template>
             </v-data-table>
 
-            <!-- protobuff schema to copy -->
-            <h3 class="text-h6 mb-2 mt-6">Protobuf Schema</h3>           
+            <!-- protobuff schema -->
+            <v-row class="align-center mb-2 mt-6">
+              <v-col>
+                <h3 class="text-h6 mb-0">Protobuf Schema</h3>
+              </v-col>
+              <v-col cols="auto">
+                <v-btn
+                  color="secondary"
+                  size="small"
+                  :href="`/node-template/${nodeTemplateId}/code`"
+                  download
+                  style="text-transform: none;"
+                >
+                  <v-icon start class="me-1">mdi-download</v-icon>
+                  Download Code
+                </v-btn>
+              </v-col>
+            </v-row>
             <v-sheet
               elevation="1"
-              class="pa-4 mt-4"
-              style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow-x: auto; border-radius: 8px;"
+              class="pa-4 mt-4 position-relative"
+              style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px;"
             >
-            
-              {{ nodeTemplate.protobuf_schema }}
+              <v-btn
+                icon
+                size="small"
+                color="primary"
+                @click="copySchema"
+                class="position-absolute"
+                style="top: 8px; right: 8px;"
+              >
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
+              {{ protobuf_schema }}
             </v-sheet>
-            
           </v-card-text>
-
-
         </v-card>
         <v-divider class="my-6" />
         
@@ -141,7 +163,7 @@
         <h2 class="text-h6 mb-2">Deployed Nodes</h2>
         <!-- Table of deployed nodes -->
         <v-data-table
-          :items="nodeTemplate.sensor_nodes"
+          :items="nodeTemplate.inherited_sensor_nodes"
           :headers="sensorHeaders"
           class="elevation-1 rounded-lg"
           hover
@@ -150,7 +172,7 @@
           elevation="1"
         >
           <template #item.status="{ item }">
-            <v-chip :color="getStatusColor(item.status)" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+            <v-chip :color="grey" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
               {{ item.status }}
             </v-chip>
           </template>
@@ -170,10 +192,10 @@
     <v-card>
       <v-card-title class="text-h6">Confirm Deletion</v-card-title>
       <v-card-text>
-        <p>To confirm deletion, type the project name: <strong>{{ nodeTemplate?.name }}</strong></p>
+        <p>To confirm deletion, type the node template name: <strong>{{ nodeTemplate?.name }}</strong></p>
         <v-text-field
           v-model="deleteConfirmInput"
-          label="Project name"
+          label="Node Template name"
           dense
           hide-details
           autofocus
@@ -209,10 +231,7 @@ const textStore = useTextStore()
 const nodeTemplateId = ref(useRoute().params.id)
 const router = useRouter()
 const nodeTemplate = ref(null)
-const nodeTemplateHeaders = [
-    { title: 'Name', key: 'name' },
-    { title: 'URL', key: 'url' }
-]
+
 const sensorHeaders = [
   { title: 'Node ID', key: 'id' },
   { title: 'Name', key: 'name'},
@@ -226,12 +245,11 @@ const fieldHeaders = [
   { title: 'Unit', key: 'unit' },
   { title: 'Commercial Sensor', key: 'commercial_sensor' },
 ]
-const groupBy = ref([{ key: 'type', order: 'asc' }])
 const loading = ref(true)
 const confirmDelete = ref(false)
 const nodeTemplateToDelete = ref(null)
 const deleteConfirmInput = ref('')
-
+const protobuf_schema = ref('')
 // Fetch node template
 nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
   .then((data) => {
@@ -250,29 +268,38 @@ nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
     console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)
   })
   .finally(() => loading.value = false)
-
+// Fetch protobuff schema
+nodeTemplateService.getNodeTemplateSchema(nodeTemplateId.value)
+  .then((data) => {
+    protobuf_schema.value = data
+  })
+  .catch((error) => {
+    console.error(`Error fetching node template ${nodeTemplateId.value} schema:`, error)
+  })
+// check if the node template has children
 const hasInheritedSensorNodes = () => {
   return Array.isArray(nodeTemplate.inherited_sensor_nodes) && nodeTemplate.inherited_sensor_nodes.length > 0
 }
-const deleteProject = (id) => {
+
+
+const deletenodeTemplate = (id) => {
   nodeTemplateToDelete.value = id
   deleteConfirmInput.value = ''
   confirmDelete.value = true
 }
 
-// const performDelete = () => {
-//   projectService.deleteProject(projectToDelete.value)
-//     .then(() => {
-//         confirmDelete.value = false
-//         router.push('/projects')
-//     })
-//     .catch(() => console.error(`Error deleting project ${projectToDelete.value}`))
-// }
+const performDelete = () => {
+  nodeTemplateService.deleteNodeTemplate(nodeTemplateToDelete.value)
+    .then(() => {
+        confirmDelete.value = false
+        router.push('/node-templates')
+    })
+    .catch(() => console.error(`Error deleting node template ${nodeTemplateToDelete.value}`))
+}
 const copySchema = () => {
-  navigator.clipboard.writeText(nodeTemplate.value.protobuf_schema).then(() => {
-    console.log('Schema copied to clipboard!')
-  }).catch(err => {
-    console.error('Failed to copy schema:', err)
+  const schemaText = JSON.stringify(protobuf_schema.value, null, 2)
+  navigator.clipboard.writeText(schemaText).catch(err => {
+    console.error('Failed to copy schema: ', err)
   })
 }
 </script>
