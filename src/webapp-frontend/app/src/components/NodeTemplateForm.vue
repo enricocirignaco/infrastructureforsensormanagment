@@ -29,22 +29,48 @@
               :key="index"
               class="mb-2"
             >
-              <v-col cols="4">
+              <v-col cols="3">
                 <v-text-field v-model="field.field_name" label="Name" :rules="[required]" />
               </v-col>
-              <!-- protobuff type dropdown -->
-              <!-- unit dropdown -->
-              <!-- commercial senosr dropdown -->
-              <v-col cols="3">
-                <!-- external resource type dropdown -->
+              <!-- protobuf type dropdown -->
+              <v-col cols="2">
                 <v-select
-                  v-model="field.type"
-                  label="Type"
+                  :items="Object.values(textStore.ProtobufDataTypes)"
+                  v-model="field.protbuf_datatype"
+                  label="ProtoBuf Data Type"
                   :rules="[required]"
                 />
               </v-col>
+              <!-- unit dropdown -->
+              <v-col cols="2">
+                <v-select
+                  :items="Object.values(textStore.sensorUnitsEnum)"
+                  v-model="field.unit"
+                  label="Unit"
+                  :rules="[required]"
+                />
+              </v-col>
+              <!-- status dropdown -->
+              <v-col cols="2">
+                <v-select
+                  :items="Object.values(textStore.nodeTemplateStatusEnum)"
+                  v-model="field.status"
+                  label="Status"
+                  :rules="[required]"
+                />
+              </v-col>
+              <!-- commercial senosor dropdown -->
+              <v-col cols="2">
+                <v-select
+                  :items="Object.values(textStore.nodeTemplateStatusEnum)"
+                  v-model="field.status"
+                  label="Commercial Sensor"
+                  :rules="[required]"
+                />
+              </v-col>
+              <!-- delete button -->
               <v-col cols="1" class="d-flex align-center">
-                <v-btn icon @click="removeField(index)">
+                <v-btn icon @click="removeField(index)" color="secondary">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-col>
