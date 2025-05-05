@@ -60,52 +60,37 @@
             </div>
             <v-list elevation="1" rounded="lg" density="comfortable">
               <v-list-item style="min-height: 72px;">
-                <v-list-item-content class="d-flex align-center">
-                  <v-icon class="me-4" style="font-size: 32px; align-self: stretch; display: flex; justify-content: center;">
-                    mdi-source-repository
-                  </v-icon>
-                  <div class="d-flex flex-column justify-center">
-                    <div class="font-weight-bold text-subtitle-1">{{ nodeTemplate.gitlab_url }}</div>
-                    <div class="text-caption text-medium-emphasis">GitLab URL</div>
-                  </div>
-                </v-list-item-content>
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-source-repository</v-icon>
+                </template>
+                <v-list-item-title>{{ nodeTemplate.gitlab_url }}</v-list-item-title>
+                <v-list-item-subtitle>GitLab URL</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
-                <v-list-item-content class="d-flex align-center">
-                  <v-icon class="me-4" style="font-size: 32px; align-self: stretch; display: flex; justify-content: center;">
-                    mdi-source-branch
-                  </v-icon>
-                  <div class="d-flex flex-column justify-center">
-                    <div class="font-weight-bold text-subtitle-1">{{ nodeTemplate.git_ref }}</div>
-                    <div class="text-caption text-medium-emphasis">Git Reference</div>
-                  </div>
-                </v-list-item-content>
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-source-branch</v-icon>
+                </template>
+                <v-list-item-title>{{ nodeTemplate.git_ref }}</v-list-item-title>
+                <v-list-item-subtitle>Git Reference</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
-                <v-list-item-content class="d-flex align-center">
-                  <v-icon class="me-4" style="font-size: 32px; align-self: stretch; display: flex; justify-content: center;">
-                    mdi-chip
-                  </v-icon>
-                  <div class="d-flex flex-column justify-center">
-                    <div class="font-weight-bold text-subtitle-1">{{ nodeTemplate.hardware_type }}</div>
-                    <div class="text-caption text-medium-emphasis">Hardware Type</div>
-                  </div>
-                </v-list-item-content>
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-chip</v-icon>
+                </template>
+                <v-list-item-title>{{ nodeTemplate.hardware_type }}</v-list-item-title>
+                <v-list-item-subtitle>Hardware Type</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
-                <v-list-item-content class="d-flex align-center">
-                  <v-icon class="me-4" style="font-size: 32px; align-self: stretch; display: flex; justify-content: center;">
-                    mdi-identifier
-                  </v-icon>
-                  <div class="d-flex flex-column justify-center">
-                    <div class="font-weight-bold text-subtitle-1">{{ nodeTemplate.uuid }}</div>
-                    <div class="text-caption text-medium-emphasis">UUID</div>
-                  </div>
-                </v-list-item-content>
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-identifier</v-icon>
+                </template>
+                <v-list-item-title>{{ nodeTemplate.uuid }}</v-list-item-title>
+                <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
+
             </v-list>
 
             <!-- Fields Table -->
@@ -136,7 +121,15 @@
             </v-data-table>
 
             <!-- protobuff schema to copy -->
-            <h3 class="text-h6 mb-2 mt-6">Protobuf Schema</h3>
+            <h3 class="text-h6 mb-2 mt-6">Protobuf Schema</h3>           
+            <v-sheet
+              elevation="1"
+              class="pa-4 mt-4"
+              style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow-x: auto; border-radius: 8px;"
+            >
+            
+              {{ nodeTemplate.protobuf_schema }}
+            </v-sheet>
             
           </v-card-text>
 
@@ -275,4 +268,11 @@ const deleteProject = (id) => {
 //     })
 //     .catch(() => console.error(`Error deleting project ${projectToDelete.value}`))
 // }
+const copySchema = () => {
+  navigator.clipboard.writeText(nodeTemplate.value.protobuf_schema).then(() => {
+    console.log('Schema copied to clipboard!')
+  }).catch(err => {
+    console.error('Failed to copy schema:', err)
+  })
+}
 </script>
