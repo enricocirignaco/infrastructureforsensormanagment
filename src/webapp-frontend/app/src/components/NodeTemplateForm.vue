@@ -9,51 +9,49 @@
             <v-text-field v-model="nodeTemplate.name" label="Node Template Name" :rules="[required]" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="nodeTemplate.short_name" label="Short Name" :rules="[required]" />
+            <v-text-field v-model="nodeTemplate.hardware_type" label="Hardware Type" :rules="[required]" />
           </v-col>
           <v-col cols="12">
             <v-textarea v-model="nodeTemplate.description" label="Node Template Description" :rules="[required]" />
           </v-col>
-          <!-- status dropdown -->
-          <v-col v-if="isEditMode" cols="12" sm="6">
-            <v-select
-              v-model="nodeTemplate.state"
-              :items="Object.values(textStore.statusEnum)"
-              label="Status"
-              :rules="[required]"
-            />
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="nodeTemplate.gitlab_url" label="Gitlab Repository URL" :rules="[required]" />
           </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="nodeTemplate.git_ref" label="Git Reference" :rules="[required]" />
+          </v-col>
+
+          <!-- Fields -->
           <v-col cols="12">
-            <h3 class="text-h6 mb-2">External Resources</h3>
+            <h3 class="text-h6 mb-2">Node Template Fields</h3>
             <v-row
-              v-for="(link, index) in nodeTemplate.external_props"
+              v-for="(field, index) in nodeTemplate.fields"
               :key="index"
               class="mb-2"
             >
               <v-col cols="4">
-                <v-text-field v-model="link.name" label="Name" :rules="[required]" />
+                <v-text-field v-model="field.field_name" label="Name" :rules="[required]" />
               </v-col>
-              <v-col cols="4">
-                <v-text-field v-model="link.url" label="URL" :rules="[required]" />
-              </v-col>
+              <!-- protobuff type dropdown -->
+              <!-- unit dropdown -->
+              <!-- commercial senosr dropdown -->
               <v-col cols="3">
                 <!-- external resource type dropdown -->
                 <v-select
-                  v-model="link.type"
-                  :items="Object.values(textStore.externalResourceNodeTemplateEnum)"
+                  v-model="field.type"
                   label="Type"
                   :rules="[required]"
                 />
               </v-col>
               <v-col cols="1" class="d-flex align-center">
-                <v-btn icon @click="removeLink(index)">
+                <v-btn icon @click="removeField(index)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-col>
             </v-row>
-            <v-btn @click="addLink" rounded="lg" color="primary">
+            <v-btn @click="addField" rounded="lg" color="primary">
               <v-icon start>mdi-plus</v-icon>
-              Add Resource
+              Add Field
             </v-btn>
           </v-col>
         </v-row>
@@ -115,11 +113,11 @@ if(isEditMode.value) {
 }
 
 
-const addLink = () => {
+const addField = () => {
   nodeTemplate.value.external_props.push({ name: '', url: '', type: '' })
 }
 
-const removeLink = (index) => {
+const removeField = (index) => {
   nodeTemplate.value.external_props.splice(index, 1)
 
 }
