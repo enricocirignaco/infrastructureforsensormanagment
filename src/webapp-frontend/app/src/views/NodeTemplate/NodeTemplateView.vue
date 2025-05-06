@@ -111,11 +111,12 @@
                 color="secondary"
                 size="small"
                 rounded
-                :to="`/commercial-sensor/${item.commercial_sensor}`"
-                style="text-transform: none;"
+                :to="`/commercial-sensor/${item.commercial_sensor.uuid}`"
+                style="text-transform: none; min-width: 150px;"
+                
               >
                 <v-icon start class="me-1">mdi-link-variant</v-icon>
-                View Sensor
+                {{ item.commercial_sensor.alias }}
               </v-btn>
             </template>
             </v-data-table>
