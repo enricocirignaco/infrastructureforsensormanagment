@@ -60,8 +60,8 @@ def get_commercial_sensor_service(
 
 def get_node_template_service(
     node_template_repository: NodeTemplateRepository = Depends(get_node_template_repository)
-) -> NodeTemplateRepository:
-    return NodeTemplateRepository(node_template_repository)
+) -> NodeTemplateService:
+    return NodeTemplateService(node_template_repository)
 
 
 async def get_current_user(
