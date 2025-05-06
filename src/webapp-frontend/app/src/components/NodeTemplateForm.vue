@@ -125,36 +125,27 @@ const router = useRouter()
 const nodeTemplate = ref(null)
 const commercialSensorsDTO = ref([])
 
+// Define the nodeTemplate object from the nodeTemplate Id or from default values
 if (isEditMode.value) {
-  Promise.all([
-    commercialSensorService.getCommercialSensorsDTO(),
-    nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
-  ])
-  .then(([sensorsData, nodeTemplateData]) => {
-    commercialSensorsDTO.value = sensorsData
-    nodeTemplate.value = nodeTemplateData
+  // Fetch nodeTemplate data
+  nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
+    .then((data) => {
+      nodeTemplate.value = data
 
-    // Map status
-    const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
-      s => s.name === nodeTemplateData.status
-    )
-    nodeTemplate.value.status = {
-      name: nodeTemplateData.status,
-      label: matchedStatus ? matchedStatus.label : nodeTemplateData.status,
-      color: matchedStatus ? matchedStatus.color : 'grey'
-    }
-
-  })
-  .catch((error) => {
-    console.error('Error loading node template or sensors:', error)
-  })
-} else {
-  // Fetch sensors first for create mode
-  commercialSensorService.getCommercialSensorsDTO()
-    .then((data) => commercialSensorsDTO.value = data)
-    .catch((error) => {
-      console.error(`Error fetching commercial sensors:`, error)
+      // Map status
+      const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
+        s => s.name === data.status
+      )
+      nodeTemplate.value.status = {
+        name: data.status,
+        label: matchedStatus ? matchedStatus.label : data.status,
+        color: matchedStatus ? matchedStatus.color : 'grey'
+      }
     })
+    .catch((error) => {
+      console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)
+    })
+} else {
   nodeTemplate.value = {
     name: '',
     description: '',
@@ -170,7 +161,13 @@ if (isEditMode.value) {
   }
 }
 
-
+// Fetch commercial sensors data
+commercialSensorService.getCommercialSensorsDTO()
+  .then((data) => commercialSensorsDTO.value = data)
+  .catch((error) => {
+    console.error(`Error fetching commercial sensors:`, error)
+  })
+  
 const addField = () => {
   nodeTemplate.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercialSensorDTO: null, commercial_sensor: '' })
 }
