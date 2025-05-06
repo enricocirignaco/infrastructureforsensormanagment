@@ -185,8 +185,6 @@ const submitNodeTemplate = () => {
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
     computeStatus()
-    console.log('isNodeArchived:', isNodeArchived.value)
-    console.log('nodeTemplate:', nodeTemplate.value)
     if(isEditMode.value){
         //put request to update the nodeTemplate
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
@@ -205,7 +203,7 @@ const computeStatus = () => {
   if(isNodeArchived.value){
     nodeTemplate.value.status = 'archived'
   } else {
-    nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.status = 'active' : nodeTemplate.value.status = 'in_use'
+    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.status = 'active' : nodeTemplate.value.status = 'in_use'
   }
 }
 </script>
