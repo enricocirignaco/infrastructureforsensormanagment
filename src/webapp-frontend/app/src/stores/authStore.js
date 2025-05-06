@@ -13,18 +13,38 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       localStorage.removeItem('auth_token') // Remove token from localStorage
     },
+    ensureValidToken() {
+      // delete token if expired
+      if (!this.isTokenValid) {
+        this.clearToken()
+        console.log('Token deleted')
+        return false
+      }
+      return true
+    },
+    getAuthHeader(header = {}) {
+      if (this.ensureValidToken()) {
+        header['Authorization'] = 'Bearer ' + this.token
+      }
+      return header
+    },
   },
   getters: {
-    isAuthenticated: (state) => !!state.token, // Returns true if token exists
-    getAuthHeader:
-      (state) =>
-      (header = {}) => {
-        if (state.isAuthenticated) {
-          // Assign the token to the Authorization header if it exists
-          header['Authorization'] = 'Bearer ' + state.token
+    isTokenValid: (state) => {
+      if (state.token) {
+        try {
+          // Decode the token and check its expiration
+          const payload = JSON.parse(atob(state.token.split('.')[1]))
+          if (typeof payload.exp !== 'number') return false
+          const exp = payload.exp * 1000 // Convert to milliseconds
+          return exp > Date.now() // Check if the token is still valid
+        } catch (e) {
+          console.error('Invalid token:', e)
+          return false
         }
-        return header
-      },
+      }
+      return false
+    },
     getUser: (state) => {
       if (state.token) {
         try {
