@@ -30,6 +30,7 @@ const router = createRouter({
         { path: '/node-template/:id', component: () => import('@/views/NodeTemplate/NodeTemplateView.vue') },
         { path: '/node-template/:id/edit', component: () => import('@/views/NodeTemplate/EditNodeTemplateView.vue') },
         { path: '/node-template/new', component: () => import('@/views/NodeTemplate/NewNodeTemplateView.vue') },
+        { path: '/sensor-nodes', component: () => import('@/views/SensorNode/SensorNodesView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page

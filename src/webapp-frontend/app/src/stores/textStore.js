@@ -20,6 +20,11 @@ export const useTextStore = defineStore('text', {
       1: { name: 'In-use', label: 'In Use', color: 'success' },
       2: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
+    sensorNodeStatusEnum: {
+      0: { name: 'active', label: 'Active', color: 'success' },
+      1: { name: 'inactive', label: 'Inactive', color: 'warning' },
+      2: { name: 'archived', label: 'Archived', color: 'grey' },
+    },
     ProtobufDataTypes: {
       0: 'double',
       1: 'float',
