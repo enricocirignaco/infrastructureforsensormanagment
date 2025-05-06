@@ -4,53 +4,21 @@ from typing import Optional, List
 from enum import Enum
 from uuid import UUID
 from app.models.user import UserOut
+from app.models.common import RDFEnumMixin
 
-
-class ProjectLinkEnum(str, Enum):
+class ProjectLinkEnum(RDFEnumMixin, str, Enum):
     WEBSITE = 'Website'
     MS_TEAMS = 'MS-Teams'
     REPORT = 'Report'
     DOCUMENTATION = 'Documentation'
     MISC = 'Misc'
 
-    @property
-    def rdf_uri(self) -> str:
-        """Return the RDF URI corresponding to the ProjectLinkType."""
-        return f'http://data.bfh.ch/ProjectLinkType/{self.value}'
-
-    @classmethod
-    def from_rdf_uri(cls, rdf_uri: str):
-        """Create a ProjectLinkEnum from the RDF URI."""
-        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/ProjectLinkType/<type>
-        cleaned_uri = rdf_uri.strip('<>')
-        type_name = cleaned_uri.split('/')[-1]
-        try:
-            return cls(type_name)
-        except ValueError:
-            raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid ProjectLinkType.")
-
-class ProjectStateEnum(str, Enum):
+class ProjectStateEnum(RDFEnumMixin, str, Enum):
     ACTIVE = 'Active'
     ARCHIVED = 'Archived'
     DELETED = 'Deleted'
 
-    @property
-    def rdf_uri(self) -> str:
-        """Return the RDF URI corresponding to the ProjectState."""
-        return f'http://data.bfh.ch/ProjectState/{self.value}'
-
-    @classmethod
-    def from_rdf_uri(cls, rdf_uri: str):
-        """Create a ProjectStateEnum from the RDF URI."""
-        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/ProjectState/<state>
-        cleaned_uri = rdf_uri.strip('<>')
-        state_name = cleaned_uri.split('/')[-1]
-        try:
-            return cls(state_name)
-        except ValueError:
-            raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid ProjectState.")
-
-class ProjectLogbookEnum(str, Enum):
+class ProjectLogbookEnum(RDFEnumMixin, str, Enum):
     CREATED = 'Created'
     UPDATED = 'Updated'
 

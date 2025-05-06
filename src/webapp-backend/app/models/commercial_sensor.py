@@ -4,33 +4,17 @@ from typing import Optional, List
 from enum import Enum
 from uuid import UUID
 from app.models.user import UserOut
+from app.models.common import RDFEnumMixin
 
-
-class CommercialSensorLinkEnum(str, Enum):
+class CommercialSensorLinkEnum(RDFEnumMixin, str, Enum):
     DATASHEET = 'Datasheet'
     WEBSHOP = 'Webshop'
     MISC = 'Misc'
 
-    @property
-    def rdf_uri(self) -> str:
-        """Return the RDF URI corresponding to the CommercialSensorLinkEnum."""
-        return f'http://data.bfh.ch/CommercialSensorLinkType/{self.value}'
-
-    @classmethod
-    def from_rdf_uri(cls, rdf_uri: str):
-        """Create a CommercialSensorLinkEnum from the RDF URI."""
-        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/CommercialSensorLinkType/<type>
-        cleaned_uri = rdf_uri.strip('<>')
-        type_name = cleaned_uri.split('/')[-1]
-        try:
-            return cls(type_name)
-        except ValueError:
-            raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid CommercialSensorLinkType.")
-
-
-class CommercialSensorLogbookEnum(str, Enum):
+class CommercialSensorLogbookEnum(RDFEnumMixin, str, Enum):
     CREATED = 'Created'
     UPDATED = 'Updated'
+
 
 class CommercialSensorLink(BaseModel):
     name: Optional[str]

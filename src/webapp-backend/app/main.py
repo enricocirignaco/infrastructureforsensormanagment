@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from contextlib import asynccontextmanager
 
-from .routers import auth, users, projects, commercial_sensors
+from .routers import auth, users, projects, commercial_sensors, node_templates
 from .utils.admin_setup import create_init_admin
 
 @asynccontextmanager
@@ -21,6 +21,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(projects.router)
 app.include_router(commercial_sensors.router)
+app.include_router(node_templates.router)
 
 
 # TODO: Delete this in production
