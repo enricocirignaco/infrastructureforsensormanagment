@@ -103,7 +103,7 @@ const filteredNodeTemplates = computed(() => {
     return true
   })
 })
-// Fetch projects data
+// Fetch node template data
 nodeTemplateService.getNodeTemplatesDTO()
   .then((data) => {
     // Map the state property to an enum object definited in textstore that also contains a color and label value
@@ -123,7 +123,7 @@ nodeTemplateService.getNodeTemplatesDTO()
   })
 
   .catch((error) => {
-    console.error('Error fetching projects:', error)
+    console.error('Error fetching node templates:', error)
   })
   .finally(() => loading.value = false)
 </script>
