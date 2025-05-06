@@ -62,7 +62,7 @@ export default {
         "field_name": "temperature",
         "protbuf_datatype": "float",
         "unit": "°C",
-        "commercial_sensor": "d7e3b9c4-2fa7-11ee-be56-0242ac120002"
+        "commercial_sensor": "a53be75c-dec2-44cb-ba02-0b83b9caaae9"
         },
         {
         "field_name": "battery_level",
@@ -176,7 +176,7 @@ export default {
                 "field_name": "temperature",
                 "protbuf_datatype": "float",
                 "unit": "°C",
-                "commercial_sensor": "d7e3b9c4-2fa7-11ee-be56-0242ac120002"
+                "commercial_sensor": "a53be75c-dec2-44cb-ba02-0b83b9caaae9"
                 },
                 {
                 "field_name": "battery_level",

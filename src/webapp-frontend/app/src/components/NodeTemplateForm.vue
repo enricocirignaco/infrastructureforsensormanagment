@@ -8,9 +8,17 @@
           <v-col cols="12" sm="6">
             <v-text-field v-model="nodeTemplate.name" label="Node Template Name" :rules="[required]" />
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="nodeTemplate.hardware_type" label="Hardware Type" :rules="[required]" />
-          </v-col>
+          <!-- status dropdown -->
+          <v-col cols="6">
+              <v-select
+                :items="Object.values(textStore.nodeTemplateStatusEnum)"
+                v-model="nodeTemplate.status"
+                label="Status"
+                :rules="[required]"
+                item-title="label"
+                item-value="name"
+              />
+            </v-col>
           <v-col cols="12">
             <v-textarea v-model="nodeTemplate.description" label="Node Template Description" :rules="[required]" />
           </v-col>
@@ -20,7 +28,9 @@
           <v-col cols="12" sm="6">
             <v-text-field v-model="nodeTemplate.git_ref" label="Git Reference" :rules="[required]" />
           </v-col>
-
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="nodeTemplate.hardware_type" label="Hardware Type" :rules="[required]" />
+          </v-col>
           <!-- Fields -->
           <v-col cols="12">
             <h3 class="text-h6 mb-2">Node Template Fields</h3>
@@ -33,7 +43,7 @@
                 <v-text-field v-model="field.field_name" label="Name" :rules="[required]" />
               </v-col>
               <!-- protobuf type dropdown -->
-              <v-col cols="2">
+              <v-col cols="3">
                 <v-select
                   :items="Object.values(textStore.ProtobufDataTypes)"
                   v-model="field.protbuf_datatype"
@@ -50,22 +60,15 @@
                   :rules="[required]"
                 />
               </v-col>
-              <!-- status dropdown -->
-              <v-col cols="2">
-                <v-select
-                  :items="Object.values(textStore.nodeTemplateStatusEnum)"
-                  v-model="field.status"
-                  label="Status"
-                  :rules="[required]"
-                />
-              </v-col>
+              
               <!-- commercial senosor dropdown -->
-              <v-col cols="2">
+              <v-col cols="3">
                 <v-select
-                  :items="Object.values(textStore.nodeTemplateStatusEnum)"
-                  v-model="field.status"
+                  :items="Object.values(commercialSensorsDTO)"
+                  v-model="field.commercialSensorDTO"
                   label="Commercial Sensor"
-                  :rules="[required]"
+                  item-title="name"
+                  item-value="uuid"
                 />
               </v-col>
               <!-- delete button -->
@@ -111,6 +114,7 @@ import { computed } from 'vue'
 import { useTextStore} from '@/stores/textStore'
 import { useRouter } from 'vue-router'
 import nodeTemplateService from '@/services/nodeTemplateService'
+import commercialSensorService from '@/services/commercialSensorService'
 
 const isEditMode = computed(() => nodeTemplateId !== null)
 const nodeTemplateForm = ref(null)
@@ -118,23 +122,60 @@ const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
 const nodeTemplate = ref(null)
+const commercialSensorsDTO = ref([])
 
-// Define the nodeTemplate object from the nodeTemplate Id or from default values
-if(isEditMode.value) {
-    // Fetch nodeTemplate data
-    nodeTemplateService.getNodeTemplate(nodeTemplateId)
-        .then((data) => nodeTemplate.value = data)
-        .catch((error) => {
-        // TODO: Handle error
-        console.error(`Error fetching nodeTemplate ${nodeTemplateId}:`, error)
+if (isEditMode.value) {
+  Promise.all([
+    commercialSensorService.getCommercialSensorsDTO(),
+    nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
+  ])
+  .then(([sensorsData, nodeTemplateData]) => {
+    commercialSensorsDTO.value = sensorsData
+    nodeTemplate.value = nodeTemplateData
+
+    // Map status
+    const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
+      s => s.name === nodeTemplateData.status
+    )
+    nodeTemplate.value.status = {
+      name: nodeTemplateData.status,
+      label: matchedStatus ? matchedStatus.label : nodeTemplateData.status,
+      color: matchedStatus ? matchedStatus.color : 'grey'
+    }
+
+    // Map each field to include its matching DTO
+    nodeTemplate.value.fields = nodeTemplate.value.fields.map(field => {
+      const matchedSensor = commercialSensorsDTO.value.find(
+        sensor => sensor.uuid === field.commercial_sensor
+      )
+      return {
+        ...field,
+        commercialSensorDTO: matchedSensor || null
+      }
     })
+  })
+  .catch((error) => {
+    console.error('Error loading node template or sensors:', error)
+  })
 } else {
+  // Fetch sensors first for create mode
+  commercialSensorService.getCommercialSensorsDTO()
+    .then((data) => commercialSensorsDTO.value = data)
+    .catch((error) => {
+      console.error(`Error fetching commercial sensors:`, error)
+    })
   nodeTemplate.value = {
     name: '',
-    short_name: '',
     description: '',
-    state: '',
-    external_props: []
+    gitlab_url: '',
+    git_ref: '',
+    hardware_type: '',
+    status: {
+      name: '',
+      label: '',
+      color: ''
+    },
+    fields: [],
   }
 }
 
