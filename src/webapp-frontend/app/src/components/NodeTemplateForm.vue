@@ -8,17 +8,9 @@
           <v-col cols="12" sm="6">
             <v-text-field v-model="nodeTemplate.name" label="Node Template Name" :rules="[required]" />
           </v-col>
-          <!-- status dropdown -->
-          <v-col cols="6">
-              <v-select
-                :items="Object.values(textStore.nodeTemplateStatusEnum)"
-                v-model="nodeTemplate.status"
-                label="Status"
-                :rules="[required]"
-                item-title="label"
-                item-value="name"
-              />
-            </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="nodeTemplate.hardware_type" label="Hardware Type" :rules="[required]" />
+          </v-col>
           <v-col cols="12">
             <v-textarea v-model="nodeTemplate.description" label="Node Template Description" :rules="[required]" />
           </v-col>
@@ -28,9 +20,17 @@
           <v-col cols="12" sm="6">
             <v-text-field v-model="nodeTemplate.git_ref" label="Git Reference" :rules="[required]" />
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="nodeTemplate.hardware_type" label="Hardware Type" :rules="[required]" />
-          </v-col>
+          
+          <!-- archived checkbox -->
+         <v-col cols="6" class="d-flex align-center">
+           <v-checkbox
+             v-model="isNodeArchived"
+             label="Archive Node Template"
+             :true-value="true"
+             :false-value="false"
+             hide-details
+           />
+         </v-col>
           <!-- Fields -->
           <v-col cols="12">
             <h3 class="text-h6 mb-2">Node Template Fields</h3>
@@ -124,6 +124,7 @@ const textStore = useTextStore()
 const router = useRouter()
 const nodeTemplate = ref(null)
 const commercialSensorsDTO = ref([])
+const isNodeArchived = ref(false)
 
 // Define the nodeTemplate object from the nodeTemplate Id or from default values
 if (isEditMode.value) {
@@ -141,6 +142,8 @@ if (isEditMode.value) {
         label: matchedStatus ? matchedStatus.label : data.status,
         color: matchedStatus ? matchedStatus.color : 'grey'
       }
+      // set the archived status
+      nodeTemplate.value.status.name === 'archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
       console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)
@@ -167,7 +170,7 @@ commercialSensorService.getCommercialSensorsDTO()
   .catch((error) => {
     console.error(`Error fetching commercial sensors:`, error)
   })
-  
+
 const addField = () => {
   nodeTemplate.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercialSensorDTO: null, commercial_sensor: '' })
 }
@@ -181,18 +184,28 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
+    computeStatus()
+    console.log('isNodeArchived:', isNodeArchived.value)
     console.log('nodeTemplate:', nodeTemplate.value)
     if(isEditMode.value){
         //put request to update the nodeTemplate
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
-            .then((nodeTemplateDTO) => router.push('/nodeTemplate/' + nodeTemplateDTO.uuid))
+            .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error updating nodeTemplate:', error))
     } else {
         // post request to create the nodeTemplate
         nodeTemplateService.createNodeTemplate(nodeTemplate.value)
-            .then((nodeTemplateDTO) => router.push('/nodeTemplate/' + nodeTemplateDTO.uuid))
+            .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error creating nodeTemplate:', error))
     }
   })
+}
+
+const computeStatus = () => {
+  if(isNodeArchived.value){
+    nodeTemplate.value.status = 'archived'
+  } else {
+    nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.status = 'active' : nodeTemplate.value.status = 'in_use'
+  }
 }
 </script>

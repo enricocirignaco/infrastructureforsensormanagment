@@ -214,5 +214,49 @@ export default {
         })
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
+  },
+  createNodeTemplate(nodeTemplate){
+    let url = BASE_URL + '/node-templates'
+    const options = {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+      body: JSON.stringify(nodeTemplate),
+    }
+    return Promise.resolve(
+        {
+            "name": "Temperature Sensor Node",
+            "uuid": "c9a2b3d4-4f5e-11ee-be56-0242ac120002",
+            "description": "A node template for monitoring ambient temperature using digital sensors.",
+            "fields": [
+                {
+                "field_name": "temperature",
+                "protbuf_datatype": "float",
+                "unit": "°C",
+                "commercial_sensor":
+                {
+                    "uuid": "a53be75c-dec2-44cb-ba02-0b83b9caaae9",
+                    "name": "Temperature Sensor",
+                    "alias": "TMP36"
+                }
+                },
+                {
+                "field_name": "battery_level",
+                "protbuf_datatype": "int32",
+                "unit": "%",
+                "commercial_sensor":
+                {
+                    "uuid": "e5a1f7d8-2fa7-11ee-be56-0242ac120002",
+                    "name": "Battery Level Sensor",
+                    "alias": "Battery Sensor"
+                }
+                }
+            ],
+        })
+    return fetch(url, options)
+      .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   }
 }
