@@ -62,13 +62,23 @@ export default {
         "field_name": "temperature",
         "protbuf_datatype": "float",
         "unit": "°C",
-        "commercial_sensor": "a53be75c-dec2-44cb-ba02-0b83b9caaae9"
+        "commercial_sensor":
+        {
+            "uuid": "a53be75c-dec2-44cb-ba02-0b83b9caaae9",
+            "name": "Temperature Sensor",
+            "alias": "TMP36"
+            }
         },
         {
         "field_name": "battery_level",
         "protbuf_datatype": "int32",
         "unit": "%",
-        "commercial_sensor": "e5a1f7d8-2fa7-11ee-be56-0242ac120002"
+        "commercial_sensor":
+        {
+            "uuid": "e5a1f7d8-2fa7-11ee-be56-0242ac120002",
+            "name": "Battery Level Sensor",
+            "alias": "Battery Sensor"
+            }
         }
     ],
     "status": "in-use",
@@ -176,13 +186,23 @@ export default {
                 "field_name": "temperature",
                 "protbuf_datatype": "float",
                 "unit": "°C",
-                "commercial_sensor": "a53be75c-dec2-44cb-ba02-0b83b9caaae9"
+                "commercial_sensor":
+                {
+                    "uuid": "a53be75c-dec2-44cb-ba02-0b83b9caaae9",
+                    "name": "Temperature Sensor",
+                    "alias": "TMP36"
+                }
                 },
                 {
                 "field_name": "battery_level",
                 "protbuf_datatype": "int32",
                 "unit": "%",
-                "commercial_sensor": "e5a1f7d8-2fa7-11ee-be56-0242ac120002"
+                "commercial_sensor":
+                {
+                    "uuid": "e5a1f7d8-2fa7-11ee-be56-0242ac120002",
+                    "name": "Battery Level Sensor",
+                    "alias": "Battery Sensor"
+                }
                 }
             ],
             "status": "in-use",

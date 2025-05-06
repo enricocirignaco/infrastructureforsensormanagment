@@ -65,10 +65,11 @@
               <v-col cols="3">
                 <v-select
                   :items="Object.values(commercialSensorsDTO)"
-                  v-model="field.commercialSensorDTO"
+                  v-model="field.commercial_sensor"
                   label="Commercial Sensor"
-                  item-title="name"
+                  item-title="alias"
                   item-value="uuid"
+                  return-object
                 />
               </v-col>
               <!-- delete button -->
@@ -143,16 +144,6 @@ if (isEditMode.value) {
       color: matchedStatus ? matchedStatus.color : 'grey'
     }
 
-    // Map each field to include its matching DTO
-    nodeTemplate.value.fields = nodeTemplate.value.fields.map(field => {
-      const matchedSensor = commercialSensorsDTO.value.find(
-        sensor => sensor.uuid === field.commercial_sensor
-      )
-      return {
-        ...field,
-        commercialSensorDTO: matchedSensor || null
-      }
-    })
   })
   .catch((error) => {
     console.error('Error loading node template or sensors:', error)
@@ -181,11 +172,11 @@ if (isEditMode.value) {
 
 
 const addField = () => {
-  nodeTemplate.value.external_props.push({ name: '', url: '', type: '' })
+  nodeTemplate.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercialSensorDTO: null, commercial_sensor: '' })
 }
 
 const removeField = (index) => {
-  nodeTemplate.value.external_props.splice(index, 1)
+  nodeTemplate.value.fields.splice(index, 1)
 
 }
 
@@ -193,6 +184,7 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
+    console.log('nodeTemplate:', nodeTemplate.value)
     if(isEditMode.value){
         //put request to update the nodeTemplate
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
