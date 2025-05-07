@@ -63,4 +63,29 @@ export default {
      return fetch(url, options)
        .then(response => response.ok ? response.json() : Promise.reject(response));
     },
+    getSensorNode: function(id) {
+        let url = BASE_URL + '/sensor-nodes/' + id
+        const options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+        }
+        return Promise.resolve({
+            uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            name: "the best node",
+            description: "A node template for monitoring ambient temperature using digital sensors.",
+            position:{
+                latitude: 60.0,
+                longitude: 24.0,
+            },
+            node_template: {},
+            status: "archived",
+            logbook: { },
+            project_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        })
+        return fetch(url, options)
+            .then(response => response.ok ? response.json() : Promise.reject(response));
+    },
 }
