@@ -1,5 +1,6 @@
 from typing import List
 from uuid import UUID
+from rdflib import Graph, URIRef, Literal, RDF
 
 from app.utils.triplestore_client import TripleStoreClient
 from app.models.user import UserInDB, RoleEnum
@@ -7,20 +8,24 @@ from app.models.user import UserInDB, RoleEnum
 class UserRepository:
     def __init__(self, triplestore_client: TripleStoreClient):
         self.triplestore_client = triplestore_client
+        self.schema = URIRef("http://schema.org/")
+        self.bfh = URIRef("http://data.bfh.ch/")
 
     def create_user(self, user: UserInDB) -> UserInDB:
-        sparql_update = f"""
-        PREFIX schema: <http://schema.org/>
-        PREFIX bfh: <http://data.bfh.ch/>
-        INSERT DATA {{
-            <http://data.bfh.ch/users/{user.uuid}> a schema:Person ;
-                schema:identifier "{user.uuid}" ;
-                schema:name "{user.full_name}" ;
-                schema:email "{user.email}" ;
-                bfh:password "{user.hashed_password}" ;
-                bfh:hasRole {user.role.rdf_uri} .
-        }}
-        """
+        g = Graph()
+        g.bind('schema', self.schema)
+        g.bind('bfh', self.bfh)
+
+        user_uri = URIRef(f"http://data.bfh.ch/users/{user.uuid}")
+
+        g.add((user_uri, RDF.type, URIRef(self.schema + "Person")))
+        g.add((user_uri, URIRef(self.schema + "identifier"), Literal(str(user.uuid))))
+        g.add((user_uri, URIRef(self.schema + "name"), Literal(user.full_name)))
+        g.add((user_uri, URIRef(self.schema + "email"), Literal(user.email)))
+        g.add((user_uri, URIRef(self.bfh + "password"), Literal(user.hashed_password)))
+        g.add((user_uri, URIRef(self.bfh + "hasRole"), URIRef(user.role.rdf_uri)))
+
+        sparql_update = f"INSERT DATA {{ {g.serialize(format='nt')} }}"
         self.triplestore_client.update(sparql_update)
 
         return self.find_user_by_uuid(user.uuid)

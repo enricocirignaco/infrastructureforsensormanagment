@@ -1,5 +1,5 @@
 from app.utils.triplestore_client import TripleStoreClient
-from app.models.node_template import NodeTemplateDB, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField
+from app.models.node_template import NodeTemplateDB, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
 from rdflib import Graph, URIRef, Literal, RDF
@@ -29,13 +29,22 @@ class NodeTemplateRepository:
         g.add((template_uri, URIRef(self.schema + "name"), Literal(node_template.name)))
         g.add((template_uri, URIRef(self.schema + "description"), Literal(node_template.description)))
         g.add((template_uri, URIRef(self.schema + "url"), Literal(str(node_template.gitlab_url))))
-        g.add((template_uri, URIRef(self.bfh + "gitRef"), Literal(node_template.git_ref)))
-        g.add((template_uri, URIRef(self.bfh + "hardwareType"), Literal(node_template.hardware_type)))
         g.add((template_uri, URIRef(self.bfh + "state"), URIRef(node_template.state.rdf_uri)))
+
+        # Board
+        g.add((template_uri, URIRef(self.bfh + "boardCore"), Literal(node_template.board.core)))
+        g.add((template_uri, URIRef(self.bfh + "boardVariant"), Literal(node_template.board.variant)))
+
+        # Configurables
+        for idx, conf in enumerate(node_template.configurables):
+            conf_uri = URIRef(f"{template_uri}/configurable/{idx}")
+            g.add((template_uri, URIRef(self.bfh + "hasConfigurable"), conf_uri))
+            g.add((conf_uri, RDF.type, URIRef(self.bfh + "Configurable")))
+            g.add((conf_uri, URIRef(self.schema + "name"), Literal(conf.name)))
 
         # Felder
         for idx, field in enumerate(node_template.fields or []):
-            field_uri = URIRef(f"http://data.bfh.ch/nodeTemplates/{node_template.uuid}/field/{idx}")
+            field_uri = URIRef(f"{template_uri}/field/{idx}")
             g.add((template_uri, URIRef(self.bfh + "hasField"), field_uri))
             g.add((field_uri, RDF.type, URIRef(self.bfh + "Field")))
             g.add((field_uri, URIRef(self.bfh + "fieldName"), Literal(field.field_name)))
@@ -47,16 +56,12 @@ class NodeTemplateRepository:
 
         # Logbuch
         for idx, entry in enumerate(node_template.logbook):
-            log_uri = URIRef(f"http://data.bfh.ch/nodeTemplates/{node_template.uuid}/log/{idx}")
+            log_uri = URIRef(f"{template_uri}/log/{idx}")
             g.add((template_uri, URIRef(self.bfh + "hasLogEntry"), log_uri))
             g.add((log_uri, RDF.type, URIRef(self.bfh + "LogEntry")))
             g.add((log_uri, URIRef(self.bfh + "logType"), Literal(entry.type.value)))
             g.add((log_uri, URIRef(self.schema + "dateCreated"), Literal(entry.date.isoformat())))
             g.add((log_uri, URIRef(self.schema + "creator"), URIRef(f"http://data.bfh.ch/users/{entry.user.uuid}")))
-
-        # Vererbte Sensor-Knoten
-        #for node_id in node_template.inherited_sensor_nodes:
-        #    g.add((template_uri, URIRef(self.bfh + "inheritedSensorNode"), Literal(node_id)))
 
         # Persistiere Graph
         query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
@@ -70,12 +75,14 @@ class NodeTemplateRepository:
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?uuid ?name ?hardwareType
+        SELECT ?uuid ?name ?core ?variant ?state
         WHERE {{
           ?s a bfh:NodeTemplate ;
-             bfh:identifier ?uuid ;
-             schema:name ?name ;
-             bfh:hardwareType ?hardwareType .
+            bfh:identifier ?uuid ;
+            schema:name ?name ;
+            bfh:boardCore ?core ;
+            bfh:boardVariant ?variant ;
+            bfh:state ?state .
         }}
         """
         res = self.triplestore_client.query(sparql_query)
@@ -83,8 +90,12 @@ class NodeTemplateRepository:
             NodeTemplateOutSlim(
                 uuid=UUID(b['uuid']['value']),
                 name=b['name']['value'],
-                hardware_type=b['hardwareType']['value'],
-            )
+                board=HardwareBoard(
+                    core=b["core"]["value"],
+                    variant=b["variant"]["value"]
+                ),
+                state=NodeTemplateStateEnum.from_rdf_uri(b["state"]["value"]),
+                )
             for b in res.get('results', {}).get('bindings', [])
         ]
     
@@ -96,16 +107,16 @@ class NodeTemplateRepository:
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?name ?description ?gitlab_url ?git_ref ?hardware_type ?state
+        SELECT ?name ?description ?gitlab_url ?core ?variant ?state
         WHERE {{
-        {template_uri} a bfh:NodeTemplate ;
-                        bfh:identifier "{uuid}" ;
-                        schema:name ?name ;
-                        schema:description ?description ;
-                        schema:url ?gitlab_url ;
-                        bfh:gitRef ?git_ref ;
-                        bfh:hardwareType ?hardware_type ;
-                        bfh:state ?state .
+            {template_uri} a bfh:NodeTemplate ;
+                            bfh:identifier "{uuid}" ;
+                            schema:name ?name ;
+                            schema:description ?description ;
+                            schema:url ?gitlab_url ;
+                            bfh:boardCore ?core ;
+                            bfh:boardVariant ?variant ;
+                            bfh:state ?state .
         }}"""
         base_res = self.triplestore_client.query(sparql_base)
         base_bindings = base_res.get("results", {}).get("bindings", [])
@@ -118,12 +129,15 @@ class NodeTemplateRepository:
             name=base["name"]["value"],
             description=base["description"]["value"],
             gitlab_url=base["gitlab_url"]["value"],
-            git_ref=base["git_ref"]["value"],
-            hardware_type=base["hardware_type"]["value"],
+            board=HardwareBoard(
+                core=base["core"]["value"],
+                variant=base["variant"]["value"]
+            ),
             state=NodeTemplateStateEnum.from_rdf_uri(base["state"]["value"]),
             fields=[],
             logbook=[],
-            inherited_sensor_nodes=[]
+            inherited_sensor_nodes=[],
+            configurables=[]
         )
 
         # 2) Felder abfragen
@@ -133,17 +147,17 @@ class NodeTemplateRepository:
 
         SELECT ?fieldName ?datatype ?unit ?sensorUuid ?sensorName ?sensorAlias
         WHERE {{
-        {template_uri} bfh:hasField ?field .
-        ?field a bfh:Field ;
-                bfh:fieldName ?fieldName ;
-                bfh:protobufDatatype ?datatype ;
-                bfh:unit ?unit .
-        OPTIONAL {{
-            ?field bfh:linkedCommercialSensor ?sensor .
-            ?sensor bfh:identifier ?sensorUuid .
-            ?sensor schema:name ?sensorName .
-            ?sensor schema:alternateName ?sensorAlias .
-        }}
+            {template_uri} bfh:hasField ?field .
+            ?field a bfh:Field ;
+                    bfh:fieldName ?fieldName ;
+                    bfh:protobufDatatype ?datatype ;
+                    bfh:unit ?unit .
+            OPTIONAL {{
+                ?field bfh:linkedCommercialSensor ?sensor .
+                ?sensor bfh:identifier ?sensorUuid .
+                ?sensor schema:name ?sensorName .
+                ?sensor schema:alternateName ?sensorAlias .
+            }}
         }}"""
         field_res = self.triplestore_client.query(sparql_fields)
         for row in field_res.get("results", {}).get("bindings", []):
@@ -163,7 +177,24 @@ class NodeTemplateRepository:
                 )
             )
 
-        # 3) Logbuch abfragen
+        # 3) Configurables abfragen
+        sparql_configurables = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?name
+        WHERE {{
+            {template_uri} bfh:hasConfigurable ?config .
+            ?config a bfh:Configurable ;
+                    schema:name ?name .
+        }}"""
+        config_res = self.triplestore_client.query(sparql_configurables)
+        for row in config_res.get("results", {}).get("bindings", []):
+            template.configurables.append(
+                ConfigurableDefinition(name=row["name"]["value"])
+            )
+
+        # 4) Logbuch abfragen
         sparql_logs = f"""
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
@@ -196,19 +227,8 @@ class NodeTemplateRepository:
                 )
             )
 
-        # 4) Vererbte Sensor-Knoten abfragen
-        # sparql_inherited = f"""
-        # PREFIX bfh: <http://data.bfh.ch/>
-
-        # SELECT ?sensorNode
-        # WHERE {{
-        #     {template_uri} bfh:inheritedSensorNode ?sensorNode .
-        # }}"""
-        # inherited_res = self.triplestore_client.query(sparql_inherited)
-        # for row in inherited_res.get("results", {}).get("bindings", []):
-        #     template.inherited_sensor_nodes.append(int(row["sensorNode"]["value"]))
-
         return template
+
 
     
     def delete_node_template(self, uuid: UUID) -> None:
@@ -224,6 +244,7 @@ class NodeTemplateRepository:
             FILTER (
                 STRSTARTS(STR(?s), "http://data.bfh.ch/nodeTemplates/{uuid}/field/") ||
                 STRSTARTS(STR(?s), "http://data.bfh.ch/nodeTemplates/{uuid}/log/") ||
+                STRSTARTS(STR(?s), "http://data.bfh.ch/nodeTemplates/{uuid}/configurable/") ||
                 STR(?s) = "http://data.bfh.ch/nodeTemplates/{uuid}"
             )
         }}

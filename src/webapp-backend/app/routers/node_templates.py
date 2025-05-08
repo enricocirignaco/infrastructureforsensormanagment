@@ -81,4 +81,8 @@ async def download_protobuf_schema_of_node_template(uuid: UUID,
 async def download_generated_protobuf_code(uuid: UUID,
                                            _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                                            node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> StreamingResponse:
+    raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Protobuf-Code-Generierung ist noch nicht implementiert."
+        )
     return node_template_service.get_protobuf_code(uuid=uuid)
