@@ -16,6 +16,10 @@ class CommercialSensorLogbookEnum(RDFEnumMixin, str, Enum):
     UPDATED = 'Updated'
 
 
+class CommercialSensorLogbookEnum(str, Enum):
+    CREATED = 'Created'
+    UPDATED = 'Updated'
+
 class CommercialSensorLink(BaseModel):
     name: Optional[str]
     url: str

@@ -65,7 +65,8 @@
 | 2025-04-20 | 17:00 - 20:00 | 3.0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
 | 2025-04-21 | 16:00 - 21:30 | 5.5   | CIRIE1         | 44, 45   | Frontend development, Project Page, Deployed Node view, Router refactoring|
 | 2025-04-22 | 10:00 - 16:00 | 5.5   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
-| 2025-04-22 | 08:00 - 11:00 | 3     | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+| 2025-04-24 | 08:00 - 11:00 | 3     | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+| 2025-04-24 | 13:00 - 20:00 | 7     | CIRIE1         |          | Gitlab CICD, bugfixing compose prod, Deploying webapp to prod server|
 | 2025-04-14 | 08:00 - 13:00 | 5,0   | DEGEL2         | 65       | Backend docker, init admin                                        |
 | 2025-04-16 | 12:00 - 19:30 | 7,5   | DEGEL2         | 65, 54   | Userhandling, password change, user update                        |
 | 2025-04-22 | 10:00 - 12:30 | 2,5   | DEGEL2         | 57       | Sketch out commercial sensor                                      |
@@ -76,3 +77,8 @@
 | 2025-04-29 | 09:00 - 15:30 | 6,5   | CIRIE1, DEGEL2 |          | Meeting, Experte-Meeting, Setup Infrastructure                    |
 | 2025-04-30 | 11:00 - 12:00 | 1,0   | DEGEL2         |          | Organisational work, Arbeitsjournal                               |
 | 2025-04-30 | 12:00 - 13:00 | 1,0   | DEGEL2         | 68, 61   | Logbook for commercial sensor                                     |
+| 2025-04-25 | 08:00 - 13:00 | 5     | CIRIE1         | 69       | Marriage Frontend, Backend, troubleshooting reverse proxy         |
+| 2025-04-25 | 14:00 - 17:00 | 3     | CIRIE1         | 69, 64   | Marriage Frontend, Backend, bugfixing frontend, deployment to server|
+| 2025-04-28 | 11:00 - 13:00 | 2     | CIRIE1         | 67       | Logbook feature frontend                                          |
+| 2025-04-28 | 14:00 - 22:00 | 8     | CIRIE1         | 70, 42,69| Marriage Frontend, Backend, deployment to server, overview page   |
+
