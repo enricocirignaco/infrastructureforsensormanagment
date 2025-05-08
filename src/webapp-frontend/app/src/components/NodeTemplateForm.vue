@@ -22,7 +22,7 @@
           </v-col>
           
           <!-- archived checkbox -->
-         <v-col cols="6" class="d-flex align-center">
+         <v-col v-if="isEditMode"cols="6" class="d-flex align-center">
            <v-checkbox
              v-model="isNodeArchived"
              label="Archive Node Template"

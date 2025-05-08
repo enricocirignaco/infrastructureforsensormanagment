@@ -38,8 +38,8 @@
             color="secondary"
           ></v-switch>
           <v-switch
-            v-model="hideInUse"
-            label="Hide In Use"
+            v-model="hideUnused"
+            label="Hide Unused"
             inset
             hide-details
             density="comfortable"
@@ -91,14 +91,14 @@ const headers = [
 ]
 const loading = ref(true)
 const tableSearch = ref('')
-const hideInUse = ref(false)
+const hideUnused = ref(false)
 const hideArchived = ref(false)
 
 // Filter entries based on toggle buttons state
 const filteredNodeTemplates = computed(() => {
   return nodeTemplates.value.filter(item => {
     if (hideArchived.value && item.status.name === 'archived') return false
-    if (hideInUse.value && item.status.name === 'in-use') return false
+    if (hideUnused.value && item.status.name === 'unused') return false
     return true
   })
 })

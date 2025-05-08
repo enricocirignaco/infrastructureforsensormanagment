@@ -59,7 +59,10 @@
               <p class="text-body-1">{{ nodeTemplate.description }}</p>
             </div>
             <v-list elevation="1" rounded="lg" density="comfortable">
-              <v-list-item style="min-height: 72px;">
+              <v-list-item
+                style="min-height: 72px; cursor: pointer;"
+                @click="openGitlabUrl"
+              >
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-source-repository</v-icon>
                 </template>
@@ -67,13 +70,6 @@
                 <v-list-item-subtitle>GitLab URL</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
-              <v-list-item style="min-height: 72px;">
-                <template #prepend>
-                  <v-icon style="font-size: 32px;">mdi-source-branch</v-icon>
-                </template>
-                <v-list-item-title>{{ nodeTemplate.git_ref }}</v-list-item-title>
-                <v-list-item-subtitle>Git Reference</v-list-item-subtitle>
-              </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
                 <template #prepend>
@@ -135,7 +131,7 @@
                   style="text-transform: none;"
                 >
                   <v-icon start class="me-1">mdi-download</v-icon>
-                  Download Code
+                  Download NanoPB Code
                 </v-btn>
               </v-col>
             </v-row>
@@ -302,5 +298,8 @@ const copySchema = () => {
   navigator.clipboard.writeText(schemaText).catch(err => {
     console.error('Failed to copy schema: ', err)
   })
+}
+const openGitlabUrl = () => {
+    window.open(nodeTemplate.value.gitlab_url, '_blank')
 }
 </script>
