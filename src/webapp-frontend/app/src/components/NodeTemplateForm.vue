@@ -44,7 +44,30 @@
             <v-text-field v-model="nodeTemplate.board.variant" label="Hardware Variant" :rules="[required]" />
           </v-col>
           
-         
+          <!-- Configurables -->
+          <v-col cols="12">
+            <h3 class="text-h6 mb-2">Configurables</h3>
+            <v-row
+              v-for="(config, index) in nodeTemplate.configurables"
+              :key="index"
+              class="mb-2"
+            >
+              <v-col cols="5">
+                <v-text-field v-model="config.name" label="Name" :rules="[required]" />
+              </v-col>
+
+              <!-- delete button -->
+              <v-col cols="1" class="d-flex align-center">
+                <v-btn icon @click="removeConfigurable(index)" color="secondary">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-btn @click="addConfigurable" rounded="lg" color="primary">
+              <v-icon start>mdi-plus</v-icon>
+              Add Config
+            </v-btn>
+          </v-col>
           <!-- Fields -->
           <v-col cols="12">
             <h3 class="text-h6 mb-2">Node Template Fields</h3>
@@ -192,6 +215,12 @@ const addField = () => {
 const removeField = (index) => {
   nodeTemplate.value.fields.splice(index, 1)
 
+}
+const addConfigurable = () => {
+  nodeTemplate.value.configurables.push({ name: '' })
+}
+const removeConfigurable = (index) => {
+  nodeTemplate.value.configurables.splice(index, 1)
 }
 
 const submitNodeTemplate = () => {
