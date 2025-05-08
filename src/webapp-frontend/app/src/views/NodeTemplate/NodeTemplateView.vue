@@ -87,19 +87,35 @@
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
             </v-list>
-            <h3 class="text-h6 mb-2 mt-6">Configurables</h3>
-            <v-list elevation="1" rounded="lg" density="comfortable">
-              <v-list-item
-                v-for="(config, index) in nodeTemplate.configurables"
-                :key="index"
-                style="min-height: 72px;"
-              >
-                <template #prepend>
-                  <v-icon style="font-size: 28px;">mdi-cog</v-icon>
-                </template>
-                <v-list-item-title>{{ config.name }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
+            <!-- configurables section -->
+            <v-row class="mt-6">
+            <v-col cols="6">
+              <h3 class="text-h6 mb-2">Configurables</h3>
+              <v-list elevation="1" rounded="lg" density="comfortable">
+                <v-list-item
+                  v-for="(config, index) in nodeTemplate.configurables"
+                  :key="index"
+                  style="min-height: 72px;"
+                >
+                  <template #prepend>
+                    <v-icon style="font-size: 28px;">mdi-cog</v-icon>
+                  </template>
+                  <v-list-item-title>{{ config.name }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-col>
+            <!--  config header file preview -->
+            <v-col cols="6">
+              <h3 class="text-h6 mb-2">config.h Preview</h3>
+              <v-sheet
+              elevation="1"
+              class="pa-4 position-relative"
+              style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px;"
+            >
+              {{ configPreview }}
+            </v-sheet>
+            </v-col>
+          </v-row>
 
 
             <!-- Fields Table -->
@@ -260,6 +276,7 @@ const confirmDelete = ref(false)
 const nodeTemplateToDelete = ref(null)
 const deleteConfirmInput = ref('')
 const protobuf_schema = ref('')
+const configPreview = ref('')
 // Fetch node template
 nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
   .then((data) => {
@@ -272,6 +289,10 @@ nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
       name: data.status,
       label: matchedStatus ? matchedStatus.label : data.status,
       color: matchedStatus ? matchedStatus.color : 'grey'
+    }
+    // build the config preview object
+    for (const conf in nodeTemplate.value.configurables) {
+      configPreview.value += `#define ${nodeTemplate.value.configurables[conf].name} <placeholder>\n`
     }
   })
   .catch((error) => {

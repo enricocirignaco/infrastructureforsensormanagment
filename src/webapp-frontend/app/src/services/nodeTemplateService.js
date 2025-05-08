@@ -102,7 +102,7 @@ export default {
     },
     "configurables": [
       {
-        name: "ttn id"
+        name: "ttn_id"
       },
     {
       name: "sending_interval"
