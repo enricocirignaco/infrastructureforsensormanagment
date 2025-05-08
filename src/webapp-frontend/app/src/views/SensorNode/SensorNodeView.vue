@@ -3,48 +3,49 @@
   <v-container v-if="loading" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
+
   <v-container v-else>
     <v-row>
       <v-col cols="9">
-        <!-- Node Template Details -->
+        <!-- Sensor node Details -->
         <v-card class="mb-4" rounded="lg">
           <v-card-title>
             <v-row class="w-100 align-center">
                 <!-- back button -->
                 <v-col cols="auto">
-                    <v-btn icon @click="router.push('/node-templates')">
+                    <v-btn icon @click="router.back()">
                         <v-icon>mdi-arrow-left</v-icon>
                     </v-btn>
                 </v-col>
                 <!-- title -->
                 <v-col>
-                    <h2 class="mb-0">{{ nodeTemplate.name }}</h2>
+                    <h2 class="mb-0">{{ sensorNode.name }}</h2>
                 </v-col>
                 <v-col cols="auto" class="d-flex align-center">
                   <!-- status-->
                   <v-chip
-                  :color="nodeTemplate.status.color"
+                  :color="sensorNode.status.color"
                   variant="flat"
                   class="me-2 text-white"
                   >
-                    {{ nodeTemplate.status.label }}
+                    {{ sensorNode.status.label }}
                   </v-chip>
                   <!-- edit button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && !hasInheritedSensorNodes()"
+                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.status.name !== 'unused'"
                   color="primary"
                   icon size="small"
                   class="me-1"
-                  @click="router.push(`/node-template/${nodeTemplateId}/edit`)"
+                  @click="router.push(`/sensor-node/${sensorNodeId}/edit`)"
                   >
                     <v-icon>mdi-pencil</v-icon>
                   </v-btn>
                   <!-- delete button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && !hasInheritedSensorNodes()"
+                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.status.name !== 'unused'"
                   color="error"
                   icon size="small"
-                  @click="deletenodeTemplate(nodeTemplateId)"
+                  @click="deletesensorNode(sensorNodeId)"
                   >
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
@@ -52,18 +53,18 @@
             </v-row>
           </v-card-title>
           <v-divider class="my-6" />
-          <!-- Node Template content -->
+          <!-- Sensor node content -->
           <v-card-text>
             <div class="mb-6">
-              <h3 class="text-h6 mb-2">Node Template Description</h3>
-              <p class="text-body-1">{{ nodeTemplate.description }}</p>
+              <h3 class="text-h6 mb-2">Notes</h3>
+              <p class="text-body-1">{{ sensorNode.description }}</p>
             </div>
             <v-list elevation="1" rounded="lg" density="comfortable">
               <v-list-item style="min-height: 72px;">
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-source-repository</v-icon>
                 </template>
-                <v-list-item-title>{{ nodeTemplate.gitlab_url }}</v-list-item-title>
+                <v-list-item-title>{{ sensorNode.gitlab_url }}</v-list-item-title>
                 <v-list-item-subtitle>GitLab URL</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
@@ -71,7 +72,7 @@
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-source-branch</v-icon>
                 </template>
-                <v-list-item-title>{{ nodeTemplate.git_ref }}</v-list-item-title>
+                <v-list-item-title>{{ sensorNode.git_ref }}</v-list-item-title>
                 <v-list-item-subtitle>Git Reference</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
@@ -79,7 +80,7 @@
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-chip</v-icon>
                 </template>
-                <v-list-item-title>{{ nodeTemplate.hardware_type }}</v-list-item-title>
+                <v-list-item-title>{{ sensorNode.hardware_type }}</v-list-item-title>
                 <v-list-item-subtitle>Hardware Type</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
@@ -87,16 +88,16 @@
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-identifier</v-icon>
                 </template>
-                <v-list-item-title>{{ nodeTemplate.uuid }}</v-list-item-title>
+                <v-list-item-title>{{ sensorNode.uuid }}</v-list-item-title>
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
 
             </v-list>
 
             <!-- Fields Table -->
-            <h3 class="text-h6 mb-2 mt-6">Node Template Fields</h3>
+            <h3 class="text-h6 mb-2 mt-6">Sensor node Fields</h3>
             <v-data-table
-              :items="nodeTemplate.fields"
+              :items="sensorNode.fields"
               :headers="fieldHeaders"
               density="compact"
               class="elevation-1 rounded-lg"
@@ -130,7 +131,7 @@
                 <v-btn
                   color="secondary"
                   size="small"
-                  :href="`/node-template/${nodeTemplateId}/code`"
+                  :href="`/sensor-node/${sensorNodeId}/code`"
                   download
                   style="text-transform: none;"
                 >
@@ -139,7 +140,7 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <v-sheet
+            <!-- <v-sheet
               elevation="1"
               class="pa-4 mt-4 position-relative"
               style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px;"
@@ -155,16 +156,16 @@
                 <v-icon>mdi-content-copy</v-icon>
               </v-btn>
               {{ protobuf_schema }}
-            </v-sheet>
+            </v-sheet> -->
           </v-card-text>
         </v-card>
         <v-divider class="my-6" />
         
 
         <h2 class="text-h6 mb-2">Deployed Nodes</h2>
-        <!-- Table of deployed nodes -->
+        <!-- Table of deployed nodes
         <v-data-table
-          :items="nodeTemplate.inherited_sensor_nodes"
+          :items="sensorNode.inherited_sensor_nodes"
           :headers="sensorHeaders"
           class="elevation-1 rounded-lg"
           hover
@@ -177,11 +178,11 @@
               {{ item.status }}
             </v-chip>
           </template>
-        </v-data-table>
+        </v-data-table> -->
       </v-col>
       <!-- Logbook -->
       <v-col cols="3">
-        <Logbook v-if="nodeTemplate?.logbook" :logbook="nodeTemplate.logbook" />
+        <Logbook v-if="sensorNode?.logbook" :logbook="sensorNode.logbook" />
       </v-col>
     </v-row>
   </v-container>
@@ -193,10 +194,10 @@
     <v-card>
       <v-card-title class="text-h6">Confirm Deletion</v-card-title>
       <v-card-text>
-        <p>To confirm deletion, type the node template name: <strong>{{ nodeTemplate?.name }}</strong></p>
+        <p>To confirm deletion, type the sensor node name: <strong>{{ sensorNode?.name }}</strong></p>
         <v-text-field
           v-model="deleteConfirmInput"
-          label="Node Template name"
+          label="Sensor node name"
           dense
           hide-details
           autofocus
@@ -208,7 +209,7 @@
         <v-btn
           color="error"
           text
-          :disabled="deleteConfirmInput !== nodeTemplate?.name"
+          :disabled="deleteConfirmInput !== sensorNode?.name"
           @click="performDelete"
         >
           Delete
@@ -222,16 +223,16 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useRoute } from 'vue-router'
-import nodeTemplateService from '@/services/nodeTemplateService'
+import sensorNodeService from '@/services/sensorNodeService'
 import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTextStore } from '@/stores/textStore'
 
 const authStore = useAuthStore()
 const textStore = useTextStore()
-const nodeTemplateId = ref(useRoute().params.id)
+const sensorNodeId = ref(useRoute().params.id)
 const router = useRouter()
-const nodeTemplate = ref(null)
+const sensorNode = ref(null)
 
 const sensorHeaders = [
   { title: 'Node ID', key: 'id' },
@@ -248,54 +249,55 @@ const fieldHeaders = [
 ]
 const loading = ref(true)
 const confirmDelete = ref(false)
-const nodeTemplateToDelete = ref(null)
+const sensorNodeToDelete = ref(null)
 const deleteConfirmInput = ref('')
 const protobuf_schema = ref('')
-// Fetch node template
-nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
+// Fetch sensor node
+sensorNodeService.getSensorNode(sensorNodeId.value)
   .then((data) => {
-    nodeTemplate.value = data
+    sensorNode.value = data
     // Map the status property to an enum object definited in textstore that also contains a color and label value
-    const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
+    const matchedStatus = Object.values(textStore.sensorNodeStatusEnum).find(
       s => s.name === data.status
     )
-    nodeTemplate.value.status = {
+    sensorNode.value.status = {
       name: data.status,
       label: matchedStatus ? matchedStatus.label : data.status,
       color: matchedStatus ? matchedStatus.color : 'grey'
     }
+    console.log('sensor node', sensorNode.value)
   })
   .catch((error) => {
-    console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)
+    console.error(`Error fetching sensor node ${sensorNodeId.value}:`, error)
   })
   .finally(() => loading.value = false)
 // Fetch protobuff schema
-nodeTemplateService.getNodeTemplateSchema(nodeTemplateId.value)
-  .then((data) => {
-    protobuf_schema.value = data
-  })
-  .catch((error) => {
-    console.error(`Error fetching node template ${nodeTemplateId.value} schema:`, error)
-  })
-// check if the node template has children
-const hasInheritedSensorNodes = () => {
-  return Array.isArray(nodeTemplate.inherited_sensor_nodes) && nodeTemplate.inherited_sensor_nodes.length > 0
-}
+// sensorNodeService.getSensorNodeSchema(sensorNodeId.value)
+//   .then((data) => {
+//     protobuf_schema.value = data
+//   })
+//   .catch((error) => {
+//     console.error(`Error fetching sensor node ${sensorNodeId.value} schema:`, error)
+//   })
+// // check if the sensor node has children
+// const hasInheritedSensorNodes = () => {
+//   return Array.isArray(sensorNode.inherited_sensor_nodes) && sensorNode.inherited_sensor_nodes.length > 0
+// }
 
 
-const deletenodeTemplate = (id) => {
-  nodeTemplateToDelete.value = id
+const deletesensorNode = (id) => {
+  sensorNodeToDelete.value = id
   deleteConfirmInput.value = ''
   confirmDelete.value = true
 }
 
 const performDelete = () => {
-  nodeTemplateService.deleteNodeTemplate(nodeTemplateToDelete.value)
+  sensorNodeService.deleteSensorNode(sensorNodeToDelete.value)
     .then(() => {
         confirmDelete.value = false
-        router.push('/node-templates')
+        router.push('/sensor-nodes')
     })
-    .catch(() => console.error(`Error deleting node template ${nodeTemplateToDelete.value}`))
+    .catch(() => console.error(`Error deleting sensor node ${sensorNodeToDelete.value}`))
 }
 const copySchema = () => {
   const schemaText = JSON.stringify(protobuf_schema.value, null, 2)
@@ -303,4 +305,12 @@ const copySchema = () => {
     console.error('Failed to copy schema: ', err)
   })
 }
+
+
+const latitude = 60.0
+const longitude = 24.0
+const zoom = 13
+
+const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.05}%2C${latitude - 0.05}%2C${longitude + 0.05}%2C${latitude + 0.05}&layer=mapnik&marker=${latitude}%2C${longitude}`
+
 </script>
