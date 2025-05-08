@@ -18,25 +18,37 @@ export default {
         {
             uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             name: "the best template",
-            hardware_type: "avr:esp32",
+            "board": {
+              core: "AVR:ESP32",
+              variant: "ESP32",
+            },
             status: "unused",
         },
         {
             uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
             name: "IoS temp template",
-            hardware_type: "arduino:uno",
+            "board": {
+              core: "AVR:ESP32",
+              variant: "ESP32",
+            },
             status: "in-use",
         },
         {
             uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
             name: "the best template 3",
-            hardware_type: "esp:esp32",
+            "board": {
+              core: "AVR:ESP32",
+              variant: "ESP32",
+            },
             status: "in-use",
         },
         {
             uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
             name: "the best template 4",
-            hardware_type: "avr:esp32",
+            "board": {
+              core: "AVR:ESP32",
+              variant: "ESP32",
+            },
             status: "archived",
         }
     ])
@@ -81,10 +93,13 @@ export default {
             }
         }
     ],
-    "status": "in-use",
+    "status": "unused",
     "gitlab_url": "https://gitlab.example.com/sensor-nodes/temperature-sensor",
     "git_ref": "main",
-    "hardware_type": "AVR:ESP32",
+    "board": {
+      core: "AVR:ESP32",
+      variant: "ESP32",
+    },
     "uuid": "c9a2b3d4-4f5e-11ee-be56-0242ac120002",
     "inherited_sensor_nodes": [],
     "logbook": [
@@ -208,7 +223,10 @@ export default {
             "status": "in-use",
             "gitlab_url": "https://gitlab.example.com/sensor-nodes/temperature-sensor",
             "git_ref": "main",
-            "hardware_type": "AVR:ESP32",
+            "board": {
+              core: "AVR:ESP32",
+              variant: "ESP32",
+            },
             "uuid": id,
             // other fields...
         })

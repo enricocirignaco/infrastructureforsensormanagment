@@ -31,7 +31,7 @@
                   </v-chip>
                   <!-- edit button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && !hasInheritedSensorNodes()"
+                  v-if="authStore.getUser?.role !== 'Researcher'"
                   color="primary"
                   icon size="small"
                   class="me-1"
@@ -41,7 +41,7 @@
                   </v-btn>
                   <!-- delete button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && !hasInheritedSensorNodes()"
+                  v-if="authStore.getUser?.role !== 'Researcher' && nodeTemplate.status.name === 'unused'"
                   color="error"
                   icon size="small"
                   @click="deletenodeTemplate(nodeTemplateId)"
@@ -75,7 +75,7 @@
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-chip</v-icon>
                 </template>
-                <v-list-item-title>{{ nodeTemplate.hardware_type }}</v-list-item-title>
+                <v-list-item-title>Core: {{nodeTemplate.board.core}} - Variant: {{ nodeTemplate.board.variant }}</v-list-item-title>
                 <v-list-item-subtitle>Hardware Type</v-list-item-subtitle>
               </v-list-item>
               <v-divider />

@@ -85,7 +85,8 @@ const textStore = useTextStore()
 const nodeTemplates = ref([])
 const headers = [
   { title: 'Name', key: 'name' },
-  { title: 'Hardware Type', key: 'hardware_type' },
+  { title: 'Hardware Core', key: 'board.core'},
+  { title: 'Hardware Variant', key: 'board.variant'},
   { title: 'Node Template ID', key: 'uuid' },
   { title: 'Status', key: 'status'},
 ]
