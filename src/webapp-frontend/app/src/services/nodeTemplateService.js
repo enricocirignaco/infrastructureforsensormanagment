@@ -100,6 +100,17 @@ export default {
       core: "AVR:ESP32",
       variant: "ESP32",
     },
+    "configurables": [
+      {
+        name: "ttn id"
+      },
+    {
+      name: "sending_interval"
+    },
+    {
+      name: "sensor_id"
+      }
+    ],
     "uuid": "c9a2b3d4-4f5e-11ee-be56-0242ac120002",
     "inherited_sensor_nodes": [],
     "logbook": [

@@ -86,8 +86,21 @@
                 <v-list-item-title>{{ nodeTemplate.uuid }}</v-list-item-title>
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
-
             </v-list>
+            <h3 class="text-h6 mb-2 mt-6">Configurables</h3>
+            <v-list elevation="1" rounded="lg" density="comfortable">
+              <v-list-item
+                v-for="(config, index) in nodeTemplate.configurables"
+                :key="index"
+                style="min-height: 72px;"
+              >
+                <template #prepend>
+                  <v-icon style="font-size: 28px;">mdi-cog</v-icon>
+                </template>
+                <v-list-item-title>{{ config.name }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+
 
             <!-- Fields Table -->
             <h3 class="text-h6 mb-2 mt-6">Node Template Fields</h3>
@@ -117,10 +130,10 @@
             </template>
             </v-data-table>
 
-            <!-- protobuff schema -->
+            <!-- protobuff scheme -->
             <v-row class="align-center mb-2 mt-6">
               <v-col>
-                <h3 class="text-h6 mb-0">Protobuf Schema</h3>
+                <h3 class="text-h6 mb-0">Protobuf Scheme</h3>
               </v-col>
               <v-col cols="auto">
                 <v-btn
