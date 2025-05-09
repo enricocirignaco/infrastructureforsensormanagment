@@ -234,7 +234,6 @@ const submitNodeTemplate = () => {
     computeState()
     if(isEditMode.value){
         //put request to update the nodeTemplate
-        console.log('nodeTemplate.value', nodeTemplate.value)
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
             .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error updating nodeTemplate:', error))
