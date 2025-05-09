@@ -22,7 +22,7 @@
       </v-row>
     </v-form>
   </v-card>
-  <v-card class="pa-4" v-if="isEditMode && nodeTemplate && nodeTemplate.state.name === 'Unused'">
+  <v-card class="pa-4" v-if="(nodeTemplate && nodeTemplate.state.name === 'Unused') || !isEditMode">
     <v-card-title>{{ isEditMode ? 'Edit Node Template' : 'Create New Node Template' }}</v-card-title>
 
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
