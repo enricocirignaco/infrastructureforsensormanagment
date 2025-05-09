@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="isEditMode && nodeTemplate && nodeTemplate.state.name !== 'Unused'" class="pa-4">
+  <v-card v-if="isEditMode && nodeTemplate?.state?.name && nodeTemplate.state.name !== 'Unused'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
       <!-- archived checkbox -->
