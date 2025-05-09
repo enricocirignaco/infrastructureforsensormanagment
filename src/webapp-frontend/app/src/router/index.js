@@ -26,6 +26,10 @@ const router = createRouter({
         { path: '/commercial-sensor/:id', component: () => import('@/views/CommercialSensor/CommercialSensorView.vue') },
         { path: '/commercial-sensor/:id/edit', component: () => import('@/views/CommercialSensor/EditCommercialSensorView.vue') },
         { path: '/commercial-sensor/new', component: () => import('@/views/CommercialSensor/NewCommercialSensorView.vue') },
+        { path: '/node-templates', component: () => import('@/views/NodeTemplate/NodeTemplatesView.vue') },
+        { path: '/node-template/:id', component: () => import('@/views/NodeTemplate/NodeTemplateView.vue') },
+        { path: '/node-template/:id/edit', component: () => import('@/views/NodeTemplate/EditNodeTemplateView.vue') },
+        { path: '/node-template/new', component: () => import('@/views/NodeTemplate/NewNodeTemplateView.vue') },
       ],
     },
     // Redirect not registered routes to notfound page

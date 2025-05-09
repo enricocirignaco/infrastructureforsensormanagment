@@ -18,32 +18,12 @@ http://mip3-cirie1.tail60817a.ts.net {
 http://fuseki.mip3-cirie1.tail60817a.ts.net {
 	reverse_proxy fuseki-triplestore:3030
 }
-# Serve production
-http://10.248.11.74 {
-	handle_path /api/v1/* {
-		reverse_proxy webapp-backend:8000
-	}
-	handle {
-      import common_static
-  	}	
-}
-https://10.248.11.74 {
-	tls internal
-	handle_path /api/v1/* {
-		reverse_proxy webapp-backend:8000
-	}
-	handle {
-      import common_static
-  	}	
-}
-https://leaflink.bfh.ch {
-	tls internal
-	handle_path /api/v1/* {
-		reverse_proxy webapp-backend:8000
-	}
-	handle {
-      import common_static
-  	}	
+
+
+
+# Internal DNS 
+http://leaflink.ti.bfh.ch {
+	redir https://leaflink.ti.bfh.ch{uri}
 }
 https://leaflink.ti.bfh.ch {
 	tls internal
@@ -54,6 +34,8 @@ https://leaflink.ti.bfh.ch {
       import common_static
   	}	
 }
+
+
 
 # Local dev testing
 http://localhost {

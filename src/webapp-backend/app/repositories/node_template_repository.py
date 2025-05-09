@@ -1,5 +1,6 @@
 from app.utils.triplestore_client import TripleStoreClient
-from app.models.node_template import NodeTemplateDB, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard
+from app.models.node_template import (
+    NodeTemplateDB, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum)
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
 from rdflib import Graph, URIRef, Literal, RDF
@@ -41,6 +42,7 @@ class NodeTemplateRepository:
             g.add((template_uri, URIRef(self.bfh + "hasConfigurable"), conf_uri))
             g.add((conf_uri, RDF.type, URIRef(self.bfh + "Configurable")))
             g.add((conf_uri, URIRef(self.schema + "name"), Literal(conf.name)))
+            g.add((conf_uri, URIRef(self.bfh + "type"), URIRef(conf.type.rdf_uri)))
 
         # Felder
         for idx, field in enumerate(node_template.fields or []):
@@ -182,16 +184,20 @@ class NodeTemplateRepository:
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?name
+        SELECT ?name ?type
         WHERE {{
             {template_uri} bfh:hasConfigurable ?config .
             ?config a bfh:Configurable ;
-                    schema:name ?name .
+                    schema:name ?name ;
+                    bfh:type ?type .
         }}"""
         config_res = self.triplestore_client.query(sparql_configurables)
         for row in config_res.get("results", {}).get("bindings", []):
             template.configurables.append(
-                ConfigurableDefinition(name=row["name"]["value"])
+                ConfigurableDefinition(
+                    name=row["name"]["value"],
+                    type=ConfigurableTypeEnum.from_rdf_uri(row["type"]["value"])
+                    )
             )
 
         # 4) Logbuch abfragen

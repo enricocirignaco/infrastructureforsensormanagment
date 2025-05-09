@@ -63,7 +63,7 @@
               class="d-flex flex-column justify-center align-center text-center"
               elevation="2"
               style="width: 100%; height: 100%"
-              to="/sensor-node"
+              to="/sensor-nodes"
               hover
               ripple
             >
@@ -81,16 +81,16 @@
               class="d-flex flex-column justify-center align-center text-center"
               elevation="2"
               style="width: 100%; height: 100%"
-              to="/sensor-template"
+              to="/node-templates"
               hover
               ripple
             >
               <v-card-title class="text-h6">Node Templates</v-card-title>
               <v-card-text>
                 <v-icon size="48" class="mb-2" :icon="textStore.icons.nodeTemplates" /> 
-                <div class="text-h4 font-weight-bold mb-2">15</div>
+                <div class="text-h4 font-weight-bold mb-2">{{ nodeTemplatesStats.total }}</div>
                 <div class="text-subtitle-2">Node Templates</div>
-                <div class="text-caption mt-1">9 Used • 6 Unused</div>
+                <div class="text-caption mt-1">{{nodeTemplatesStats.inUse}} In Use • {{nodeTemplatesStats.archived}} Archived</div>
               </v-card-text>
             </v-card>
           </v-col>
@@ -106,11 +106,13 @@ import projectService from '@/services/projectService'
 import commercialSensorService from '@/services/commercialSensorService'
 import { ref } from 'vue'
 import { useTextStore } from '@/stores/textStore'
-
+import nodeTemplateService
+ from '@/services/nodeTemplateService'
 const textStore = useTextStore()
 const authStore = useAuthStore()
 let projectsStats = ref(null)
 let commercialSensorsStats = ref(null)
+const nodeTemplatesStats = ref(null)
 const loading = ref(true)
 
 Promise.all([
@@ -131,7 +133,16 @@ Promise.all([
         active: commercialSensorsDTO.filter(sensor => sensor.state === 'Active').length,
         updated: commercialSensorsDTO.filter(sensor => sensor.updated).length,
       }
-    })
+    }),
+  nodeTemplateService.getNodeTemplatesDTO()
+    .then((nodeTemplatesDTO) => {
+      if (!nodeTemplatesDTO) return Promise.reject('No node templates data found')
+      nodeTemplatesStats.value = {
+        total: nodeTemplatesDTO.length,
+        inUse: nodeTemplatesDTO.filter(template => template.status === 'in-use').length,
+        archived: nodeTemplatesDTO.filter(template => template.status === 'archived').length,
+      }
+    }),
 ])
   .catch((error) => {
     console.error('Error loading dashboard data:', error)

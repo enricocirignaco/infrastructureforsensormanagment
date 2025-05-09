@@ -1,0 +1,1 @@
+system_defined_configurables = ["APP_EUI", "DEV_EUI", "APP_KEY"]

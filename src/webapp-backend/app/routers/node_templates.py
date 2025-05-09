@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi.responses import StreamingResponse, JSONResponse
 from typing import List
 from uuid import UUID
 
@@ -64,17 +64,22 @@ async def delete_specific_node_template(uuid: UUID,
                 200: {"description": "Protobug schema ready and returned"},
                 202: {"description": "Schema generation in progress"},
                 404: {"description": "Node template not found"}
-            },
-            response_class=Response)
+            })
 async def download_protobuf_schema_of_node_template(uuid: UUID,
+                                                request: Request,
                                                 _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
-                                                node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> Response:
+                                                node_template_service: NodeTemplateService = Depends(get_node_template_service)):
     schema = node_template_service.get_protobuf_schema(uuid=uuid)
-    return Response(
-        content=schema,
-        media_type="text/plain",
-        headers={"Content-Disposition": "attachment; filename=schema.proto"}
-    )
+
+    accept_header = request.headers.get("accept", "")
+    if "application/json" in accept_header:
+        return JSONResponse(content={"schema": schema})
+    else:
+        return Response(
+            content=schema,
+            media_type="text/plain",
+            headers={"Content-Disposition": "attachment; filename=schema.proto"}
+        )
 
 
 @router.get("/{uuid}/code", response_class=StreamingResponse)
