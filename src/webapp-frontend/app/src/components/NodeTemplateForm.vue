@@ -63,7 +63,7 @@
 
               <!-- delete button -->
               <v-col cols="1" class="d-flex align-center">
-                <v-btn icon @click="removeConfigurable(index)" color="secondary">
+                <v-btn icon @click="removeConfigurable(nodeTemplate.configurables.indexOf(config))" color="secondary">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
               </v-col>
