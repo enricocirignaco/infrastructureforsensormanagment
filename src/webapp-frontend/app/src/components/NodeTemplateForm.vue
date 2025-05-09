@@ -1,6 +1,6 @@
 <template>
-  <v-card v-if="isEditMode && nodeTemplate && nodeTemplate.status.name !== 'unused'" class="pa-4">
-    <v-card-title>Edit Archived Status</v-card-title>
+  <v-card v-if="isEditMode && nodeTemplate && nodeTemplate.state.name !== 'Unused'" class="pa-4">
+    <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
       <!-- archived checkbox -->
       <v-col v-if="isEditMode"cols="6" class="d-flex align-center">
@@ -22,7 +22,7 @@
       </v-row>
     </v-form>
   </v-card>
-  <v-card class="pa-4" v-else>
+  <v-card class="pa-4" v-if="isEditMode && nodeTemplate && nodeTemplate.state.name === 'Unused'">
     <v-card-title>{{ isEditMode ? 'Edit Node Template' : 'Create New Node Template' }}</v-card-title>
 
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
@@ -166,24 +166,24 @@ const isNodeArchived = ref(false)
 // Define the nodeTemplate object from the nodeTemplate Id or from default values
 if (isEditMode.value) {
   // Fetch nodeTemplate data
-  nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
+  nodeTemplateService.getNodeTemplate(nodeTemplateId)
     .then((data) => {
       nodeTemplate.value = data
 
-      // Map status
-      const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
-        s => s.name === data.status
+      // Map state
+      const matchedState = Object.values(textStore.nodeTemplateStatusEnum).find(
+        s => s.name === data.state
       )
-      nodeTemplate.value.status = {
-        name: data.status,
-        label: matchedStatus ? matchedStatus.label : data.status,
-        color: matchedStatus ? matchedStatus.color : 'grey'
+      nodeTemplate.value.state = {
+        name: data.state,
+        label: matchedState ? matchedState.label : data.state,
+        color: matchedState ? matchedState.color : 'grey'
       }
-      // set the archived status
-      nodeTemplate.value.status.name === 'archived' ? isNodeArchived.value = true : isNodeArchived.value = false
+      // set the archived state
+      nodeTemplate.value.state.name === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
-      console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)
+      console.error(`Error fetching node template ${nodeTemplateId}:`, error)
     })
 } else {
   nodeTemplate.value = {
@@ -196,7 +196,7 @@ if (isEditMode.value) {
       variant: ''
     },
     configurables: [],
-    status: {
+    state: {
       name: '',
       label: '',
       color: ''
@@ -213,7 +213,7 @@ commercialSensorService.getCommercialSensorsDTO()
   })
 
 const addField = () => {
-  nodeTemplate.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercialSensorDTO: null, commercial_sensor: '' })
+  nodeTemplate.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercial_sensor: null })
 }
 
 const removeField = (index) => {
@@ -231,26 +231,27 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
-    computeStatus()
+    computeState()
     if(isEditMode.value){
         //put request to update the nodeTemplate
+        console.log('nodeTemplate.value', nodeTemplate.value)
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
             .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error updating nodeTemplate:', error))
     } else {
         // post request to create the nodeTemplate
-        nodeTemplateService.createNodeTemplate(nodeTemplate.value)
+        nodeTemplateService.createNodeTemplate()
             .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error creating nodeTemplate:', error))
     }
   })
 }
 
-const computeStatus = () => {
+const computeState = () => {
   if(isNodeArchived.value){
-    nodeTemplate.value.status = 'archived'
+    nodeTemplate.value.state = 'Archived'
   } else {
-    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.status = 'active' : nodeTemplate.value.status = 'in_use'
+    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.state = 'Unused' : nodeTemplate.value.state = 'In-use'
   }
 }
 </script>

@@ -137,18 +137,18 @@
               elevation="1"
               disable-sort
             >
-            <template #item.commercial_sensor="{ item }">
-              <v-btn
+            <template  #item.commercial_sensor="{ item }">
+              <v-btn v-if="item.commercial_sensor?.uuid"
                 variant="outlined"
                 color="secondary"
                 size="small"
                 rounded
-                :to="`/commercial-sensor/${item.commercial_sensor.uuid}`"
+                :to="`/commercial-sensor/${item.commercial_sensor?.uuid}`"
                 style="text-transform: none; min-width: 150px;"
                 
               >
                 <v-icon start class="me-1">mdi-link-variant</v-icon>
-                {{ item.commercial_sensor.alias }}
+                {{ item.commercial_sensor?.alias }}
               </v-btn>
             </template>
             </v-data-table>
@@ -162,7 +162,7 @@
                 <v-btn
                   color="secondary"
                   size="small"
-                  :href="`/node-templates/${nodeTemplateId}/code`"
+                  :href="`/node-template/${nodeTemplateId}/code`"
                   download
                   style="text-transform: none;"
                 >
@@ -301,6 +301,12 @@ nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
     for (const conf in nodeTemplate.value.configurables) {
       configPreview.value += `#define ${nodeTemplate.value.configurables[conf].name} <placeholder>\n`
     }
+    // set commercial sensor as empty object instead of null
+    nodeTemplate.value.fields.forEach((field) => {
+      if (field.commercial_sensor === null) {
+        field.commercial_sensor = {}
+      }
+    })
   })
   .catch((error) => {
     console.error(`Error fetching node template ${nodeTemplateId.value}:`, error)

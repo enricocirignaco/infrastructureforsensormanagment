@@ -17,6 +17,7 @@ export default {
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   },
+
   getNodeTemplate(id) {
     let url = BASE_URL + '/node-templates/' + id
     const options = {
@@ -30,6 +31,7 @@ export default {
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   },
+
   getNodeTemplateSchema(id) {
     let url = BASE_URL + '/node-templates/' + id + '/schema'
     const options = {
@@ -57,8 +59,9 @@ export default {
     return fetch(url, options)
       .then(response => response.ok ? null : response.json().then(errorData => Promise.reject(errorData)))
   },
-  editNodeTemplate(id){
-    let url = BASE_URL + '/node-templates/' + id
+
+  editNodeTemplate(nodeTemplate){
+    let url = BASE_URL + '/node-templates/' + nodeTemplate.uuid
     const options = {
       method: 'PUT',
       headers: {
@@ -66,10 +69,12 @@ export default {
         'Content-Type': 'application/json',
         ...authStore.getAuthHeader(),
       },
+      body: JSON.stringify(nodeTemplate),
     }
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
   },
+
   createNodeTemplate(nodeTemplate){
     let url = BASE_URL + '/node-templates'
     const options = {
