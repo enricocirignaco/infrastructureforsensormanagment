@@ -5,8 +5,9 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
-    restApiBaseUrl: `${window.location.origin}/api/v1`,
-    restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+    // restApiBaseUrl: `${window.location.origin}/api/v1`,
+    // restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+    restApiBaseUrl: 'http://localhost/api/v1',
 
 
     statusEnum: {
@@ -15,7 +16,7 @@ export const useTextStore = defineStore('text', {
       2: 'Deleted',
     },
     nodeTemplateStatusEnum: {
-      0: { name: 'unused', label: 'Unused', color: 'warning' },
+      0: { name: 'Unused', label: 'Unused', color: 'warning' },
       1: { name: 'in-use', label: 'In Use', color: 'success' },
       2: { name: 'archived', label: 'Archived', color: 'grey' },
     },
