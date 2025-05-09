@@ -1,8 +1,9 @@
 from uuid import UUID, uuid4
 
 from app.repositories.node_template_repository import NodeTemplateRepository
-from app.models.node_template import NodeTemplateDB, NodeTemplateUpdate, NodeTemplateCreate, NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateLogbookEntry, NodeTemplateLogbookEnum, NodeTemplateStateEnum
+from app.models.node_template import NodeTemplateDB, NodeTemplateUpdate, NodeTemplateCreate, ConfigurableDefinition, ConfigurableTypeEnum, NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateLogbookEntry, NodeTemplateLogbookEnum, NodeTemplateStateEnum
 from app.utils.exceptions import NotFoundError
+from app.constants import system_defined_configurables
 from app.models.user import UserInDB, UserOut
 from datetime import datetime
 from typing import List
@@ -22,8 +23,25 @@ class NodeTemplateService:
 
     def create_node_template(self, node_template: NodeTemplateCreate, logged_in_user: UserInDB) -> NodeTemplateDB:
         uuid = uuid4()
-        logbook = [NodeTemplateLogbookEntry(type=NodeTemplateLogbookEnum.CREATED, date=datetime.now(), user=UserOut(**logged_in_user.model_dump()))]
-        node_template_db = NodeTemplateDB(**node_template.model_dump(), uuid=uuid, logbook=logbook, inherited_sensor_nodes=[], state=NodeTemplateStateEnum.UNUSED)
+        logbook = [NodeTemplateLogbookEntry(
+            type=NodeTemplateLogbookEnum.CREATED, 
+            date=datetime.now(), 
+            user=UserOut(**logged_in_user.model_dump()))
+        ]
+        node_template_db = NodeTemplateDB(
+            **node_template.model_dump(), 
+            uuid=uuid, 
+            logbook=logbook, 
+            inherited_sensor_nodes=[], 
+            state=NodeTemplateStateEnum.UNUSED
+        )
+        for config in system_defined_configurables:
+            node_template_db.configurables.append(
+                ConfigurableDefinition(
+                    name=config,
+                    type=ConfigurableTypeEnum.SYSTEM_DEFINED
+                )
+            )
         return self.node_template_repository.create_node_template(node_template_db)
 
     def update_node_template(self, uuid: UUID, node_template: NodeTemplateUpdate, logged_in_user: UserInDB) -> NodeTemplateDB:
@@ -33,6 +51,18 @@ class NodeTemplateService:
         if node_template.uuid and node_template_db.uuid != node_template.uuid:
             raise ValueError("UUID must not be changed in payload")
         
+        # Check if any of the system-defined configurables have been changed
+        existing_system_defined = {
+            config.name for config in node_template_db.configurables
+            if config.type == ConfigurableTypeEnum.SYSTEM_DEFINED
+        }
+        updated_system_defined = {
+            config.name for config in node_template.configurables
+            if config.type == ConfigurableTypeEnum.SYSTEM_DEFINED
+        }
+        if existing_system_defined != updated_system_defined:
+            raise ValueError("System-defined configurables cannot be modified or removed")
+
         if node_template_db.state == NodeTemplateStateEnum.UNUSED and node_template.state == NodeTemplateStateEnum.UNUSED:
             # Update node template that is currently unused
             node_template_update = NodeTemplateDB(

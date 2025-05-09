@@ -35,12 +35,17 @@ class NodeTemplateStateEnum(RDFEnumMixin, str, Enum):
     IN_USE = 'In-Use'
     ARCHIVED = 'Archived'
 
+class ConfigurableTypeEnum(RDFEnumMixin, str, Enum):
+    USER_DEFINED = 'UserDefined'
+    SYSTEM_DEFINED = 'SystemDefined'
+
 class HardwareBoard(BaseModel):
     core: str
     variant: str
 
 class ConfigurableDefinition(BaseModel):
     name: str
+    type: ConfigurableTypeEnum
 
 class NodeTemplateLogbookEntry(BaseModel):
     type: NodeTemplateLogbookEnum
