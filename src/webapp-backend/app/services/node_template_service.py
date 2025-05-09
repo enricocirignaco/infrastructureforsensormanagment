@@ -69,8 +69,8 @@ class NodeTemplateService:
 
     def get_protobuf_schema(self, uuid: UUID) -> str:
         # TODO replace with calling external service
-        return """
-        edition = "2023";
+        return """edition = "2023";
+
         message Person {
         string name = 1;
         int32 id = 2;
