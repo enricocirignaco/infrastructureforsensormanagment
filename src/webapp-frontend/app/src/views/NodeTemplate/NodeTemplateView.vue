@@ -21,13 +21,13 @@
                     <h2 class="mb-0">{{ nodeTemplate.name }}</h2>
                 </v-col>
                 <v-col cols="auto" class="d-flex align-center">
-                  <!-- status-->
+                  <!-- state-->
                   <v-chip
-                  :color="nodeTemplate.status.color"
+                  :color="nodeTemplate.state.color"
                   variant="flat"
                   class="me-2 text-white"
                   >
-                    {{ nodeTemplate.status.label }}
+                    {{ nodeTemplate.state.label }}
                   </v-chip>
                   <!-- edit button -->
                   <v-btn
@@ -41,7 +41,7 @@
                   </v-btn>
                   <!-- delete button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && nodeTemplate.status.name === 'unused'"
+                  v-if="authStore.getUser?.role !== 'Researcher' && nodeTemplate.state.name === 'unused'"
                   color="error"
                   icon size="small"
                   @click="deletenodeTemplate(nodeTemplateId)"
@@ -55,7 +55,7 @@
           <!-- Node Template content -->
           <v-card-text>
             <div class="mb-6">
-              <h3 class="text-h6 mb-2">Node Template Description</h3>
+              <h3 class="text-h6 mb-2">Description</h3>
               <p class="text-body-1">{{ nodeTemplate.description }}</p>
             </div>
             <v-list elevation="1" rounded="lg" density="comfortable">
@@ -119,7 +119,7 @@
 
 
             <!-- Fields Table -->
-            <h3 class="text-h6 mb-2 mt-6">Node Template Fields</h3>
+            <h3 class="text-h6 mb-2 mt-6">Fields</h3>
             <v-data-table
               :items="nodeTemplate.fields"
               :headers="fieldHeaders"
@@ -197,9 +197,9 @@
           rounded="lg"
           elevation="1"
         >
-          <template #item.status="{ item }">
+          <template #item.state="{ item }">
             <v-chip :color="grey" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-              {{ item.status }}
+              {{ item.state }}
             </v-chip>
           </template>
         </v-data-table>
@@ -263,7 +263,7 @@ const sensorHeaders = [
   { title: 'Name', key: 'name'},
   { title: 'Type', key: 'type' },
   { title: 'Location', key: 'location' },
-  { title: 'Status', key: 'status' },
+  { title: 'State', key: 'state' },
 ]
 const fieldHeaders = [
   { title: 'Field Name', key: 'field_name' },
@@ -281,14 +281,14 @@ const configPreview = ref('')
 nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
   .then((data) => {
     nodeTemplate.value = data
-    // Map the status property to an enum object definited in textstore that also contains a color and label value
-    const matchedStatus = Object.values(textStore.nodeTemplateStatusEnum).find(
-      s => s.name === data.status
+    // Map the state property to an enum object definited in textstore that also contains a color and label value
+    const matchedState = Object.values(textStore.nodeTemplateStatusEnum).find(
+      s => s.name === data.state
     )
-    nodeTemplate.value.status = {
-      name: data.status,
-      label: matchedStatus ? matchedStatus.label : data.status,
-      color: matchedStatus ? matchedStatus.color : 'grey'
+    nodeTemplate.value.state = {
+      name: data.state,
+      label: matchedState ? matchedState.label : data.state,
+      color: matchedState ? matchedState.color : 'grey'
     }
     // build the config preview object
     for (const conf in nodeTemplate.value.configurables) {

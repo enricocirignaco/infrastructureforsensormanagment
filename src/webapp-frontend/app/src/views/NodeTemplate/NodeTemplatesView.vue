@@ -12,7 +12,7 @@
       </v-btn>
       </v-col>
     </v-row>
-    <!-- Searchbar & status Filter -->
+    <!-- Searchbar & state Filter -->
     <v-row class="align-center mb-4" dense>
       <v-col cols="12" class="d-flex align-center justify-space-between">
         <v-text-field
@@ -62,9 +62,9 @@
       elevation="1"
       :loading="loading"
     >
-      <template #item.status="{ item }">
-        <v-chip :color="item.status.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-          {{ item.status.label }}
+      <template #item.state="{ item }">
+        <v-chip :color="item.state.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+          {{ item.state.label }}
         </v-chip>
       </template>
     </v-data-table>
@@ -88,7 +88,7 @@ const headers = [
   { title: 'Hardware Core', key: 'board.core'},
   { title: 'Hardware Variant', key: 'board.variant'},
   { title: 'Node Template ID', key: 'uuid' },
-  { title: 'Status', key: 'status'},
+  { title: 'Status', key: 'state'},
 ]
 const loading = ref(true)
 const tableSearch = ref('')
@@ -98,24 +98,24 @@ const hideArchived = ref(false)
 // Filter entries based on toggle buttons state
 const filteredNodeTemplates = computed(() => {
   return nodeTemplates.value.filter(item => {
-    if (hideArchived.value && item.status.name === 'archived') return false
-    if (hideUnused.value && item.status.name === 'unused') return false
+    if (hideArchived.value && item.state.name === 'Archived') return false
+    if (hideUnused.value && item.state.name === 'Unused') return false
     return true
   })
 })
 // Fetch projects data
 nodeTemplateService.getNodeTemplatesDTO()
   .then((data) => {
-    // Map the status property to an enum object definited in textstore that also contains a color and label value
+    // Map the state property to an enum object definited in textstore that also contains a color and label value
     nodeTemplates.value = data.map(item => {
       const matched = Object.values(textStore.nodeTemplateStatusEnum).find(
-        s => s.name === item.status
+        s => s.name === item.state
       )
       return {
         ...item,
-        status: {
-          name: item.status,
-          label: matched ? matched.label : item.status,
+        state: {
+          name: item.state,
+          label: matched ? matched.label : item.state,
           color: matched ? matched.color : 'grey'
         }
       }
