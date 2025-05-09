@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from uuid import UUID
 
-from app.dependencies import require_roles_or_owner, get_project_service
+from app.dependencies import require_roles_or_owner, get_project_service ,get_node_template_service
 from app.utils.exceptions import NotFoundError
 from app.models.user import UserInDB, RoleEnum
 from app.models.project import ProjectBase, ProjectOutSlim, ProjectOutFull, ProjectUpdate
+from app.models.node_template import NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateCreate
 from app.services.project_service import ProjectService
+from app.services.node_template_service import NodeTemplateService
 
 
 router = APIRouter(

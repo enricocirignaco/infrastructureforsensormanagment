@@ -82,7 +82,3 @@
 | 2025-04-28 | 11:00 - 13:00 | 2     | CIRIE1         | 67       | Logbook feature frontend                                          |
 | 2025-04-28 | 14:00 - 22:00 | 8     | CIRIE1         | 70, 42,69| Marriage Frontend, Backend, deployment to server, overview page   |
 
-
-
-
-

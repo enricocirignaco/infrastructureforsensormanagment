@@ -1,27 +1,12 @@
 from pydantic import BaseModel, EmailStr
 from enum import Enum
 from uuid import UUID
+from app.models.common import RDFEnumMixin
 
-class RoleEnum(str, Enum):
+class RoleEnum(RDFEnumMixin, str, Enum):
     RESEARCHER = 'Researcher'
     TECHNICIAN = 'Technician'
     ADMIN = 'Admin'
-        
-    @property
-    def rdf_uri(self) -> str:
-        """Return the RDF URI corresponding to the Role."""
-        return f'<http://data.bfh.ch/Roles/{self.value}>'
-
-    @classmethod
-    def from_rdf_uri(cls, rdf_uri: str):
-        """Create a RoleEnum from the RDF URI."""
-        # The RDF URI structure is expected to be in the format: http://data.bfh.ch/Roles/<role>
-        cleaned_uri = rdf_uri.strip('<>')
-        role_name = cleaned_uri.split('/')[-1]
-        try:
-            return cls(role_name)
-        except ValueError:
-            raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid Role.")
 
 
 class UserBase(BaseModel):

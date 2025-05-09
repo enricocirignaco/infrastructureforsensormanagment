@@ -6,9 +6,11 @@ from .utils.triplestore_client import TripleStoreClient
 from .repositories.user_repository import UserRepository
 from .repositories.project_repository import ProjectRepository
 from .repositories.commercial_sensor_repository import CommercialSensorRepository
+from .repositories.node_template_repository import NodeTemplateRepository
 from .services.auth_service import AuthService, oauth2_scheme
 from .services.project_service import ProjectService
 from .services.commercial_sensor_service import CommercialSensorService
+from .services.node_template_service import NodeTemplateService
 from .config import settings
 
 # Utils
@@ -34,6 +36,11 @@ def get_commercial_sensor_repository(
 ) -> CommercialSensorRepository:
     return CommercialSensorRepository(triplestore_client)
 
+def get_node_template_repository(
+    triplestore_client: TripleStoreClient = Depends(get_triplestore_client),  
+) -> NodeTemplateRepository:
+    return NodeTemplateRepository(triplestore_client)
+
 # Services
 
 def get_auth_service(
@@ -50,6 +57,11 @@ def get_commercial_sensor_service(
     commercial_sensor_repository: CommercialSensorRepository = Depends(get_commercial_sensor_repository)
 ) -> CommercialSensorService:
     return CommercialSensorService(commercial_sensor_repository)
+
+def get_node_template_service(
+    node_template_repository: NodeTemplateRepository = Depends(get_node_template_repository)
+) -> NodeTemplateService:
+    return NodeTemplateService(node_template_repository)
 
 
 async def get_current_user(
