@@ -22,7 +22,7 @@
       </v-row>
     </v-form>
   </v-card>
-  <v-card class="pa-4" v-if="nodeTemplate && nodeTemplate.status.name === 'unused'">
+  <v-card class="pa-4" v-else>
     <v-card-title>{{ isEditMode ? 'Edit Node Template' : 'Create New Node Template' }}</v-card-title>
 
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
@@ -133,7 +133,7 @@
       </v-container>
     </v-form>
   </v-card>
-  <v-container v-if="!isEditMode" class="d-flex justify-center align-center" style="min-height: 300px">
+  <v-container v-if="!isEditMode && !nodeTemplate" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
 </template>
@@ -191,7 +191,11 @@ if (isEditMode.value) {
     description: '',
     gitlab_url: '',
     git_ref: '',
-    hardware_type: '',
+    board: {
+      core: '',
+      variant: ''
+    },
+    configurables: [],
     status: {
       name: '',
       label: '',
