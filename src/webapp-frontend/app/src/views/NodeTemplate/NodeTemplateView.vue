@@ -100,7 +100,7 @@
               <h3 class="text-h6 mb-2">Configurables</h3>
               <v-list elevation="1" rounded="lg" density="comfortable">
                 <v-list-item
-                  v-for="(config, index) in nodeTemplate.configurables.slice().sort((a, b) => a.type.localeCompare(b.type))"
+                  v-for="(config, index) in nodeTemplate.configurables"
                   :key="index"
                   style="min-height: 72px;"
                   :style="config.type === 'SystemDefined' ? 'background-color: rgba(0,0,0,0.05); font-style: italic;' : ''"
@@ -300,6 +300,8 @@ nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
       label: matchedState ? matchedState.label : data.state,
       color: matchedState ? matchedState.color : 'grey'
     }
+    // sort configurables by type
+    nodeTemplate.value.configurables.sort((a, b) => a.type.localeCompare(b.type))
     // build the config preview object
     for (const conf in nodeTemplate.value.configurables) {
       configPreview.value += `#define ${nodeTemplate.value.configurables[conf].name} <placeholder>\n`

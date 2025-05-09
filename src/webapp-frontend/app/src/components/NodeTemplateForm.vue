@@ -32,7 +32,7 @@
             <v-text-field v-model="nodeTemplate.name" label="Node Template Name" :rules="[required]" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="nodeTemplate.gitlab_url" label="Gitlab Repository URL" :rules="[required]" />
+            <v-text-field v-model="nodeTemplate.gitlab_url" type="url" label="Gitlab Repository URL" :rules="[v => /^(http:\/\/|https:\/\/)/.test(v) || 'URL must start with http:// or https://', required]" />
           </v-col>
           <v-col cols="12">
             <v-textarea v-model="nodeTemplate.description" label="Node Template Description" :rules="[required]" />
