@@ -41,7 +41,7 @@
                   </v-btn>
                   <!-- delete button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && nodeTemplate.state.name === 'unused'"
+                  v-if="authStore.getUser?.role !== 'Researcher' && nodeTemplate.state.name === 'Unused'"
                   color="error"
                   icon size="small"
                   @click="deletenodeTemplate(nodeTemplateId)"
@@ -70,13 +70,20 @@
                 <v-list-item-subtitle>GitLab URL</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
+              <v-list-item style="min-height: 72px;">
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-chip</v-icon>
+                </template>
+                <v-list-item-title>{{nodeTemplate.board.core}}</v-list-item-title>
+                <v-list-item-subtitle>Hardware Core</v-list-item-subtitle>
+              </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
                 <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-chip</v-icon>
                 </template>
-                <v-list-item-title>Core: {{nodeTemplate.board.core}} - Variant: {{ nodeTemplate.board.variant }}</v-list-item-title>
-                <v-list-item-subtitle>Hardware Type</v-list-item-subtitle>
+                <v-list-item-title>{{ nodeTemplate.board.variant }}</v-list-item-title>
+                <v-list-item-subtitle>Hardware Variant</v-list-item-subtitle>
               </v-list-item>
               <v-divider />
               <v-list-item style="min-height: 72px;">
@@ -155,7 +162,7 @@
                 <v-btn
                   color="secondary"
                   size="small"
-                  :href="`/node-template/${nodeTemplateId}/code`"
+                  :href="`/node-templates/${nodeTemplateId}/code`"
                   download
                   style="text-transform: none;"
                 >
@@ -179,7 +186,7 @@
               >
                 <v-icon>mdi-content-copy</v-icon>
               </v-btn>
-              {{ protobuf_schema }}
+              {{ protobuf_schema.schema }}
             </v-sheet>
           </v-card-text>
         </v-card>

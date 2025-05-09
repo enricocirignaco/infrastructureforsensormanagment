@@ -17,8 +17,8 @@ export const useTextStore = defineStore('text', {
     },
     nodeTemplateStatusEnum: {
       0: { name: 'Unused', label: 'Unused', color: 'warning' },
-      1: { name: 'in-use', label: 'In Use', color: 'success' },
-      2: { name: 'archived', label: 'Archived', color: 'grey' },
+      1: { name: 'In-use', label: 'In Use', color: 'success' },
+      2: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
     ProtobufDataTypes: {
       0: 'double',
