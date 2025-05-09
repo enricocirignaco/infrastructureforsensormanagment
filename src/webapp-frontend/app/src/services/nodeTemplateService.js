@@ -5,7 +5,7 @@ const authStore = useAuthStore()
 
 export default {
   getNodeTemplatesDTO: function () {
-    let url = BASE_URL + '/node-templates'
+    let url = BASE_URL + '/node-templates/'
     const options = {
       method: 'GET',
       headers: {
@@ -76,7 +76,7 @@ export default {
   },
 
   createNodeTemplate(nodeTemplate){
-    let url = BASE_URL + '/node-templates'
+    let url = BASE_URL + '/node-templates/'
     const options = {
       method: 'POST',
       headers: {

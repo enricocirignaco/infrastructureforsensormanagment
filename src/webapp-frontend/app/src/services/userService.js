@@ -24,7 +24,7 @@ export default {
   },
   
   postUser: function (user) {
-    let url = BASE_URL + '/users'
+    let url = BASE_URL + '/users/'
     const options = {
       method: 'POST',
       headers: {

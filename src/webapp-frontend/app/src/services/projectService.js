@@ -5,7 +5,7 @@ const authStore = useAuthStore()
 
 export default {
   getProjectsDTO: function () {
-    let url = BASE_URL + '/projects'
+    let url = BASE_URL + '/projects/'
     const options = {
       method: 'GET',
       headers: {
@@ -33,7 +33,7 @@ export default {
   },
 
   createProject: function (project) {
-    let url = BASE_URL + '/projects'
+    let url = BASE_URL + '/projects/'
     const options = {
       method: 'POST',
       headers: {

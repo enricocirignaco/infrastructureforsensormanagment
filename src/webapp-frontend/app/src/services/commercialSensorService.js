@@ -5,7 +5,7 @@ const authStore = useAuthStore()
 
 export default {
     getCommercialSensorsDTO: function() {
-        let url = BASE_URL + '/commercial-sensors'
+        let url = BASE_URL + '/commercial-sensors/'
         const options = {
             method: 'GET',
             headers: {
@@ -56,7 +56,7 @@ export default {
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
     createCommercialSensor(sensor) {
-        let url = BASE_URL + '/commercial-sensors'
+        let url = BASE_URL + '/commercial-sensors/'
         const options = {
             method: 'POST',
             headers: {
