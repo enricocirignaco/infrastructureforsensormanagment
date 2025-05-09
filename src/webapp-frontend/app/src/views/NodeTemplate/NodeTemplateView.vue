@@ -100,10 +100,10 @@
               <h3 class="text-h6 mb-2">Configurables</h3>
               <v-list elevation="1" rounded="lg" density="comfortable">
                 <v-list-item
-                  v-for="(config, index) in nodeTemplate.configurables"
+                  v-for="(config, index) in nodeTemplate.configurables.slice().sort((a, b) => a.type.localeCompare(b.type))"
                   :key="index"
                   style="min-height: 72px;"
-                  :style="config.type === 'SystemDefinited' ? 'background-color: var(--v-theme-primary);' : ''"
+                  :style="config.type === 'SystemDefined' ? 'background-color: rgba(0,0,0,0.05); font-style: italic;' : ''"
 
 
                 >

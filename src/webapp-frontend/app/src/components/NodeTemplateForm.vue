@@ -235,8 +235,6 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
-    console.log('nodeTemplate.value', nodeTemplate.value)
-
     computeState()
     if(isEditMode.value){
         //put request to update the nodeTemplate
