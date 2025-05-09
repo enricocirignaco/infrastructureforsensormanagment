@@ -103,6 +103,9 @@
                   v-for="(config, index) in nodeTemplate.configurables"
                   :key="index"
                   style="min-height: 72px;"
+                  :style="config.type === 'SystemDefinited' ? 'background-color: var(--v-theme-primary);' : ''"
+
+
                 >
                   <template #prepend>
                     <v-icon style="font-size: 28px;">mdi-cog</v-icon>

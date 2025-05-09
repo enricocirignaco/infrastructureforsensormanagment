@@ -49,11 +49,17 @@
             <h3 class="text-h6 mb-2">Configurables</h3>
             <v-row
               v-for="(config, index) in nodeTemplate.configurables"
+              v-if="true"
               :key="index"
               class="mb-2"
             >
               <v-col cols="5">
-                <v-text-field v-model="config.name" label="Name" :rules="[required]" />
+                <v-text-field
+                :model-value="config.name"
+                @update:model-value="val => config.name = val.toUpperCase()"
+                label="Name"
+                :rules="[required]"
+                />
               </v-col>
 
               <!-- delete button -->
