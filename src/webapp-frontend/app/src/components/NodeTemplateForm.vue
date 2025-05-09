@@ -48,8 +48,7 @@
           <v-col cols="12">
             <h3 class="text-h6 mb-2">Configurables</h3>
             <v-row
-              v-for="(config, index) in nodeTemplate.configurables"
-              v-if="true"
+              v-for="(config, index) in nodeTemplate.configurables.filter(c => c.type === 'UserDefined')"
               :key="index"
               class="mb-2"
             >
@@ -196,7 +195,6 @@ if (isEditMode.value) {
     name: '',
     description: '',
     gitlab_url: '',
-    git_ref: '',
     board: {
       core: '',
       variant: ''
@@ -247,7 +245,7 @@ const submitNodeTemplate = () => {
             .catch((error) => console.log('Error updating nodeTemplate:', error))
     } else {
         // post request to create the nodeTemplate
-        nodeTemplateService.createNodeTemplate()
+        nodeTemplateService.createNodeTemplate(nodeTemplate.value)
             .then((nodeTemplate) => router.push('/node-template/' + nodeTemplate.uuid))
             .catch((error) => console.log('Error creating nodeTemplate:', error))
     }
