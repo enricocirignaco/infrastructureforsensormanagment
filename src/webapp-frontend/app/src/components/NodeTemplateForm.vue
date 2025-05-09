@@ -227,7 +227,7 @@ const removeField = (index) => {
 
 }
 const addConfigurable = () => {
-  nodeTemplate.value.configurables.push({ name: '' })
+  nodeTemplate.value.configurables.push({ name: '', type: 'UserDefined'})
 }
 const removeConfigurable = (index) => {
   nodeTemplate.value.configurables.splice(index, 1)
@@ -237,6 +237,8 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
+    console.log('nodeTemplate.value', nodeTemplate.value)
+
     computeState()
     if(isEditMode.value){
         //put request to update the nodeTemplate
