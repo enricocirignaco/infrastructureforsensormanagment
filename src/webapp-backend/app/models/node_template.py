@@ -6,7 +6,6 @@ from uuid import UUID
 from typing import Optional, List
 from app.models.user import UserOut
 from app.models.commercial_sensor import CommercialSensorOutSlim
-from app.models.sensor_node import SensorNodeOutSlim
 from app.models.common import RDFEnumMixin
 
 class ProtobufDatatypeEnum(RDFEnumMixin, str, Enum):
@@ -81,7 +80,6 @@ class NodeTemplateUpdate(NodeTemplateBase):
 class NodeTemplateDB(NodeTemplateBase):
     uuid: UUID
     logbook: List[NodeTemplateLogbookEntry]
-    inherited_sensor_nodes: List[SensorNodeOutSlim]
     state: NodeTemplateStateEnum
 
 # Models used to return data
@@ -95,5 +93,4 @@ class NodeTemplateOutSlim(BaseModel):
 class NodeTemplateOutFull(NodeTemplateBase):
     uuid: UUID
     logbook: List[NodeTemplateLogbookEntry]
-    inherited_sensor_nodes: List[SensorNodeOutSlim]
     state: NodeTemplateStateEnum

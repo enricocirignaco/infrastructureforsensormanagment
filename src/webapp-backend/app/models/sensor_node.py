@@ -67,7 +67,7 @@ class SensorNodeUpdate(SensorNodeBase):
     
 # Models used internally
 
-class NodeTemplateDB(SensorNodeLocation):
+class SensorNodeDB(SensorNodeLocation):
     uuid: UUID
     logbook: List[SensorNodeLogbookEntry]
     state: SensorNodeStateEnum
