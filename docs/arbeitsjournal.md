@@ -81,4 +81,7 @@
 | 2025-04-25 | 14:00 - 17:00 | 3     | CIRIE1         | 69, 64   | Marriage Frontend, Backend, bugfixing frontend, deployment to server|
 | 2025-04-28 | 11:00 - 13:00 | 2     | CIRIE1         | 67       | Logbook feature frontend                                          |
 | 2025-04-28 | 14:00 - 22:00 | 8     | CIRIE1         | 70, 42,69| Marriage Frontend, Backend, deployment to server, overview page   |
-
+| 2025-05-01 | 13:00 - 14:00 | 1,0   | DEGEL2         | 61       | Current state of openapi spec                                     |
+| 2025-05-06 | 13:00 - 18:00 | 5,0   | DEGEL2         | 55, 68   | Logbook Commercial Sensor, Node Template CRUD                     |
+| 2025-05-08 | 14:00 - 18:00 | 4,0   | DEGEL2         | 55       | Node Template Update                                              |
+| 2025-05-08 | 10:00 - 17:00 | 7,0   | DEGEL2         | 46       | Marry Node Template and fix bugs                                  |
