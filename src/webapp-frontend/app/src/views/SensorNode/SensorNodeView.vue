@@ -22,17 +22,17 @@
                     <h2 class="mb-0">{{ sensorNode.name }}</h2>
                 </v-col>
                 <v-col cols="auto" class="d-flex align-center">
-                  <!-- status-->
+                  <!-- state-->
                   <v-chip
-                  :color="sensorNode.status.color"
+                  :color="sensorNode.state.color"
                   variant="flat"
                   class="me-2 text-white"
                   >
-                    {{ sensorNode.status.label }}
+                    {{ sensorNode.state.label }}
                   </v-chip>
                   <!-- edit button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.status.name !== 'unused'"
+                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.state.name !== 'unused'"
                   color="primary"
                   icon size="small"
                   class="me-1"
@@ -42,7 +42,7 @@
                   </v-btn>
                   <!-- delete button -->
                   <v-btn
-                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.status.name !== 'unused'"
+                  v-if="authStore.getUser?.role !== 'Researcher' && sensorNode.state.name !== 'unused'"
                   color="error"
                   icon size="small"
                   @click="deletesensorNode(sensorNodeId)"
@@ -91,9 +91,26 @@
                 <v-list-item-title>{{ sensorNode.uuid }}</v-list-item-title>
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
-
             </v-list>
-
+            <!-- configurables section -->
+            <v-row class="mt-6">
+            <v-col cols="6">
+              <h3 class="text-h6 mb-2">Configurables</h3>
+              <v-list elevation="1" rounded="lg" density="comfortable">
+                <v-list-item
+                  v-for="(config, index) in sensorNode.configurables"
+                  :key="index"
+                  style="min-height: 72px;"
+                  :style="config.type === 'SystemDefined' ? 'background-color: rgba(0,0,0,0.05); font-style: italic;' : ''"
+                >
+                  <template #prepend>
+                    <v-icon style="font-size: 28px;">mdi-cog</v-icon>
+                  </template>
+                    <v-list-item-title>{{config.name}}: <strong>{{ config.value }}</strong></v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-col>
+            </v-row>
             <!-- Fields Table -->
             <h3 class="text-h6 mb-2 mt-6">Sensor node Fields</h3>
             <v-data-table
@@ -173,9 +190,9 @@
           rounded="lg"
           elevation="1"
         >
-          <template #item.status="{ item }">
+          <template #item.state="{ item }">
             <v-chip :color="grey" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-              {{ item.status }}
+              {{ item.state }}
             </v-chip>
           </template>
         </v-data-table> -->
@@ -239,7 +256,7 @@ const sensorHeaders = [
   { title: 'Name', key: 'name'},
   { title: 'Type', key: 'type' },
   { title: 'Location', key: 'location' },
-  { title: 'Status', key: 'status' },
+  { title: 'State', key: 'state' },
 ]
 const fieldHeaders = [
   { title: 'Field Name', key: 'field_name' },
@@ -256,14 +273,14 @@ const protobuf_schema = ref('')
 sensorNodeService.getSensorNode(sensorNodeId.value)
   .then((data) => {
     sensorNode.value = data
-    // Map the status property to an enum object definited in textstore that also contains a color and label value
-    const matchedStatus = Object.values(textStore.sensorNodeStatusEnum).find(
-      s => s.name === data.status
+    // Map the state property to an enum object definited in textstore that also contains a color and label value
+    const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
+      s => s.name === data.state
     )
-    sensorNode.value.status = {
-      name: data.status,
-      label: matchedStatus ? matchedStatus.label : data.status,
-      color: matchedStatus ? matchedStatus.color : 'grey'
+    sensorNode.value.state = {
+      name: data.state,
+      label: matchedState ? matchedState.label : data.state,
+      color: matchedState ? matchedState.color : 'grey'
     }
     console.log('sensor node', sensorNode.value)
   })
