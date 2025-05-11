@@ -101,6 +101,28 @@
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
             </v-list>
+            <v-divider class="my-6" />
+            <!-- sensor location map -->
+            <v-row class="mb-6">
+              <v-col cols="12">
+                <v-card elevation="1" rounded="lg">
+                  <v-card-title>
+                    <h3 class="text-h6 mb-0">Sensor Node Location</h3>
+                  </v-card-title>
+                  <v-card-text>
+                    <LMap
+                      v-if="sensorNode?.location"
+                      style="height: 400px; width: 100%;"
+                      :zoom="13"
+                      :center="[sensorNode.location.latitude, sensorNode.location.longitude]"
+                    >
+                      <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <LMarker :lat-lng="[sensorNode.location.latitude, sensorNode.location.longitude]" />
+                    </LMap>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
             <!-- configurables section -->
             <v-row class="mt-6">
             <v-col cols="6">
@@ -202,6 +224,9 @@ import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTextStore } from '@/stores/textStore'
 import { computed } from 'vue'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 
 const authStore = useAuthStore()
 const textStore = useTextStore()
@@ -262,4 +287,12 @@ const performDelete = () => {
 const openTTNUrl = () => {
     window.open(sensorNode.value.ttn_device_link, '_blank')
 }
+
+// Fix default icon paths for leaflet map (because Vite doesn't automatically handle them)
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: new URL('leaflet/dist/images/marker-icon-2x.png', import.meta.url).href,
+  iconUrl: new URL('leaflet/dist/images/marker-icon.png', import.meta.url).href,
+  shadowUrl: new URL('leaflet/dist/images/marker-shadow.png', import.meta.url).href,
+})
 </script>
