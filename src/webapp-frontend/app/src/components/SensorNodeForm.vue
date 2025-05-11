@@ -32,8 +32,16 @@
           <v-col cols="12" sm="6">
             <v-text-field v-model="sensorNode.name" label="Sensor Node Name" :rules="[required]" />
           </v-col>
+          <!-- node template dropdown -->
           <v-col cols="12" sm="6">
-            <v-text-field v-model="sensorNode.node_template_uuid" label="Node Template" :rules="[v => /^(http:\/\/|https:\/\/)/.test(v) || 'URL must start with http:// or https://', required]" />
+            <v-select
+              :items="Object.values(nodeTemplates)"
+              v-model="sensorNode.node_template_uuid"
+              label="Node Template"
+              item-title="name"
+              item-value="uuid"
+              :rules="[required]"
+            />
           </v-col>
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Sensor Node Description" :rules="[required]" />
@@ -183,8 +191,6 @@
 </template>
 
 <script setup>
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
-import 'leaflet/dist/leaflet.css'
 // defineProps of the component
 const { sensorNodeId } = defineProps({
   sensorNodeId: {
@@ -198,25 +204,19 @@ import { computed } from 'vue'
 import { useTextStore} from '@/stores/textStore'
 import { useRouter } from 'vue-router'
 import sensorNodeService from '@/services/sensorNodeService'
-import commercialSensorService from '@/services/commercialSensorService'
+import nodeTemplateService from '@/services/nodeTemplateService'
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import 'leaflet/dist/leaflet.css'
 
 const showMap = ref(false)
-
 const isEditMode = computed(() => sensorNodeId !== null)
 const sensorNodeForm = ref(null)
 const required = v => !!v || 'Required'
-
-// Custom rule: location fields required if any location field is filled
-const locationConditionalRule = () => {
-  const loc = sensorNode.value.location
-  const isAnyFilled = loc.latitude || loc.langitude || loc.altitude || loc.postalcode
-  return v => !isAnyFilled || !!v || 'Required if any location field is filled'
-}
 const textStore = useTextStore()
 const router = useRouter()
 const sensorNode = ref(null)
 const isNodeArchived = ref(false)
-
+const nodeTemplates = ref([])
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
   // Fetch sensorNode data
@@ -258,7 +258,21 @@ if (isEditMode.value) {
     fields: [],
   }
 }
+// fetch node templates
+nodeTemplateService.getNodeTemplatesDTO()
+  .then((data) => {
+    nodeTemplates.value = data
+  })
+  .catch((error) => {
+    console.error('Error fetching node templates:', error)
+  })
 
+// Custom rule: location fields required if any location field is filled
+const locationConditionalRule = () => {
+  const loc = sensorNode.value.location
+  const isAnyFilled = loc.latitude || loc.langitude || loc.altitude || loc.postalcode
+  return v => !isAnyFilled || !!v || 'Required if any location field is filled'
+}
 
 const addField = () => {
   sensorNode.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercial_sensor: null })
