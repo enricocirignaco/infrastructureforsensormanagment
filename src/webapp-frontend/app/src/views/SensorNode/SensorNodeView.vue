@@ -112,12 +112,21 @@
                   <v-card-text>
                     <LMap
                       v-if="sensorNode?.location"
+                      class="rounded-lg"
                       style="height: 400px; width: 100%;"
                       :zoom="13"
                       :center="[sensorNode.location.latitude, sensorNode.location.longitude]"
                     >
                       <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                      <LMarker :lat-lng="[sensorNode.location.latitude, sensorNode.location.longitude]" />
+                      <LMarker :lat-lng="[sensorNode.location.latitude, sensorNode.location.longitude]">
+                        <LPopup>
+                          <div style="min-width: 200px;">
+                            <strong>{{ sensorNode.name }}</strong><br />
+                            Project: {{ sensorNode.project_uuid }}<br />
+                            Last Update: {{ new Date(sensorNode.last_timeseries?.timestamp).toLocaleDateString(userLocale) }}
+                          </div>
+                        </LPopup>
+                      </LMarker>
                     </LMap>
                   </v-card-text>
                 </v-card>
@@ -224,7 +233,7 @@ import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTextStore } from '@/stores/textStore'
 import { computed } from 'vue'
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
