@@ -6,7 +6,7 @@
         <h1>Sensor Nodes</h1>
       </v-col>
     </v-row>
-    <!-- Searchbar & status Filter -->
+    <!-- Searchbar & state Filter -->
     <v-row class="align-center mb-4" dense>
       <v-col cols="12" class="d-flex align-center justify-space-between">
         <v-text-field
@@ -41,6 +41,16 @@
             style="transform: scale(0.75); height: 28px;"
             color="secondary"
           ></v-switch>
+          <v-switch
+            v-model="hidePrepared"
+            label="Hide Prepared"
+            inset
+            hide-details
+            density="comfortable"
+            class="rounded-pill ma-0 pa-0"
+            style="transform: scale(0.75); height: 28px;"
+            color="secondary"
+          ></v-switch>
         </div>
       </v-col>
     </v-row>
@@ -56,9 +66,9 @@
       elevation="1"
       :loading="loading"
     >
-      <template #item.status="{ item }">
-        <v-chip :color="item.status.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-          {{ item.status.label }}
+      <template #item.state="{ item }">
+        <v-chip :color="item.state.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+          {{ item.state.label }}
         </v-chip>
       </template>
     </v-data-table>
@@ -78,35 +88,38 @@ const sensorNodes = ref([])
 const headers = [
   { title: 'Name', key: 'name' },
   { title: 'Sensor Node ID', key: 'uuid' },
+  { title: 'Project', key: 'project.name' },
   { title: 'Node Template', key: 'node_template.name' },
-  { title: 'Status', key: 'status'},
+  { title: 'State', key: 'state'},
 ]
 const loading = ref(true)
 const tableSearch = ref('')
 const hideInactive = ref(false)
 const hideArchived = ref(false)
+const hidePrepared = ref(false)
 
 // Filter entries based on toggle buttons state
 const filteredSensorNodes = computed(() => {
   return sensorNodes.value.filter(item => {
-    if (hideArchived.value && item.status.name === 'archived') return false
-    if (hideInactive.value && item.status.name === 'inactive') return false
+    if (hideArchived.value && item.state.name === 'Archived') return false
+    if (hideInactive.value && item.state.name === 'Inactive') return false
+    if (hidePrepared.value && item.state.name === 'Prepared') return false
     return true
   })
 })
 // Fetch sensor node data
 sensorNodeService.getSensorNodesDTO()
   .then((data) => {
-    // Map the status property to an enum object definited in textstore that also contains a color and label value
+    // Map the state property to an enum object definited in textstore that also contains a color and label value
     sensorNodes.value = data.map(item => {
       const matched = Object.values(textStore.sensorNodeStatusEnum).find(
-        s => s.name === item.status
+        s => s.name === item.state
       )
       return {
         ...item,
-        status: {
-          name: item.status,
-          label: matched ? matched.label : item.status,
+        state: {
+          name: item.state,
+          label: matched ? matched.label : item.state,
           color: matched ? matched.color : 'grey'
         }
       }

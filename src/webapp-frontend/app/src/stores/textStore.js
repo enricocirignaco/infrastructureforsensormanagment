@@ -5,8 +5,8 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
-    restApiBaseUrl: `${window.location.origin}/api/v1`,
-    // restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+    // restApiBaseUrl: `${window.location.origin}/api/v1`,
+    restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
     // restApiBaseUrl: 'http://localhost/api/v1',
 
 
@@ -21,9 +21,10 @@ export const useTextStore = defineStore('text', {
       2: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
     sensorNodeStatusEnum: {
-      0: { name: 'active', label: 'Active', color: 'success' },
-      1: { name: 'inactive', label: 'Inactive', color: 'warning' },
-      2: { name: 'archived', label: 'Archived', color: 'grey' },
+      0: { name: 'Active', label: 'Active', color: 'success' },
+      1: { name: 'Inactive', label: 'Inactive', color: 'error' },
+      2: { name: 'Prepared', label: 'Prepared', color: 'warning' },
+      3: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
     ProtobufDataTypes: {
       0: 'double',

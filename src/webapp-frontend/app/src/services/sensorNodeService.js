@@ -14,51 +14,86 @@ export default {
             },
         }
     return Promise.resolve([
-        {
-            uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            name: "the best node",
-            node_template: {
-                uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                name: "the best template",
-                hardware_type: "avr:esp32",
-                status: "in-use",
-            },
-            status: "archived",
+      {
+        uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        name: "the best node",
+        state: "Prepared",
+        node_template: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          name: "the best template",
+          board: {
+            core: "avr",
+            variant: "esp32"
+          },
+          state: "in-use"
         },
-        {
-            uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-            name: "IoS temp node",
-            node_template: {
-                uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-                name: "IoS temp template",
-                hardware_type: "arduino:uno",
-                status: "in-use",
-            },
-            status: "active",
-        },
-        {
-            uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
-            name: "the best node 3",
-            node_template: {
-                uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
-                name: "the best template 3",
-                hardware_type: "esp:esp32",
-                status: "in-use",
-            },
-            status: "inactive",
-        },
-        {
-            uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
-            name: "the best node 4",
-            node_template: {
-                uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
-                name: "the best template 4",
-                hardware_type: "avr:esp32",
-                status: "in-use",
-            },
-            status: "inactive",
+        project: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afaa",
+          name: "Sample Project",
+          short_name: "SP",
+          state: "Active"
         }
-        
+      },
+      {
+        uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+        name: "IoS temp node",
+        state: "Active",
+        node_template: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+          name: "IoS temp template",
+          board: {
+            core: "arduino",
+            variant: "uno"
+          },
+          state: "in-use"
+        },
+        project: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afab",
+          name: "IoS Monitoring",
+          short_name: "IoSM",
+          state: "Active"
+        }
+      },
+      {
+        uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
+        name: "the best node 3",
+        state: "Archived",
+        node_template: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa8",
+          name: "the best template 3",
+          board: {
+            core: "esp",
+            variant: "esp32"
+          },
+          state: "in-use"
+        },
+        project: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afac",
+          name: "TempNet",
+          short_name: "TN",
+          state: "Inactive"
+        }
+      },
+      {
+        uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
+        name: "the best node 4",
+        state: "Inactive",
+        node_template: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa9",
+          name: "the best template 4",
+          board: {
+            core: "avr",
+            variant: "esp32"
+          },
+          state: "in-use"
+        },
+        project: {
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afad",
+          name: "ForestNet",
+          short_name: "FN",
+          state: "Inactive"
+        }
+      }
     ])
      return fetch(url, options)
        .then(response => response.ok ? response.json() : Promise.reject(response));
