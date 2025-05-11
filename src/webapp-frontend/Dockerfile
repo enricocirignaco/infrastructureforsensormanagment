@@ -3,6 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 COPY src/webapp-frontend/app /app
+
+ARG APP_VERSION
+ENV VITE_APP_VERSION=$APP_VERSION
+
 RUN npm install
 RUN npm run build
 

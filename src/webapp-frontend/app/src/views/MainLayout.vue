@@ -47,21 +47,32 @@
 
     <!-- Header (Navbar) -->
     <v-app-bar app color="primary">
-      <v-toolbar-title style="cursor: pointer" @click="router.push('/')">{{
-        textStore.applicationName
-      }}</v-toolbar-title>
+      <v-toolbar-title style="cursor: pointer" @click="router.push('/')">
+        {{ textStore.applicationName }}
+      </v-toolbar-title>
       <v-spacer></v-spacer>
 
+      <!-- Version Banner -->
+      <v-chip
+        class="mx-1"
+        size="x-small"
+        variant="outlined"
+        color="secondary"
+        style="opacity: 0.7;"
+      >
+        {{ textStore?.appVersion}}
+      </v-chip>
+
       <!-- Custom Dark Mode Toggle -->
-      <DarkModeToggle />
+      <DarkModeToggle class="mx-1" />
 
       <!-- Settings Button -->
-      <v-btn icon color="secondary" @click="router.push('/settings')">
+      <v-btn icon color="secondary" class="mx-1" @click="router.push('/settings')">
         <v-icon>mdi-cog-outline</v-icon>
       </v-btn>
 
       <!-- Logout Button -->
-      <v-btn icon color="secondary" @click="logout">
+      <v-btn icon color="secondary" class="mx-1" @click="logout">
         <v-icon>mdi-logout</v-icon>
       </v-btn>
     </v-app-bar>
