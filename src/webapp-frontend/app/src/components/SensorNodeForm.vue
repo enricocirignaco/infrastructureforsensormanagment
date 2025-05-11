@@ -33,7 +33,7 @@
             <v-text-field v-model="sensorNode.name" label="Sensor Node Name" :rules="[required]" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="sensorNode.gitlab_url" type="url" label="Gitlab Repository URL" :rules="[v => /^(http:\/\/|https:\/\/)/.test(v) || 'URL must start with http:// or https://', required]" />
+            <v-text-field v-model="sensorNode.node_template_uuid" label="Node Template" :rules="[v => /^(http:\/\/|https:\/\/)/.test(v) || 'URL must start with http:// or https://', required]" />
           </v-col>
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Sensor Node Description" :rules="[required]" />
@@ -96,26 +96,21 @@
               :key="index"
               class="mb-2"
             >
-              <v-col cols="5">
+              <v-col cols="6">
                 <v-text-field
-                :model-value="config.name"
-                @update:model-value="val => config.name = val.toUpperCase()"
-                label="Name"
-                :rules="[required]"
+                  v-model="config.name"
+                  label="Name"
+                  :rules="[required]"
                 />
               </v-col>
-
-              <!-- delete button -->
-              <v-col cols="1" class="d-flex align-center">
-                <v-btn icon @click="removeConfigurable(sensorNode.configurables.indexOf(config))" color="secondary">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-col>
+              <v-col cols="5">
+                <v-text-field
+                :model-value="config.value"
+                label="Value"
+                :rules="[required]"
+                />
+              </v-col> 
             </v-row>
-            <v-btn @click="addConfigurable" rounded="lg" color="primary">
-              <v-icon start>mdi-plus</v-icon>
-              Add Config
-            </v-btn>
           </v-col>
           <!-- Fields -->
           <v-col cols="12">
