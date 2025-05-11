@@ -60,7 +60,19 @@
         </v-card>
         <v-divider class="my-6" />
 
-        <h2 class="text-h6 mb-2">Deployed Nodes</h2>
+        <v-row class="align-center justify-space-between mb-2 px-4">
+          <h2 class="text-h6 mb-0">Deployed Nodes</h2>
+          <v-btn
+            v-if="authStore.getUser?.role !== 'Researcher'"
+            color="surface"
+            variant="flat"
+            size="small"
+            @click="router.push({ path: '/sensor-node/new', query: { project_uuid: projectId } })"
+            >
+            <v-icon start>mdi-plus</v-icon>
+            Add New Sensor Node
+          </v-btn>
+        </v-row>
         <!-- Table of deployed nodes -->
         <v-data-table
           :items="project.sensor_nodes"
