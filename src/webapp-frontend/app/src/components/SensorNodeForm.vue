@@ -22,9 +22,10 @@
       </v-row>
     </v-form>
   </v-card>
-  <v-card class="pa-4" v-if="(sensorNode && sensorNode.state.name === 'Unused') || !isEditMode">
-    <v-card-title>{{ isEditMode ? 'Edit Sensor Node' : 'Create New Sensor Node' }}</v-card-title>
 
+  <!-- main form -->
+  <v-card class="pa-4" v-if="(sensorNode && sensorNode.state.name === 'Prepared') || !isEditMode">
+    <v-card-title>{{ isEditMode ? 'Edit Sensor Node' : 'Create New Sensor Node' }}</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
       <v-container>
         <v-row>
@@ -37,11 +38,54 @@
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Sensor Node Description" :rules="[required]" />
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="sensorNode.board.core" label="Hardware Core" :rules="[required]" />
-          </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="sensorNode.board.variant" label="Hardware Variant" :rules="[required]" />
+          
+          <v-col cols="12">
+            <v-card outlined>
+              <v-card-title class="text-subtitle-1 d-flex justify-space-between align-center">
+                <span>Location</span>
+                <v-btn rounded="lg" color="primary" @click="showMap = !showMap">
+                  <v-icon start>mdi-map-marker</v-icon>
+                  {{ showMap ? 'Hide Map' : 'Show Map' }}
+                </v-btn>
+              </v-card-title>
+              <v-card-text>
+                <!-- map -->
+                <v-row v-if="showMap">
+                  <v-col cols="12">
+                    <LMap
+                      style="height: 300px"
+                      :zoom="6"
+                      :center="[46.8, 8.2]"
+                      @click="e => {
+                        sensorNode.location.latitude = e.latlng.lat
+                        sensorNode.location.langitude = e.latlng.lng
+                      }"
+                    >
+                      <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <LMarker
+                        v-if="sensorNode.location.latitude && sensorNode.location.langitude"
+                        :lat-lng="[sensorNode.location.latitude, sensorNode.location.langitude]"
+                      />
+                    </LMap>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col v-if="!showMap" cols="12" sm="6">
+                    <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" :rules="[locationConditionalRule()]" />
+                  </v-col>
+                  <v-col v-if="!showMap" cols="12" sm="6">
+                    <v-text-field v-model="sensorNode.location.langitude" type='number' label="Longitude" :rules="[locationConditionalRule()]" />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field v-model="sensorNode.location.altitude" type='number' label="Altitude" :rules="[locationConditionalRule()]" />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field v-model="sensorNode.location.postalcode" type='number' label="Postal code" :rules="[locationConditionalRule()]" />
+                  </v-col>
+                </v-row>
+                
+              </v-card-text>
+            </v-card>
           </v-col>
           
           <!-- Configurables -->
@@ -144,6 +188,8 @@
 </template>
 
 <script setup>
+import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
+import 'leaflet/dist/leaflet.css'
 // defineProps of the component
 const { sensorNodeId } = defineProps({
   sensorNodeId: {
@@ -159,13 +205,21 @@ import { useRouter } from 'vue-router'
 import sensorNodeService from '@/services/sensorNodeService'
 import commercialSensorService from '@/services/commercialSensorService'
 
+const showMap = ref(false)
+
 const isEditMode = computed(() => sensorNodeId !== null)
 const sensorNodeForm = ref(null)
 const required = v => !!v || 'Required'
+
+// Custom rule: location fields required if any location field is filled
+const locationConditionalRule = () => {
+  const loc = sensorNode.value.location
+  const isAnyFilled = loc.latitude || loc.langitude || loc.altitude || loc.postalcode
+  return v => !isAnyFilled || !!v || 'Required if any location field is filled'
+}
 const textStore = useTextStore()
 const router = useRouter()
 const sensorNode = ref(null)
-const commercialSensorsDTO = ref([])
 const isNodeArchived = ref(false)
 
 // Define the sensorNode object from the sensorNode Id or from default values
@@ -194,10 +248,11 @@ if (isEditMode.value) {
   sensorNode.value = {
     name: '',
     description: '',
-    gitlab_url: '',
-    board: {
-      core: '',
-      variant: ''
+    location: {
+      latitude: '',
+      langitude: '',
+      altitude: '',
+      postalcode: '',
     },
     configurables: [],
     state: {
@@ -209,12 +264,6 @@ if (isEditMode.value) {
   }
 }
 
-// Fetch commercial sensors data
-commercialSensorService.getCommercialSensorsDTO()
-  .then((data) => commercialSensorsDTO.value = data)
-  .catch((error) => {
-    console.error(`Error fetching commercial sensors:`, error)
-  })
 
 const addField = () => {
   sensorNode.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercial_sensor: null })
