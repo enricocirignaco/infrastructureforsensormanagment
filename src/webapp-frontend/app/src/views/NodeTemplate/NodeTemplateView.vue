@@ -325,10 +325,6 @@ nodeTemplateService.getNodeTemplateSchema(nodeTemplateId.value)
   .catch((error) => {
     console.error(`Error fetching node template ${nodeTemplateId.value} schema:`, error)
   })
-// check if the node template has children
-const hasInheritedSensorNodes = () => {
-  return Array.isArray(nodeTemplate.inherited_sensor_nodes) && nodeTemplate.inherited_sensor_nodes.length > 0
-}
 
 
 const deletenodeTemplate = (id) => {
