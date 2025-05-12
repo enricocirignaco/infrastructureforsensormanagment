@@ -10,7 +10,7 @@ export const useTextStore = defineStore('text', {
     // restApiBaseUrl: 'http://localhost/api/v1',
 
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
-    statusEnum: {
+    projectStatusEnum: {
       0: 'Active',
       1: 'Archived',
       2: 'Deleted',

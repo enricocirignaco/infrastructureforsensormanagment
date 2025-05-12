@@ -279,6 +279,19 @@ export default {
         })
         // return fetch(url, options)
         //     .then(response => response.ok ? response.json() : Promise.reject(response));
-    }
+    },
+    deleteSensorNode: function(id) {
+        let url = BASE_URL + '/sensor-nodes/' + id
+        const options = {
+            method: 'DELETE',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+        }
+        return Promise.resolve(true)
+        // return fetch(url, options)
+        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+    },
 
 }

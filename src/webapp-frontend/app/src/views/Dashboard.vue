@@ -19,6 +19,7 @@
 
       <template v-else>
         <v-row class="fill-height flex-wrap gap-4" align="stretch">
+          <!-- Projects -->
           <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
             <v-card
               class="d-flex flex-column justify-center align-center text-center"
@@ -35,12 +36,13 @@
                   <div class="text-h4 font-weight-bold mb-2">{{ projectsStats?.total ?? '-' }}</div>
                   <div class="text-subtitle-2">Projects Total</div>
                   <div class="text-caption mt-1">
-                    {{ projectsStats?.active ?? '-' }} Active • {{ projectsStats?.updated ?? '-' }} Updated
+                    {{ projectsStats?.active ?? '-' }} Active • {{ projectsStats?.archived ?? '-' }} Archived
                   </div>
                 </v-card-text>
               
             </v-card>
           </v-col>
+          <!-- Sensor nodes -->
           <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
             <v-card
               class="d-flex flex-column justify-center align-center text-center"
@@ -50,38 +52,40 @@
               hover
               ripple
             >
-              <v-card-title class="text-h6">Commercial Sensors</v-card-title>
-              <v-card-text>
-                <v-icon size="48" class="mb-2" :icon="textStore.icons.commercialSensors" />              <div class="text-h4 font-weight-bold mb-2">{{ commercialSensorsStats?.total ?? '-' }}</div>
-                <div class="text-subtitle-2">Commercial Sensors</div>
-                <div class="text-caption mt-1">8 Vendors • {{ commercialSensorsStats?.total ?? '-' }} In Use</div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
-            <v-card
-              class="d-flex flex-column justify-center align-center text-center"
-              elevation="2"
-              style="width: 100%; height: 100%"
-              to="/sensor-nodes"
-              hover
-              ripple
-            >
-              <v-card-title class="text-h6">Sensor Nodes</v-card-title>
+            <v-card-title class="text-h6">Sensor Nodes</v-card-title>
               <v-card-text>
                 <v-icon size="48" class="mb-2" :icon="textStore.icons.sensorNodes" /> 
-                <div class="text-h4 font-weight-bold mb-2">40</div>
+                <div class="text-h4 font-weight-bold mb-2">{{ sensorNodesStats.total }}</div>
                 <div class="text-subtitle-2">Sensor Nodes</div>
-                <div class="text-caption mt-1">36 Online • 4 Offline</div>
+                <div class="text-caption mt-1">{{sensorNodesStats.active}} Active • {{sensorNodesStats.inactive}} Inactive</div>
               </v-card-text>
             </v-card>
           </v-col>
+          <!-- Commercial sensors -->
           <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
             <v-card
               class="d-flex flex-column justify-center align-center text-center"
               elevation="2"
               style="width: 100%; height: 100%"
               to="/node-templates"
+              hover
+              ripple
+            >
+              <v-card-title class="text-h6">Commercial Sensors</v-card-title>
+              <v-card-text>
+                <v-icon size="48" class="mb-2" :icon="textStore.icons.commercialSensors" />
+                <div class="text-h4 font-weight-bold mb-2">{{ commercialSensorsStats?.total ?? '-' }}</div>
+                <div class="text-subtitle-2">Commercial Sensors</div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+          <!-- Node templates -->
+          <v-col cols="6" class="d-flex" style="height: calc(50% - 12px);">
+            <v-card
+              class="d-flex flex-column justify-center align-center text-center"
+              elevation="2"
+              style="width: 100%; height: 100%"
+              to="/sensor-nodes"
               hover
               ripple
             >
@@ -106,13 +110,14 @@ import projectService from '@/services/projectService'
 import commercialSensorService from '@/services/commercialSensorService'
 import { ref } from 'vue'
 import { useTextStore } from '@/stores/textStore'
-import nodeTemplateService
- from '@/services/nodeTemplateService'
+import nodeTemplateService from '@/services/nodeTemplateService'
+import sensorNodeService from '@/services/sensorNodeService'
 const textStore = useTextStore()
 const authStore = useAuthStore()
 let projectsStats = ref(null)
 let commercialSensorsStats = ref(null)
 const nodeTemplatesStats = ref(null)
+const sensorNodesStats = ref(null)
 const loading = ref(true)
 
 Promise.all([
@@ -122,16 +127,14 @@ Promise.all([
       projectsStats.value = {
         total: projectsDTO.length,
         active: projectsDTO.filter(project => project.state === 'Active').length,
-        updated: projectsDTO.filter(project => project.updated).length,
+        archived: projectsDTO.filter(project => project.state === 'Archived').length,
       }
     }),
   commercialSensorService.getCommercialSensorsDTO()
     .then((commercialSensorsDTO) => {
       if (!commercialSensorsDTO) return Promise.reject('No commercial sensors data found')
       commercialSensorsStats.value = {
-        total: commercialSensorsDTO.length,
-        active: commercialSensorsDTO.filter(sensor => sensor.state === 'Active').length,
-        updated: commercialSensorsDTO.filter(sensor => sensor.updated).length,
+        total: commercialSensorsDTO.length
       }
     }),
   nodeTemplateService.getNodeTemplatesDTO()
@@ -139,8 +142,17 @@ Promise.all([
       if (!nodeTemplatesDTO) return Promise.reject('No node templates data found')
       nodeTemplatesStats.value = {
         total: nodeTemplatesDTO.length,
-        inUse: nodeTemplatesDTO.filter(template => template.status === 'in-use').length,
-        archived: nodeTemplatesDTO.filter(template => template.status === 'archived').length,
+        inUse: nodeTemplatesDTO.filter(template => template.state === 'In-use').length,
+        archived: nodeTemplatesDTO.filter(template => template.state === 'Archived').length,
+      }
+    }),
+  sensorNodeService.getSensorNodesDTO()
+    .then((sensorNodesDTO) => {
+      if (!sensorNodesDTO) return Promise.reject('No sensor nodes data found')
+      sensorNodesStats.value = {
+        total: sensorNodesDTO.length,
+        active: sensorNodesDTO.filter(node => node.state === 'Active').length,
+        inactive: sensorNodesDTO.filter(node => node.state === 'Inactive').length,
       }
     }),
 ])

@@ -18,7 +18,7 @@
           <v-col v-if="isEditMode" cols="12" sm="6">
             <v-select
               v-model="project.state"
-              :items="Object.values(textStore.statusEnum)"
+              :items="Object.values(textStore.projectStatusEnum)"
               label="Status"
               :rules="[required]"
             />
