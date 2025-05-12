@@ -41,10 +41,11 @@
               item-title="name"
               item-value="uuid"
               :rules="[required]"
+              @update:modelValue="loadConfigurables"
             />
           </v-col>
           <v-col cols="12">
-            <v-textarea v-model="sensorNode.description" label="Sensor Node Description" :rules="[required]" />
+            <v-textarea v-model="sensorNode.description" label="Notes" />
           </v-col>
           
           <v-col cols="12">
@@ -85,10 +86,10 @@
                     <v-text-field v-model="sensorNode.location.langitude" type='number' label="Longitude" :rules="[locationConditionalRule()]" />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.altitude" type='number' label="Altitude" :rules="[locationConditionalRule()]" />
+                    <v-text-field v-model="sensorNode.location.altitude" type='number' label="Altitude" />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.postalcode" type='number' label="Postal code" :rules="[locationConditionalRule()]" />
+                    <v-text-field v-model="sensorNode.location.postalcode" type='number' label="Postal code" />
                   </v-col>
                 </v-row>
                 
@@ -97,81 +98,28 @@
           </v-col>
           
           <!-- Configurables -->
-          <v-col cols="12">
-            <h3 class="text-h6 mb-2">Configurables</h3>
-            <v-row
-              v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
-              :key="index"
-              class="mb-2"
-            >
-              <v-col cols="6">
-                <v-text-field
-                  v-model="config.name"
-                  label="Name"
-                  :rules="[required]"
-                />
-              </v-col>
-              <v-col cols="5">
-                <v-text-field
-                :model-value="config.value"
-                label="Value"
-                :rules="[required]"
-                />
-              </v-col> 
-            </v-row>
-          </v-col>
-          <!-- Fields -->
-          <v-col cols="12">
-            <h3 class="text-h6 mb-2">Sensor Node Fields</h3>
-            <v-row
-              v-for="(field, index) in sensorNode.fields"
-              :key="index"
-              class="mb-2"
-            >
-              <v-col cols="3">
-                <v-text-field v-model="field.field_name" label="Name" :rules="[required]" />
-              </v-col>
-              <!-- protobuf type dropdown -->
-              <v-col cols="3">
-                <v-select
-                  :items="Object.values(textStore.ProtobufDataTypes)"
-                  v-model="field.protbuf_datatype"
-                  label="ProtoBuf Data Type"
-                  :rules="[required]"
-                />
-              </v-col>
-              <!-- unit dropdown -->
-              <v-col cols="2">
-                <v-select
-                  :items="Object.values(textStore.sensorUnitsEnum)"
-                  v-model="field.unit"
-                  label="Unit"
-                  :rules="[required]"
-                />
-              </v-col>
-              
-              <!-- commercial senosor dropdown -->
-              <v-col cols="3">
-                <v-select
-                  :items="Object.values(commercialSensorsDTO)"
-                  v-model="field.commercial_sensor"
-                  label="Commercial Sensor"
-                  item-title="alias"
-                  item-value="uuid"
-                  return-object
-                />
-              </v-col>
-              <!-- delete button -->
-              <v-col cols="1" class="d-flex align-center">
-                <v-btn icon @click="removeField(index)" color="secondary">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-            <v-btn @click="addField" rounded="lg" color="primary">
-              <v-icon start>mdi-plus</v-icon>
-              Add Field
-            </v-btn>
+          <v-col v-if="showConfigurables" cols="12">
+            <v-card outlined>
+              <v-card-title class="text-subtitle-1">Configurables</v-card-title>
+              <v-card-text>
+                <v-row
+                  v-for="(config, index) in sensorNode.configurables"
+                  :key="index"
+                  class="mb-2"
+                >
+                  <v-col cols="3" class="d-flex align-center">
+                    <span class="text-subtitle-2">{{ config.name }}</span>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field
+                      v-model="config.value"
+                      label="Value"
+                      :rules="[required]"
+                    />
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
         <v-row>
@@ -185,6 +133,8 @@
       </v-container>
     </v-form>
   </v-card>
+
+  <!-- loading animation -->
   <v-container v-if="!isEditMode && !sensorNode" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
@@ -207,7 +157,9 @@ import sensorNodeService from '@/services/sensorNodeService'
 import nodeTemplateService from '@/services/nodeTemplateService'
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const showMap = ref(false)
 const isEditMode = computed(() => sensorNodeId !== null)
 const sensorNodeForm = ref(null)
@@ -217,13 +169,13 @@ const router = useRouter()
 const sensorNode = ref(null)
 const isNodeArchived = ref(false)
 const nodeTemplates = ref([])
+const showConfigurables = ref(false)
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
   // Fetch sensorNode data
   sensorNodeService.getSensorNode(sensorNodeId)
     .then((data) => {
       sensorNode.value = data
-
       // Map state
       const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
         s => s.name === data.state
@@ -243,6 +195,8 @@ if (isEditMode.value) {
   sensorNode.value = {
     name: '',
     description: '',
+    node_template_uuid: '',
+    project_uuid: `${route.query.project_uuid}`,
     location: {
       latitude: '',
       langitude: '',
@@ -251,21 +205,36 @@ if (isEditMode.value) {
     },
     configurables: [],
     state: {
-      name: '',
-      label: '',
-      color: ''
+      name: 'Prepared',
+      label: 'Prepared',
+      color: 'warning'
     },
-    fields: [],
   }
 }
 // fetch node templates
-nodeTemplateService.getNodeTemplatesDTO()
-  .then((data) => {
-    nodeTemplates.value = data
-  })
-  .catch((error) => {
-    console.error('Error fetching node templates:', error)
-  })
+  nodeTemplateService.getNodeTemplatesDTO()
+    .then((data) => nodeTemplates.value = data)
+    .catch((error) => console.error('Error fetching node templates:', error))
+
+// get configurables from the node template
+function loadConfigurables(nodeTemplateUuid) {
+  // fetch node template
+  nodeTemplateService.getNodeTemplate(nodeTemplateUuid)
+    .then((data) => {
+      // load configurables from the node template to the sensorNode
+      sensorNode.value.configurables = data.configurables.map((config) => {
+        return {
+          name: config.name,
+          type: config.type,
+          value: config.value
+        }
+      })
+      showConfigurables.value = true
+    })
+    .catch((error) => {
+      console.error('Error fetching node templates:', error)
+    })
+}
 
 // Custom rule: location fields required if any location field is filled
 const locationConditionalRule = () => {
@@ -274,26 +243,10 @@ const locationConditionalRule = () => {
   return v => !isAnyFilled || !!v || 'Required if any location field is filled'
 }
 
-const addField = () => {
-  sensorNode.value.fields.push({ name: '', protbuf_datatype: '', unit: '', commercial_sensor: null })
-}
-
-const removeField = (index) => {
-  sensorNode.value.fields.splice(index, 1)
-
-}
-const addConfigurable = () => {
-  sensorNode.value.configurables.push({ name: '', type: 'UserDefined'})
-}
-const removeConfigurable = (index) => {
-  sensorNode.value.configurables.splice(index, 1)
-}
-
 const submitSensorNode = () => {
   // Validate Form
   sensorNodeForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
-    computeState()
     if(isEditMode.value){
         //put request to update the sensorNode
         sensorNodeService.editSensorNode(sensorNode.value)
@@ -301,9 +254,10 @@ const submitSensorNode = () => {
             .catch((error) => console.log('Error updating sensorNode:', error))
     } else {
         // post request to create the sensorNode
-        sensorNodeService.createSensorNode(sensorNode.value)
-            .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
-            .catch((error) => console.log('Error creating sensorNode:', error))
+        // sensorNodeService.createSensorNode(sensorNode.value)
+        //     .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
+        //     .catch((error) => console.log('Error creating sensorNode:', error))
+        console.log('SensorNode to be created:', sensorNode.value)
     }
   })
 }
