@@ -176,4 +176,57 @@ export default {
         return fetch(url, options)
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
+    createSensorNode: function(sensorNode) {
+        let url = BASE_URL + '/sensor-nodes'
+        const options = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+            body: JSON.stringify(sensorNode),
+        }
+        return Promise.resolve({
+          uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          name: "the best node",
+          description: "A node template for monitoring ambient temperature using digital sensors.",
+          location: {
+            latitude: 60.0,
+            longitude: 24.0,
+            altitude: 100.0,
+            postalcode: "12345"
+          },
+          configurables: [
+            {
+              name: "sampling_interval",
+              type: "UserDefined",
+              value: "60"
+            },
+            {
+              name: "sampling_interval",
+              type: "SystemDefined",
+              value: "halihalo"
+            }
+          ],
+          state: "Prepared",
+          node_template_uuid: "53158b25-a93f-432a-9f41-e7dff5d2d0bb",
+          project_uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          ttn_device_link: "https://example.com/",
+          logbook: [
+            {
+              type: "Created",
+              date: "2024-01-10T12:30:00Z",
+              user: {
+                uuid: "user-uuid-1",
+                full_name: "Alice Example",
+                email: "some"
+              }
+              }
+              ],
+        })
+        // return fetch(url, options)
+        //     .then(response => response.ok ? response.json() : Promise.reject(response));
+    }
+
 }

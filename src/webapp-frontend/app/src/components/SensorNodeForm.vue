@@ -24,7 +24,7 @@
   </v-card>
 
   <!-- main form -->
-  <v-card class="pa-4" v-if="(sensorNode && sensorNode.state.name === 'Prepared') || !isEditMode">
+  <v-card class="pa-4" v-if="(sensorNode && sensorNode.state?.name === 'Prepared') || !isEditMode">
     <v-card-title>{{ isEditMode ? 'Edit Sensor Node' : 'Create New Sensor Node' }}</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
       <v-container>
@@ -47,7 +47,7 @@
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Notes" />
           </v-col>
-          
+          <!-- location -->
           <v-col cols="12">
             <v-card outlined>
               <v-card-title class="text-subtitle-1 d-flex justify-space-between align-center">
@@ -80,19 +80,18 @@
                 </v-row>
                 <v-row>
                   <v-col v-if="!showMap" cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" :rules="[locationConditionalRule()]" />
+                    <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" :rules="[required]" />
                   </v-col>
                   <v-col v-if="!showMap" cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.langitude" type='number' label="Longitude" :rules="[locationConditionalRule()]" />
+                    <v-text-field v-model="sensorNode.location.langitude" type='number' label="Longitude" :rules="[required]" />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.altitude" type='number' label="Altitude" />
+                    <v-text-field v-model.number="sensorNode.location.altitude" type='number' label="Altitude" />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.postalcode" type='number' label="Postal code" />
+                    <v-text-field v-model.number="sensorNode.location.postalcode" type='number' label="Postal code" />
                   </v-col>
                 </v-row>
-                
               </v-card-text>
             </v-card>
           </v-col>
@@ -170,6 +169,7 @@ const sensorNode = ref(null)
 const isNodeArchived = ref(false)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
+
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
   // Fetch sensorNode data
@@ -203,12 +203,7 @@ if (isEditMode.value) {
       altitude: '',
       postalcode: '',
     },
-    configurables: [],
-    state: {
-      name: 'Prepared',
-      label: 'Prepared',
-      color: 'warning'
-    },
+    configurables: []
   }
 }
 // fetch node templates
@@ -236,13 +231,6 @@ function loadConfigurables(nodeTemplateUuid) {
     })
 }
 
-// Custom rule: location fields required if any location field is filled
-const locationConditionalRule = () => {
-  const loc = sensorNode.value.location
-  const isAnyFilled = loc.latitude || loc.langitude || loc.altitude || loc.postalcode
-  return v => !isAnyFilled || !!v || 'Required if any location field is filled'
-}
-
 const submitSensorNode = () => {
   // Validate Form
   sensorNodeForm.value?.validate().then((isValid) => {
@@ -254,19 +242,10 @@ const submitSensorNode = () => {
             .catch((error) => console.log('Error updating sensorNode:', error))
     } else {
         // post request to create the sensorNode
-        // sensorNodeService.createSensorNode(sensorNode.value)
-        //     .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
-        //     .catch((error) => console.log('Error creating sensorNode:', error))
-        console.log('SensorNode to be created:', sensorNode.value)
+        sensorNodeService.createSensorNode(sensorNode.value)
+            .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
+            .catch((error) => console.log('Error creating sensorNode:', error))
     }
   })
-}
-
-const computeState = () => {
-  if(isNodeArchived.value){
-    sensorNode.value.state = 'Archived'
-  } else {
-    sensorNode.value.inherited_sensor_nodes != null && sensorNode.value.inherited_sensor_nodes.length === 0 ? sensorNode.value.state = 'Unused' : sensorNode.value.state = 'In-use'
-  }
 }
 </script>
