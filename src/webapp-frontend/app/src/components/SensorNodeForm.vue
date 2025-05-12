@@ -1,16 +1,19 @@
 <template>
-  <v-card v-if="isEditMode && sensorNode?.state?.name && sensorNode.state.name !== 'Unused'" class="pa-4">
+  <v-card v-if="isEditMode && sensorNode?.state && sensorNode.state !== 'Prepared'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
       <!-- archived checkbox -->
-      <v-col v-if="isEditMode"cols="6" class="d-flex align-center">
+      <v-col v-if="sensorNode.state !== 'Active'" cols="6" class="d-flex align-center">
         <v-checkbox
-          v-model="isNodeArchived"
+          v-model="sensorNode.state"
           label="Archive Sensor Node"
-          :true-value="true"
-          :false-value="false"
+          :true-value="'Archived'"
+          :false-value="'Inactive'"
           hide-details
         />
+      </v-col>
+      <v-col cols="12">
+        <v-textarea v-model="sensorNode.description" label="Notes" />
       </v-col>
       <v-row>
         <v-col cols="12">
@@ -24,7 +27,7 @@
   </v-card>
 
   <!-- main form -->
-  <v-card class="pa-4" v-if="(sensorNode && sensorNode.state?.name === 'Prepared') || !isEditMode">
+  <v-card class="pa-4" v-if="(sensorNode && sensorNode?.state === 'Prepared') || !isEditMode">
     <v-card-title>{{ isEditMode ? 'Edit Sensor Node' : 'Create New Sensor Node' }}</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
       <v-container>
@@ -63,17 +66,17 @@
                   <v-col cols="12">
                     <LMap
                       style="height: 300px"
-                      :zoom="6"
-                      :center="[46.8, 8.2]"
+                      :zoom="7"
+                      :center="[sensorNode.location.latitude || 46.8, sensorNode.location.longitude || 8.2]"
                       @click="e => {
                         sensorNode.location.latitude = e.latlng.lat
-                        sensorNode.location.langitude = e.latlng.lng
+                        sensorNode.location.longitude = e.latlng.lng
                       }"
                     >
                       <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       <LMarker
-                        v-if="sensorNode.location.latitude && sensorNode.location.langitude"
-                        :lat-lng="[sensorNode.location.latitude, sensorNode.location.langitude]"
+                        v-if="sensorNode.location.latitude && sensorNode.location.latitude"
+                        :lat-lng="[sensorNode.location.latitude, sensorNode.location.longitude]"
                       />
                     </LMap>
                   </v-col>
@@ -83,7 +86,7 @@
                     <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" :rules="[required]" />
                   </v-col>
                   <v-col v-if="!showMap" cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.langitude" type='number' label="Longitude" :rules="[required]" />
+                    <v-text-field v-model="sensorNode.location.longitude" type='number' label="Longitude" :rules="[required]" />
                   </v-col>
                   <v-col cols="12" sm="6">
                     <v-text-field v-model.number="sensorNode.location.altitude" type='number' label="Altitude" />
@@ -97,7 +100,7 @@
           </v-col>
           
           <!-- Configurables -->
-          <v-col v-if="showConfigurables" cols="12">
+          <v-col v-if="showConfigurables || isEditMode" cols="12">
             <v-card outlined>
               <v-card-title class="text-subtitle-1">Configurables</v-card-title>
               <v-card-text>
@@ -176,17 +179,8 @@ if (isEditMode.value) {
   sensorNodeService.getSensorNode(sensorNodeId)
     .then((data) => {
       sensorNode.value = data
-      // Map state
-      const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
-        s => s.name === data.state
-      )
-      sensorNode.value.state = {
-        name: data.state,
-        label: matchedState ? matchedState.label : data.state,
-        color: matchedState ? matchedState.color : 'grey'
-      }
       // set the archived state
-      sensorNode.value.state.name === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
+      sensorNode.value.state === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
       console.error(`Error fetching node sensor node ${sensorNodeId}:`, error)
@@ -199,7 +193,7 @@ if (isEditMode.value) {
     project_uuid: `${route.query.project_uuid}`,
     location: {
       latitude: '',
-      langitude: '',
+      longitude: '',
       altitude: '',
       postalcode: '',
     },
@@ -236,6 +230,7 @@ const submitSensorNode = () => {
   sensorNodeForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
     if(isEditMode.value){
+        console.log('sensorNode:', sensorNode.value)
         //put request to update the sensorNode
         sensorNodeService.editSensorNode(sensorNode.value)
             .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
@@ -248,4 +243,5 @@ const submitSensorNode = () => {
     }
   })
 }
+
 </script>
