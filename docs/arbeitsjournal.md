@@ -85,3 +85,10 @@
 | 2025-05-06 | 13:00 - 18:00 | 5,0   | DEGEL2         | 55, 68   | Logbook Commercial Sensor, Node Template CRUD                     |
 | 2025-05-08 | 14:00 - 18:00 | 4,0   | DEGEL2         | 55       | Node Template Update                                              |
 | 2025-05-08 | 10:00 - 17:00 | 7,0   | DEGEL2         | 46       | Marry Node Template and fix bugs                                  |
+| 2025-05-04 | 12:30 - 18:00 | 5,5   | CIRIE1         | 47       | Node Template Overview, Logbook Commercial Sensor                 |
+| 2025-05-05 | 08:00 - 12:30 | 4,5   | CIRIE1         | 47       | Node Template Overview, Node Template overview                    |
+| 2025-05-06 | 08:00 - 17:00 | 9,0   | CIRIE1         | 46, 75   | NOde Template page, fix token expiration bug                      |
+| 2025-05-08 | 17:00 - 21:00 | 4,0   | CIRIE1         | 46       | Node Template page, fix token expiration bug                      |
+| 2025-05-09 | 09:00 - 17:00 | 8,0   | CIRIE1         | 76, 49   | Buxfixing Node Template Page                                      |
+| 2025-05-11 | 13:00 - 22:30 | 9,5   | CIRIE1         | 77, 48   | Edit New sensor node pages, version banner                        |
+| 2025-05-12 | 08:30 - 11:30 | 3,0   | CIRIE1         | 49       | sesnor node finished, dashboard updated                           |
