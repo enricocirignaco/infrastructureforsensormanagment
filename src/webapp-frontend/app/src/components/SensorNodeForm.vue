@@ -75,7 +75,7 @@
                     >
                       <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       <LMarker
-                        v-if="sensorNode.location.latitude && sensorNode.location.latitude"
+                        v-if="sensorNode.location.latitude && sensorNode.location.longitude"
                         :lat-lng="[sensorNode.location.latitude, sensorNode.location.longitude]"
                       />
                     </LMap>
@@ -109,10 +109,10 @@
                   :key="index"
                   class="mb-2"
                 >
-                  <v-col cols="3" class="d-flex align-center">
+                  <v-col cols="4" class="d-flex align-center">
                     <span class="text-subtitle-2">{{ config.name }}</span>
                   </v-col>
-                  <v-col cols="6">
+                  <v-col cols="8">
                     <v-text-field
                       v-model="config.value"
                       label="Value"
@@ -192,10 +192,10 @@ if (isEditMode.value) {
     node_template_uuid: '',
     project_uuid: `${route.query.project_uuid}`,
     location: {
-      latitude: '',
-      longitude: '',
-      altitude: '',
-      postalcode: '',
+      latitude: null,
+      longitude: null,
+      altitude: null,
+      postalcode: null,
     },
     configurables: []
   }

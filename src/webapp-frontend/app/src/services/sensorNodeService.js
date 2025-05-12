@@ -129,7 +129,7 @@ export default {
               value: "halihalo"
             }
           ],
-          state: "Inactive",
+          state: "Prepared",
           node_template_uuid: "53158b25-a93f-432a-9f41-e7dff5d2d0bb",
           project_uuid: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
           ttn_device_link: "https://example.com/",
