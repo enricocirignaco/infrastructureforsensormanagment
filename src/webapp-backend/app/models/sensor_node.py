@@ -5,7 +5,7 @@ from enum import Enum
 from uuid import UUID
 from typing import Optional, List
 from app.models.user import UserOut
-from app.models.common import RDFEnumMixin
+from app.models.common import RDFEnumMixin, ConfigurableTypeEnum
 from app.models.node_template import NodeTemplateOutSlim
 from app.models.project import ProjectOutSlim
 
@@ -18,10 +18,6 @@ class SensorNodeStateEnum(RDFEnumMixin, str, Enum):
 class SensorNodeLogbookEnum(RDFEnumMixin, str, Enum):
     CREATED = 'Created'
     UPDATED = 'Updated'
-    
-class ConfigurableTypeEnum(RDFEnumMixin, str, Enum):
-    USER_DEFINED = 'UserDefined'
-    SYSTEM_DEFINED = 'SystemDefined'
 
 class SensorNodeLocation(BaseModel):
     latitude: Optional[float]
@@ -67,7 +63,7 @@ class SensorNodeUpdate(SensorNodeBase):
     
 # Models used internally
 
-class SensorNodeDB(SensorNodeLocation):
+class SensorNodeDB(SensorNodeBase):
     uuid: UUID
     logbook: List[SensorNodeLogbookEntry]
     state: SensorNodeStateEnum
@@ -91,27 +87,5 @@ class SensorNodeOutFull(SensorNodeBase):
     project_uuid: UUID
     node_template_uuid: UUID
     ttn_device_link: HttpUrl
-    last_timeseries: TimeseriesData
+    last_timeseries: Optional[TimeseriesData] = None
     
-    
-    
-# TODO datenmodell ausskizzieren
-
-
-#{
-#    "timestamp": "2023-10-01T12:00:00Z",
-#    "fields": [
-#        {
-#            "field_name": "temp1",
-#            "protobuf_datatype": "double",
-#            "unit": "°C",
-#            "value": "22.5"
-#        },
-#        {
-#            "field_name": "hum1",
-#            "protobuf_datatype": "double",
-#            "unit": "%",
-#            "value": "34"
-#        }
-#    ]
-#}

@@ -22,6 +22,7 @@ class NodeTemplateService:
         return self.node_template_repository.find_all_node_templates()
 
     def create_node_template(self, node_template: NodeTemplateCreate, logged_in_user: UserInDB) -> NodeTemplateDB:
+        # TODO check if field_names are unique
         uuid = uuid4()
         logbook = [NodeTemplateLogbookEntry(
             type=NodeTemplateLogbookEnum.CREATED, 
@@ -31,8 +32,7 @@ class NodeTemplateService:
         node_template_db = NodeTemplateDB(
             **node_template.model_dump(), 
             uuid=uuid, 
-            logbook=logbook, 
-            inherited_sensor_nodes=[], 
+            logbook=logbook,
             state=NodeTemplateStateEnum.UNUSED
         )
         for config in system_defined_configurables:
@@ -63,12 +63,12 @@ class NodeTemplateService:
         if existing_system_defined != updated_system_defined:
             raise ValueError("System-defined configurables cannot be modified or removed")
 
+        # TODO not even description can be changed as soon as state is IN_USE 
         if node_template_db.state == NodeTemplateStateEnum.UNUSED and node_template.state == NodeTemplateStateEnum.UNUSED:
             # Update node template that is currently unused
             node_template_update = NodeTemplateDB(
                 **node_template.model_dump(), 
-                logbook=node_template_db.logbook, 
-                inherited_sensor_nodes=node_template_db.inherited_sensor_nodes)
+                logbook=node_template_db.logbook)
         elif node_template_db.state == NodeTemplateStateEnum.IN_USE and node_template.state == NodeTemplateStateEnum.ARCHIVED:
             # Archive node template that is currently in use
             node_template_update = NodeTemplateDB(**node_template_db.model_dump())
@@ -87,13 +87,22 @@ class NodeTemplateService:
                                      user=UserOut(**logged_in_user.model_dump())))
         
         return self.node_template_repository.update_node_template(node_template=node_template_update)
+    
+    def set_in_use_node_template(self, uuid: UUID):
+        node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
+        if not node_template_db:
+            raise NotFoundError("Node Template not found")
+        if node_template_db.state != NodeTemplateStateEnum.UNUSED:
+            return
+        node_template_db.state = NodeTemplateStateEnum.IN_USE
+        self.node_template_repository.update_node_template(node_template=node_template_db)
 
     def delete_node_template(self, uuid: UUID):
         node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
         if not node_template_db:
             raise NotFoundError("Node Template not found")
-        if node_template_db.inherited_sensor_nodes:
-            raise ValueError("Node Template has inherited sensor nodes and cannot be deleted")
+        if node_template_db.state != NodeTemplateStateEnum.UNUSED:
+            raise ValueError("Only unused node templates can be deleted")
         self.node_template_repository.delete_node_template(uuid=uuid)
 
 

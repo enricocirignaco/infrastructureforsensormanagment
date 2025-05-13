@@ -71,9 +71,11 @@ def get_node_template_service(
     return NodeTemplateService(node_template_repository)
 
 def get_sensor_node_service(
-    sensor_node_repository: SensorNodeRepository = Depends(get_sensor_node_repository)
+    sensor_node_repository: SensorNodeRepository = Depends(get_sensor_node_repository),
+    project_service: ProjectService = Depends(get_project_service),
+    node_template_service: NodeTemplateService = Depends(get_node_template_service)
 ) -> SensorNodeService:
-    return SensorNodeService(sensor_node_repository)
+    return SensorNodeService(sensor_node_repository, project_service, node_template_service)
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),

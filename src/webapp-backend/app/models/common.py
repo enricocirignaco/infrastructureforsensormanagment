@@ -1,3 +1,5 @@
+from enum import Enum
+
 class RDFEnumMixin:
     _rdf_base_uri = 'http://data.bfh.ch/'
 
@@ -13,3 +15,7 @@ class RDFEnumMixin:
             return cls(state_name)
         except ValueError:
             raise ValueError(f"Invalid RDF URI: {rdf_uri} does not correspond to a valid {cls.__name__}.")
+
+class ConfigurableTypeEnum(RDFEnumMixin, str, Enum):
+    USER_DEFINED = 'UserDefined'
+    SYSTEM_DEFINED = 'SystemDefined'

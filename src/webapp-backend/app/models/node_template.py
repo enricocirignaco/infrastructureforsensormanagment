@@ -6,7 +6,7 @@ from uuid import UUID
 from typing import Optional, List
 from app.models.user import UserOut
 from app.models.commercial_sensor import CommercialSensorOutSlim
-from app.models.common import RDFEnumMixin
+from app.models.common import RDFEnumMixin, ConfigurableTypeEnum
 
 class ProtobufDatatypeEnum(RDFEnumMixin, str, Enum):
     DOUBLE = 'double'
@@ -34,10 +34,6 @@ class NodeTemplateStateEnum(RDFEnumMixin, str, Enum):
     IN_USE = 'In-Use'
     ARCHIVED = 'Archived'
 
-class ConfigurableTypeEnum(RDFEnumMixin, str, Enum):
-    USER_DEFINED = 'UserDefined'
-    SYSTEM_DEFINED = 'SystemDefined'
-
 class HardwareBoard(BaseModel):
     core: str
     variant: str
@@ -53,7 +49,7 @@ class NodeTemplateLogbookEntry(BaseModel):
 
 class NodeTemplateField(BaseModel):
     field_name: str
-    protbuf_datatype: str
+    protbuf_datatype: ProtobufDatatypeEnum
     unit: str
     commercial_sensor: Optional[CommercialSensorOutSlim]
 

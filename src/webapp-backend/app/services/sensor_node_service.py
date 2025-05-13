@@ -1,33 +1,89 @@
 from app.repositories.sensor_node_repository import SensorNodeRepository
-from app.models.sensor_node import SensorNodeDB, SensorNodeOutSlim, SensorNodeOutFull, SensorNodeUpdate, SensorNodeCreate
+from app.models.sensor_node import SensorNodeDB, SensorNodeOutSlim, TimeseriesData, SensorNodeOutFull, SensorNodeUpdate, SensorNodeCreate, SensorNodeLogbookEntry, SensorNodeLogbookEnum, SensorNodeStateEnum, ConfigurableTypeEnum
 from app.models.user import UserInDB, UserOut, RoleEnum
+from app.models.node_template import NodeTemplateStateEnum
+from app.services.project_service import ProjectService
+from app.services.node_template_service import NodeTemplateService
 from app.utils.exceptions import NotFoundError
 
-from fastapi import HTTPException, status
 from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 
 class SensorNodeService:
 
-    def __init__(self, sensor_node_repository: SensorNodeRepository):
+    def __init__(self, sensor_node_repository: SensorNodeRepository, 
+                 project_service: ProjectService,
+                 node_template_service: NodeTemplateService):
         self._sensor_node_repository = sensor_node_repository
+        self._project_service = project_service
+        self._node_template_service = node_template_service
         
     def get_all_sensor_nodes(self, filters: dict = None) -> List[SensorNodeOutSlim]:
         if filters is None:
             filters = {}
-        pass
+        sensor_nodes = self._sensor_node_repository.find_all_sensor_nodes()
+        if filters.get("project_uuid"):
+            sensor_nodes = [sn for sn in sensor_nodes if sn.project.uuid == filters["project_uuid"]]
+        if filters.get("node_template_uuid"):
+            sensor_nodes = [sn for sn in sensor_nodes if sn.node_template.uuid == filters["node_template_uuid"]]
+        return sensor_nodes
     
     def get_sensor_node_by_uuid(self, uuid: UUID) -> SensorNodeOutFull:
-        pass
+        sensor_node_db = self._sensor_node_repository.find_sensor_node_by_uuid(uuid=uuid)
+        if not sensor_node_db:
+            raise NotFoundError("Sensor node not found")
+        # TODO Replace with actual timeseries data retrieval
+        sensor_node_out = SensorNodeOutFull(**sensor_node_db.model_dump(), last_timeseries=TimeseriesData(timestamp=datetime.now(), fields=[]))
+        # TODO Based on timeseries data, set the state of the sensor node
+        # sensor_node_out.state = SensorNodeStateEnum.ACTIVE if sensor_node_out.last_timeseries.timestamp < .... else SensorNodeStateEnum.INACTIVE
+        return sensor_node_out
     
     def create_sensor_node(self, sensor_node: SensorNodeCreate, logged_in_user: UserInDB) -> SensorNodeOutFull:
-        pass
+        # Check if given uuid's exist
+        try:
+            self._project_service.get_project_by_uuid(uuid=sensor_node.project_uuid)
+        except NotFoundError:
+            raise NotFoundError("No project found with the given uuid")
+        try:
+            node_template = self._node_template_service.get_node_template_by_uuid(uuid=sensor_node.node_template_uuid)
+        except NotFoundError:
+            raise NotFoundError("No node template found with the given uuid")
+        
+        # Check if each configurable is identical to the ones defined in the node template
+        user_configs_template = [config.name for config in node_template.configurables if config.type == ConfigurableTypeEnum.USER_DEFINED]
+        user_configs_node = [config.name for config in sensor_node.configurables if config.type == ConfigurableTypeEnum.USER_DEFINED]
+        if sorted(user_configs_template) != sorted(user_configs_node):
+            raise ValueError("The user-defined configurables do not match the ones defined in the node template.")
+        
+        # Create the sensor node
+        uuid = uuid4()
+        logbook = [SensorNodeLogbookEntry(type=SensorNodeLogbookEnum.CREATED, date=datetime.now(), user=UserOut(**logged_in_user.model_dump()))]
+        ttn_device_link = f"https://console.thethingsnetwork.org/applications/{sensor_node.project_uuid}/devices/{uuid}" # TODO: adapt this when TTN is implemented
+        sensor_node_db = SensorNodeDB(
+            **sensor_node.model_dump(), 
+            uuid=uuid, 
+            state=SensorNodeStateEnum.PREPARED, 
+            logbook=logbook,
+            ttn_device_link=ttn_device_link)
+        sensor_node_db = self._sensor_node_repository.create_sensor_node(sensor_node_db)
+        
+        # Update state of the node template
+        if node_template.state == NodeTemplateStateEnum.UNUSED:
+            self._node_template_service.set_in_use_node_template(node_template.uuid)
+        
+        sensor_node_out = SensorNodeOutFull(**sensor_node_db.model_dump(), last_timeseries=None)
+        return sensor_node_out
     
     def update_sensor_node(self, uuid: UUID, sensor_node: SensorNodeUpdate, logged_in_user: UserInDB) -> SensorNodeOutFull:
         pass
     
     def delete_sensor_node(self, uuid: UUID) -> None:
-        pass
+        sensor_node_db = self._sensor_node_repository.find_sensor_node_by_uuid(uuid=uuid)
+        if not sensor_node_db:
+            raise NotFoundError("Sensor node not found")
+        if sensor_node_db.state != SensorNodeStateEnum.PREPARED:
+            raise ValueError("Sensor node cannot be deleted, it is not in the PREPARED state")
+        self._sensor_node_repository.delete_sensor_node(uuid=uuid)
     
     
