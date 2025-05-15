@@ -4,7 +4,7 @@ FROM debian:stable-slim
 RUN apt update && \
     apt install -y curl && \
     apt install -y python3 python3-pip && \
-    apt install git unzip build-essential && \
+    apt install -y git unzip build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 # Install arduino-cli
