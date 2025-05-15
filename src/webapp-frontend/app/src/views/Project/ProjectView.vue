@@ -75,17 +75,18 @@
         </v-row>
         <!-- Table of deployed nodes -->
         <v-data-table
-          :items="project.sensor_nodes"
+          :items="sensorNodes"
           :headers="sensorHeaders"
           class="elevation-1 rounded-lg"
           hover
           density="compact"
           rounded="lg"
           elevation="1"
+          @click:row="(_, event) => router.push(`/sensor-node/${event.item.uuid}`)"
         >
-          <template #item.status="{ item }">
-            <v-chip :color="getStatusColor(item.status)" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-              {{ item.status }}
+          <template #item.state="{ item }">
+            <v-chip :color="item.state.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+              {{ item.state.label }}
             </v-chip>
           </template>
         </v-data-table>
@@ -132,7 +133,10 @@ import { useRoute } from 'vue-router'
 import projectService from '@/services/projectService'
 import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
+import sensorNodeService from '@/services/sensorNodeService'
+import { useTextStore } from '@/stores/textStore'
 
+const textStore = useTextStore()
 const authStore = useAuthStore()
 const projectId = ref(useRoute().params.id)
 const router = useRouter()
@@ -142,18 +146,16 @@ const projectHeaders = [
     { title: 'URL', key: 'url' }
 ]
 const sensorHeaders = [
-  { title: 'Node ID', key: 'id' },
-  { title: 'Name', key: 'name'},
-  { title: 'Type', key: 'type' },
-  { title: 'Location', key: 'location' },
-  { title: 'Status', key: 'status' },
+  { title: 'Node ID', key: 'uuid' },
+  { title: 'Project', key: 'project.name'},
+  { title: 'State', key: 'state' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])
 const loading = ref(true)
 const confirmDelete = ref(false)
 const projectToDelete = ref(null)
 const deleteConfirmInput = ref('')
-
+const sensorNodes = ref([])
 // Fetch project data
 projectService.getProject(projectId.value)
     .then((data) => project.value = data)
@@ -161,7 +163,26 @@ projectService.getProject(projectId.value)
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
   .finally(() => loading.value = false)
-
+// fetch sensor nodes
+sensorNodeService.getSensorNodesByProject(projectId.value)
+  .then((data) => {
+    sensorNodes.value = data.map(node => {
+      const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
+        s => s.name === node.state
+      )
+      return {
+        ...node,
+        state: {
+          name: node.state,
+          label: matchedState ? matchedState.label : node.state,
+          color: matchedState ? matchedState.color : 'grey'
+        }
+      }
+    })
+  })
+  .catch((error) => {
+    console.error(`Error fetching sensor nodes for project ${projectId.value}:`, error)
+  })
 // render status color
 function getStatusColor (status) {
     if (status === 'Active') return 'success'

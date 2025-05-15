@@ -16,6 +16,30 @@ export default {
      return fetch(url, options)
        .then(response => response.ok ? response.json() : Promise.reject(response));
     },
+    getSensorNodesByProject: function(projectId) {
+        let url = BASE_URL + '/sensor-nodes?project_uuid=' + projectId
+        const options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+        }
+     return fetch(url, options)
+       .then(response => response.ok ? response.json() : Promise.reject(response));
+    },
+    getSensorNodesByNodeTemplate: function(nodeTemplateId) {
+        let url = BASE_URL + '/sensor-nodes?node_template_uuid=' + nodeTemplateId
+        const options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                ...authStore.getAuthHeader(),
+            },
+        }
+     return fetch(url, options)
+       .then(response => response.ok ? response.json() : Promise.reject(response));
+    },
     getSensorNode: function(id) {
         let url = BASE_URL + '/sensor-nodes/' + id
         const options = {

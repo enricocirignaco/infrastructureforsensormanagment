@@ -199,17 +199,18 @@
         <h2 class="text-h6 mb-2">Deployed Nodes</h2>
         <!-- Table of deployed nodes -->
         <v-data-table
-          :items="nodeTemplate.inherited_sensor_nodes"
+          :items="sensorNodes"
           :headers="sensorHeaders"
           class="elevation-1 rounded-lg"
           hover
           density="compact"
           rounded="lg"
           elevation="1"
+          @click:row="(_, event) => router.push(`/sensor-node/${event.item.uuid}`)"
         >
           <template #item.state="{ item }">
-            <v-chip :color="grey" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-              {{ item.state }}
+            <v-chip :color="item.state.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+              {{ item.state.label }}
             </v-chip>
           </template>
         </v-data-table>
@@ -261,6 +262,7 @@ import nodeTemplateService from '@/services/nodeTemplateService'
 import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useTextStore } from '@/stores/textStore'
+import sensorNodeService from '@/services/sensorNodeService'
 
 const authStore = useAuthStore()
 const textStore = useTextStore()
@@ -269,10 +271,8 @@ const router = useRouter()
 const nodeTemplate = ref(null)
 
 const sensorHeaders = [
-  { title: 'Node ID', key: 'id' },
-  { title: 'Name', key: 'name'},
-  { title: 'Type', key: 'type' },
-  { title: 'Location', key: 'location' },
+  { title: 'Node ID', key: 'uuid' },
+  { title: 'Project', key: 'project.name'},
   { title: 'State', key: 'state' },
 ]
 const fieldHeaders = [
@@ -287,6 +287,7 @@ const nodeTemplateToDelete = ref(null)
 const deleteConfirmInput = ref('')
 const protobuf_schema = ref('')
 const configPreview = ref('')
+const sensorNodes = ref([])
 // Fetch node template
 nodeTemplateService.getNodeTemplate(nodeTemplateId.value)
   .then((data) => {
@@ -325,7 +326,26 @@ nodeTemplateService.getNodeTemplateSchema(nodeTemplateId.value)
   .catch((error) => {
     console.error(`Error fetching node template ${nodeTemplateId.value} schema:`, error)
   })
-
+  // fetch sensor nodes
+sensorNodeService.getSensorNodesByNodeTemplate(nodeTemplateId.value)
+  .then((data) => {
+    sensorNodes.value = data.map(node => {
+      const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
+        s => s.name === node.state
+      )
+      return {
+        ...node,
+        state: {
+          name: node.state,
+          label: matchedState ? matchedState.label : node.state,
+          color: matchedState ? matchedState.color : 'grey'
+        }
+      }
+    })
+  })
+  .catch((error) => {
+    console.error(`Error fetching sensor nodes for node template ${nodeTemplateId.value}:`, error)
+  })
 
 const deletenodeTemplate = (id) => {
   nodeTemplateToDelete.value = id
