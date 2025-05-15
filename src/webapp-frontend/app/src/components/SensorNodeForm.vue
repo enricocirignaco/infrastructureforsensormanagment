@@ -83,10 +83,10 @@
                 </v-row>
                 <v-row>
                   <v-col v-if="!showMap" cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" :rules="[required]" />
+                    <v-text-field v-model="sensorNode.location.latitude" type='number' label="Latitude" />
                   </v-col>
                   <v-col v-if="!showMap" cols="12" sm="6">
-                    <v-text-field v-model="sensorNode.location.longitude" type='number' label="Longitude" :rules="[required]" />
+                    <v-text-field v-model="sensorNode.location.longitude" type='number' label="Longitude" />
                   </v-col>
                   <v-col cols="12" sm="6">
                     <v-text-field v-model.number="sensorNode.location.altitude" type='number' label="Altitude" />

@@ -59,6 +59,9 @@ class SensorNodeService:
         # TODO Replace this block with: Create the sensor node in TTN and get the device ids
         system_configs = [ConfigurableAssignment(**config.model_dump(), value=str(uuid4())) 
                           for config in node_template.configurables if config.type == ConfigurableTypeEnum.SYSTEM_DEFINED]
+        user_configs = [config for config in sensor_node.configurables if config.type == ConfigurableTypeEnum.USER_DEFINED]
+        
+        confiurables = user_configs + system_configs
         
         # Create the sensor node
         uuid = uuid4()
@@ -70,7 +73,7 @@ class SensorNodeService:
             state=SensorNodeStateEnum.PREPARED, 
             logbook=logbook,
             ttn_device_link=ttn_device_link)
-        sensor_node_db.configurables.extend(system_configs)
+        sensor_node_db.configurables = confiurables
         sensor_node_db = self._sensor_node_repository.create_sensor_node(sensor_node_db)
         
         # Update state of the node template

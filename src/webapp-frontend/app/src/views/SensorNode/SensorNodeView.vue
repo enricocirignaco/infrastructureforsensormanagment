@@ -76,7 +76,7 @@
               @click="router.push(`/project/${sensorNode.project_uuid}`)"
               >
                 <template #prepend>
-                  <v-icon style="font-size: 32px;">mdi-chip</v-icon>
+                  <v-icon style="font-size: 32px;">mdi-forest</v-icon>
                 </template>
                 <v-list-item-title>{{ sensorNode.project_uuid }}</v-list-item-title>
                 <v-list-item-subtitle>Project UUID</v-list-item-subtitle>
@@ -87,7 +87,7 @@
               @click="router.push(`/node-template/${sensorNode.node_template_uuid}`)"
               >
                 <template #prepend>
-                  <v-icon style="font-size: 32px;">mdi-chip</v-icon>
+                  <v-icon style="font-size: 32px;">mdi-file-document-multiple</v-icon>
                 </template>
                 <v-list-item-title>{{ sensorNode.node_template_uuid }}</v-list-item-title>
                 <v-list-item-subtitle>Node Template UUID</v-list-item-subtitle>

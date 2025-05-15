@@ -6,8 +6,8 @@ export const useTextStore = defineStore('text', {
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
     // restApiBaseUrl: `${window.location.origin}/api/v1`,
-    restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
-    // restApiBaseUrl: 'http://localhost/api/v1',
+    // restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+     restApiBaseUrl: 'http://localhost/api/v1',
 
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {
@@ -17,7 +17,7 @@ export const useTextStore = defineStore('text', {
     },
     nodeTemplateStatusEnum: {
       0: { name: 'Unused', label: 'Unused', color: 'warning' },
-      1: { name: 'In-use', label: 'In Use', color: 'success' },
+      1: { name: 'In-Use', label: 'In Use', color: 'success' },
       2: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
     sensorNodeStatusEnum: {

@@ -142,7 +142,7 @@ Promise.all([
       if (!nodeTemplatesDTO) return Promise.reject('No node templates data found')
       nodeTemplatesStats.value = {
         total: nodeTemplatesDTO.length,
-        inUse: nodeTemplatesDTO.filter(template => template.state === 'In-use').length,
+        inUse: nodeTemplatesDTO.filter(template => template.state === 'In-Use').length,
         archived: nodeTemplatesDTO.filter(template => template.state === 'Archived').length,
       }
     }),
