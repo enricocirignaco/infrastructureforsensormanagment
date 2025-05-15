@@ -7,10 +7,12 @@ from .repositories.user_repository import UserRepository
 from .repositories.project_repository import ProjectRepository
 from .repositories.commercial_sensor_repository import CommercialSensorRepository
 from .repositories.node_template_repository import NodeTemplateRepository
+from .repositories.sensor_node_repository import SensorNodeRepository
 from .services.auth_service import AuthService, oauth2_scheme
 from .services.project_service import ProjectService
 from .services.commercial_sensor_service import CommercialSensorService
 from .services.node_template_service import NodeTemplateService
+from .services.sensor_node_service import SensorNodeService
 from .config import settings
 
 # Utils
@@ -41,6 +43,11 @@ def get_node_template_repository(
 ) -> NodeTemplateRepository:
     return NodeTemplateRepository(triplestore_client)
 
+def get_sensor_node_repository(
+    triplestore_client: TripleStoreClient = Depends(get_triplestore_client),
+) -> SensorNodeRepository:
+    return SensorNodeRepository(triplestore_client)
+
 # Services
 
 def get_auth_service(
@@ -63,6 +70,12 @@ def get_node_template_service(
 ) -> NodeTemplateService:
     return NodeTemplateService(node_template_repository)
 
+def get_sensor_node_service(
+    sensor_node_repository: SensorNodeRepository = Depends(get_sensor_node_repository),
+    project_service: ProjectService = Depends(get_project_service),
+    node_template_service: NodeTemplateService = Depends(get_node_template_service)
+) -> SensorNodeService:
+    return SensorNodeService(sensor_node_repository, project_service, node_template_service)
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),

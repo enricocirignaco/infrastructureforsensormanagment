@@ -1,0 +1,1873 @@
+---
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  "/token":
+    post:
+      tags:
+      - auth
+      summary: Login
+      operationId: login_token_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_login_token_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Token"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/":
+    get:
+      tags:
+      - user
+      summary: Read All Users
+      operationId: read_all_users_users__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/UserOut"
+                type: array
+                title: Response Read All Users Users  Get
+        '404':
+          description: Not found
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - user
+      summary: Create New User
+      operationId: create_new_user_users__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserIn"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserOut"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/users/{uuid}":
+    get:
+      tags:
+      - user
+      summary: Read Specific User
+      operationId: read_specific_user_users__uuid__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserOut"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - user
+      summary: Update Specific User
+      operationId: update_specific_user_users__uuid__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserBase"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserOut"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    patch:
+      tags:
+      - user
+      summary: Change Password
+      operationId: change_password_users__uuid__patch
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserChangePw"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Token"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/projects/":
+    get:
+      tags:
+      - project
+      summary: Read All Projects
+      operationId: read_all_projects_projects__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/ProjectOutSlim"
+                type: array
+                title: Response Read All Projects Projects  Get
+        '404':
+          description: Not found
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - project
+      summary: Create New Project
+      operationId: create_new_project_projects__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProjectBase"
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProjectOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/projects/{uuid}":
+    get:
+      tags:
+      - project
+      summary: Read Specific Project
+      operationId: read_specific_project_projects__uuid__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProjectOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - project
+      summary: Update Specific Project
+      operationId: update_specific_project_projects__uuid__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProjectUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProjectOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - project
+      summary: Delete Specific Project
+      operationId: delete_specific_project_projects__uuid__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/commercial-sensors/":
+    get:
+      tags:
+      - commercial sensors
+      summary: Read All Commercial Sensors
+      operationId: read_all_commercial_sensors_commercial_sensors__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/CommercialSensorOutSlim"
+                type: array
+                title: Response Read All Commercial Sensors Commercial Sensors  Get
+        '404':
+          description: Not found
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - commercial sensors
+      summary: Create New Commercial Sensor
+      operationId: create_new_commercial_sensor_commercial_sensors__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CommercialSensorIn"
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CommercialSensorOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/commercial-sensors/{uuid}":
+    get:
+      tags:
+      - commercial sensors
+      summary: Read Specific Commercial Sensors
+      operationId: read_specific_commercial_sensors_commercial_sensors__uuid__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CommercialSensorOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - commercial sensors
+      summary: Update Specific Commercial Sensor
+      operationId: update_specific_commercial_sensor_commercial_sensors__uuid__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CommercialSensorUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CommercialSensorOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - commercial sensors
+      summary: Delete Specific Commercial Sensor
+      operationId: delete_specific_commercial_sensor_commercial_sensors__uuid__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/node-templates/":
+    get:
+      tags:
+      - node templates
+      summary: Read All Node Templates
+      operationId: read_all_node_templates_node_templates__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  "$ref": "#/components/schemas/NodeTemplateOutSlim"
+                type: array
+                title: Response Read All Node Templates Node Templates  Get
+        '404':
+          description: Not found
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - node templates
+      summary: Create New Node Template
+      operationId: create_new_node_template_node_templates__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NodeTemplateCreate"
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NodeTemplateOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+      security:
+      - OAuth2PasswordBearer: []
+  "/node-templates/{uuid}":
+    get:
+      tags:
+      - node templates
+      summary: Read Specific Node Template
+      operationId: read_specific_node_template_node_templates__uuid__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NodeTemplateOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - node templates
+      summary: Update Specific Node Template
+      operationId: update_specific_node_template_node_templates__uuid__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NodeTemplateUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NodeTemplateOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - node templates
+      summary: Delete Specific Node Template
+      operationId: delete_specific_node_template_node_templates__uuid__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/node-templates/{uuid}/schema":
+    get:
+      tags:
+      - node templates
+      summary: Download Protobuf Schema Of Node Template
+      operationId: download_protobuf_schema_of_node_template_node_templates__uuid__schema_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Protobug schema ready and returned
+          content:
+            application/json:
+              schema: {}
+        '202':
+          description: Schema generation in progress
+        '404':
+          description: Node template not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/node-templates/{uuid}/code":
+    get:
+      tags:
+      - node templates
+      summary: Download Generated Protobuf Code
+      operationId: download_generated_protobuf_code_node_templates__uuid__code_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/sensor-nodes/":
+    get:
+      tags:
+      - sensor nodes
+      summary: Read All Sensor Nodes
+      operationId: read_all_sensor_nodes_sensor_nodes__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: project_uuid
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Project Uuid
+      - name: node_template_uuid
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Node Template Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/SensorNodeOutSlim"
+                title: Response Read All Sensor Nodes Sensor Nodes  Get
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    post:
+      tags:
+      - sensor nodes
+      summary: Create New Sensor Node
+      operationId: create_new_sensor_node_sensor_nodes__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/SensorNodeCreate"
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SensorNodeOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/sensor-nodes/{uuid}":
+    get:
+      tags:
+      - sensor nodes
+      summary: Read Specific Sensor Node
+      operationId: read_specific_sensor_node_sensor_nodes__uuid__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SensorNodeOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - sensor nodes
+      summary: Update Specific Sensor Node
+      operationId: update_specific_sensor_node_sensor_nodes__uuid__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/SensorNodeUpdate"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SensorNodeOutFull"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - sensor nodes
+      summary: Delete Specific Sensor Node
+      operationId: delete_specific_sensor_node_sensor_nodes__uuid__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Uuid
+      responses:
+        '204':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+components:
+  schemas:
+    Body_login_token_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: "^password$"
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_token_post
+    CommercialSensorIn:
+      properties:
+        name:
+          type: string
+          title: Name
+        alias:
+          type: string
+          title: Alias
+        description:
+          type: string
+          title: Description
+        external_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorLink"
+            type: array
+          - type: 'null'
+          title: External Props
+        sensor_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorProps"
+            type: array
+          - type: 'null'
+          title: Sensor Props
+      type: object
+      required:
+      - name
+      - alias
+      - description
+      - external_props
+      - sensor_props
+      title: CommercialSensorIn
+    CommercialSensorLink:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        url:
+          type: string
+          title: Url
+        type:
+          "$ref": "#/components/schemas/CommercialSensorLinkEnum"
+      type: object
+      required:
+      - name
+      - url
+      - type
+      title: CommercialSensorLink
+    CommercialSensorLinkEnum:
+      type: string
+      enum:
+      - Datasheet
+      - Webshop
+      - Misc
+      title: CommercialSensorLinkEnum
+    CommercialSensorLogbookEntry:
+      properties:
+        type:
+          "$ref": "#/components/schemas/CommercialSensorLogbookEnum"
+        date:
+          type: string
+          format: date-time
+          title: Date
+        user:
+          "$ref": "#/components/schemas/UserOut"
+      type: object
+      required:
+      - type
+      - date
+      - user
+      title: CommercialSensorLogbookEntry
+    CommercialSensorLogbookEnum:
+      type: string
+      enum:
+      - Created
+      - Updated
+      title: CommercialSensorLogbookEnum
+    CommercialSensorOutFull:
+      properties:
+        name:
+          type: string
+          title: Name
+        alias:
+          type: string
+          title: Alias
+        description:
+          type: string
+          title: Description
+        external_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorLink"
+            type: array
+          - type: 'null'
+          title: External Props
+        sensor_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorProps"
+            type: array
+          - type: 'null'
+          title: Sensor Props
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        logbook:
+          items:
+            "$ref": "#/components/schemas/CommercialSensorLogbookEntry"
+          type: array
+          title: Logbook
+      type: object
+      required:
+      - name
+      - alias
+      - description
+      - external_props
+      - sensor_props
+      - uuid
+      - logbook
+      title: CommercialSensorOutFull
+    CommercialSensorOutSlim:
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        name:
+          type: string
+          title: Name
+        alias:
+          type: string
+          title: Alias
+      type: object
+      required:
+      - uuid
+      - name
+      - alias
+      title: CommercialSensorOutSlim
+    CommercialSensorProps:
+      properties:
+        name:
+          type: string
+          title: Name
+        unit:
+          type: string
+          title: Unit
+        precision:
+          type: integer
+          title: Precision
+        range:
+          "$ref": "#/components/schemas/CommercialSensorRange"
+      type: object
+      required:
+      - name
+      - unit
+      - precision
+      - range
+      title: CommercialSensorProps
+    CommercialSensorRange:
+      properties:
+        min:
+          type: integer
+          title: Min
+        max:
+          type: integer
+          title: Max
+      type: object
+      required:
+      - min
+      - max
+      title: CommercialSensorRange
+    CommercialSensorUpdate:
+      properties:
+        name:
+          type: string
+          title: Name
+        alias:
+          type: string
+          title: Alias
+        description:
+          type: string
+          title: Description
+        external_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorLink"
+            type: array
+          - type: 'null'
+          title: External Props
+        sensor_props:
+          anyOf:
+          - items:
+              "$ref": "#/components/schemas/CommercialSensorProps"
+            type: array
+          - type: 'null'
+          title: Sensor Props
+        uuid:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Uuid
+      type: object
+      required:
+      - name
+      - alias
+      - description
+      - external_props
+      - sensor_props
+      - uuid
+      title: CommercialSensorUpdate
+    ConfigurableAssignment:
+      properties:
+        name:
+          type: string
+          title: Name
+        type:
+          "$ref": "#/components/schemas/ConfigurableTypeEnum"
+        value:
+          type: string
+          title: Value
+      type: object
+      required:
+      - name
+      - type
+      - value
+      title: ConfigurableAssignment
+    ConfigurableDefinition:
+      properties:
+        name:
+          type: string
+          title: Name
+        type:
+          "$ref": "#/components/schemas/ConfigurableTypeEnum"
+      type: object
+      required:
+      - name
+      - type
+      title: ConfigurableDefinition
+    ConfigurableTypeEnum:
+      type: string
+      enum:
+      - UserDefined
+      - SystemDefined
+      title: ConfigurableTypeEnum
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HardwareBoard:
+      properties:
+        core:
+          type: string
+          title: Core
+        variant:
+          type: string
+          title: Variant
+      type: object
+      required:
+      - core
+      - variant
+      title: HardwareBoard
+    NodeTemplateCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+        fields:
+          items:
+            "$ref": "#/components/schemas/NodeTemplateField"
+          type: array
+          title: Fields
+        gitlab_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Gitlab Url
+        board:
+          "$ref": "#/components/schemas/HardwareBoard"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableDefinition"
+          type: array
+          title: Configurables
+      type: object
+      required:
+      - name
+      - description
+      - fields
+      - gitlab_url
+      - board
+      - configurables
+      title: NodeTemplateCreate
+    NodeTemplateField:
+      properties:
+        field_name:
+          type: string
+          title: Field Name
+        protbuf_datatype:
+          type: string
+          title: Protbuf Datatype
+        unit:
+          type: string
+          title: Unit
+        commercial_sensor:
+          anyOf:
+          - "$ref": "#/components/schemas/CommercialSensorOutSlim"
+          - type: 'null'
+      type: object
+      required:
+      - field_name
+      - protbuf_datatype
+      - unit
+      - commercial_sensor
+      title: NodeTemplateField
+    NodeTemplateLogbookEntry:
+      properties:
+        type:
+          "$ref": "#/components/schemas/NodeTemplateLogbookEnum"
+        date:
+          type: string
+          format: date-time
+          title: Date
+        user:
+          "$ref": "#/components/schemas/UserOut"
+      type: object
+      required:
+      - type
+      - date
+      - user
+      title: NodeTemplateLogbookEntry
+    NodeTemplateLogbookEnum:
+      type: string
+      enum:
+      - Created
+      - Updated
+      title: NodeTemplateLogbookEnum
+    NodeTemplateOutFull:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+        fields:
+          items:
+            "$ref": "#/components/schemas/NodeTemplateField"
+          type: array
+          title: Fields
+        gitlab_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Gitlab Url
+        board:
+          "$ref": "#/components/schemas/HardwareBoard"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableDefinition"
+          type: array
+          title: Configurables
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        logbook:
+          items:
+            "$ref": "#/components/schemas/NodeTemplateLogbookEntry"
+          type: array
+          title: Logbook
+        state:
+          "$ref": "#/components/schemas/NodeTemplateStateEnum"
+      type: object
+      required:
+      - name
+      - description
+      - fields
+      - gitlab_url
+      - board
+      - configurables
+      - uuid
+      - logbook
+      - state
+      title: NodeTemplateOutFull
+    NodeTemplateOutSlim:
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        name:
+          type: string
+          title: Name
+        board:
+          "$ref": "#/components/schemas/HardwareBoard"
+        state:
+          "$ref": "#/components/schemas/NodeTemplateStateEnum"
+      type: object
+      required:
+      - uuid
+      - name
+      - board
+      - state
+      title: NodeTemplateOutSlim
+    NodeTemplateStateEnum:
+      type: string
+      enum:
+      - Unused
+      - In-Use
+      - Archived
+      title: NodeTemplateStateEnum
+    NodeTemplateUpdate:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          type: string
+          title: Description
+        fields:
+          items:
+            "$ref": "#/components/schemas/NodeTemplateField"
+          type: array
+          title: Fields
+        gitlab_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Gitlab Url
+        board:
+          "$ref": "#/components/schemas/HardwareBoard"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableDefinition"
+          type: array
+          title: Configurables
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        state:
+          "$ref": "#/components/schemas/NodeTemplateStateEnum"
+      type: object
+      required:
+      - name
+      - description
+      - fields
+      - gitlab_url
+      - board
+      - configurables
+      - uuid
+      - state
+      title: NodeTemplateUpdate
+    ProjectBase:
+      properties:
+        name:
+          type: string
+          title: Name
+        short_name:
+          type: string
+          title: Short Name
+        description:
+          type: string
+          title: Description
+        external_props:
+          items:
+            "$ref": "#/components/schemas/ProjectLink"
+          type: array
+          title: External Props
+      type: object
+      required:
+      - name
+      - short_name
+      - description
+      - external_props
+      title: ProjectBase
+    ProjectLink:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        url:
+          type: string
+          title: Url
+        type:
+          "$ref": "#/components/schemas/ProjectLinkEnum"
+      type: object
+      required:
+      - name
+      - url
+      - type
+      title: ProjectLink
+    ProjectLinkEnum:
+      type: string
+      enum:
+      - Website
+      - MS-Teams
+      - Report
+      - Documentation
+      - Misc
+      title: ProjectLinkEnum
+    ProjectLogbookEntry:
+      properties:
+        type:
+          "$ref": "#/components/schemas/ProjectLogbookEnum"
+        date:
+          type: string
+          format: date-time
+          title: Date
+        user:
+          "$ref": "#/components/schemas/UserOut"
+      type: object
+      required:
+      - type
+      - date
+      - user
+      title: ProjectLogbookEntry
+    ProjectLogbookEnum:
+      type: string
+      enum:
+      - Created
+      - Updated
+      title: ProjectLogbookEnum
+    ProjectOutFull:
+      properties:
+        name:
+          type: string
+          title: Name
+        short_name:
+          type: string
+          title: Short Name
+        description:
+          type: string
+          title: Description
+        external_props:
+          items:
+            "$ref": "#/components/schemas/ProjectLink"
+          type: array
+          title: External Props
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        state:
+          "$ref": "#/components/schemas/ProjectStateEnum"
+        logbook:
+          items:
+            "$ref": "#/components/schemas/ProjectLogbookEntry"
+          type: array
+          title: Logbook
+      type: object
+      required:
+      - name
+      - short_name
+      - description
+      - external_props
+      - uuid
+      - state
+      - logbook
+      title: ProjectOutFull
+    ProjectOutSlim:
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        name:
+          type: string
+          title: Name
+        short_name:
+          type: string
+          title: Short Name
+        state:
+          "$ref": "#/components/schemas/ProjectStateEnum"
+      type: object
+      required:
+      - uuid
+      - name
+      - short_name
+      - state
+      title: ProjectOutSlim
+    ProjectStateEnum:
+      type: string
+      enum:
+      - Active
+      - Archived
+      - Deleted
+      title: ProjectStateEnum
+    ProjectUpdate:
+      properties:
+        name:
+          type: string
+          title: Name
+        short_name:
+          type: string
+          title: Short Name
+        description:
+          type: string
+          title: Description
+        external_props:
+          items:
+            "$ref": "#/components/schemas/ProjectLink"
+          type: array
+          title: External Props
+        uuid:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Uuid
+        state:
+          "$ref": "#/components/schemas/ProjectStateEnum"
+      type: object
+      required:
+      - name
+      - short_name
+      - description
+      - external_props
+      - uuid
+      - state
+      title: ProjectUpdate
+    RoleEnum:
+      type: string
+      enum:
+      - Researcher
+      - Technician
+      - Admin
+      title: RoleEnum
+    SensorNodeCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        location:
+          "$ref": "#/components/schemas/SensorNodeLocation"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableAssignment"
+          type: array
+          title: Configurables
+        project_uuid:
+          type: string
+          format: uuid
+          title: Project Uuid
+        node_template_uuid:
+          type: string
+          format: uuid
+          title: Node Template Uuid
+      type: object
+      required:
+      - name
+      - description
+      - location
+      - configurables
+      - project_uuid
+      - node_template_uuid
+      title: SensorNodeCreate
+    SensorNodeLocation:
+      properties:
+        latitude:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Latitude
+        longitude:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Longitude
+        altitude:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Altitude
+        postalcode:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Postalcode
+      type: object
+      required:
+      - latitude
+      - longitude
+      - altitude
+      - postalcode
+      title: SensorNodeLocation
+    SensorNodeLogbookEntry:
+      properties:
+        type:
+          "$ref": "#/components/schemas/SensorNodeLogbookEnum"
+        date:
+          type: string
+          format: date-time
+          title: Date
+        user:
+          "$ref": "#/components/schemas/UserOut"
+      type: object
+      required:
+      - type
+      - date
+      - user
+      title: SensorNodeLogbookEntry
+    SensorNodeLogbookEnum:
+      type: string
+      enum:
+      - Created
+      - Updated
+      title: SensorNodeLogbookEnum
+    SensorNodeOutFull:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        location:
+          "$ref": "#/components/schemas/SensorNodeLocation"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableAssignment"
+          type: array
+          title: Configurables
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        logbook:
+          items:
+            "$ref": "#/components/schemas/SensorNodeLogbookEntry"
+          type: array
+          title: Logbook
+        state:
+          "$ref": "#/components/schemas/SensorNodeStateEnum"
+        project_uuid:
+          type: string
+          format: uuid
+          title: Project Uuid
+        node_template_uuid:
+          type: string
+          format: uuid
+          title: Node Template Uuid
+        ttn_device_link:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Ttn Device Link
+        last_timeseries:
+          "$ref": "#/components/schemas/TimeseriesData"
+      type: object
+      required:
+      - name
+      - description
+      - location
+      - configurables
+      - uuid
+      - logbook
+      - state
+      - project_uuid
+      - node_template_uuid
+      - ttn_device_link
+      - last_timeseries
+      title: SensorNodeOutFull
+    SensorNodeOutSlim:
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        name:
+          type: string
+          title: Name
+        state:
+          "$ref": "#/components/schemas/SensorNodeStateEnum"
+        node_template:
+          "$ref": "#/components/schemas/NodeTemplateOutSlim"
+        project:
+          "$ref": "#/components/schemas/ProjectOutSlim"
+      type: object
+      required:
+      - uuid
+      - name
+      - state
+      - node_template
+      - project
+      title: SensorNodeOutSlim
+    SensorNodeStateEnum:
+      type: string
+      enum:
+      - Prepared
+      - Active
+      - Inactive
+      - Archived
+      title: SensorNodeStateEnum
+    SensorNodeUpdate:
+      properties:
+        name:
+          type: string
+          title: Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        location:
+          "$ref": "#/components/schemas/SensorNodeLocation"
+        configurables:
+          items:
+            "$ref": "#/components/schemas/ConfigurableAssignment"
+          type: array
+          title: Configurables
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+        state:
+          "$ref": "#/components/schemas/SensorNodeStateEnum"
+      type: object
+      required:
+      - name
+      - description
+      - location
+      - configurables
+      - uuid
+      - state
+      title: SensorNodeUpdate
+    TimeseriesData:
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+        fields:
+          items:
+            "$ref": "#/components/schemas/TimeseriesField"
+          type: array
+          title: Fields
+      type: object
+      required:
+      - timestamp
+      - fields
+      title: TimeseriesData
+    TimeseriesField:
+      properties:
+        field_name:
+          type: string
+          title: Field Name
+        protobuf_datatype:
+          type: string
+          title: Protobuf Datatype
+        unit:
+          type: string
+          title: Unit
+        value:
+          type: string
+          title: Value
+      type: object
+      required:
+      - field_name
+      - protobuf_datatype
+      - unit
+      - value
+      title: TimeseriesField
+    Token:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+      type: object
+      required:
+      - access_token
+      - token_type
+      title: Token
+    UserBase:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        full_name:
+          type: string
+          title: Full Name
+        role:
+          "$ref": "#/components/schemas/RoleEnum"
+      type: object
+      required:
+      - email
+      - full_name
+      - role
+      title: UserBase
+    UserChangePw:
+      properties:
+        current_password:
+          type: string
+          title: Current Password
+        new_password:
+          type: string
+          title: New Password
+      type: object
+      required:
+      - current_password
+      - new_password
+      title: UserChangePw
+      description: Model used when some field on an user get updated
+    UserIn:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        full_name:
+          type: string
+          title: Full Name
+        role:
+          "$ref": "#/components/schemas/RoleEnum"
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+      - email
+      - full_name
+      - role
+      - password
+      title: UserIn
+      description: Model used when new user gets created
+    UserOut:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        full_name:
+          type: string
+          title: Full Name
+        role:
+          "$ref": "#/components/schemas/RoleEnum"
+        uuid:
+          type: string
+          format: uuid
+          title: Uuid
+      type: object
+      required:
+      - email
+      - full_name
+      - role
+      - uuid
+      title: UserOut
+      description: Model used to send data back over API
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: token

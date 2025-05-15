@@ -1,6 +1,6 @@
 from app.utils.triplestore_client import TripleStoreClient
 from app.models.node_template import (
-    NodeTemplateDB, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum)
+    NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum)
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
 from rdflib import Graph, URIRef, Literal, RDF
@@ -50,7 +50,7 @@ class NodeTemplateRepository:
             g.add((template_uri, URIRef(self.bfh + "hasField"), field_uri))
             g.add((field_uri, RDF.type, URIRef(self.bfh + "Field")))
             g.add((field_uri, URIRef(self.bfh + "fieldName"), Literal(field.field_name)))
-            g.add((field_uri, URIRef(self.bfh + "protobufDatatype"), Literal(field.protbuf_datatype)))
+            g.add((field_uri, URIRef(self.bfh + "protobufDatatype"), URIRef(field.protbuf_datatype.rdf_uri)))
             g.add((field_uri, URIRef(self.bfh + "unit"), Literal(field.unit)))
             if field.commercial_sensor:
                 sensor_uri = URIRef(f"http://data.bfh.ch/commercialSensors/{field.commercial_sensor.uuid}")
@@ -138,7 +138,6 @@ class NodeTemplateRepository:
             state=NodeTemplateStateEnum.from_rdf_uri(base["state"]["value"]),
             fields=[],
             logbook=[],
-            inherited_sensor_nodes=[],
             configurables=[]
         )
 
@@ -173,7 +172,7 @@ class NodeTemplateRepository:
             template.fields.append(
                 NodeTemplateField(
                     field_name=row["fieldName"]["value"],
-                    protbuf_datatype=row["datatype"]["value"],
+                    protbuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row["datatype"]["value"]),
                     unit=row["unit"]["value"],
                     commercial_sensor=sensor
                 )
