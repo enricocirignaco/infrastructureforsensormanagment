@@ -5,7 +5,7 @@ const authStore = useAuthStore()
 
 export default {
     getSensorNodesDTO: function() {
-        let url = BASE_URL + '/sensor-nodes'
+        let url = BASE_URL + '/sensor-nodes/'
         const options = {
             method: 'GET',
             headers: {
@@ -53,7 +53,7 @@ export default {
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
     createSensorNode: function(sensorNode) {
-        let url = BASE_URL + '/sensor-nodes'
+        let url = BASE_URL + '/sensor-nodes/'
         const options = {
             method: 'POST',
             headers: {
