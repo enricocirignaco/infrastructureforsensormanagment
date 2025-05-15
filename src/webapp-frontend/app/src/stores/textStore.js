@@ -11,9 +11,9 @@ export const useTextStore = defineStore('text', {
 
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {
-      0: 'Active',
-      1: 'Archived',
-      2: 'Deleted',
+      0: { name: 'Active', label: 'Active', color: 'success' },
+      1: { name: 'Archived', label: 'Archived', color: 'grey' },
+      2: { name: 'Deleted', label: 'Deleted', color: 'error' },
     },
     nodeTemplateStatusEnum: {
       0: { name: 'Unused', label: 'Unused', color: 'warning' },

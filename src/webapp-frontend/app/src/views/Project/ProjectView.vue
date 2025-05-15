@@ -21,8 +21,8 @@
                 </v-col>
                 <!-- status & edit button -->
                 <v-col cols="auto" class="d-flex align-center">
-                    <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
-                      {{ project.state }}
+                    <v-chip :color="project.state.color" variant="flat" class="me-2 text-white">
+                      {{ project.state.label }}
                     </v-chip>
                     <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
                       <v-icon>mdi-pencil</v-icon>
@@ -158,7 +158,19 @@ const deleteConfirmInput = ref('')
 const sensorNodes = ref([])
 // Fetch project data
 projectService.getProject(projectId.value)
-    .then((data) => project.value = data)
+    .then((data) => {
+      project.value = data
+      // Map the state property to an enum object definited in textstore that also contains a color and label value
+      const matchedState = Object.values(textStore.projectStatusEnum).find(
+        s => s.name === project.value.state
+      )
+      project.value.state = {
+        name: project.value.state,
+        label: matchedState ? matchedState.label : project.value.state,
+        color: matchedState ? matchedState.color : 'grey'
+      }
+
+    })
     .catch((error) => {
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
