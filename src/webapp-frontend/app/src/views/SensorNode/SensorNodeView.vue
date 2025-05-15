@@ -13,7 +13,7 @@
             <v-row class="w-100 align-center">
                 <!-- back button -->
                 <v-col cols="auto">
-                    <v-btn icon @click="router.back()">
+                    <v-btn icon @click="router.push('/sensor-nodes')">
                         <v-icon>mdi-arrow-left</v-icon>
                     </v-btn>
                 </v-col>

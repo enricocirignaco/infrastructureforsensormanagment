@@ -17,7 +17,6 @@ export const useAuthStore = defineStore('auth', {
       // delete token if expired
       if (!this.isTokenValid) {
         this.clearToken()
-        console.log('Token deleted')
         return false
       }
       return true

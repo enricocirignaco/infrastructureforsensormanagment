@@ -240,7 +240,6 @@ const submitSensorNode = () => {
   sensorNodeForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
     if(isEditMode.value){
-        console.log('sensorNode:', sensorNode.value)
         //put request to update the sensorNode
         sensorNodeService.editSensorNode(sensorNode.value)
             .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
