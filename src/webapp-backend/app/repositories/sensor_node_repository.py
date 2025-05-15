@@ -168,7 +168,7 @@ class SensorNodeRepository:
                 latitude=float(base["lat"]["value"]) if "lat" in base else None,
                 longitude=float(base["long"]["value"]) if "long" in base else None,
                 altitude=int(base["alt"]["value"]) if "alt" in base else None,
-                postalcode=base["postal"]["value"] if "postal" in base else None  
+                postalcode=int(base["postal"]["value"]) if "postal" in base else None  
             ),
             node_template_uuid=UUID(base["templateUuid"]["value"]),
             project_uuid=UUID(base["projectUuid"]["value"]),
