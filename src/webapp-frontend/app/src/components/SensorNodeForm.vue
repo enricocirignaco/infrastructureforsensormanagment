@@ -89,10 +89,20 @@
                     <v-text-field v-model="sensorNode.location.longitude" type='number' label="Longitude" />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model.number="sensorNode.location.altitude" type='number' label="Altitude" />
+                    <v-text-field
+                    v-model.number="sensorNode.location.altitude"
+                    type='number'
+                    label="Altitude"
+                    @blur="sensorNode.location.altitude = sensorNode.location.altitude === '' ? null : sensorNode.location.altitude"
+                    />
                   </v-col>
                   <v-col cols="12" sm="6">
-                    <v-text-field v-model.number="sensorNode.location.postalcode" type='number' label="Postal code" />
+                    <v-text-field
+                    v-model.number="sensorNode.location.postalcode"
+                    type='number'
+                    label="Postal code"
+                    @blur="sensorNode.location.postalcode = sensorNode.location.postalcode === '' ? null : sensorNode.location.postalcode"
+                    />
                   </v-col>
                 </v-row>
               </v-card-text>

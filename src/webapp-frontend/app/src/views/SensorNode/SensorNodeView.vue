@@ -129,6 +129,24 @@
                       </LMarker>
                     </LMap>
                   </v-card-text>
+                  <v-list elevation="1" rounded="lg" density="comfortable" class="mt-4">
+                    <v-list-item v-if="sensorNode.location?.altitude">
+                      <template #prepend>
+                        <v-icon style="font-size: 32px;">mdi-arrow-expand-vertical</v-icon>
+                      </template>
+                      <v-list-item-title>{{ sensorNode.location.altitude }}</v-list-item-title>
+                      <v-list-item-subtitle>Altitude</v-list-item-subtitle>
+                    </v-list-item>
+                    <v-divider />
+                    <v-list-item v-if="sensorNode.location?.postalcode">
+                      <template #prepend>
+                        <v-icon style="font-size: 32px;">mdi-map-marker</v-icon>
+                      </template>
+                      <v-list-item-title>{{ sensorNode.location.postalcode }}</v-list-item-title>
+                      <v-list-item-subtitle>Postal Code</v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                
                 </v-card>
               </v-col>
             </v-row>
