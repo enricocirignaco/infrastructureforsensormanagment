@@ -115,7 +115,7 @@
               <v-card-title class="text-subtitle-1">Configurables</v-card-title>
               <v-card-text>
                 <v-row
-                  v-for="(config, index) in sensorNode.configurables"
+                  v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
                   :key="index"
                   class="mb-2"
                 >

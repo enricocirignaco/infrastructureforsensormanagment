@@ -66,7 +66,7 @@ export default {
             },
         }
         return fetch(url, options)
-            .then(response => response.ok ? response.json() : Promise.reject(response));
+            .then(response => response.ok ? null : response.json().then(errorData => Promise.reject(errorData)))
     },
 
 }
