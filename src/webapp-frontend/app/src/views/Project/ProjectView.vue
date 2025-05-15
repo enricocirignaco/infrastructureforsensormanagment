@@ -21,8 +21,8 @@
                 </v-col>
                 <!-- status & edit button -->
                 <v-col cols="auto" class="d-flex align-center">
-                    <v-chip :color="getStatusColor(project.state)" variant="flat" class="me-2 text-white">
-                      {{ project.state }}
+                    <v-chip :color="project.state.color" variant="flat" class="me-2 text-white">
+                      {{ project.state.label }}
                     </v-chip>
                     <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
                       <v-icon>mdi-pencil</v-icon>
@@ -60,20 +60,33 @@
         </v-card>
         <v-divider class="my-6" />
 
-        <h2 class="text-h6 mb-2">Deployed Nodes</h2>
+        <v-row class="align-center justify-space-between mb-2 px-4">
+          <h2 class="text-h6 mb-0">Deployed Nodes</h2>
+          <v-btn
+            v-if="authStore.getUser?.role !== 'Researcher'"
+            color="surface"
+            variant="flat"
+            size="small"
+            @click="router.push({ path: '/sensor-node/new', query: { project_uuid: projectId } })"
+            >
+            <v-icon start>mdi-plus</v-icon>
+            Add New Sensor Node
+          </v-btn>
+        </v-row>
         <!-- Table of deployed nodes -->
         <v-data-table
-          :items="project.sensor_nodes"
+          :items="sensorNodes"
           :headers="sensorHeaders"
           class="elevation-1 rounded-lg"
           hover
           density="compact"
           rounded="lg"
           elevation="1"
+          @click:row="(_, event) => router.push(`/sensor-node/${event.item.uuid}`)"
         >
-          <template #item.status="{ item }">
-            <v-chip :color="getStatusColor(item.status)" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
-              {{ item.status }}
+          <template #item.state="{ item }">
+            <v-chip :color="item.state.color" variant="flat" class="text-white" style="min-width: 80px; justify-content: center;">
+              {{ item.state.label }}
             </v-chip>
           </template>
         </v-data-table>
@@ -120,7 +133,10 @@ import { useRoute } from 'vue-router'
 import projectService from '@/services/projectService'
 import Logbook from '@/components/Logbook.vue'
 import { useAuthStore } from '@/stores/authStore'
+import sensorNodeService from '@/services/sensorNodeService'
+import { useTextStore } from '@/stores/textStore'
 
+const textStore = useTextStore()
 const authStore = useAuthStore()
 const projectId = ref(useRoute().params.id)
 const router = useRouter()
@@ -130,26 +146,55 @@ const projectHeaders = [
     { title: 'URL', key: 'url' }
 ]
 const sensorHeaders = [
-  { title: 'Node ID', key: 'id' },
-  { title: 'Name', key: 'name'},
-  { title: 'Type', key: 'type' },
-  { title: 'Location', key: 'location' },
-  { title: 'Status', key: 'status' },
+  { title: 'Node ID', key: 'uuid' },
+  { title: 'Project', key: 'project.name'},
+  { title: 'State', key: 'state' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])
 const loading = ref(true)
 const confirmDelete = ref(false)
 const projectToDelete = ref(null)
 const deleteConfirmInput = ref('')
-
+const sensorNodes = ref([])
 // Fetch project data
 projectService.getProject(projectId.value)
-    .then((data) => project.value = data)
+    .then((data) => {
+      project.value = data
+      // Map the state property to an enum object definited in textstore that also contains a color and label value
+      const matchedState = Object.values(textStore.projectStatusEnum).find(
+        s => s.name === project.value.state
+      )
+      project.value.state = {
+        name: project.value.state,
+        label: matchedState ? matchedState.label : project.value.state,
+        color: matchedState ? matchedState.color : 'grey'
+      }
+
+    })
     .catch((error) => {
     console.error(`Error fetching project ${projectId.value}:`, error)
   })
   .finally(() => loading.value = false)
-
+// fetch sensor nodes
+sensorNodeService.getSensorNodesByProject(projectId.value)
+  .then((data) => {
+    sensorNodes.value = data.map(node => {
+      const matchedState = Object.values(textStore.sensorNodeStatusEnum).find(
+        s => s.name === node.state
+      )
+      return {
+        ...node,
+        state: {
+          name: node.state,
+          label: matchedState ? matchedState.label : node.state,
+          color: matchedState ? matchedState.color : 'grey'
+        }
+      }
+    })
+  })
+  .catch((error) => {
+    console.error(`Error fetching sensor nodes for project ${projectId.value}:`, error)
+  })
 // render status color
 function getStatusColor (status) {
     if (status === 'Active') return 'success'

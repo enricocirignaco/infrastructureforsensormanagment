@@ -254,7 +254,7 @@ const computeState = () => {
   if(isNodeArchived.value){
     nodeTemplate.value.state = 'Archived'
   } else {
-    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.state = 'Unused' : nodeTemplate.value.state = 'In-use'
+    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.state = 'Unused' : nodeTemplate.value.state = 'In-Use'
   }
 }
 </script>

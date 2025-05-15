@@ -23,7 +23,7 @@ class SensorNodeLocation(BaseModel):
     latitude: Optional[float]
     longitude: Optional[float]
     altitude: Optional[int]
-    postalcode: Optional[str]
+    postalcode: Optional[int]
 
 class SensorNodeLogbookEntry(BaseModel):
     type: SensorNodeLogbookEnum

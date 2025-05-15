@@ -3,13 +3,7 @@
     <!-- Title & Button -->
     <v-row class="justify-space-between mb-4">
       <v-col cols="auto">
-        <h1>Node Templates</h1>
-      </v-col>
-      <v-col cols="auto">
-      <v-btn v-if="authStore.getUser?.role !== 'Researcher'" rounded="xl" class="text-none" @click="router.push('/node-template/new')">
-        <v-icon start>mdi-plus</v-icon>
-        New Node Template
-      </v-btn>
+        <h1>Sensor Nodes</h1>
       </v-col>
     </v-row>
     <!-- Searchbar & state Filter -->
@@ -17,7 +11,7 @@
       <v-col cols="12" class="d-flex align-center justify-space-between">
         <v-text-field
           v-model="tableSearch"
-          label="Search node templates"
+          label="Search sensor nodes"
           prepend-inner-icon="mdi-magnify"
           variant="solo-filled"
           hide-details
@@ -27,6 +21,16 @@
           class="py-0"
         ></v-text-field>
         <div class="d-flex align-center" style="gap: 16px;">
+          <v-switch
+            v-model="hideInactive"
+            label="Hide Inactive"
+            inset
+            hide-details
+            density="comfortable"
+            class="rounded-pill ma-0 pa-0"
+            style="transform: scale(0.75); height: 28px;"
+            color="secondary"
+          ></v-switch>
           <v-switch
             v-model="hideArchived"
             label="Hide Archived"
@@ -38,8 +42,8 @@
             color="secondary"
           ></v-switch>
           <v-switch
-            v-model="hideUnused"
-            label="Hide Unused"
+            v-model="hidePrepared"
+            label="Hide Prepared"
             inset
             hide-details
             density="comfortable"
@@ -52,10 +56,10 @@
     </v-row>
     <!-- Table -->
     <v-data-table
-      :items="filteredNodeTemplates"
+      :items="filteredSensorNodes"
       :headers="headers"
       v-model:search="tableSearch"
-      @click:row="(_, { item }) => router.push(`/node-template/${item.uuid}`)"
+      @click:row="(_, { item }) => router.push(`/sensor-node/${item.uuid}`)"
       class="elevation-1 rounded-lg"
       hover
       rounded="lg"
@@ -74,41 +78,41 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
 import { useTextStore } from '@/stores/textStore'
-import nodeTemplateService from '@/services/nodeTemplateService'
+import sensorNodeService from '@/services/sensorNodeService'
 import { computed } from 'vue'
 
-const authStore = useAuthStore()
 const router = useRouter()
 const textStore = useTextStore()
-const nodeTemplates = ref([])
+const sensorNodes = ref([])
 const headers = [
   { title: 'Name', key: 'name' },
-  { title: 'Hardware Core', key: 'board.core'},
-  { title: 'Hardware Variant', key: 'board.variant'},
-  { title: 'Node Template ID', key: 'uuid' },
-  { title: 'Status', key: 'state'},
+  { title: 'Sensor Node ID', key: 'uuid' },
+  { title: 'Project', key: 'project.name' },
+  { title: 'Node Template', key: 'node_template.name' },
+  { title: 'State', key: 'state'},
 ]
 const loading = ref(true)
 const tableSearch = ref('')
-const hideUnused = ref(false)
+const hideInactive = ref(false)
 const hideArchived = ref(false)
+const hidePrepared = ref(false)
 
 // Filter entries based on toggle buttons state
-const filteredNodeTemplates = computed(() => {
-  return nodeTemplates.value.filter(item => {
+const filteredSensorNodes = computed(() => {
+  return sensorNodes.value.filter(item => {
     if (hideArchived.value && item.state.name === 'Archived') return false
-    if (hideUnused.value && item.state.name === 'Unused') return false
+    if (hideInactive.value && item.state.name === 'Inactive') return false
+    if (hidePrepared.value && item.state.name === 'Prepared') return false
     return true
   })
 })
-// Fetch node template data
-nodeTemplateService.getNodeTemplatesDTO()
+// Fetch sensor node data
+sensorNodeService.getSensorNodesDTO()
   .then((data) => {
     // Map the state property to an enum object definited in textstore that also contains a color and label value
-    nodeTemplates.value = data.map(item => {
-      const matched = Object.values(textStore.nodeTemplateStatusEnum).find(
+    sensorNodes.value = data.map(item => {
+      const matched = Object.values(textStore.sensorNodeStatusEnum).find(
         s => s.name === item.state
       )
       return {
@@ -121,9 +125,8 @@ nodeTemplateService.getNodeTemplatesDTO()
       }
   })
   })
-
   .catch((error) => {
-    console.error('Error fetching node templates:', error)
+    console.error('Error fetching sensor nodes:', error)
   })
   .finally(() => loading.value = false)
 </script>

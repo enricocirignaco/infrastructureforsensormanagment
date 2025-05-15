@@ -35,7 +35,6 @@ function toggleTheme() {
 .custom-switch {
   display: flex;
   justify-content: space-between;
-  width: 80px;
   padding: 0;
 }
 
