@@ -199,6 +199,9 @@
               elevation="1"
               disable-sort
             >
+              <template #item.value="{ item }">
+                {{ item.value }} {{ item.unit }}
+              </template>
             </v-data-table>
             </v-container>
       </v-col>
@@ -272,7 +275,6 @@ const fieldHeaders = [
   { title: 'Field Name', key: 'field_name' },
   { title: 'Data Type', key: 'protobuf_datatype' },
   { title: 'Value', key: 'value' },
-  { title: 'Unit', key: 'unit' },
 ]
 
 // Fetch sensor node
