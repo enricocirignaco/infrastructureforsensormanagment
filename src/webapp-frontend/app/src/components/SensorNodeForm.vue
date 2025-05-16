@@ -221,13 +221,15 @@ function loadConfigurables(nodeTemplateUuid) {
   nodeTemplateService.getNodeTemplate(nodeTemplateUuid)
     .then((data) => {
       // load configurables from the node template to the sensorNode
-      sensorNode.value.configurables = data.configurables.map((config) => {
-        return {
-          name: config.name,
-          type: config.type,
-          value: config.value
-        }
-      })
+      sensorNode.value.configurables = data.configurables
+        .filter((config) => config.type === 'UserDefined')
+        .map((config) => {
+          return {
+            name: config.name,
+            type: config.type,
+            value: config.value
+          }
+        })
       showConfigurables.value = true
     })
     .catch((error) => {
