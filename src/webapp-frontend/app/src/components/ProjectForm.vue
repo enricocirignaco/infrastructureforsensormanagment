@@ -89,7 +89,7 @@
             </v-btn>
           </v-col>
           <v-col cols="6">
-            <v-btn color="grey" class="mt-4" block @click="router.back()">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
               <v-icon start>mdi-close</v-icon>
               Cancel
             </v-btn>
