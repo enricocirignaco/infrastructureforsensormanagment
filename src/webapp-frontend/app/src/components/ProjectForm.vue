@@ -47,17 +47,6 @@
           <v-col cols="12">
             <v-textarea v-model="project.description" label="Project Description" :rules="[required]" />
           </v-col>
-          <!-- status dropdown -->
-          <v-col v-if="isEditMode" cols="12" sm="6">
-            <v-select
-              v-model="project.state"
-              :items="Object.values(textStore.projectStatusEnum)"
-              label="Status"
-              item-title="label"
-              item-value="name"
-              :rules="[required]"
-            />
-          </v-col>
           <v-col cols="12">
             <h3 class="text-h6 mb-2">External Resources</h3>
             <v-row
