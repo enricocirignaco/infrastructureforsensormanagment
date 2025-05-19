@@ -67,6 +67,18 @@ services:
       - FUSEKI_DATASET_2=testing
     env_file:
       - .env-fuseki
+
+  yasgui:
+    image: erikap/yasgui
+    container_name: yasgui
+    restart: unless-stopped
+    ports:
+      - "3031:80"
+    depends_on:
+      - fuseki
+    environment:
+      - DEFAULT_SPARQL_ENDPOINT=http://leaflink.ti.bfh.ch:3030/testing/sparql
+      - ENABLE_ENDPOINT_SELECTOR=true
 volumes:
   reverse-proxy-data:
   reverse-proxy-config:

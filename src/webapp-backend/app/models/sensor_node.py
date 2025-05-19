@@ -11,8 +11,9 @@ from app.models.project import ProjectOutSlim
 
 class SensorNodeStateEnum(RDFEnumMixin, str, Enum):
     PREPARED = 'Prepared'
-    ACTIVE = 'Active'
-    INACTIVE = 'Inactive'
+    IN_USE = 'In-Use' # Only used internally in db as an umbrella over active and inactive
+    ACTIVE = 'Active' # Used externally, infered at runtime from the state of the node
+    INACTIVE = 'Inactive' # Used externally, infered at runtime from the state of the node
     ARCHIVED = 'Archived'
     
 class SensorNodeLogbookEnum(RDFEnumMixin, str, Enum):
