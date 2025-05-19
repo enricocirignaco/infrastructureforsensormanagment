@@ -152,7 +152,7 @@ const projectHeaders = [
 ]
 const sensorHeaders = [
   { title: 'Node ID', key: 'uuid' },
-  { title: 'Project', key: 'project.name'},
+  { title: 'Node Template', key: 'node_template.name' },
   { title: 'State', key: 'state' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])
