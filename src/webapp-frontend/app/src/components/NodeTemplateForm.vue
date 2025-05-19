@@ -62,6 +62,7 @@
                 <v-text-field
                 :model-value="config.name"
                 @update:model-value="val => config.name = val.toUpperCase()"
+                @keypress="e => e.key === ' ' && e.preventDefault()"
                 label="Name"
                 :rules="[required]"
                 />
