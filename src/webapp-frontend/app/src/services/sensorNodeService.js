@@ -17,7 +17,7 @@ export default {
        .then(response => response.ok ? response.json() : Promise.reject(response));
     },
     getSensorNodesByProject: function(projectId) {
-        let url = BASE_URL + '/sensor-nodes?project_uuid=' + projectId
+        let url = BASE_URL + '/sensor-nodes/?project_uuid=' + projectId
         const options = {
             method: 'GET',
             headers: {
@@ -29,7 +29,7 @@ export default {
        .then(response => response.ok ? response.json() : Promise.reject(response));
     },
     getSensorNodesByNodeTemplate: function(nodeTemplateId) {
-        let url = BASE_URL + '/sensor-nodes?node_template_uuid=' + nodeTemplateId
+        let url = BASE_URL + '/sensor-nodes/?node_template_uuid=' + nodeTemplateId
         const options = {
             method: 'GET',
             headers: {

@@ -27,7 +27,12 @@
                     <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="primary" icon size="small" class="me-1" @click="router.push(`/project/${projectId}/edit`)">
                       <v-icon>mdi-pencil</v-icon>
                     </v-btn>
-                    <v-btn v-if="authStore.getUser?.role !== 'Researcher'" color="error" icon size="small" @click="deleteProject(projectId)">
+                    <v-btn
+                    v-if="authStore.getUser?.role !== 'Researcher' && project.state.name === 'Prepared'"
+                    color="error"
+                    icon size="small"
+                    @click="deleteProject(projectId)"
+                    >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-col>
@@ -147,7 +152,7 @@ const projectHeaders = [
 ]
 const sensorHeaders = [
   { title: 'Node ID', key: 'uuid' },
-  { title: 'Project', key: 'project.name'},
+  { title: 'Node Template', key: 'node_template.name' },
   { title: 'State', key: 'state' },
 ]
 const groupBy = ref([{ key: 'type', order: 'asc' }])

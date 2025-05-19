@@ -22,7 +22,10 @@ class NodeTemplateService:
         return self.node_template_repository.find_all_node_templates()
 
     def create_node_template(self, node_template: NodeTemplateCreate, logged_in_user: UserInDB) -> NodeTemplateDB:
-        # TODO check if field_names are unique
+        field_names = [field.field_name for field in node_template.fields]
+        if len(field_names) != len(set(field_names)):
+            raise ValueError("Field names must be unique")
+
         uuid = uuid4()
         logbook = [NodeTemplateLogbookEntry(
             type=NodeTemplateLogbookEnum.CREATED, 
@@ -63,12 +66,14 @@ class NodeTemplateService:
         if existing_system_defined != updated_system_defined:
             raise ValueError("System-defined configurables cannot be modified or removed")
 
-        # TODO not even description can be changed as soon as state is IN_USE 
         if node_template_db.state == NodeTemplateStateEnum.UNUSED and node_template.state == NodeTemplateStateEnum.UNUSED:
             # Update node template that is currently unused
             node_template_update = NodeTemplateDB(
                 **node_template.model_dump(), 
                 logbook=node_template_db.logbook)
+        elif node_template_db.state != NodeTemplateStateEnum.UNUSED and node_template_db.state == node_template.state:
+            # Update node template that is currently in use or archived but state is not changed
+            return node_template_db
         elif node_template_db.state == NodeTemplateStateEnum.IN_USE and node_template.state == NodeTemplateStateEnum.ARCHIVED:
             # Archive node template that is currently in use
             node_template_update = NodeTemplateDB(**node_template_db.model_dump())
@@ -89,12 +94,23 @@ class NodeTemplateService:
         return self.node_template_repository.update_node_template(node_template=node_template_update)
     
     def set_in_use_node_template(self, uuid: UUID):
+        """Used when a sensor node is created from the node template"""
         node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
         if not node_template_db:
             raise NotFoundError("Node Template not found")
         if node_template_db.state != NodeTemplateStateEnum.UNUSED:
             return
         node_template_db.state = NodeTemplateStateEnum.IN_USE
+        self.node_template_repository.update_node_template(node_template=node_template_db)
+        
+    def set_unused_node_template(self, uuid: UUID):
+        """Used when no sensor node is using the node template anymore"""
+        node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
+        if not node_template_db:
+            raise NotFoundError("Node Template not found")
+        if node_template_db.state != NodeTemplateStateEnum.IN_USE:
+            return
+        node_template_db.state = NodeTemplateStateEnum.UNUSED
         self.node_template_repository.update_node_template(node_template=node_template_db)
 
     def delete_node_template(self, uuid: UUID):

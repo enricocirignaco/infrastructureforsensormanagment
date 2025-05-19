@@ -58,3 +58,5 @@ async def delete_specific_project(uuid: UUID,
         project_service.delete_project(uuid=uuid)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))

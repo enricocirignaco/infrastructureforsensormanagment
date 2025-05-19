@@ -27,6 +27,7 @@ export default createVuetify({
           accent: '#344738',
           background: '#16332D',
           surface: '#7B7653',
+          error: '#F02222',
         },
       },
     },

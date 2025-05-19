@@ -13,15 +13,21 @@
         />
       </v-col>
       <v-col cols="12">
-        <v-textarea v-model="sensorNode.description" label="Notes" />
+        <v-textarea v-if="sensorNode.state !== 'Archived' "v-model="sensorNode.description" label="Notes" />
       </v-col>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="6">
           <v-btn type="submit" color="primary" class="mt-4" block>
             <v-icon start>mdi-content-save</v-icon>
             Save Sensor Node
           </v-btn>
         </v-col>
+        <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
+            </v-btn>
+          </v-col>
       </v-row>
     </v-form>
   </v-card>
@@ -66,8 +72,8 @@
                   <v-col cols="12">
                     <LMap
                       style="height: 300px"
-                      :zoom="7"
-                      :center="[sensorNode.location.latitude || 46.8, sensorNode.location.longitude || 8.2]"
+                      :zoom="12"
+                      :center="[sensorNode.location.latitude || textStore.newMapDefaultLocation.lat, sensorNode.location.longitude || textStore.newMapDefaultLocation.lng]"
                       @click="e => {
                         sensorNode.location.latitude = e.latlng.lat
                         sensorNode.location.longitude = e.latlng.lng
@@ -114,20 +120,29 @@
             <v-card outlined>
               <v-card-title class="text-subtitle-1">Configurables</v-card-title>
               <v-card-text>
-                <v-row
-                  v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
-                  :key="index"
-                  class="mb-2"
-                >
-                  <v-col cols="4" class="d-flex align-center">
-                    <span class="text-subtitle-2">{{ config.name }}</span>
+                <v-row>
+                  <v-col cols="6">
+                    <v-row
+                      v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
+                      :key="index"
+                      class="mb-2"
+                    >
+                      <v-col cols="6" class="d-flex align-center">
+                        <span class="text-subtitle-2">{{ config.name }}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <v-text-field
+                          v-model="config.value"
+                          label="Value"
+                          :rules="[required]"
+                        />
+                      </v-col>
+                    </v-row>
                   </v-col>
-                  <v-col cols="8">
-                    <v-text-field
-                      v-model="config.value"
-                      label="Value"
-                      :rules="[required]"
-                    />
+                  <v-col cols="6">
+                   <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2" style="white-space: pre-wrap;">
+                      {{ textStore.configurablesWarning }}
+                    </v-alert>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -135,10 +150,16 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="6">
             <v-btn type="submit" color="primary" class="mt-4" block>
               <v-icon start>mdi-content-save</v-icon>
               Save Sensor Node
+            </v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
             </v-btn>
           </v-col>
         </v-row>
@@ -179,7 +200,6 @@ const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
 const sensorNode = ref(null)
-const isNodeArchived = ref(false)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
 
@@ -189,8 +209,6 @@ if (isEditMode.value) {
   sensorNodeService.getSensorNode(sensorNodeId)
     .then((data) => {
       sensorNode.value = data
-      // set the archived state
-      sensorNode.value.state === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
       console.error(`Error fetching node sensor node ${sensorNodeId}:`, error)

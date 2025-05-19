@@ -88,7 +88,7 @@ const headers = [
   { title: 'Hardware Core', key: 'board.core'},
   { title: 'Hardware Variant', key: 'board.variant'},
   { title: 'Node Template ID', key: 'uuid' },
-  { title: 'Status', key: 'state'},
+  { title: 'State', key: 'state'},
 ]
 const loading = ref(true)
 const tableSearch = ref('')

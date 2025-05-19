@@ -1,11 +1,11 @@
 <template>
-  <v-card v-if="isEditMode && nodeTemplate?.state?.name && nodeTemplate.state.name !== 'Unused'" class="pa-4">
+  <v-card v-if="isEditMode && nodeTemplate?.state && nodeTemplate.state !== 'Unused'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
       <!-- archived checkbox -->
       <v-col v-if="isEditMode"cols="6" class="d-flex align-center">
         <v-checkbox
-          v-model="isNodeArchived"
+          v-model="nodeTemplate.state"
           label="Archive Node Template"
           :true-value="true"
           :false-value="false"
@@ -13,16 +13,22 @@
         />
       </v-col>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="6">
           <v-btn type="submit" color="primary" class="mt-4" block>
             <v-icon start>mdi-content-save</v-icon>
             Save Node Template
           </v-btn>
         </v-col>
+        <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
+            </v-btn>
+          </v-col>
       </v-row>
     </v-form>
   </v-card>
-  <v-card class="pa-4" v-if="(nodeTemplate && nodeTemplate.state.name === 'Unused') || !isEditMode">
+  <v-card class="pa-4" v-if="(nodeTemplate && nodeTemplate.state === 'Unused') || !isEditMode">
     <v-card-title>{{ isEditMode ? 'Edit Node Template' : 'Create New Node Template' }}</v-card-title>
 
     <v-form ref="nodeTemplateForm" @submit.prevent="submitNodeTemplate">
@@ -56,6 +62,7 @@
                 <v-text-field
                 :model-value="config.name"
                 @update:model-value="val => config.name = val.toUpperCase()"
+                @keypress="e => e.key === ' ' && e.preventDefault()"
                 label="Name"
                 :rules="[required]"
                 />
@@ -128,10 +135,16 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="6">
             <v-btn type="submit" color="primary" class="mt-4" block>
               <v-icon start>mdi-content-save</v-icon>
               Save Node Template
+            </v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
             </v-btn>
           </v-col>
         </v-row>
@@ -166,7 +179,6 @@ const textStore = useTextStore()
 const router = useRouter()
 const nodeTemplate = ref(null)
 const commercialSensorsDTO = ref([])
-const isNodeArchived = ref(false)
 
 // Define the nodeTemplate object from the nodeTemplate Id or from default values
 if (isEditMode.value) {
@@ -174,18 +186,6 @@ if (isEditMode.value) {
   nodeTemplateService.getNodeTemplate(nodeTemplateId)
     .then((data) => {
       nodeTemplate.value = data
-
-      // Map state
-      const matchedState = Object.values(textStore.nodeTemplateStatusEnum).find(
-        s => s.name === data.state
-      )
-      nodeTemplate.value.state = {
-        name: data.state,
-        label: matchedState ? matchedState.label : data.state,
-        color: matchedState ? matchedState.color : 'grey'
-      }
-      // set the archived state
-      nodeTemplate.value.state.name === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
       console.error(`Error fetching node template ${nodeTemplateId}:`, error)
@@ -200,11 +200,7 @@ if (isEditMode.value) {
       variant: ''
     },
     configurables: [],
-    state: {
-      name: '',
-      label: '',
-      color: ''
-    },
+    state: '',
     fields: [],
   }
 }
@@ -235,7 +231,6 @@ const submitNodeTemplate = () => {
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
-    computeState()
     if(isEditMode.value){
         //put request to update the nodeTemplate
         nodeTemplateService.editNodeTemplate(nodeTemplate.value)
@@ -248,13 +243,5 @@ const submitNodeTemplate = () => {
             .catch((error) => console.log('Error creating nodeTemplate:', error))
     }
   })
-}
-
-const computeState = () => {
-  if(isNodeArchived.value){
-    nodeTemplate.value.state = 'Archived'
-  } else {
-    nodeTemplate.value.inherited_sensor_nodes != null && nodeTemplate.value.inherited_sensor_nodes.length === 0 ? nodeTemplate.value.state = 'Unused' : nodeTemplate.value.state = 'In-Use'
-  }
 }
 </script>

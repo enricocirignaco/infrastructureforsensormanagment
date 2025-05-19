@@ -132,6 +132,18 @@ services:
       - PUBLISH_INTERVAL_SEC=5
       - PYTHONUNBUFFERED=1
 
+  yasgui:
+    image: erikap/yasgui
+    container_name: yasgui
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    depends_on:
+      - fuseki
+    environment:
+      - DEFAULT_SPARQL_ENDPOINT=http://localhost:3030/testing/sparql
+      - ENABLE_ENDPOINT_SELECTOR=true
+
 volumes:
   reverse-proxy-conf:
   reverse-proxy-data:
