@@ -1,5 +1,32 @@
 <template>
-  <v-card class="pa-4" v-if="project">
+  <!-- Archived View -->
+   <v-card v-if="isEditMode && project?.state && project.state !== 'Prepared'" class="pa-4">
+    <v-card-title>Edit Archived State</v-card-title>
+    <v-form ref="projectForm" @submit.prevent="submitProject">
+      <!-- archived checkbox -->
+      <v-col v-if="project.state !== 'Active'" cols="6" class="d-flex align-center">
+        <v-checkbox
+          v-model="project.state"
+          label="Archive Sensor Node"
+          :true-value="'Archived'"
+          :false-value="'Active'"
+          hide-details
+        />
+      </v-col>
+      <v-row>
+        <v-col cols="12">
+          <v-btn type="submit" color="primary" class="mt-4" block>
+            <v-icon start>mdi-content-save</v-icon>
+            Save Project
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-card>
+
+
+
+  <v-card class="pa-4" v-if="(project && project?.state === 'Prepared') || !isEditMode">
     <v-card-title>{{ isEditMode ? 'Edit Project' : 'Create New Project' }}</v-card-title>
 
     <v-form ref="projectForm" @submit.prevent="submitProject">
@@ -20,6 +47,8 @@
               v-model="project.state"
               :items="Object.values(textStore.projectStatusEnum)"
               label="Status"
+              item-title="label"
+              item-value="name"
               :rules="[required]"
             />
           </v-col>
@@ -68,7 +97,8 @@
       </v-container>
     </v-form>
   </v-card>
-  <v-container v-else class="d-flex justify-center align-center" style="min-height: 300px">
+  <!-- loading animation -->
+  <v-container v-if="!isEditMode && !project" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
 </template>
@@ -99,7 +129,19 @@ const project = ref(null)
 if(isEditMode.value) {
     // Fetch project data
     projectService.getProject(projectId)
-        .then((data) => project.value = data)
+        .then((data) => {
+          project.value = data
+          // Map state
+          const matchedState = Object.values(textStore.projectStatusEnum).find(
+            s => s.name === data.state
+          )
+          project.value.state = {
+            name: data.state,
+            label: matchedState ? matchedState.label : data.state,
+            color: matchedState ? matchedState.color : 'grey'
+          }
+          console.log('Fetched project:', project.value)
+        })
         .catch((error) => {
         // TODO: Handle error
         console.error(`Error fetching project ${projectId}:`, error)
