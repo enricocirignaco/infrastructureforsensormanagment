@@ -121,7 +121,7 @@
               <v-card-title class="text-subtitle-1">Configurables</v-card-title>
               <v-card-text>
                 <v-row>
-                  <v-col cols="8">
+                  <v-col cols="6">
                     <v-row
                       v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
                       :key="index"
@@ -139,9 +139,9 @@
                       </v-col>
                     </v-row>
                   </v-col>
-                  <v-col cols="4">
-                    <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2">
-                      Hinweis: Zeichenketten müssen in <code>"Anführungszeichen"</code> geschrieben werden.
+                  <v-col cols="6">
+                   <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2" style="white-space: pre-wrap;">
+                      {{ textStore.configurablesWarning }}
                     </v-alert>
                   </v-col>
                 </v-row>

@@ -95,5 +95,16 @@ export const useTextStore = defineStore('text', {
       lat: 47.14,
       lng: 7.24,
     },
+    configurablesWarning: `
+Note:
+These values will be written directly into a C header file as preprocessor definitions like:
+#define CONFIG_NAME CONFIG_VALUE
+
+Make sure your input is syntactically valid in C.
+For example:
+- Strings must be enclosed in double quotes → "example"
+- Booleans should be written as 0 or 1
+- Avoid special characters not supported by the C preprocessor
+    `
   }),
 })
