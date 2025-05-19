@@ -13,7 +13,7 @@
         />
       </v-col>
       <v-col cols="12">
-        <v-textarea v-model="sensorNode.description" label="Notes" />
+        <v-textarea v-if="sensorNode.state !== 'Archived' "v-model="sensorNode.description" label="Notes" />
       </v-col>
       <v-row>
         <v-col cols="6">
@@ -120,20 +120,29 @@
             <v-card outlined>
               <v-card-title class="text-subtitle-1">Configurables</v-card-title>
               <v-card-text>
-                <v-row
-                  v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
-                  :key="index"
-                  class="mb-2"
-                >
-                  <v-col cols="4" class="d-flex align-center">
-                    <span class="text-subtitle-2">{{ config.name }}</span>
-                  </v-col>
+                <v-row>
                   <v-col cols="8">
-                    <v-text-field
-                      v-model="config.value"
-                      label="Value"
-                      :rules="[required]"
-                    />
+                    <v-row
+                      v-for="(config, index) in sensorNode.configurables.filter(c => c.type === 'UserDefined')"
+                      :key="index"
+                      class="mb-2"
+                    >
+                      <v-col cols="6" class="d-flex align-center">
+                        <span class="text-subtitle-2">{{ config.name }}</span>
+                      </v-col>
+                      <v-col cols="6">
+                        <v-text-field
+                          v-model="config.value"
+                          label="Value"
+                          :rules="[required]"
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2">
+                      Hinweis: Zeichenketten müssen in <code>"Anführungszeichen"</code> geschrieben werden.
+                    </v-alert>
                   </v-col>
                 </v-row>
               </v-card-text>
