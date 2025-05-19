@@ -4,7 +4,7 @@
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="projectForm" @submit.prevent="submitProject">
       <!-- archived checkbox -->
-      <v-col v-if="project.state !== 'Active'" cols="6" class="d-flex align-center">
+      <v-col v-if="project.state !== 'Prepared'" cols="6" class="d-flex align-center">
         <v-checkbox
           v-model="project.state"
           label="Archive Sensor Node"
@@ -131,15 +131,6 @@ if(isEditMode.value) {
     projectService.getProject(projectId)
         .then((data) => {
           project.value = data
-          // Map state
-          const matchedState = Object.values(textStore.projectStatusEnum).find(
-            s => s.name === data.state
-          )
-          project.value.state = {
-            name: data.state,
-            label: matchedState ? matchedState.label : data.state,
-            color: matchedState ? matchedState.color : 'grey'
-          }
           console.log('Fetched project:', project.value)
         })
         .catch((error) => {
