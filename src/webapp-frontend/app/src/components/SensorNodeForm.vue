@@ -72,8 +72,8 @@
                   <v-col cols="12">
                     <LMap
                       style="height: 300px"
-                      :zoom="7"
-                      :center="[sensorNode.location.latitude || 46.8, sensorNode.location.longitude || 8.2]"
+                      :zoom="12"
+                      :center="[sensorNode.location.latitude || textStore.newMapDefaultLocation.lat, sensorNode.location.longitude || textStore.newMapDefaultLocation.lng]"
                       @click="e => {
                         sensorNode.location.latitude = e.latlng.lat
                         sensorNode.location.longitude = e.latlng.lng

@@ -5,15 +5,15 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
-    restApiBaseUrl: `${window.location.origin}/api/v1`,
-    // restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+    // restApiBaseUrl: `${window.location.origin}/api/v1`,
+    restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
     //  restApiBaseUrl: 'http://localhost/api/v1',
 
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {
       0: { name: 'Active', label: 'Active', color: 'success' },
-      1: { name: 'Archived', label: 'Archived', color: 'grey' },
-      2: { name: 'Deleted', label: 'Deleted', color: 'error' },
+      1: { name: 'Prepared', label: 'Prepared', color: 'warning' },
+      2: { name: 'Archived', label: 'Archived', color: 'grey' },
     },
     nodeTemplateStatusEnum: {
       0: { name: 'Unused', label: 'Unused', color: 'warning' },
@@ -56,6 +56,7 @@ export const useTextStore = defineStore('text', {
       2: 'Misc'
     },
     sensorUnitsEnum: {
+      UNITLESS: 'Unitless',
       CELSIUS: '°C',
       FAHRENHEIT: '°F',
       KELVIN: 'K',
@@ -89,6 +90,10 @@ export const useTextStore = defineStore('text', {
       'commercialSensors': 'mdi-chip',
       'nodeTemplates': 'mdi-file-document-multiple',
       'sensorNodes': 'mdi-wifi',
-    }
+    },
+    newMapDefaultLocation: {
+      lat: 47.14,
+      lng: 7.24,
+    },
   }),
 })
