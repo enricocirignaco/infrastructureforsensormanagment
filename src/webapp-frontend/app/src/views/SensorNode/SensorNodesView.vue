@@ -87,9 +87,9 @@ const textStore = useTextStore()
 const sensorNodes = ref([])
 const headers = [
   { title: 'Name', key: 'name' },
-  { title: 'Sensor Node ID', key: 'uuid' },
   { title: 'Project', key: 'project.name' },
   { title: 'Node Template', key: 'node_template.name' },
+  { title: 'Sensor Node ID', key: 'uuid' },
   { title: 'State', key: 'state'},
 ]
 const loading = ref(true)
