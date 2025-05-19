@@ -13,12 +13,18 @@
         />
       </v-col>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="6">
           <v-btn type="submit" color="primary" class="mt-4" block>
             <v-icon start>mdi-content-save</v-icon>
             Save Node Template
           </v-btn>
         </v-col>
+        <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
+            </v-btn>
+          </v-col>
       </v-row>
     </v-form>
   </v-card>
@@ -128,10 +134,16 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="6">
             <v-btn type="submit" color="primary" class="mt-4" block>
               <v-icon start>mdi-content-save</v-icon>
               Save Node Template
+            </v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
             </v-btn>
           </v-col>
         </v-row>

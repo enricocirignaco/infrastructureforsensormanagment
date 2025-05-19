@@ -16,12 +16,18 @@
         <v-textarea v-model="sensorNode.description" label="Notes" />
       </v-col>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="6">
           <v-btn type="submit" color="primary" class="mt-4" block>
             <v-icon start>mdi-content-save</v-icon>
             Save Sensor Node
           </v-btn>
         </v-col>
+        <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
+            </v-btn>
+          </v-col>
       </v-row>
     </v-form>
   </v-card>
@@ -135,10 +141,16 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="6">
             <v-btn type="submit" color="primary" class="mt-4" block>
               <v-icon start>mdi-content-save</v-icon>
               Save Sensor Node
+            </v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn color="secondary" class="mt-4" block @click="router.back()">
+              <v-icon start>mdi-close</v-icon>
+              Cancel
             </v-btn>
           </v-col>
         </v-row>
@@ -179,7 +191,6 @@ const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
 const sensorNode = ref(null)
-const isNodeArchived = ref(false)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
 
@@ -189,8 +200,6 @@ if (isEditMode.value) {
   sensorNodeService.getSensorNode(sensorNodeId)
     .then((data) => {
       sensorNode.value = data
-      // set the archived state
-      sensorNode.value.state === 'Archived' ? isNodeArchived.value = true : isNodeArchived.value = false
     })
     .catch((error) => {
       console.error(`Error fetching node sensor node ${sensorNodeId}:`, error)
