@@ -140,7 +140,7 @@ class SensorNodeService:
         if not nodes_by_project:
             self._project_service.set_prepared_project(sensor_node_db.project_uuid)
         # Update state of the node template back to UNUSED if no other sensor nodes are using it
-        nodes_by_template = self._node_template_service.get_all_node_templates(filters={"uuid": sensor_node_db.node_template_uuid})
+        nodes_by_template = self.get_all_sensor_nodes(filters={"node_template_uuid": sensor_node_db.node_template_uuid})
         if not nodes_by_template:
             self._node_template_service.set_unused_node_template(sensor_node_db.node_template_uuid)
     
