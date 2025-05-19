@@ -55,3 +55,5 @@ async def delete_specific_commercial_sensor(uuid: UUID,
         commercial_sensor_service.delete_commercial_sensor(uuid=uuid)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
