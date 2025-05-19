@@ -14,9 +14,9 @@ class ProjectLinkEnum(RDFEnumMixin, str, Enum):
     MISC = 'Misc'
 
 class ProjectStateEnum(RDFEnumMixin, str, Enum):
+    PREPARED = 'Prepared'
     ACTIVE = 'Active'
     ARCHIVED = 'Archived'
-    DELETED = 'Deleted'
 
 class ProjectLogbookEnum(RDFEnumMixin, str, Enum):
     CREATED = 'Created'

@@ -2,6 +2,7 @@ from app.repositories.sensor_node_repository import SensorNodeRepository
 from app.models.sensor_node import SensorNodeDB, SensorNodeOutSlim, ConfigurableAssignment, TimeseriesData, SensorNodeOutFull, SensorNodeUpdate, SensorNodeCreate, SensorNodeLogbookEntry, SensorNodeLogbookEnum, SensorNodeStateEnum, ConfigurableTypeEnum
 from app.models.user import UserInDB, UserOut, RoleEnum
 from app.models.node_template import NodeTemplateStateEnum
+from app.models.project import ProjectStateEnum
 from app.services.project_service import ProjectService
 from app.services.node_template_service import NodeTemplateService
 from app.utils.exceptions import NotFoundError
@@ -42,7 +43,7 @@ class SensorNodeService:
     def create_sensor_node(self, sensor_node: SensorNodeCreate, logged_in_user: UserInDB) -> SensorNodeOutFull:
         # Check if given uuid's exist
         try:
-            self._project_service.get_project_by_uuid(uuid=sensor_node.project_uuid)
+            project = self._project_service.get_project_by_uuid(uuid=sensor_node.project_uuid)
         except NotFoundError:
             raise NotFoundError("No project found with the given uuid")
         try:
@@ -76,10 +77,12 @@ class SensorNodeService:
         sensor_node_db.configurables = confiurables
         sensor_node_db = self._sensor_node_repository.create_sensor_node(sensor_node_db)
         
-        # Update state of the node template
+        # Update state of the node template and project if needed
         if node_template.state == NodeTemplateStateEnum.UNUSED:
             self._node_template_service.set_in_use_node_template(node_template.uuid)
-        
+        if project.state == ProjectStateEnum.PREPARED:
+            self._project_service.set_active_project(project.uuid)
+                
         sensor_node_out = SensorNodeOutFull(**sensor_node_db.model_dump(), last_timeseries=None)
         return sensor_node_out
     
@@ -93,7 +96,7 @@ class SensorNodeService:
         # If state is still PREPARED, almost all changes should be allowed
         if sensor_node_db.state == SensorNodeStateEnum.PREPARED:
             if sensor_node.state != SensorNodeStateEnum.PREPARED:
-                raise ValueError("State of sensore node must not be updated manually")
+                raise ValueError("State of sensor node must not be updated manually")
             # Check if each configurable is identical to the ones defined in the node template
             node_configurables_names = [config.name for config in sensor_node_db.configurables]
             template_configurables_names = [config.name for config in sensor_node.configurables]
@@ -131,5 +134,14 @@ class SensorNodeService:
         if sensor_node_db.state != SensorNodeStateEnum.PREPARED:
             raise ValueError("Sensor node cannot be deleted, it is not in the PREPARED state")
         self._sensor_node_repository.delete_sensor_node(uuid=uuid)
+        
+        # Update state of the project back to PREPARED if no other sensor nodes are in the project
+        nodes_by_project = self.get_all_sensor_nodes(filters={"project_uuid": sensor_node_db.project_uuid})
+        if not nodes_by_project:
+            self._project_service.set_prepared_project(sensor_node_db.project_uuid)
+        # Update state of the node template back to UNUSED if no other sensor nodes are using it
+        nodes_by_template = self._node_template_service.get_all_node_templates(filters={"uuid": sensor_node_db.node_template_uuid})
+        if not nodes_by_template:
+            self._node_template_service.set_unused_node_template(sensor_node_db.node_template_uuid)
     
-    
+        
