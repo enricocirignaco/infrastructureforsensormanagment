@@ -192,7 +192,7 @@
             </v-card-title>
             <v-expand-transition>
               <v-card-text v-show="showFirmwareTools">
-                <FlashEsp />
+                <FlashEsp :sensor-id="sensorNodeId" />
               </v-card-text>
             </v-expand-transition>
           </v-card>
