@@ -98,7 +98,7 @@ class CompilationService:
                 return Response(
                     content=response.content,
                     status_code=response.status_code,
-                    media_type="application/zip"
+                    media_type=response.headers.get("content-type")
                 )
             elif response.status_code == 400:
                 raise ValueError(f"Bad request: {response.text}")
