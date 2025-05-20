@@ -143,8 +143,8 @@ class SensorNodeRepository:
                         bfh:state ?state ;
                         bfh:ttnDeviceLink ?ttn ;
                         bfh:usesNodeTemplate ?templateUri ;
-                        bfh:partOfProject ?projectUri .
-                        bfh:gitlabRef ?gitlabRef ;
+                        bfh:partOfProject ?projectUri ;
+                        bfh:gitlabRef ?gitlabRef .
             OPTIONAL {{ {sensor_uri} schema:description ?description }}
             OPTIONAL {{ {sensor_uri} bfh:latitude ?lat }}
             OPTIONAL {{ {sensor_uri} bfh:longitude ?long }}

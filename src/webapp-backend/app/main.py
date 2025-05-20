@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from contextlib import asynccontextmanager
 
-from .routers import auth, users, projects, commercial_sensors, node_templates, sensor_nodes
+from .routers import auth, users, projects, commercial_sensors, node_templates, sensor_nodes, compilation
 from .utils.admin_setup import create_init_admin
 
 @asynccontextmanager
@@ -23,6 +23,7 @@ app.include_router(projects.router)
 app.include_router(commercial_sensors.router)
 app.include_router(node_templates.router)
 app.include_router(sensor_nodes.router)
+app.include_router(compilation.router)
 
 # TODO: Delete this in production
 from fastapi.middleware.cors import CORSMiddleware

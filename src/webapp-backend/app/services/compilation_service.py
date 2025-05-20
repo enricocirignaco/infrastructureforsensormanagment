@@ -29,10 +29,12 @@ class CompilationService:
             raise NotFoundError("Node template of sensor node not found.")
 
         payload = {
-            "git_repo_url": node_template.gitlab_url,
+            "git_repo_url": str(node_template.gitlab_url),
             "firmware_tag": sensor_node.gitlab_ref,
-            "board": node_template.board,
-            "libraries": [],
+            "board": {
+                "core": node_template.board.core,
+                "variant": node_template.board.variant
+            },
             "config": [
                 {"key": config.name, "value": config.value}
                 for config in sensor_node.configurables
@@ -40,7 +42,6 @@ class CompilationService:
         }
 
         url = f"{self._base_url}/build"
-
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url, json=payload, headers=self._headers)

@@ -27,6 +27,8 @@ async def create_build_job(sensor_node_uuid: UUID,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ExternalServiceError as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e))
     
 @router.get("/job/{job_id}/status", response_model=BuildJobStatusResponse)
 async def get_build_job_status(job_id: UUID,
