@@ -74,16 +74,24 @@
       <v-col class="pa-4 mb-4">
         <h4 class="text-h6 mb-4">Flash ESP Board</h4>
         <v-btn
-            color="primary"
-            class="me-4 mb-2"
-            @click="connectToBoard"
+          v-if="isSerialConnected"
+          color="primary"
+          class="me-4 mb-2"
+          @click="serialDisconnect"
         >
-            Connect
+          Disconnect
+        </v-btn>
+        <v-btn
+          v-else
+          color="primary"
+          class="me-4 mb-2"
+          @click="serialConnect"
+        >
+          Connect
         </v-btn>
         <v-btn
             color="primary"
             class="mb-2"
-            @click="connectToBoard"
         >
             Flash ESP
         </v-btn>
@@ -120,7 +128,7 @@ const compilationLogs = ref('')
 const jobId = ref('')
 const jobStatus = ref('')
 const flashingLogs = ref('')
-
+const isSerialConnected = ref(false)
 // Function to start the compilation process
 const triggerCompilation = () => {
   compilationService.buildFirmware(sensorId)
@@ -161,43 +169,65 @@ const checkCompilationStatus = () => {
 }
 
 
-let port = null
-let transport = null
-let info = ''
-let loader = null
-let chipRom = null
-// Set up a terminal to funnel loader messages into our UI
+let SerialPort = null
+let SerialTransport = null
+let SerialLoader = null
+let SerialChipRom = null
+// Set up a terminal to funnel SerialLoader messages into our UI
 const terminal = {
     clean() {},
     writeLine: (line) => { flashingLogs.value += line + '\n' },
     write: (data) => { flashingLogs.value += data }
 }
-const connectToBoard = async () => {
+// Function to connect to the serial SerialPort
+const serialConnect = async () => {
   try {
-    if(port === null) {
-        // Prompt user to select a serial port
-        port = await navigator.serial.requestPort()
-        // Wrap the port in esptool-js Transport and open it
-        transport = new Transport(port, true)
+    if(SerialPort === null) {
+        // Prompt user to select a serial SerialPort
+        SerialPort = await navigator.serial.requestPort()
+        // Wrap the SerialPort in esptool-js Transport and open it
+        SerialTransport = new Transport(SerialPort, true)
     }
     // Initialize the ESPLoader and perform the bootloader handshake
-    loader = new ESPLoader({ transport, baudrate: 115200, terminal })
-    chipRom = await loader.main()
+    SerialLoader = new ESPLoader({ SerialTransport, baudrate: 115200, terminal })
+    SerialChipRom = await SerialLoader.main()
+    isSerialConnected.value = true
   } catch (error) {
     flashingLogs.value += `ERROR: ${error.message}\n`
+    isSerialConnected.value = false
   }
-};
+}
+
+// Function to disconnect from the serial SerialPort
+const serialDisconnect = async () => {
+  try {
+    if (SerialTransport) {
+      await SerialTransport.disconnect()
+      flashingLogs.value += 'Transport disconnected.\n'
+    }
+  } catch (err) {
+    flashingLogs.value += `ERROR during disconnect: ${err.message}\n`
+  } finally {
+    // Clean up references no matter what
+    SerialPort = null
+    SerialTransport = null
+    SerialLoader = null
+    SerialChipRom = null
+    flashingLogs.value += 'Disconnected from ESP board.\n'
+    isSerialConnected.value = false
+  }
+}
 
 
 
 
 // // Example stub function
 // const connectAndFlash = async () => {
-//   const port = await navigator.serial.requestPort()
-//   const transport = new SerialTransport(port)
-//   const loader = new ESPLoader(transport, 'esp32') // adjust chip type
+//   const SerialPort = await navigator.serial.requestPort()
+//   const SerialTransport = new SerialTransport(SerialPort)
+//   const SerialLoader = new ESPLoader(SerialTransport, 'esp32') // adjust chip type
 
-//   await loader.initialize()
-//   // loader.flashData(...) // to be added
+//   await SerialLoader.initialize()
+//   // SerialLoader.flashData(...) // to be added
 // }
 </script>
