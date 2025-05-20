@@ -180,6 +180,23 @@
             </v-sheet>
             </v-col>
           </v-row>
+          <!-- Firmware Tools Section -->
+          <v-divider class="my-6" />
+          <v-card class="mb-4" rounded="lg">
+            <v-card-title class="d-flex justify-space-between align-center">
+              <h3 class="text-h6 mb-0">Firmware Tools</h3>
+              <v-spacer />
+              <v-btn color="primary" @click="showFirmwareTools = !showFirmwareTools">
+                {{ showFirmwareTools ? 'Hide' : 'Show' }}
+              </v-btn>
+            </v-card-title>
+            <v-expand-transition>
+              <v-card-text v-show="showFirmwareTools">
+                <FlashEsp />
+              </v-card-text>
+            </v-expand-transition>
+          </v-card>
+
           </v-card-text>
         </v-card>
         <v-divider class="my-6" />
@@ -212,8 +229,6 @@
       </v-col>
     </v-row>
   </v-container>
-
-
   
   <!-- delete dialog -->
   <v-dialog v-model="confirmDelete" max-width="500">
@@ -257,6 +272,7 @@ import { computed } from 'vue'
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import FlashEsp from '@/components/FlashEsp.vue'
 
 const authStore = useAuthStore()
 const textStore = useTextStore()
@@ -265,6 +281,7 @@ const sensorNode = ref(null)
 const loading = ref(true)
 const confirmDelete = ref(false)
 const sensorNodeToDelete = ref(null)
+const showFirmwareTools = ref(false)
 const deleteConfirmInput = ref('')
 const sensorNodeId = ref(useRoute().params.id)
 const userLocale = typeof navigator !== 'undefined' ? navigator.language : 'en-US'

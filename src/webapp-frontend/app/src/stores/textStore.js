@@ -5,10 +5,11 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
-    restApiBaseUrl: `${window.location.origin}/api/v1`,
-    //restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
+    // restApiBaseUrl: `${window.location.origin}/api/v1`,
+    restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
     //  restApiBaseUrl: 'http://localhost/api/v1',
 
+    flashEspBaudrate: 921600,
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {
       0: { name: 'Active', label: 'Active', color: 'success' },
