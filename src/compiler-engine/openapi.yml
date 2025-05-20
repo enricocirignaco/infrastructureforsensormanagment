@@ -189,11 +189,6 @@ components:
           example: "v1.0.0"
         board:
           $ref: "#/components/schemas/Board"
-        libraries:
-          type: array
-          items:
-            type: string
-          example: ["ArduinoJson@6.17.3"]
         config:
           type: array
           items:

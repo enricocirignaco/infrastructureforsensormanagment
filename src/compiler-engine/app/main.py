@@ -40,7 +40,6 @@ class StandardBuildRequest(BaseModel):
     git_repo_url: str
     firmware_tag: str
     board: Board
-    libraries: Optional[List[str]] = None
     config: Optional[List[ConfigProperty]] = None
 
 class CustomBuildRequest(BaseModel):
@@ -234,7 +233,6 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
     compile_command = f"""bash -c "
             mkdir -p /cache/boards /cache/arduino && \
             arduino-cli core install {request.board.core} && \
-            arduino-cli lib install {" ".join(request.libraries)} && \
             arduino-cli core update-index && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
@@ -319,7 +317,21 @@ def generic_compile_task(
                 "message": f"Error including config.h in main.ino: {str(e)}"
             }
             return
-
+    # Extract libraries from libraries.txt if present
+    libraries_file_path = f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/libraries.txt"
+    if os.path.isfile(libraries_file_path):
+        try:
+            with open(libraries_file_path, "r") as lib_file:
+                libraries = [line.strip() for line in lib_file if line.strip()]
+                if libraries:
+                    install_libs_cmd = f"arduino-cli lib install {' '.join(libraries)}"
+                    compiler_command = compiler_command.replace("arduino-cli core update-index &&", f"{install_libs_cmd} && arduino-cli core update-index &&")
+        except Exception as e:
+            jobs_status_map[job_id] = {
+                "status": BuildStatus.error,
+                "message": f"Error reading libraries.txt: {str(e)}"
+            }
+            return
     # Build source code in the Docker container
     try:
         docker_client.images.pull(
