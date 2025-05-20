@@ -14,7 +14,7 @@ services:
       - compiler-engine-logs:/logs
       - compiler-engine-cache:/cache
     env_file:
-      - .env
+      - .env-compiler-engine
   volumes-cleaner:
     build:
       context: src/volumes-cleaner
@@ -26,7 +26,7 @@ services:
       - compiler-engine-logs:/logs
       - ./src/compiler-engine/app/cleaner.py:/app/cleaner.py
     env_file:
-      - .env
+      - .env-compiler-engine
     restart: unless-stopped
   reverse-proxy:
     build:
