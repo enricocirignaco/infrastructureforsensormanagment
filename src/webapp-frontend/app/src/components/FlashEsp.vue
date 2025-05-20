@@ -3,22 +3,22 @@
     <!-- Compilation Section -->
     <v-row>
       <v-col>
-            <v-btn
-            :disabled="jobStatus === 'running' || jobStatus === 'pending'"
-            color="secondary"
-            class="mb-2"
-            @click="triggerCompilation"
+        <v-btn
+        :disabled="jobStatus === 'running' || jobStatus === 'pending'"
+        color="secondary"
+        class="mb-2"
+        @click="triggerCompilation"
+        >
+        Compile Firmware</v-btn>
+        <span v-if="jobId" class="ms-4 text-caption">Job ID: {{ jobId }}</span>
+        <h4 class="mb-2">Compiler engine logs</h4>
+        <v-sheet
+            elevation="1"
+            class="pa-4 position-relative"
+            style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
             >
-            Compile Firmware</v-btn>
-            <span v-if="jobId" class="ms-4 text-caption">Job ID: {{ jobId }}</span>
-            <h4 class="mb-2">Compiler engine logs</h4>
-            <v-sheet
-                elevation="1"
-                class="pa-4 position-relative"
-                style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
-                >
-                {{ compilationLogs }}
-            </v-sheet>
+            {{ compilationLogs }}
+        </v-sheet>
       </v-col>
     </v-row>
 
@@ -31,9 +31,9 @@
         :href="`/compilation/job/${jobId}/artifacts?bin_only=${downloadOptions.bin_only}&get_source_code=${downloadOptions.get_source_code}&get_logs=${downloadOptions.get_logs}`"
         download
         >
-        Download Artifacts</v-btn>
+            Download Artifacts
+        </v-btn>
       </v-col>
-
       <v-col cols="4">
          <v-switch
           v-model="downloadOptions.bin_only"
@@ -45,7 +45,6 @@
           style="transform: scale(0.85); height: 32px;"
           color="secondary"
         ></v-switch>
-
         <v-switch
           v-model="downloadOptions.get_source_code"
           label="Include Source Code"
@@ -56,7 +55,6 @@
           style="transform: scale(0.85); height: 32px;"
           color="secondary"
         ></v-switch>
-
         <v-switch
           v-model="downloadOptions.get_logs"
           label="Include Logs"
@@ -70,16 +68,22 @@
       </v-col>
     </v-row>
 
-    <v-divider class="my-6"></v-divider>
+    <v-divider v-if="jobStatus === 'success'" class="my-6"></v-divider>
     <!-- Flashing Section -->
-    <v-row v-if="isCompilationSuccess">
+    <v-row v-if="true">
       <v-col class="pa-4 mb-4">
         <h4 class="text-h6 mb-4">Flash ESP Board</h4>
-        <v-btn color="primary" class="me-4 mb-2">Connect</v-btn>
+        <v-btn
+            color="primary"
+            class="me-4 mb-2"
+            @click="connectToBoard"
+        >
+            Connect
+        </v-btn>
         <v-btn
             color="primary"
             class="mb-2"
-            @click="connectAndFlash"
+            @click="connectToBoard"
         >
             Flash ESP
         </v-btn>
@@ -87,7 +91,7 @@
         <v-sheet
             style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px; min-height: 100px;"
         >
-            {{ }}
+            {{flashingLogs }}
         </v-sheet>
       </v-col>
     </v-row>
@@ -95,9 +99,8 @@
 </template>
 
 <script setup>
-
 import { reactive, ref } from 'vue'
-import { ESPLoader } from 'esptool-js'
+import { ESPLoader, Transport } from 'esptool-js'
 import { useTextStore } from '@/stores/textStore'
 import compilationService from '@/services/compilationService'
 
@@ -106,19 +109,17 @@ const downloadOptions = reactive({
   get_source_code: false,
   get_logs: false
 })
-
 const { sensorId } = defineProps({
   sensorId: {
     type: String,
     default: null
   }
 })
-
 const textStore = useTextStore()
-const isCompilationSuccess = ref(true)
 const compilationLogs = ref('')
 const jobId = ref('')
 const jobStatus = ref('')
+const flashingLogs = ref('')
 
 // Function to start the compilation process
 const triggerCompilation = () => {
@@ -160,15 +161,43 @@ const checkCompilationStatus = () => {
 }
 
 
-
-
-// Example stub function
-const connectAndFlash = async () => {
-  const port = await navigator.serial.requestPort()
-  const transport = new ESPLoader.SerialTransport(port)
-  const loader = new ESPLoader(transport, 'esp32') // adjust chip type
-
-  await loader.initialize()
-  // loader.flashData(...) // to be added
+let port = null
+let transport = null
+let info = ''
+let loader = null
+let chipRom = null
+// Set up a terminal to funnel loader messages into our UI
+const terminal = {
+    clean() {},
+    writeLine: (line) => { flashingLogs.value += line + '\n' },
+    write: (data) => { flashingLogs.value += data }
 }
+const connectToBoard = async () => {
+  try {
+    if(port === null) {
+        // Prompt user to select a serial port
+        port = await navigator.serial.requestPort()
+        // Wrap the port in esptool-js Transport and open it
+        transport = new Transport(port, true)
+    }
+    // Initialize the ESPLoader and perform the bootloader handshake
+    loader = new ESPLoader({ transport, baudrate: 115200, terminal })
+    chipRom = await loader.main()
+  } catch (error) {
+    flashingLogs.value += `ERROR: ${error.message}\n`
+  }
+};
+
+
+
+
+// // Example stub function
+// const connectAndFlash = async () => {
+//   const port = await navigator.serial.requestPort()
+//   const transport = new SerialTransport(port)
+//   const loader = new ESPLoader(transport, 'esp32') // adjust chip type
+
+//   await loader.initialize()
+//   // loader.flashData(...) // to be added
+// }
 </script>
