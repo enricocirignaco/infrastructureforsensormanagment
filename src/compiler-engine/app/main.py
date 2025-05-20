@@ -140,23 +140,23 @@ async def get_build_artifacts(
     job_id: str,
     get_source_code: bool = Query(False, description="Include the source code in the artifacts"),
     get_logs: bool = Query(False, description="Include the logs in the artifacts"),
-    hex_only: bool = Query(False, description="Return only the compiled hex file")
+    bin_only: bool = Query(False, description="Return only the compiled binary file")
 ):
     if job_id not in jobs_status_map:
         raise HTTPException(status_code=404, detail="Job ID not found")
     if jobs_status_map[job_id]["status"] != BuildStatus.successful and jobs_status_map[job_id]["status"] != BuildStatus.delivered:
         raise HTTPException(status_code=400, detail="Job is not successful, use GET /status to get more informations")
-    if hex_only and (get_source_code or get_logs):
-        raise HTTPException(status_code=400, detail="Cannot include source code or logs when hex_only is set to true")
+    if bin_only and (get_source_code or get_logs):
+        raise HTTPException(status_code=400, detail="Cannot include source code or logs when bin_only is set to true")
     
     try:
-        # Return only the compiled hex file if hex_only is set to true
-        if hex_only:
+        # Return only the compiled binary file if bin_only is set to true
+        if bin_only:
             try:
                 jobs_status_map[job_id]["status"] = BuildStatus.delivered
                 return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARDUINO_BINARY)
             except Exception:
-                raise HTTPException(status_code=404, detail="Compiled hex file not found")
+                raise HTTPException(status_code=404, detail="Compiled binary file not found")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
         zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artifacts.zip"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
