@@ -9,7 +9,7 @@ export const useTextStore = defineStore('text', {
     restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
     //  restApiBaseUrl: 'http://localhost/api/v1',
 
-    flashEspBaudrate: 921600,
+    serialBaudrate: 921600,
     compilationPollingInterval: 1000,
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {

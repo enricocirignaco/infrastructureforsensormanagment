@@ -189,7 +189,7 @@ const serialConnect = async () => {
         SerialTransport = new Transport(SerialPort, true)
     }
     // Initialize the ESPLoader and perform the bootloader handshake
-    SerialLoader = new ESPLoader({ SerialTransport, baudrate: 115200, terminal })
+    SerialLoader = new ESPLoader({ transport: SerialTransport, baudrate: textStore.serialBaudrate, terminal })
     SerialChipRom = await SerialLoader.main()
     isSerialConnected.value = true
   } catch (error) {
