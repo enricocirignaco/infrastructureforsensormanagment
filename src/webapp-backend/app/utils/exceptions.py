@@ -14,3 +14,7 @@ class NotFoundError(Exception):
 class EmailAlreadyExists(Exception):
     """Raised when new user tries to be created with existing email."""
     pass
+
+class ExternalServiceError(Exception):
+    """Raised when an external service returns an error or is not available."""
+    pass

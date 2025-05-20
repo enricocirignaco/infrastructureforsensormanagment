@@ -31,6 +31,7 @@ class SensorNodeRepository:
             g.add((sensor_uri, URIRef(self.schema + "description"), Literal(sensor_node.description)))
         g.add((sensor_uri, URIRef(self.bfh + "state"), URIRef(sensor_node.state.rdf_uri)))
         g.add((sensor_uri, URIRef(self.bfh + "ttnDeviceLink"), Literal(str(sensor_node.ttn_device_link))))
+        g.add((sensor_uri, URIRef(self.bfh + "gitlabRef"), Literal(sensor_node.gitlab_ref)))
         
         # Standort
         if sensor_node.location.latitude is not None:
@@ -134,7 +135,7 @@ class SensorNodeRepository:
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?name ?description ?state ?ttn ?lat ?long ?alt ?postal ?templateUuid ?projectUuid
+        SELECT ?name ?description ?gitlabRef ?state ?ttn ?lat ?long ?alt ?postal ?templateUuid ?projectUuid
         WHERE {{
             {sensor_uri} a bfh:SensorNode ;
                         bfh:identifier "{uuid}" ;
@@ -142,7 +143,8 @@ class SensorNodeRepository:
                         bfh:state ?state ;
                         bfh:ttnDeviceLink ?ttn ;
                         bfh:usesNodeTemplate ?templateUri ;
-                        bfh:partOfProject ?projectUri .
+                        bfh:partOfProject ?projectUri ;
+                        bfh:gitlabRef ?gitlabRef .
             OPTIONAL {{ {sensor_uri} schema:description ?description }}
             OPTIONAL {{ {sensor_uri} bfh:latitude ?lat }}
             OPTIONAL {{ {sensor_uri} bfh:longitude ?long }}
@@ -164,6 +166,7 @@ class SensorNodeRepository:
             description=base["description"]["value"] if "description" in base else None,
             state=SensorNodeStateEnum.from_rdf_uri(base["state"]["value"]),
             ttn_device_link=base["ttn"]["value"],
+            gitlab_ref=base["gitlabRef"]["value"],
             location=SensorNodeLocation(
                 latitude=float(base["lat"]["value"]) if "lat" in base else None,
                 longitude=float(base["long"]["value"]) if "long" in base else None,

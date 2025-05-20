@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     INIT_ADMIN_PW: str = Field("", env="INIT_ADMIN_PW")
     JWT_SECRET: str = Field(..., env="JWT_SECRET")
     ACCESS_TOKEN_EXPIRE_MIN: int = Field(60, env="ACCESS_TOKEN_EXPIRE_MIN")
+    COMPILER_ENGINE_BASE_URL: str = Field("http://compiler-engine:8000", env="COMPILER_ENGINE_BASE_URL")
 
 #    class Config:
 #        env_file = ".env"  

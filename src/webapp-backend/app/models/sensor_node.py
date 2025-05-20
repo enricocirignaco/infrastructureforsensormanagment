@@ -50,6 +50,7 @@ class SensorNodeBase(BaseModel):
     name: str
     description: Optional[str]
     location: SensorNodeLocation
+    gitlab_ref: str
     configurables: List[ConfigurableAssignment]
 
 # Models used for mutations (from API)
