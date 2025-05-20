@@ -70,7 +70,7 @@
 
     <v-divider v-if="jobStatus === 'success'" class="my-6"></v-divider>
     <!-- Flashing Section -->
-    <v-row v-if="true">
+    <v-row v-if="jobStatus === 'success'">
       <v-col class="pa-4 mb-4">
         <h4 class="text-h6 mb-4">Flash ESP Board</h4>
         <v-btn
@@ -78,6 +78,7 @@
           color="primary"
           class="me-4 mb-2"
           @click="serialDisconnect"
+          :disabled="isSerialFlashing"
         >
           Disconnect
         </v-btn>
@@ -90,14 +91,17 @@
           Connect
         </v-btn>
         <v-btn
-            color="primary"
+            v-if="isSerialConnected"
+            color="secondary"
             class="mb-2"
+            @click="flashFirmware"
+            :disabled="isSerialFlashing"
         >
-            Flash ESP
+            Flash Firmware
         </v-btn>
         <h4 class="mt-4 mb-2">ESP Tool logs</h4>
         <v-sheet
-            style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px; min-height: 100px;"
+            style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
         >
             {{flashingLogs }}
         </v-sheet>
@@ -129,6 +133,7 @@ const jobId = ref('')
 const jobStatus = ref('')
 const flashingLogs = ref('')
 const isSerialConnected = ref(false)
+const isSerialFlashing = ref(false)
 // Function to start the compilation process
 const triggerCompilation = () => {
   compilationService.buildFirmware(sensorId)
@@ -215,19 +220,41 @@ const serialDisconnect = async () => {
     SerialChipRom = null
     flashingLogs.value += 'Disconnected from ESP board.\n'
     isSerialConnected.value = false
+    isSerialFlashing.value = false
   }
 }
 
-
-
-
-// // Example stub function
-// const connectAndFlash = async () => {
-//   const SerialPort = await navigator.serial.requestPort()
-//   const SerialTransport = new SerialTransport(SerialPort)
-//   const SerialLoader = new ESPLoader(SerialTransport, 'esp32') // adjust chip type
-
-//   await SerialLoader.initialize()
-//   // SerialLoader.flashData(...) // to be added
-// }
+// Function to flash the firmware
+const flashFirmware = async () => {
+    isSerialFlashing.value = true
+  try {
+    if (!SerialLoader) {
+      flashingLogs.value += 'ERROR: Board not connected. Please connect first.\n'
+      return
+    }
+    flashingLogs.value += 'Fetching firmware binary...\n'
+    // download compiled binary as ArrayBuffer
+    const artifact = await compilationService.getBuildArtifact(jobId.value)
+    const arrayBuffer = artifact
+    const uint8 = new Uint8Array(arrayBuffer)
+    // convert to binary string for esptool-js
+    const firmwareStr = SerialLoader.ui8ToBstr(uint8)
+    flashingLogs.value += 'Starting flash...\n'
+    await SerialLoader.writeFlash({
+      fileArray: [{ data: firmwareStr, address: 0x1000 }],
+      flashSize: 'keep',
+      eraseAll: false,
+      compress: true,
+      reportProgress: (fileIndex, written, total) => {
+        flashingLogs.value += `Flashing ${(written/total*100).toFixed(1)}%...\n`
+      }
+    })
+    await SerialLoader.after()
+    flashingLogs.value += 'Flash completed successfully.\n'
+    isSerialFlashing.value = false
+  } catch (error) {
+    flashingLogs.value += `ERROR during flash: ${error.message}\n`
+    isSerialFlashing.value = false
+  }
+}
 </script>

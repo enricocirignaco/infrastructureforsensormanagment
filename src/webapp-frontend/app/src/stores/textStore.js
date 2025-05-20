@@ -10,6 +10,7 @@ export const useTextStore = defineStore('text', {
     //  restApiBaseUrl: 'http://localhost/api/v1',
 
     serialBaudrate: 921600,
+    defaultFlashAddress: 0x0000,
     compilationPollingInterval: 1000,
     appVersion: import.meta.env.VITE_APP_VERSION || 'dev',
     projectStatusEnum: {

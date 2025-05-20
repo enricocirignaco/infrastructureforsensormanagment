@@ -39,11 +39,13 @@ export default {
         return fetch(url, options)
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
-    getBuildArtifact: function(jobId, getBinaryOnly, getSourceCode, getLogs) {
-        let url = BASE_URL + '/compilation/job/' + jobId + '/artifacts?' + getBinaryOnly + '&' + getSourceCode + '&' + getLogs
+    getBuildArtifact: function(jobId) {
+        let url = BASE_URL + '/compilation/job/' +jobId + '/artifacts?bin_only=true&get_source_code=false&get_logs=false'
+
         const options = {
             method: 'GET',
             headers: {
+                Accept: 'application/octet-stream',
                 ...authStore.getAuthHeader(),
             },
         }
