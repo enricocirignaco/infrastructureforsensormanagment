@@ -33,7 +33,7 @@ async def create_new_sensor_node(
     sensor_node_service: SensorNodeService = Depends(get_sensor_node_service)
 ) -> SensorNodeOutFull:
     try:
-        return sensor_node_service.create_sensor_node(sensor_node=sensor_node, logged_in_user=logged_in_user)
+        return await sensor_node_service.create_sensor_node(sensor_node=sensor_node, logged_in_user=logged_in_user)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:
@@ -71,7 +71,7 @@ async def delete_specific_sensor_node(
     sensor_node_service: SensorNodeService = Depends(get_sensor_node_service)
 ):
     try:
-        sensor_node_service.delete_sensor_node(uuid=uuid)
+        await sensor_node_service.delete_sensor_node(uuid=uuid)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:

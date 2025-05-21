@@ -45,7 +45,7 @@ class SensorNodeService:
         # sensor_node_out.state = SensorNodeStateEnum.ACTIVE if sensor_node_out.last_timeseries.timestamp < .... else SensorNodeStateEnum.INACTIVE
         return sensor_node_out
     
-    def create_sensor_node(self, sensor_node: SensorNodeCreate, logged_in_user: UserInDB) -> SensorNodeOutFull:
+    async def create_sensor_node(self, sensor_node: SensorNodeCreate, logged_in_user: UserInDB) -> SensorNodeOutFull:
         # Check if given uuid's exist
         try:
             project = self._project_service.get_project_by_uuid(uuid=sensor_node.project_uuid)
@@ -64,7 +64,7 @@ class SensorNodeService:
         
         # Create the sensor node
         uuid = uuid4()
-        keys = self._ttn_service.create_device(sensor_node_id=uuid)
+        keys = await self._ttn_service.create_device(sensor_node_id=uuid)
         system_configs = [
             ConfigurableAssignment(name="APP_KEY", type=ConfigurableTypeEnum.SYSTEM_DEFINED, value=keys.app_key, display_value=f"[ {keys.app_key} ]"),
             ConfigurableAssignment(name="JOIN_EUI", type=ConfigurableTypeEnum.SYSTEM_DEFINED, value=keys.join_eui, display_value=f"[ {keys.join_eui} ]"),
@@ -134,14 +134,14 @@ class SensorNodeService:
         else:
             raise ValueError("Sensor node cannot be updated, it is not in the PREPARED state")
     
-    def delete_sensor_node(self, uuid: UUID) -> None:
+    async def delete_sensor_node(self, uuid: UUID) -> None:
         sensor_node_db = self._sensor_node_repository.find_sensor_node_by_uuid(uuid=uuid)
         if not sensor_node_db:
             raise NotFoundError("Sensor node not found")
         if sensor_node_db.state != SensorNodeStateEnum.PREPARED:
             raise ValueError("Sensor node cannot be deleted, it is not in the PREPARED state")
         self._sensor_node_repository.delete_sensor_node(uuid=uuid)
-        self._ttn_service.delete_device(sensor_node_id=sensor_node_db.uuid)
+        await self._ttn_service.delete_device(sensor_node_id=sensor_node_db.uuid)
         
         # Update state of the project back to PREPARED if no other sensor nodes are in the project
         nodes_by_project = self.get_all_sensor_nodes(filters={"project_uuid": sensor_node_db.project_uuid})
