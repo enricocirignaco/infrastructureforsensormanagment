@@ -66,9 +66,9 @@ class SensorNodeService:
         uuid = uuid4()
         keys = await self._ttn_service.create_device(sensor_node_id=uuid)
         system_configs = [
-            ConfigurableAssignment(name="APP_KEY", type=ConfigurableTypeEnum.SYSTEM_DEFINED, value=keys.app_key, display_value=f"[ {keys.app_key} ]"),
-            ConfigurableAssignment(name="JOIN_EUI", type=ConfigurableTypeEnum.SYSTEM_DEFINED, value=keys.join_eui, display_value=f"[ {keys.join_eui} ]"),
-            ConfigurableAssignment(name="DEV_EUI", type=ConfigurableTypeEnum.SYSTEM_DEFINED, value=keys.dev_eui, display_value=f"[ {keys.dev_eui} ]")
+            ConfigurableAssignment(name="APP_KEY", type=ConfigurableTypeEnum.SYSTEM_DEFINED, display_value=keys.app_key, value=self._to_c_array(keys.app_key)),
+            ConfigurableAssignment(name="JOIN_EUI", type=ConfigurableTypeEnum.SYSTEM_DEFINED, display_value=keys.join_eui, value=self._to_c_array(keys.join_eui)),
+            ConfigurableAssignment(name="DEV_EUI", type=ConfigurableTypeEnum.SYSTEM_DEFINED, display_value=keys.dev_eui, value=self._to_c_array(keys.dev_eui)),
         ]
         user_configs = [config for config in sensor_node.configurables if config.type == ConfigurableTypeEnum.USER_DEFINED]
         configurables = user_configs + system_configs
@@ -153,3 +153,10 @@ class SensorNodeService:
             self._node_template_service.set_unused_node_template(sensor_node_db.node_template_uuid)
     
         
+    def _to_c_array(self, hex_string: str) -> str:
+        if len(hex_string) % 2 != 0:
+            raise ValueError("Hex string must have even length")
+        
+        bytes_list = [f"0x{hex_string[i:i+2]}" for i in range(0, len(hex_string), 2)]
+        formatted_bytes = ", ".join(bytes_list)
+        return f"{{ {formatted_bytes} }};"

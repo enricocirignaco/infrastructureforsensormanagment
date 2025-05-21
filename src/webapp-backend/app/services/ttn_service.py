@@ -5,11 +5,6 @@ from uuid import UUID
 from app.models.sensor_node import TTNKeys
 from app.config import settings
 
-#https://github.com/TheThingsNetwork/lorawan-devices/blob/master/vendor/heltec/cubecell-dev-board-class-a-otaa.yaml
-
-#https://www.thethingsindustries.com/docs/hardware/devices/adding-devices/manual/otaa/
-#https://www.thethingsindustries.com/docs/hardware/devices/models/heltec-ab01/
-
 class TTNService:
     
     def __init__(self):
@@ -40,6 +35,12 @@ class TTNService:
                         "dev_eui": dev_eui,
                         "join_eui": join_eui
                     },
+                    "version_ids": {
+                        "brand_id": "heltec",
+                        "model_id": "cubecell-dev-board-class-a-otaa",
+                        "firmware_version": "1.0",
+                        "band_id": "EU_863_870_TTN"
+                    },
                     "network_server_address": "eu1.cloud.thethings.network",
                     "application_server_address": "eu1.cloud.thethings.network",
                     "join_server_address": "eu1.cloud.thethings.network"
@@ -50,7 +51,11 @@ class TTNService:
                         "ids.join_eui",
                         "network_server_address",
                         "application_server_address",
-                        "join_server_address"
+                        "join_server_address",
+                        "version_ids.brand_id",
+                        "version_ids.model_id",
+                        "version_ids.firmware_version",
+                        "version_ids.band_id"
                     ]
                 }
             }
