@@ -4,14 +4,17 @@ from uuid import UUID
 
 from app.models.sensor_node import TTNKeys
 from app.config import settings
+from app.services.ttn.ttn_service_base import TtnServiceBase
 
-class TTNService:
+class TtnServiceReal(TtnServiceBase):
     
     def __init__(self):
         self.app_id = settings.TTN_APP_ID
         api_key = settings.TTN_API_KEY
+        if api_key is None:
+            raise ValueError("TTN_API_KEY must be set as an environment variable in order to use the TTN service.")
         
-        self.base_url = f"https://eu1.cloud.thethings.network/api/v3"
+        self.base_url = "https://eu1.cloud.thethings.network/api/v3"
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
@@ -180,6 +183,8 @@ class TTNService:
             if not is_resp.is_success:
                 raise Exception(f"Identity Server error: {is_resp.status_code} – {is_resp.text}")
 
+    def build_device_link(self, sensor_node_id: UUID) -> str:
+        return f"https://eu1.cloud.thethings.network/console/applications/{self.app_id}/devices/{sensor_node_id}"
 
     def _random_hex(self, length_bytes: int) -> str:
         return secrets.token_hex(length_bytes).upper()

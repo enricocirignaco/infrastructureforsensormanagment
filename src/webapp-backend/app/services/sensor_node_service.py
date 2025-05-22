@@ -6,7 +6,7 @@ from app.models.project import ProjectStateEnum
 from app.constants import system_defined_configurables
 from app.services.project_service import ProjectService
 from app.services.node_template_service import NodeTemplateService
-from app.services.ttn_service import TTNService
+from app.services.ttn.ttn_service_base import TtnServiceBase
 from app.utils.exceptions import NotFoundError
 from app.config import settings
 
@@ -19,7 +19,7 @@ class SensorNodeService:
     def __init__(self, sensor_node_repository: SensorNodeRepository, 
                  project_service: ProjectService,
                  node_template_service: NodeTemplateService,
-                 ttn_service: TTNService):
+                 ttn_service: TtnServiceBase):
         self._sensor_node_repository = sensor_node_repository
         self._project_service = project_service
         self._node_template_service = node_template_service
@@ -74,7 +74,7 @@ class SensorNodeService:
         configurables = user_configs + system_configs
         
         logbook = [SensorNodeLogbookEntry(type=SensorNodeLogbookEnum.CREATED, date=datetime.now(), user=UserOut(**logged_in_user.model_dump()))]
-        ttn_device_link = f"https://eu1.cloud.thethings.network/console/applications/{settings.TTN_APP_ID}/devices/{uuid}"
+        ttn_device_link = self._ttn_service.build_device_link(sensor_node_id=uuid)
         sensor_node_db = SensorNodeDB(
             **sensor_node.model_dump(), 
             uuid=uuid,
