@@ -14,12 +14,12 @@ export default {
                 'Content-Type': 'application/json',
             },
         }
-        return Promise.resolve({
-            job_id: "123e4567-e89b-12d3-a456-426614174000",
-            status: "pending",
-            message: "Building process started in background",
-            timestamp: "2021-10-10T10:10:10Z"
-        });
+        // return Promise.resolve({
+        //     job_id: "123e4567-e89b-12d3-a456-426614174000",
+        //     status: "pending",
+        //     message: "Building process started in background",
+        //     timestamp: "2021-10-10T10:10:10Z"
+        // });
         return fetch(url, options)
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
@@ -32,10 +32,10 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-        return Promise.resolve({
-            "status": "success",
-            "message": "Building process in progress"
-            });
+        // return Promise.resolve({
+        //     "status": "success",
+        //     "message": "Building process in progress"
+        //     });
         return fetch(url, options)
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
@@ -49,7 +49,7 @@ export default {
                 ...authStore.getAuthHeader(),
             },
         }
-        return Promise.resolve(new Blob([""], { type: "application/octet-stream" }));
+        // return Promise.resolve(new Blob([""], { type: "application/octet-stream" }));
         return fetch(url, options)
             .then(response => response.ok ? response : Promise.reject(response));
     }

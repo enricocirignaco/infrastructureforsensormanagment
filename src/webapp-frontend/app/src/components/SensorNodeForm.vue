@@ -56,6 +56,9 @@
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Notes" />
           </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="sensorNode.gitlab_ref" label="Gitlab Ref" :rules="[required]" />
+          </v-col>
           <!-- location -->
           <v-col cols="12">
             <v-card outlined>
@@ -225,7 +228,8 @@ if (isEditMode.value) {
       altitude: null,
       postalcode: null,
     },
-    configurables: []
+    configurables: [],
+    gitlab_ref: '',
   }
 }
 // fetch node templates

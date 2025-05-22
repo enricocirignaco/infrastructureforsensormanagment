@@ -100,6 +100,14 @@
                 <v-list-item-title>{{ sensorNode.uuid }}</v-list-item-title>
                 <v-list-item-subtitle>UUID</v-list-item-subtitle>
               </v-list-item>
+              <v-divider />
+              <v-list-item style="min-height: 72px;">
+                <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-identifier</v-icon>
+                </template>
+                <v-list-item-title>{{ sensorNode.gitlab_ref }}</v-list-item-title>
+                <v-list-item-subtitle>Gitlab Ref</v-list-item-subtitle>
+              </v-list-item>
             </v-list>
             <v-divider class="my-6" />
             <!-- sensor location map -->

@@ -23,13 +23,13 @@
     </v-row>
 
     <!-- Artifact Download Section -->
-    <v-row v-if="jobStatus === 'success'">
+    <v-row v-if="jobStatus === 'successful'">
       <v-col cols="8">
         <v-btn
         color="secondary"
         class="mb-4"
-        :href="`/compilation/job/${jobId}/artifacts?bin_only=${downloadOptions.bin_only}&get_source_code=${downloadOptions.get_source_code}&get_logs=${downloadOptions.get_logs}`"
-        download
+        @click="compilationService.getBuildArtifact(jobId)"
+
         >
             Download Artifacts
         </v-btn>
@@ -68,9 +68,9 @@
       </v-col>
     </v-row>
 
-    <v-divider v-if="jobStatus === 'success'" class="my-6"></v-divider>
+    <v-divider v-if="jobStatus === 'successful'" class="my-6"></v-divider>
     <!-- Flashing Section -->
-    <v-row v-if="jobStatus === 'success'">
+    <v-row v-if="jobStatus === 'successful'">
       <v-col class="pa-4 mb-4">
         <h4 class="text-h6 mb-4">Flash ESP Board</h4>
         <v-btn
