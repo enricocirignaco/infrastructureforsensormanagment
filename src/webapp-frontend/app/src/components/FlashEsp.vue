@@ -28,7 +28,8 @@
         <v-btn
         color="secondary"
         class="mb-4"
-        @click="compilationService.getBuildArtifact(jobId)"
+        @click="downloadArtifacts"
+        download
 
         >
             Download Artifacts
@@ -173,7 +174,30 @@ const checkCompilationStatus = () => {
     })
 }
 
+const downloadArtifacts = () => {
+  compilationService.getBuildArtifact(
+    jobId.value,
+    downloadOptions.bin_only,
+    downloadOptions.get_source_code,
+    downloadOptions.get_logs,
+    true
+  )
+  .then(artifact => {
+    const blob = new Blob([artifact])
+    const url = window.URL.createObjectURL(blob)
 
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'firmware.bin'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  })
+  .catch(error => {
+    compilationLogs.value += `ERROR downloading artifact: ${error.message}\n`
+  })
+}
 let SerialPort = null
 let SerialTransport = null
 let SerialLoader = null

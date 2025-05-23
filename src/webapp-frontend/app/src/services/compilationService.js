@@ -39,17 +39,23 @@ export default {
         return fetch(url, options)
             .then(response => response.ok ? response.json() : Promise.reject(response));
     },
-    getBuildArtifact: function(jobId, binOnly = true, getSourceCode = false, getLogs = false, isDownload = false) {
-        let url = BASE_URL + '/compilation/job/' +jobId + '/artifacts?bin_only=' + binOnly + '&get_source_code=' + getSourceCode +'&get_logs=' + getLogs + '&is_download=' + isDownload
+    getBuildArtifact: function(jobId, binOnly = true, getSourceCode = false, getLogs = false) {
+        const params = new URLSearchParams({
+            bin_only: binOnly,
+            get_source_code: getSourceCode,
+            get_logs: getLogs,
+        });
+
+        const url = `${BASE_URL}/compilation/job/${jobId}/artifacts?${params.toString()}`;
         const options = {
             method: 'GET',
             headers: {
-               Accept: 'application/octet-stream, application/zip, application/json',
+                Accept: 'application/octet-stream, application/zip, application/json',
                 ...authStore.getAuthHeader(),
             },
-        }
-        // return Promise.resolve(new Blob([""], { type: "application/octet-stream" }));
+        };
+
         return fetch(url, options)
-            .then(response => response.ok ? response : Promise.reject(response));
+            .then(response => response.ok ? response.blob() : Promise.reject(response));
     }
 }
