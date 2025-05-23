@@ -159,7 +159,7 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="6">
+          <v-col :cols="isEditMode ? 6 : 4">
             <v-btn
             type="submit"
             color="primary"
@@ -168,10 +168,22 @@
             :disabled="isSubmitting"
             >
               <v-icon start>mdi-content-save</v-icon>
-              Save Sensor Node
+              Save
             </v-btn>
           </v-col>
-          <v-col cols="6">
+          <v-col v-if="!isEditMode" cols="4">
+            <v-btn
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            @click="submitAndCreateAnother"
+            >
+              <v-icon start>mdi-content-save</v-icon>
+              Save and Create Another
+            </v-btn>
+          </v-col>
+          <v-col :cols="isEditMode ? 6 : 4">
             <v-btn color="secondary" class="mt-4" block @click="router.back()">
               <v-icon start>mdi-close</v-icon>
               Cancel
@@ -288,6 +300,22 @@ const submitSensorNode = () => {
             .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
             .catch((error) => console.log('Error creating sensorNode:', error))
     }
+  })
+}
+
+  const submitAndCreateAnother = () => {
+  // Validate Form
+  sensorNodeForm.value?.validate().then((isValid) => {
+    if (!isValid.valid) return
+    isSubmitting.value = true
+
+    // post request to create the sensorNode
+    sensorNodeService.createSensorNode(sensorNode.value)
+        .then((sensorNode) => {
+          // TODO
+          isSubmitting.value = false
+        })
+        .catch((error) => console.log('Error creating sensorNode:', error))
   })
 }
 
