@@ -16,6 +16,7 @@
             elevation="1"
             class="pa-4 position-relative"
             style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
+            ref="compilationLogSheet"
             >
             {{ compilationLogs }}
         </v-sheet>
@@ -103,7 +104,8 @@
         <h4 class="mt-4 mb-2">ESP Tool logs</h4>
         <v-sheet
             style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
-        >
+            ref="flashingLogsSheet"
+            >
             {{flashingLogs }}
         </v-sheet>
       </v-col>
@@ -116,6 +118,7 @@ import { reactive, ref } from 'vue'
 import { ESPLoader, Transport } from 'esptool-js'
 import { useTextStore } from '@/stores/textStore'
 import compilationService from '@/services/compilationService'
+import { watch, nextTick } from 'vue'
 
 const downloadOptions = reactive({
   bin_only: true,
@@ -135,6 +138,8 @@ const jobStatus = ref('')
 const flashingLogs = ref('')
 const isSerialConnected = ref(false)
 const isSerialFlashing = ref(false)
+const compilationLogSheet = ref(null)
+const flashingLogsSheet = ref(null)
 // Function to start the compilation process
 const triggerCompilation = () => {
   compilationService.buildFirmware(sensorId)
@@ -203,6 +208,23 @@ const downloadArtifacts = () => {
     compilationLogs.value += `ERROR downloading artifact: ${error.message}\n`;
   });
 }
+
+// Scroll to the bottom of the logs when they change
+watch(compilationLogs, () => {
+  nextTick(() => {
+    const el = compilationLogSheet.value?.$el || compilationLogSheet.value
+    if (el) el.scrollTop = el.scrollHeight
+  })
+})
+// Scroll to the bottom of the flashing logs when they change
+watch(flashingLogs, () => {
+  nextTick(() => {
+    const el = flashingLogsSheet.value?.$el || flashingLogsSheet.value
+    if (el) el.scrollTop = el.scrollHeight
+  })
+})
+
+
 let SerialPort = null
 let SerialTransport = null
 let SerialLoader = null
