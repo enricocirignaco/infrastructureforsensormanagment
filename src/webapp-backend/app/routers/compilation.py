@@ -43,10 +43,13 @@ async def get_build_job_status(job_id: UUID,
     
 @router.get("/job/{job_id}/artifacts", response_class=Response)
 async def get_build_job_artifacts(job_id: UUID, get_source_code: bool = False, get_logs: bool = False, bin_only: bool = False,
+                                  is_download: bool = False,
                                  _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN, RoleEnum.TECHNICIAN])),
                                  compilation_service: CompilationService = Depends(get_compilation_service)) -> Response:
     try:
-        return await compilation_service.get_build_job_artifacts(job_id, get_source_code, get_logs, bin_only)
+        response = await compilation_service.get_build_job_artifacts(job_id, get_source_code, get_logs, bin_only)
+        response.headers["Content-Disposition"] = "attachment" if is_download else "inline"
+        return response
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e:
