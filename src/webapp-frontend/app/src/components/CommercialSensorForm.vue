@@ -78,6 +78,7 @@
                   :suffix="prop.unit"
                   prefix="±"
                   type="number"
+                  :rules="[required]"
                 />
               </v-col>
               <v-col cols="3">
@@ -88,7 +89,7 @@
                     label="Min"
                     :suffix="prop.unit"
                     type="number"
-                    :rules="[prop.range.max ? required : () => true]"
+                    :rules="[required]"
                     />
                   </v-col>
                   <v-col cols="2" class="d-flex align-center justify-center text-medium-emphasis">
@@ -100,7 +101,7 @@
                     label="Max"
                     :suffix="prop.unit"
                     type="number"
-                    :rules="[prop.range.min ? required : () => true]"
+                    :rules="[required]"
                     />
                   </v-col>
                 </v-row>
