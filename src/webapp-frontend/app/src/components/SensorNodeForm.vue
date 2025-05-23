@@ -1,4 +1,10 @@
 <template>
+  <!-- Message Banner -->
+   <Banner
+      type="info"
+      message="halihalo"
+   ></Banner>
+
   <v-card v-if="isEditMode && sensorNode?.state && sensorNode.state !== 'Prepared'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
@@ -218,7 +224,7 @@ import nodeTemplateService from '@/services/nodeTemplateService'
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useRoute } from 'vue-router'
-
+import Banner from '@/components/Banner.vue'
 const route = useRoute()
 const showMap = ref(false)
 const isEditMode = computed(() => sensorNodeId !== null)

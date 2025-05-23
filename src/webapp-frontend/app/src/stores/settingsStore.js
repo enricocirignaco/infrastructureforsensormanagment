@@ -4,6 +4,7 @@ export const useSettingsStore = defineStore('settings', {
   state: () => ({
     // Parse the value to a boolean from localStorage
     isDarkMode: JSON.parse(localStorage.getItem('dark_mode')) || false,
+    bannerDuration: 5000,
   }),
   actions: {
     toggleDarkMode() {
