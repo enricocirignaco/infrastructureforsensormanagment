@@ -56,6 +56,6 @@ export default {
         };
 
         return fetch(url, options)
-            .then(response => response.ok ? response.blob() : Promise.reject(response));
+            .then(response => response.ok ? response : Promise.reject(response));
     }
 }
