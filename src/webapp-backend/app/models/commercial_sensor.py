@@ -27,13 +27,13 @@ class CommercialSensorLogbookEntry(BaseModel):
 
 
 class CommercialSensorRange(BaseModel):
-    min: int
-    max: int
+    min: float
+    max: float
 
 class CommercialSensorProps(BaseModel):
     name: str
     unit: str
-    precision: int
+    precision: float
     range: CommercialSensorRange
 
 class CommercialSensorBase(BaseModel):
