@@ -120,7 +120,13 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <v-btn type="submit" color="primary" class="mt-4" block>
+            <v-btn
+            type="submit"
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            >
               <v-icon start>mdi-content-save</v-icon>
               Save
             </v-btn>
@@ -161,7 +167,7 @@ const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
 const sensor = ref(null)
-
+const isSubmitting = ref(false)
 // Define the sensor object from the sensor Id or from default values
 if(isEditMode.value) {
     // Fetch sensor data
@@ -209,6 +215,7 @@ const removeSensorProp = (index) => {
   sensor.value.sensor_props.splice(index, 1)
 }
 const submitSensor = () => {
+  isSubmitting.value = true
   // Validate Form
   sensorForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return

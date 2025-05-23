@@ -17,7 +17,13 @@
       </v-col>
       <v-row>
         <v-col cols="6">
-          <v-btn type="submit" color="primary" class="mt-4" block>
+          <v-btn
+          type="submit"
+          color="primary"
+          class="mt-4"
+          block
+          :disabled="isSubmitting"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Save Sensor Node
           </v-btn>
@@ -154,7 +160,13 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <v-btn type="submit" color="primary" class="mt-4" block>
+            <v-btn
+            type="submit"
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            >
               <v-icon start>mdi-content-save</v-icon>
               Save Sensor Node
             </v-btn>
@@ -205,6 +217,7 @@ const router = useRouter()
 const sensorNode = ref(null)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
+const isSubmitting = ref(false)
 
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
@@ -263,6 +276,7 @@ const submitSensorNode = () => {
   // Validate Form
   sensorNodeForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
+    isSubmitting.value = true
     if(isEditMode.value){
         //put request to update the sensorNode
         sensorNodeService.editSensorNode(sensorNode.value)

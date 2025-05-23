@@ -14,7 +14,13 @@
       </v-col>
       <v-row>
         <v-col cols="6">
-          <v-btn type="submit" color="primary" class="mt-4" block>
+          <v-btn
+          type="submit"
+          color="primary"
+          class="mt-4"
+          block
+          :disabled="isSubmitting"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Save Node Template
           </v-btn>
@@ -136,7 +142,13 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <v-btn type="submit" color="primary" class="mt-4" block>
+            <v-btn
+            type="submit"
+            color="primary"
+            class="mt-4"
+            block
+            isSubmitting.value = true
+            >
               <v-icon start>mdi-content-save</v-icon>
               Save Node Template
             </v-btn>
@@ -179,6 +191,7 @@ const textStore = useTextStore()
 const router = useRouter()
 const nodeTemplate = ref(null)
 const commercialSensorsDTO = ref([])
+const isSubmitting = ref(false)
 
 // Define the nodeTemplate object from the nodeTemplate Id or from default values
 if (isEditMode.value) {
@@ -228,6 +241,7 @@ const removeConfigurable = (index) => {
 }
 
 const submitNodeTemplate = () => {
+  isSubmitting.value = true
   // Validate Form
   nodeTemplateForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
