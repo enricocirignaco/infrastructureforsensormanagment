@@ -7,7 +7,7 @@
       <v-col v-if="project.state !== 'Prepared'" cols="6" class="d-flex align-center">
         <v-checkbox
           v-model="project.state"
-          label="Archive Sensor Node"
+          label="Archive Project"
           :true-value="'Archived'"
           :false-value="'Active'"
           hide-details

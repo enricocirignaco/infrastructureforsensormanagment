@@ -143,7 +143,7 @@
                     </v-row>
                   </v-col>
                   <v-col cols="6">
-                   <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2" style="white-space: pre-wrap;">
+                   <v-alert type="info" variant="tonal" border="start" border-color="primary" color="white" class="ma-2" style="white-space: pre-wrap;">
                       {{ textStore.configurablesWarning }}
                     </v-alert>
                   </v-col>
