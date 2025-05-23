@@ -97,7 +97,10 @@ class CompilationService:
             if response.status_code == 200:
                 return Response(
                     content=response.content,
-                    content_disposition=response.headers.get("content-disposition"),
+                    headers={
+                        "Content-Disposition": response.headers.get("content-disposition"),
+                        "Content-Type": response.headers.get("content-type")
+                    },
                     status_code=response.status_code,
                     media_type=response.headers.get("content-type")
                 )
