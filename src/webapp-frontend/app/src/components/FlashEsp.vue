@@ -179,24 +179,29 @@ const downloadArtifacts = () => {
     jobId.value,
     downloadOptions.bin_only,
     downloadOptions.get_source_code,
-    downloadOptions.get_logs,
-    true
+    downloadOptions.get_logs
   )
-  .then(artifact => {
-    const blob = new Blob([artifact])
-    const url = window.URL.createObjectURL(blob)
+  .then(response => {
+    const disposition = response.headers.get('Content-Disposition');
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+    const filename = match ? match[1].replace(/['"]/g, '') : 'firmware.bin';
 
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'firmware.bin'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    return response.blob().then(blob => ({ blob, filename }));
+  })
+  .then(({ blob, filename }) => {
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   })
   .catch(error => {
-    compilationLogs.value += `ERROR downloading artifact: ${error.message}\n`
-  })
+    compilationLogs.value += `ERROR downloading artifact: ${error.message}\n`;
+  });
 }
 let SerialPort = null
 let SerialTransport = null
