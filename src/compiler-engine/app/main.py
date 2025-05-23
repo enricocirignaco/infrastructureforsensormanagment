@@ -153,7 +153,7 @@ async def get_build_artifacts(
         if bin_only:
             try:
                 jobs_status_map[job_id]["status"] = BuildStatus.delivered
-                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARDUINO_BINARY)
+                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename= 'job_id_' + job_id + '_' + DEFAULT_ARDUINO_BINARY)
             except Exception:
                 raise HTTPException(status_code=404, detail="Compiled binary file not found")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
@@ -188,7 +188,7 @@ async def get_build_artifacts(
                     zipf.write(log_file_path, arcname="compilation.log")
 
         jobs_status_map[job_id]["status"] = BuildStatus.delivered
-        return FileResponse(zip_path, media_type="application/zip", filename="artifacts.zip")
+        return FileResponse(zip_path, media_type="application/zip", filename= 'job_id_' + job_id + '_artifacts.zip')
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
@@ -245,10 +245,10 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
     if request.config:
         try:
             config_file = "// Auto-generated config.h\n"
-            config_file += "#ifndef CONFIG_H\n#define CONFIG_H\n\n"
+            config_file += "#ifndef COMPILER_ENGINE_CONFIG_H\n#define COMPILER_ENGINE_CONFIG_H\n\n"
             for prop in request.config:
                 config_file += f"#define {prop.key} \"{prop.value}\"\n"
-            config_file += "\n#endif // CONFIG_H\n"
+            config_file += "\n#endif // COMPILER_ENGINE_CONFIG_H\n"
         except Exception as e:
             jobs_status_map[job_id] = {
                 "status": BuildStatus.error,
