@@ -3,7 +3,7 @@ from typing import List
 from uuid import UUID
 
 from ..dependencies import require_roles_or_owner, get_sensor_node_service
-from app.utils.exceptions import NotFoundError
+from app.utils.exceptions import NotFoundError, ExternalServiceError
 from app.models.user import UserInDB, RoleEnum
 from app.models.sensor_node import SensorNodeOutSlim, SensorNodeOutFull, SensorNodeUpdate, SensorNodeCreate
 from app.services.sensor_node_service import SensorNodeService
@@ -38,6 +38,8 @@ async def create_new_sensor_node(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))
 
 @router.get("/{uuid}", response_model=SensorNodeOutFull)
 async def read_specific_sensor_node(
@@ -76,3 +78,5 @@ async def delete_specific_sensor_node(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))

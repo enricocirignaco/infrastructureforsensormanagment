@@ -5,6 +5,7 @@ from uuid import UUID
 from app.models.sensor_node import TTNKeys
 from app.config import settings
 from app.services.ttn.ttn_service_base import TtnServiceBase
+from app.utils.exceptions import ExternalServiceError
 
 class TtnServiceReal(TtnServiceBase):
     
@@ -64,7 +65,7 @@ class TtnServiceReal(TtnServiceBase):
             }
             is_resp = await client.post(is_url, json=identity_payload, headers=self.headers)
             if not is_resp.is_success:
-                raise Exception(f"Identity Server error: {is_resp.status_code} – {is_resp.text}")
+                raise ExternalServiceError(f"Identity Server error: {is_resp.status_code} – {is_resp.text}")
 
             # === Schritt 2: Join Server ===
             js_url = f"{self.base_url}/js/applications/{self.app_id}/devices/{device_id}"
@@ -96,7 +97,7 @@ class TtnServiceReal(TtnServiceBase):
             }
             js_resp = await client.put(js_url, json=join_payload, headers=self.headers)
             if not js_resp.is_success:
-                raise Exception(f"Join Server error: {js_resp.status_code} – {js_resp.text}")
+                raise ExternalServiceError(f"Join Server error: {js_resp.status_code} – {js_resp.text}")
 
             # === Schritt 3: Network Server ===
             ns_url = f"{self.base_url}/ns/applications/{self.app_id}/devices/{device_id}"
@@ -126,7 +127,7 @@ class TtnServiceReal(TtnServiceBase):
             }
             ns_resp = await client.put(ns_url, json=ns_payload, headers=self.headers)
             if not ns_resp.is_success:
-                raise Exception(f"Network Server error: {ns_resp.status_code} – {ns_resp.text}")
+                raise ExternalServiceError(f"Network Server error: {ns_resp.status_code} – {ns_resp.text}")
 
             # === Schritt 4: Application Server ===
             as_url = f"{self.base_url}/as/applications/{self.app_id}/devices/{device_id}"
@@ -148,7 +149,7 @@ class TtnServiceReal(TtnServiceBase):
             }
             as_resp = await client.put(as_url, json=as_payload, headers=self.headers)
             if not as_resp.is_success:
-                raise Exception(f"Application Server error: {as_resp.status_code} – {as_resp.text}")
+                raise ExternalServiceError(f"Application Server error: {as_resp.status_code} – {as_resp.text}")
 
         return TTNKeys(
             app_key=app_key,
@@ -163,25 +164,25 @@ class TtnServiceReal(TtnServiceBase):
             as_url = f"{self.base_url}/as/applications/{self.app_id}/devices/{sensor_node_id}"
             as_resp = await client.delete(as_url, headers=self.headers)
             if not as_resp.is_success:
-                raise Exception(f"Application Server error: {as_resp.status_code} – {as_resp.text}")
+                raise ExternalServiceError(f"Application Server error: {as_resp.status_code} – {as_resp.text}")
 
             # === Schritt 2: Network Server ===
             ns_url = f"{self.base_url}/ns/applications/{self.app_id}/devices/{sensor_node_id}"
             ns_resp = await client.delete(ns_url, headers=self.headers)
             if not ns_resp.is_success:
-                raise Exception(f"Network Server error: {ns_resp.status_code} – {ns_resp.text}")
+                raise ExternalServiceError(f"Network Server error: {ns_resp.status_code} – {ns_resp.text}")
 
             # === Schritt 3: Join Server ===
             js_url = f"{self.base_url}/js/applications/{self.app_id}/devices/{sensor_node_id}"
             js_resp = await client.delete(js_url, headers=self.headers)
             if not js_resp.is_success:
-                raise Exception(f"Join Server error: {js_resp.status_code} – {js_resp.text}")
+                raise ExternalServiceError(f"Join Server error: {js_resp.status_code} – {js_resp.text}")
 
             # === Schritt 4: Identity Server ===
             is_url = f"{self.base_url}/applications/{self.app_id}/devices/{sensor_node_id}"
             is_resp = await client.delete(is_url, headers=self.headers)
             if not is_resp.is_success:
-                raise Exception(f"Identity Server error: {is_resp.status_code} – {is_resp.text}")
+                raise ExternalServiceError(f"Identity Server error: {is_resp.status_code} – {is_resp.text}")
 
     def build_device_link(self, sensor_node_id: UUID) -> str:
         return f"https://eu1.cloud.thethings.network/console/applications/{self.app_id}/devices/{sensor_node_id}"

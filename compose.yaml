@@ -55,6 +55,7 @@ services:
       - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
+      - FEATURE_TTN_ENABLED=false
     env_file:
       - .env-backend
   timeseries-parser:
