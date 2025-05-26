@@ -1,9 +1,4 @@
 <template>
-  <!-- Message Banner -->
-   <Banner
-      type="info"
-      message="halihalo"
-   ></Banner>
 
   <v-card v-if="isEditMode && sensorNode?.state && sensorNode.state !== 'Prepared'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
@@ -155,7 +150,7 @@
                     </v-row>
                   </v-col>
                   <v-col cols="6">
-                   <v-alert type="info" variant="tonal" border="start" border-color="primary" color="white" class="ma-2" style="white-space: pre-wrap;">
+                   <v-alert type="info" variant="tonal" border="start" border-color="primary" class="ma-2" style="white-space: pre-wrap;">
                       {{ textStore.configurablesWarning }}
                     </v-alert>
                   </v-col>
@@ -163,6 +158,14 @@
               </v-card-text>
             </v-card>
           </v-col>
+        </v-row>
+        <v-row>
+            <!-- Message Banner -->
+          <Banner
+              v-if="bannerMessage !== ''"
+              type="info"
+              :message="bannerMessage"
+          ></Banner>
         </v-row>
         <v-row>
           <v-col :cols="isEditMode ? 6 : 4">
@@ -204,6 +207,7 @@
   <v-container v-if="!isEditMode && !sensorNode" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
+
 </template>
 
 <script setup>
@@ -236,7 +240,7 @@ const sensorNode = ref(null)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
 const isSubmitting = ref(false)
-
+const bannerMessage = ref('')
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
   // Fetch sensorNode data
@@ -320,6 +324,7 @@ const submitSensorNode = () => {
         .then((sensorNode) => {
           // TODO
           isSubmitting.value = false
+          bannerMessage.value = "New Sensor Node created successfully. UUID: "+ sensorNode.uuid + "     You can now create another one."
         })
         .catch((error) => console.log('Error creating sensorNode:', error))
   })
