@@ -113,13 +113,15 @@
             <!-- sensor location map -->
             <v-row class="mb-6">
               <v-col cols="12">
-                <v-card elevation="1" rounded="lg">
+                <v-card
+                  v-if="(sensorNode?.location?.latitude && sensorNode?.location?.longitude) || sensorNode?.location?.postalcode || sensorNode?.location?.altitude"
+                  elevation="1"
+                  rounded="lg">
                   <v-card-title>
                     <h3 class="text-h6 mb-0">Sensor Node Location</h3>
                   </v-card-title>
-                  <v-card-text>
+                  <v-card-text v-if="sensorNode?.location?.latitude && sensorNode?.location?.longitude">
                     <LMap
-                      v-if="sensorNode?.location"
                       class="rounded-lg"
                       style="height: 400px; width: 100%;"
                       :zoom="13"
