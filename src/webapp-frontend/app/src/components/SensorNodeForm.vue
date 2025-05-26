@@ -288,7 +288,10 @@ function loadConfigurables(nodeTemplateUuid) {
             value: config.value
           }
         })
-      showConfigurables.value = true
+      if(sensorNode.value.configurables.length > 0) {
+        // show configurables if there are any
+        showConfigurables.value = true
+      }
     })
     .catch((error) => {
       console.error('Error fetching node templates:', error)
