@@ -229,6 +229,7 @@ import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useRoute } from 'vue-router'
 import Banner from '@/components/Banner.vue'
+import { nextTick } from 'vue'
 const route = useRoute()
 const showMap = ref(false)
 const isEditMode = computed(() => sensorNodeId !== null)
@@ -322,9 +323,12 @@ const submitSensorNode = () => {
     // post request to create the sensorNode
     sensorNodeService.createSensorNode(sensorNode.value)
         .then((sensorNode) => {
-          // TODO
           isSubmitting.value = false
-          bannerMessage.value = "New Sensor Node created successfully. UUID: "+ sensorNode.uuid + "     You can now create another one."
+          // reset banner message first to force reactivity
+          bannerMessage.value = ''
+          nextTick(() => {
+            bannerMessage.value = `New Sensor Node created successfully. UUID: ${sensorNode.uuid}     You can now create another one.`
+          })
         })
         .catch((error) => console.log('Error creating sensorNode:', error))
   })
