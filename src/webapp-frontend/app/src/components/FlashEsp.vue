@@ -92,6 +92,7 @@
           color="primary"
           class="me-4 mb-2"
           @click="serialConnect"
+          :disabled="isConsoleConnected"
         >
           Connect
         </v-btn>
@@ -110,6 +111,37 @@
             ref="flashingLogsSheet"
             >
             {{flashingLogs }}
+        </v-sheet>
+      </v-col>
+    </v-row>
+    <!-- Serial Console Section -->
+    <v-row>
+      <v-col class="pa-4 mb-4">
+        <h4 class="text-h6 mb-4">Serial Console</h4>
+        <v-btn
+          v-if="isConsoleConnected"
+          color="primary"
+          class="me-4 mb-2"
+          @click="serialConsoleDisconnect"
+          :disabled="isSerialConnected"
+        >
+          Disconnect
+        </v-btn>
+        <v-btn
+          v-else
+          color="primary"
+          class="me-4 mb-2"
+          @click="serialConsoleConnect"
+          :disabled="isSerialConnected"
+        >
+          Connect
+        </v-btn>
+        <!-- <h4 class="mt-4 mb-2">ESP Tool logs</h4> -->
+        <v-sheet
+            style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
+            ref="flashingLogsSheet"
+            >
+            {{consoleLogs }}
         </v-sheet>
       </v-col>
     </v-row>
@@ -140,9 +172,11 @@ const jobId = ref('')
 const jobStatus = ref('')
 const flashingLogs = ref('')
 const isSerialConnected = ref(false)
+const isConsoleConnected = ref(false)
 const isSerialFlashing = ref(false)
 const compilationLogSheet = ref(null)
 const flashingLogsSheet = ref(null)
+const consoleLogs = ref('')
 // Function to start the compilation process
 const triggerCompilation = () => {
   compilationService.buildFirmware(sensorId)
@@ -248,7 +282,7 @@ const serialConnect = async () => {
         SerialTransport = new Transport(SerialPort, true)
     }
     // Initialize the ESPLoader and perform the bootloader handshake
-    SerialLoader = new ESPLoader({ transport: SerialTransport, baudrate: textStore.serialBaudrate, terminal })
+    SerialLoader = new ESPLoader({ transport: SerialTransport, baudrate: 115200, terminal })
     SerialChipRom = await SerialLoader.main()
     isSerialConnected.value = true
   } catch (error) {
@@ -261,6 +295,11 @@ const serialConnect = async () => {
 const serialDisconnect = async () => {
   try {
     if (SerialTransport) {
+      // Disconnect transport and pulse DTR to reset
+      flashingLogs.value += 'Triggering a DTR reset...\n'
+      await SerialTransport.setDTR(false)
+      await new Promise(r => setTimeout(r, 100))
+      await SerialTransport.setDTR(true)
       await SerialTransport.disconnect()
       flashingLogs.value += 'Transport disconnected.\n'
     }
@@ -277,7 +316,51 @@ const serialDisconnect = async () => {
     isSerialFlashing.value = false
   }
 }
+// serial console connection
+let reader = null
+const serialConsoleConnect = async () => {
+  try {
+    if(SerialPort === null){
+      SerialPort = await navigator.serial.requestPort()
+      await SerialPort.open({ baudRate: 115200 })
+      SerialTransport = new Transport(SerialPort)
+    }
+    const decoder = new TextDecoder()
+    reader = SerialPort.readable.getReader()
+    isConsoleConnected.value = true
+    consoleLogs.value += `Serial console connected at 115200 baud\n`
 
+    // Read loop: append incoming data to logs
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      const chunk = decoder.decode(value)
+      consoleLogs.value += chunk
+    }
+  } catch (error) {
+    consoleLogs.value += `ERROR in serial console: ${error.message}\n`
+    reader?.releaseLock()
+    isConsoleConnected.value = false
+  }
+}
+// serial console disconnection
+const serialConsoleDisconnect = async () => {
+  try {
+    if (SerialPort && reader) {
+      // Release reader when done
+      reader.releaseLock()
+      await SerialPort.close()
+      consoleLogs.value += 'Serial console disconnected.\n'
+    }
+  } catch (err) {
+    consoleLogs.value += `ERROR during console disconnect: ${err.message}\n`
+  } finally {
+    SerialPort = null
+    SerialTransport = null
+    reader = null
+    isConsoleConnected.value = false
+  }
+}
 // Function to flash the firmware
 const flashFirmware = async () => {
     isSerialFlashing.value = true
