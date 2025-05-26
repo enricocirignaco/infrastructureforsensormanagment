@@ -287,15 +287,15 @@ const flashFirmware = async () => {
       return
     }
     flashingLogs.value += 'Fetching firmware binary...\n'
-    // download compiled binary as ArrayBuffer
-    const artifact = await compilationService.getBuildArtifact(jobId.value)
-    const arrayBuffer = artifact
-    const uint8 = new Uint8Array(arrayBuffer)
-    // convert to binary string for esptool-js
-    const firmwareStr = SerialLoader.ui8ToBstr(uint8)
+    const response = await compilationService.getBuildArtifact(jobId.value)
+    flashingLogs.value += 'Firmware binary fetched successfully.\n'
+    const blob = await response.blob()
+    const arrayBuffer = await blob.arrayBuffer()
+    const uint8Array = new Uint8Array(arrayBuffer)
+    const firmwareStr = SerialLoader.ui8ToBstr(uint8Array)
     flashingLogs.value += 'Starting flash...\n'
     await SerialLoader.writeFlash({
-      fileArray: [{ data: firmwareStr, address: 0x1000 }],
+      fileArray: [{ data: firmwareStr, address: 0x0000 }],
       flashSize: 'keep',
       eraseAll: false,
       compress: true,
@@ -305,9 +305,10 @@ const flashFirmware = async () => {
     })
     await SerialLoader.after()
     flashingLogs.value += 'Flash completed successfully.\n'
-    isSerialFlashing.value = false
   } catch (error) {
     flashingLogs.value += `ERROR during flash: ${error.message}\n`
+  }
+  finally {
     isSerialFlashing.value = false
   }
 }
