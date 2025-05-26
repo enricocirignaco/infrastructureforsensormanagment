@@ -283,7 +283,7 @@ const serialConnect = async () => {
         SerialTransport = new Transport(SerialPort, true)
     }
     // Initialize the ESPLoader and perform the bootloader handshake
-    SerialLoader = new ESPLoader({ transport: SerialTransport, baudrate: 115200, terminal })
+    SerialLoader = new ESPLoader({ transport: SerialTransport, baudrate: textStore.serialBaudrate, terminal })
     SerialChipRom = await SerialLoader.main()
     isSerialConnected.value = true
   } catch (error) {
@@ -318,9 +318,9 @@ const serialConsoleConnect = async () => {
   try {
     if(SerialPort === null){
       SerialPort = await navigator.serial.requestPort()
-      await SerialPort.open({ baudRate: 115200 })
+      await SerialPort.open({ baudRate: textStore.serialBaudrate })
       SerialTransport = new Transport(SerialPort)
-      flashingLogs.value += 'Triggering a DTR reset...\n'
+      consoleLogs.value += 'Triggering a DTR reset...\n'
       await SerialTransport.setDTR(false)
       await new Promise(r => setTimeout(r, 100))
       await SerialTransport.setDTR(true)
@@ -328,7 +328,7 @@ const serialConsoleConnect = async () => {
     const decoder = new TextDecoder()
     reader = SerialPort.readable.getReader()
     isConsoleConnected.value = true
-    consoleLogs.value += `Serial console connected at 115200 baud\n`
+    consoleLogs.value += `Serial console connected at ${textStore.serialBaudrate} baud\n`
 
     // Read loop: append incoming data to logs
     while (true) {
