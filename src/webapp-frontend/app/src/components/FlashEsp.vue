@@ -107,6 +107,8 @@
         </v-btn>
         <h4 class="mt-4 mb-2">ESP Tool logs</h4>
         <v-sheet
+            elevation="1"
+            class="pa-4 position-relative"
             style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
             ref="flashingLogsSheet"
             >
@@ -138,8 +140,10 @@
         </v-btn>
         <!-- <h4 class="mt-4 mb-2">ESP Tool logs</h4> -->
         <v-sheet
+            elevation="1"
+            class="pa-4 position-relative"
             style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; height: 200px;"
-            ref="flashingLogsSheet"
+            ref="consoleLogsSheet"
             >
             {{consoleLogs }}
         </v-sheet>
@@ -176,6 +180,7 @@ const isConsoleConnected = ref(false)
 const isSerialFlashing = ref(false)
 const compilationLogSheet = ref(null)
 const flashingLogsSheet = ref(null)
+const consoleLogsSheet = ref(null)
 const consoleLogs = ref('')
 // Function to start the compilation process
 const triggerCompilation = () => {
@@ -246,18 +251,14 @@ const downloadArtifacts = () => {
   });
 }
 
-// Scroll to the bottom of the logs when they change
-watch(compilationLogs, () => {
-  nextTick(() => {
-    const el = compilationLogSheet.value?.$el || compilationLogSheet.value
-    if (el) el.scrollTop = el.scrollHeight
-  })
-})
-// Scroll to the bottom of the flashing logs when they change
-watch(flashingLogs, () => {
-  nextTick(() => {
-    const el = flashingLogsSheet.value?.$el || flashingLogsSheet.value
-    if (el) el.scrollTop = el.scrollHeight
+// Scroll to the bottom of the logs when any of them change
+;[compilationLogs, flashingLogs, consoleLogs].forEach((logRef, i) => {
+  const sheetRef = [compilationLogSheet, flashingLogsSheet, consoleLogsSheet][i]
+  watch(logRef, () => {
+    nextTick(() => {
+      const el = sheetRef.value?.$el || sheetRef.value
+      if (el) el.scrollTop = el.scrollHeight
+    })
   })
 })
 
@@ -295,11 +296,6 @@ const serialConnect = async () => {
 const serialDisconnect = async () => {
   try {
     if (SerialTransport) {
-      // Disconnect transport and pulse DTR to reset
-      flashingLogs.value += 'Triggering a DTR reset...\n'
-      await SerialTransport.setDTR(false)
-      await new Promise(r => setTimeout(r, 100))
-      await SerialTransport.setDTR(true)
       await SerialTransport.disconnect()
       flashingLogs.value += 'Transport disconnected.\n'
     }
@@ -324,6 +320,10 @@ const serialConsoleConnect = async () => {
       SerialPort = await navigator.serial.requestPort()
       await SerialPort.open({ baudRate: 115200 })
       SerialTransport = new Transport(SerialPort)
+      flashingLogs.value += 'Triggering a DTR reset...\n'
+      await SerialTransport.setDTR(false)
+      await new Promise(r => setTimeout(r, 100))
+      await SerialTransport.setDTR(true)
     }
     const decoder = new TextDecoder()
     reader = SerialPort.readable.getReader()
