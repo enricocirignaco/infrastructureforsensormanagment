@@ -37,9 +37,10 @@
         </v-btn>
       </v-col>
       <v-col cols="4">
-         <v-switch
+        <v-switch
           v-model="downloadOptions.bin_only"
           label="Binary Only"
+          :disabled="downloadOptions.get_source_code || downloadOptions.get_logs"
           inset
           hide-details
           density="comfortable"
@@ -50,6 +51,7 @@
         <v-switch
           v-model="downloadOptions.get_source_code"
           label="Include Source Code"
+          :disabled="downloadOptions.bin_only"
           inset
           hide-details
           density="comfortable"
@@ -60,6 +62,7 @@
         <v-switch
           v-model="downloadOptions.get_logs"
           label="Include Logs"
+          :disabled="downloadOptions.bin_only"
           inset
           hide-details
           density="comfortable"
