@@ -174,7 +174,7 @@
                   <template #prepend>
                     <v-icon style="font-size: 28px;">mdi-cog</v-icon>
                   </template>
-                  <v-list-item-title>{{ config.name }}: <strong>{{ config.value }}</strong></v-list-item-title>
+                  <v-list-item-title>{{ config.name }}:<br> <strong>{{ config.type === 'SystemDefined' ? config.display_value : config.value }}</strong></v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-col>
