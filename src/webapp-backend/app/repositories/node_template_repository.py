@@ -3,12 +3,13 @@ from app.models.node_template import (
     NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum, ProtobufSchema, ProtobufSchemaField)
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
-from rdflib import Graph, URIRef, Literal, RDF, Namespace
+from rdflib import Graph, URIRef, Literal, RDF, Namespace, XSD
 
 from typing import List
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 import re
+import base64
 
 class NodeTemplateRepository:
 
@@ -280,19 +281,22 @@ class NodeTemplateRepository:
         """
         res = self.triplestore_client.query(sparql_query)
         
-        if not res.get('results', {}).get('bindings'):
+        bindings = res.get('results', {}).get('bindings', [])
+        if not bindings:
             return None
         
-        message_name = res['messageName']['value']
+        message_name = bindings[0]['messageName']['value']
+        
         fields = [
             ProtobufSchemaField(
                 field_name=row['fieldName']['value'],
                 protobuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row['datatype']['value'])
             )
-            for row in res['results']['bindings']
+            for row in bindings
         ]
         
         return ProtobufSchema(message_name=message_name, fields=fields)
+
     
     def find_all_protobuf_schemas(self) -> List[ProtobufSchema]:
         sparql_query = f"""
@@ -332,10 +336,9 @@ class NodeTemplateRepository:
         return list(schemas.values())
 
     def write_protobuf_schema(self, schema: bytes) -> None:
-        BFH = Namespace("http://data.bfh.ch/")
-        SCHEMA = Namespace("http://schema.org/")
-        description_uri = URIRef("http://data.bfh.ch/protobufDescriptionFile")
+        description_uri = URIRef("http://data.bfh.ch/protobufDescriptorFile")
         
+        # Remove existing descriptor file
         delete_query = f"""
         PREFIX bfh: <http://data.bfh.ch/>
         DELETE WHERE {{
@@ -343,19 +346,15 @@ class NodeTemplateRepository:
         }}
         """
         self.triplestore_client.update(delete_query)
-    
+        
         g = Graph()
         g.bind('schema', self.schema)
         g.bind('bfh', self.bfh)
         
-        g.parse(data=schema.decode('utf-8'), format='nt')
-
-        # 3. Metadaten hinzufügen
-        #g.add((description_uri, RDF.type, BFH.ProtobufDescriptionFile))
-        #g.add((description_uri, SCHEMA.name, Literal(schema_name)))
-        #g.add((description_uri, SCHEMA.description, Literal(description)))
-        #g.add((description_uri, SCHEMA.dateCreated, Literal(datetime.utcnow().isoformat())))
-#
-        ## 4. In den Triplestore schreiben
-        #sparql_update = f"INSERT DATA {{ {g.serialize(format='nt')} }}"
-        #triplestore_client.update(sparql_update)
+        g.add((description_uri, RDF.type, URIRef("http://data.bfh.ch/ProtobufDescriptionFile")))
+        encoded_bytes = base64.b64encode(schema).decode('ascii')
+        g.add((description_uri, URIRef(self.bfh + "binaryContent"), Literal(encoded_bytes, datatype=XSD.base64Binary)))
+        g.add((description_uri, URIRef(self.schema + "dateModified"), Literal(datetime.now(timezone.utc).isoformat(), datatype=XSD.dateTime)))
+        
+        sparql_update = f"INSERT DATA {{ {g.serialize(format='nt')} }}"
+        self.triplestore_client.update(sparql_update)

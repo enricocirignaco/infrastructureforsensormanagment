@@ -56,7 +56,7 @@ class NodeTemplateService:
         
         return node_template_db
 
-    def update_node_template(self, uuid: UUID, node_template: NodeTemplateUpdate, logged_in_user: UserInDB) -> NodeTemplateDB:
+    async def update_node_template(self, uuid: UUID, node_template: NodeTemplateUpdate, logged_in_user: UserInDB) -> NodeTemplateDB:
         node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
         if not node_template_db:
             raise NotFoundError("Node Template not found")
@@ -79,7 +79,8 @@ class NodeTemplateService:
             # Update node template that is currently unused
             node_template_update = NodeTemplateDB(
                 **node_template.model_dump(), 
-                logbook=node_template_db.logbook)
+                logbook=node_template_db.logbook,
+                protobuf_message_name=f"Msg_{uuid.hex}")
         elif node_template_db.state != NodeTemplateStateEnum.UNUSED and node_template_db.state == node_template.state:
             # Update node template that is currently in use or archived but state is not changed
             return node_template_db
@@ -100,7 +101,11 @@ class NodeTemplateService:
                                      date=datetime.now(), 
                                      user=UserOut(**logged_in_user.model_dump())))
         
-        return self.node_template_repository.update_node_template(node_template=node_template_update)
+        node_template_db =  self.node_template_repository.update_node_template(node_template=node_template_update)
+    
+        await self._update_protobuf_schema()
+        
+        return node_template_db
     
     def set_in_use_node_template(self, uuid: UUID):
         """Used when a sensor node is created from the node template"""
@@ -155,7 +160,7 @@ class NodeTemplateService:
     def get_protobuf_code(self, uuid: UUID):
         pass
     
-    async def _update_protobuf_schema(self) -> bytes:
+    async def _update_protobuf_schema(self) -> None:
         protobuf_schemas = self.node_template_repository.find_all_protobuf_schemas()
         protobuf_schemas_json = [schema.model_dump() for schema in protobuf_schemas]
         
@@ -171,7 +176,8 @@ class NodeTemplateService:
                 
                 if response.is_success:
                     octet_stream = response.content
-                    print(octet_stream)
+                    self.node_template_repository.write_protobuf_schema(octet_stream)
+                    return
                 else:
                     raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
                 

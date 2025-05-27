@@ -159,7 +159,7 @@
             <!-- protobuff scheme -->
             <v-row class="align-center mb-2 mt-6">
               <v-col>
-                <h3 class="text-h6 mb-0">Protobuf Scheme</h3>
+                <h3 class="text-h6 mb-0">Protobuf Schema</h3>
               </v-col>
               <v-col cols="auto">
                 <v-btn
@@ -188,8 +188,7 @@
                 style="top: 8px; right: 8px;"
               >
                 <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-              {{ protobuf_schema.schema }}
+              </v-btn>{{ protobuf_schema.schema }}
             </v-sheet>
           </v-card-text>
         </v-card>
@@ -362,8 +361,9 @@ const performDelete = () => {
     .catch(() => console.error(`Error deleting node template ${nodeTemplateToDelete.value}`))
 }
 const copySchema = () => {
-  const schemaText = JSON.stringify(protobuf_schema.value, null, 2)
-  navigator.clipboard.writeText(schemaText).catch(err => {
+  const schemaText = protobuf_schema.value.schema
+  const schemaFormatted = schemaText.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+  navigator.clipboard.writeText(schemaFormatted).catch(err => {
     console.error('Failed to copy schema: ', err)
   })
 }

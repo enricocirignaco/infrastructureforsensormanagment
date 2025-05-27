@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 
 from ..dependencies import require_roles_or_owner, get_node_template_service
-from app.utils.exceptions import NotFoundError
+from app.utils.exceptions import NotFoundError, ExternalServiceError
 from app.models.user import UserInDB, RoleEnum
 from app.models.node_template import NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateUpdate, NodeTemplateCreate
 from app.services.node_template_service import NodeTemplateService
@@ -35,7 +35,10 @@ async def read_specific_node_template(uuid: UUID,
 async def create_new_node_template(project: NodeTemplateCreate,
                              logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                              node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> NodeTemplateOutFull:
-    return await node_template_service.create_node_template(node_template=project, logged_in_user=logged_in_user)
+    try:
+        return await node_template_service.create_node_template(node_template=project, logged_in_user=logged_in_user)
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))
 
 @router.put("/{uuid}", response_model=NodeTemplateOutFull)
 async def update_specific_node_template(uuid: UUID,
@@ -43,11 +46,13 @@ async def update_specific_node_template(uuid: UUID,
                                         logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                                         node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> NodeTemplateOutFull:
     try:
-        return node_template_service.update_node_template(uuid=uuid, node_template=node_template, logged_in_user=logged_in_user)
+        return await node_template_service.update_node_template(uuid=uuid, node_template=node_template, logged_in_user=logged_in_user)
     except NotFoundError as err:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))
 
 @router.delete("/{uuid}", status_code=204)
 async def delete_specific_node_template(uuid: UUID,
@@ -61,7 +66,7 @@ async def delete_specific_node_template(uuid: UUID,
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
 
 @router.get("/{uuid}/schema", responses={
-                200: {"description": "Protobug schema ready and returned"},
+                200: {"description": "Protobuf schema ready and returned"},
                 202: {"description": "Schema generation in progress"},
                 404: {"description": "Node template not found"}
             })
