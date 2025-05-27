@@ -35,6 +35,7 @@ class ConfigurableAssignment(BaseModel):
     name: str
     type: ConfigurableTypeEnum
     value: str
+    display_value: Optional[str] = None
     
 class TimeseriesField(BaseModel):
     field_name: str
@@ -72,6 +73,11 @@ class SensorNodeDB(SensorNodeBase):
     project_uuid: UUID
     node_template_uuid: UUID
     ttn_device_link: HttpUrl
+
+class TTNKeys(BaseModel):
+    app_key: str
+    join_eui: str
+    dev_eui: str
 
 # Models used to return data
 

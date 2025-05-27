@@ -59,6 +59,8 @@ class SensorNodeRepository:
             g.add((conf_uri, URIRef(self.schema + "name"), Literal(conf.name)))
             g.add((conf_uri, URIRef(self.bfh + "type"), URIRef(conf.type.rdf_uri)))
             g.add((conf_uri, URIRef(self.schema + "value"), Literal(conf.value)))
+            if conf.display_value:
+                g.add((conf_uri, URIRef(self.bfh + "displayValue"), Literal(conf.display_value)))
 
         # Logbuch
         for idx, entry in enumerate(sensor_node.logbook):
@@ -184,13 +186,14 @@ class SensorNodeRepository:
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?name ?type ?value
+        SELECT ?name ?type ?value ?displayValue
         WHERE {{
             {sensor_uri} bfh:hasConfigurable ?conf .
             ?conf a bfh:ConfigurableAssignment ;
                 schema:name ?name ;
                 bfh:type ?type ;
                 schema:value ?value .
+            OPTIONAL {{ ?conf bfh:displayValue ?displayValue }}
         }}
         """
         config_res = self.triplestore_client.query(sparql_config)
@@ -199,7 +202,8 @@ class SensorNodeRepository:
                 ConfigurableAssignment(
                     name=row["name"]["value"],
                     type=ConfigurableTypeEnum.from_rdf_uri(row["type"]["value"]),
-                    value=row["value"]["value"]
+                    value=row["value"]["value"],
+                    display_value=row["displayValue"]["value"] if "displayValue" in row else None
                 )
             )
 

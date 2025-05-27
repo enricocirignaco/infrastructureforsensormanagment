@@ -14,6 +14,9 @@ from .services.commercial_sensor_service import CommercialSensorService
 from .services.node_template_service import NodeTemplateService
 from .services.sensor_node_service import SensorNodeService
 from .services.compilation_service import CompilationService
+from .services.ttn.ttn_service_real import TtnServiceReal
+from .services.ttn.ttn_service_mock import TtnServiceMock
+from .services.ttn.ttn_service_base import TtnServiceBase
 from .config import settings
 
 # Utils
@@ -51,6 +54,12 @@ def get_sensor_node_repository(
 
 # Services
 
+def get_ttn_service() -> TtnServiceBase: 
+    if settings.FEATURE_TTN_ENABLED:
+        return TtnServiceReal()
+    else:
+        return TtnServiceMock()
+
 def get_auth_service(
     user_repository: UserRepository = Depends(get_user_repository),
 ) -> AuthService:
@@ -74,15 +83,17 @@ def get_node_template_service(
 def get_sensor_node_service(
     sensor_node_repository: SensorNodeRepository = Depends(get_sensor_node_repository),
     project_service: ProjectService = Depends(get_project_service),
-    node_template_service: NodeTemplateService = Depends(get_node_template_service)
+    node_template_service: NodeTemplateService = Depends(get_node_template_service),
+    ttn_service: TtnServiceBase = Depends(get_ttn_service),
 ) -> SensorNodeService:
-    return SensorNodeService(sensor_node_repository, project_service, node_template_service)
+    return SensorNodeService(sensor_node_repository, project_service, node_template_service, ttn_service)
 
 def get_compilation_service(
     sensor_node_service: SensorNodeService = Depends(get_sensor_node_service),
     node_template_service: NodeTemplateService = Depends(get_node_template_service)
 ) -> CompilationService:
     return CompilationService(sensor_node_service, node_template_service)
+
 
 
 async def get_current_user(

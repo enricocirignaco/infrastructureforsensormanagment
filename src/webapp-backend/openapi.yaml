@@ -830,6 +830,116 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
+  "/compilation/build/{sensor_node_uuid}":
+    post:
+      tags:
+      - compilation
+      summary: Create Build Job
+      operationId: create_build_job_compilation_build__sensor_node_uuid__post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: sensor_node_uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Sensor Node Uuid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/InitBuildResponse"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/compilation/job/{job_id}/status":
+    get:
+      tags:
+      - compilation
+      summary: Get Build Job Status
+      operationId: get_build_job_status_compilation_job__job_id__status_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BuildJobStatusResponse"
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/compilation/job/{job_id}/artifacts":
+    get:
+      tags:
+      - compilation
+      summary: Get Build Job Artifacts
+      operationId: get_build_job_artifacts_compilation_job__job_id__artifacts_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      - name: get_source_code
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Get Source Code
+      - name: get_logs
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Get Logs
+      - name: bin_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Bin Only
+      responses:
+        '200':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
 components:
   schemas:
     Body_login_token_post:
@@ -865,6 +975,19 @@ components:
       - username
       - password
       title: Body_login_token_post
+    BuildJobStatusResponse:
+      properties:
+        status:
+          type: string
+          title: Status
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - status
+      - message
+      title: BuildJobStatusResponse
     CommercialSensorIn:
       properties:
         name:
@@ -1136,6 +1259,29 @@ components:
       - core
       - variant
       title: HardwareBoard
+    InitBuildResponse:
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          title: Job Id
+        status:
+          type: string
+          title: Status
+        message:
+          type: string
+          title: Message
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+      type: object
+      required:
+      - job_id
+      - status
+      - message
+      - timestamp
+      title: InitBuildResponse
     NodeTemplateCreate:
       properties:
         name:
@@ -1177,8 +1323,7 @@ components:
           type: string
           title: Field Name
         protbuf_datatype:
-          type: string
-          title: Protbuf Datatype
+          "$ref": "#/components/schemas/ProtobufDatatypeEnum"
         unit:
           type: string
           title: Unit
@@ -1467,9 +1612,9 @@ components:
     ProjectStateEnum:
       type: string
       enum:
+      - Prepared
       - Active
       - Archived
-      - Deleted
       title: ProjectStateEnum
     ProjectUpdate:
       properties:
@@ -1504,6 +1649,25 @@ components:
       - uuid
       - state
       title: ProjectUpdate
+    ProtobufDatatypeEnum:
+      type: string
+      enum:
+      - double
+      - float
+      - int32
+      - int64
+      - uint32
+      - uint64
+      - sint32
+      - sint64
+      - fixed32
+      - fixed64
+      - sfixed32
+      - sfixed64
+      - bool
+      - string
+      - bytes
+      title: ProtobufDatatypeEnum
     RoleEnum:
       type: string
       enum:
@@ -1523,6 +1687,9 @@ components:
           title: Description
         location:
           "$ref": "#/components/schemas/SensorNodeLocation"
+        gitlab_ref:
+          type: string
+          title: Gitlab Ref
         configurables:
           items:
             "$ref": "#/components/schemas/ConfigurableAssignment"
@@ -1541,6 +1708,7 @@ components:
       - name
       - description
       - location
+      - gitlab_ref
       - configurables
       - project_uuid
       - node_template_uuid
@@ -1564,7 +1732,7 @@ components:
           title: Altitude
         postalcode:
           anyOf:
-          - type: string
+          - type: integer
           - type: 'null'
           title: Postalcode
       type: object
@@ -1608,6 +1776,9 @@ components:
           title: Description
         location:
           "$ref": "#/components/schemas/SensorNodeLocation"
+        gitlab_ref:
+          type: string
+          title: Gitlab Ref
         configurables:
           items:
             "$ref": "#/components/schemas/ConfigurableAssignment"
@@ -1639,12 +1810,15 @@ components:
           format: uri
           title: Ttn Device Link
         last_timeseries:
-          "$ref": "#/components/schemas/TimeseriesData"
+          anyOf:
+          - "$ref": "#/components/schemas/TimeseriesData"
+          - type: 'null'
       type: object
       required:
       - name
       - description
       - location
+      - gitlab_ref
       - configurables
       - uuid
       - logbook
@@ -1652,7 +1826,6 @@ components:
       - project_uuid
       - node_template_uuid
       - ttn_device_link
-      - last_timeseries
       title: SensorNodeOutFull
     SensorNodeOutSlim:
       properties:
@@ -1681,6 +1854,7 @@ components:
       type: string
       enum:
       - Prepared
+      - In-Use
       - Active
       - Inactive
       - Archived
@@ -1697,6 +1871,9 @@ components:
           title: Description
         location:
           "$ref": "#/components/schemas/SensorNodeLocation"
+        gitlab_ref:
+          type: string
+          title: Gitlab Ref
         configurables:
           items:
             "$ref": "#/components/schemas/ConfigurableAssignment"
@@ -1713,6 +1890,7 @@ components:
       - name
       - description
       - location
+      - gitlab_ref
       - configurables
       - uuid
       - state
