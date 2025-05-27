@@ -93,7 +93,7 @@ paths:
       tags:
         - "Build Job"
       summary: "Get build job artifacts"
-      description: "Downloads the build artifacts as a ZIP archive or only the compiled hex file based on query parameters."
+      description: "Downloads the build artifacts as a ZIP archive or only the compiled binary file based on query parameters."
       parameters:
         - name: job_id
           in: path
@@ -115,9 +115,9 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: hex_only
+        - name: bin_only
           in: query
-          description: "Return only the compiled hex file"
+          description: "Return only the compiled binary file"
           required: false
           schema:
             type: boolean
@@ -189,11 +189,6 @@ components:
           example: "v1.0.0"
         board:
           $ref: "#/components/schemas/Board"
-        libraries:
-          type: array
-          items:
-            type: string
-          example: ["ArduinoJson@6.17.3"]
         config:
           type: array
           items:

@@ -1,4 +1,5 @@
 <template>
+
   <v-card v-if="isEditMode && sensorNode?.state && sensorNode.state !== 'Prepared'" class="pa-4">
     <v-card-title>Edit Archived State</v-card-title>
     <v-form ref="sensorNodeForm" @submit.prevent="submitSensorNode">
@@ -17,7 +18,13 @@
       </v-col>
       <v-row>
         <v-col cols="6">
-          <v-btn type="submit" color="primary" class="mt-4" block>
+          <v-btn
+          type="submit"
+          color="primary"
+          class="mt-4"
+          block
+          :disabled="isSubmitting"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Save Sensor Node
           </v-btn>
@@ -55,6 +62,9 @@
           </v-col>
           <v-col cols="12">
             <v-textarea v-model="sensorNode.description" label="Notes" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field v-model="sensorNode.gitlab_ref" label="Gitlab Ref" :rules="[required]" />
           </v-col>
           <!-- location -->
           <v-col cols="12">
@@ -150,13 +160,39 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="6">
-            <v-btn type="submit" color="primary" class="mt-4" block>
+            <!-- Message Banner -->
+          <Banner
+              v-if="bannerMessage !== ''"
+              type="info"
+              :message="bannerMessage"
+          ></Banner>
+        </v-row>
+        <v-row>
+          <v-col :cols="isEditMode ? 6 : 4">
+            <v-btn
+            type="submit"
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            >
               <v-icon start>mdi-content-save</v-icon>
-              Save Sensor Node
+              Save
             </v-btn>
           </v-col>
-          <v-col cols="6">
+          <v-col v-if="!isEditMode" cols="4">
+            <v-btn
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            @click="submitAndCreateAnother"
+            >
+              <v-icon start>mdi-content-save</v-icon>
+              Save and Create Another
+            </v-btn>
+          </v-col>
+          <v-col :cols="isEditMode ? 6 : 4">
             <v-btn color="secondary" class="mt-4" block @click="router.back()">
               <v-icon start>mdi-close</v-icon>
               Cancel
@@ -171,6 +207,7 @@
   <v-container v-if="!isEditMode && !sensorNode" class="d-flex justify-center align-center" style="min-height: 300px">
     <v-progress-circular indeterminate color="primary" size="64" />
   </v-container>
+
 </template>
 
 <script setup>
@@ -191,7 +228,8 @@ import nodeTemplateService from '@/services/nodeTemplateService'
 import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useRoute } from 'vue-router'
-
+import Banner from '@/components/Banner.vue'
+import { nextTick } from 'vue'
 const route = useRoute()
 const showMap = ref(false)
 const isEditMode = computed(() => sensorNodeId !== null)
@@ -202,7 +240,8 @@ const router = useRouter()
 const sensorNode = ref(null)
 const nodeTemplates = ref([])
 const showConfigurables = ref(false)
-
+const isSubmitting = ref(false)
+const bannerMessage = ref('')
 // Define the sensorNode object from the sensorNode Id or from default values
 if (isEditMode.value) {
   // Fetch sensorNode data
@@ -225,7 +264,8 @@ if (isEditMode.value) {
       altitude: null,
       postalcode: null,
     },
-    configurables: []
+    configurables: [],
+    gitlab_ref: '',
   }
 }
 // fetch node templates
@@ -248,7 +288,10 @@ function loadConfigurables(nodeTemplateUuid) {
             value: config.value
           }
         })
-      showConfigurables.value = true
+      if(sensorNode.value.configurables.length > 0) {
+        // show configurables if there are any
+        showConfigurables.value = true
+      }
     })
     .catch((error) => {
       console.error('Error fetching node templates:', error)
@@ -259,6 +302,7 @@ const submitSensorNode = () => {
   // Validate Form
   sensorNodeForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return
+    isSubmitting.value = true
     if(isEditMode.value){
         //put request to update the sensorNode
         sensorNodeService.editSensorNode(sensorNode.value)
@@ -270,6 +314,26 @@ const submitSensorNode = () => {
             .then((sensorNode) => router.push('/sensor-node/' + sensorNode.uuid))
             .catch((error) => console.log('Error creating sensorNode:', error))
     }
+  })
+}
+
+  const submitAndCreateAnother = () => {
+  // Validate Form
+  sensorNodeForm.value?.validate().then((isValid) => {
+    if (!isValid.valid) return
+    isSubmitting.value = true
+
+    // post request to create the sensorNode
+    sensorNodeService.createSensorNode(sensorNode.value)
+        .then((sensorNode) => {
+          isSubmitting.value = false
+          // reset banner message first to force reactivity
+          bannerMessage.value = ''
+          nextTick(() => {
+            bannerMessage.value = `New Sensor Node created successfully. UUID: ${sensorNode.uuid}     You can now create another one.`
+          })
+        })
+        .catch((error) => console.log('Error creating sensorNode:', error))
   })
 }
 

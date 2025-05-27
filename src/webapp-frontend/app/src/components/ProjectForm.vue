@@ -7,7 +7,7 @@
       <v-col v-if="project.state !== 'Prepared'" cols="6" class="d-flex align-center">
         <v-checkbox
           v-model="project.state"
-          label="Archive Sensor Node"
+          label="Archive Project"
           :true-value="'Archived'"
           :false-value="'Active'"
           hide-details
@@ -15,7 +15,13 @@
       </v-col>
       <v-row>
         <v-col cols="6">
-          <v-btn type="submit" color="primary" class="mt-4" block>
+          <v-btn
+          type="submit"
+          color="primary"
+          class="mt-4"
+          block
+          :disabled="isSubmitting"
+          >
             <v-icon start>mdi-content-save</v-icon>
             Save Project
           </v-btn>
@@ -83,7 +89,13 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <v-btn type="submit" color="primary" class="mt-4" block>
+            <v-btn
+            type="submit"
+            color="primary"
+            class="mt-4"
+            block
+            :disabled="isSubmitting"
+            >
               <v-icon start>mdi-content-save</v-icon>
               Save Project
             </v-btn>
@@ -125,7 +137,7 @@ const required = v => !!v || 'Required'
 const textStore = useTextStore()
 const router = useRouter()
 const project = ref(null)
-
+const isSubmitting = ref(false)
 // Define the project object from the project Id or from default values
 if(isEditMode.value) {
     // Fetch project data
@@ -159,6 +171,7 @@ const removeLink = (index) => {
 }
 
 const submitProject = () => {
+  isSubmitting.value = true
   // Validate Form
   projectForm.value?.validate().then((isValid) => {
     if (!isValid.valid) return

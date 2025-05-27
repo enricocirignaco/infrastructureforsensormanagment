@@ -333,7 +333,25 @@ Another interesting software is the arduino create agent (also named arduino clo
 If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
 
 The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
+#### Followups
+After further analysis and siscussion with the team and stakeholders it was decided to move in two different directions. The first high priority task is to implement a solution so that the user can program the heltech hardware in a as hasslyfree as possible way without using the invaiable webserial API. This means that the requirements that no addtional software is allowedto be installed on the host machine is lifted. The second task is to try to get a working solution using the webserial API for flashing a compatible Hardware board. This will provide a proof of concept for the webserial API and the idel workflow can be demostraded. This proof of concept can also be used in future project to convince the stakeholders to adopt an hardware platform conpatible with the webserial API and thus leveraging the advantages of this technology.
+### Webserial ESP32-S3
+Although this is the task with a lower priority, it was decided to research the feasibility of this solution first because this will have a great impact on to what extens the specific solution for the heltec will be delevoped and refined.
+#### Research - Browser Serial APIs
+A brief research was conducted to find out if the webserial thecnology is the only and best candidate for this task. While Web Serial (supported only in Chromium-based browsers like Chrome, Edge, and Brave) is currently the most practical way to flash ESP32 devices directly via the browser [18], there are a few alternative Web APIs worth noting. WebUSB allows direct USB access but requires custom USB descriptors and is only available in Chromium-based browsers — not Firefox or Safari [19]. WebHID, designed for HID-class devices, is unsuitable for flashing and also lacks cross-browser support [20]. WebBluetooth is supported in Firefox and Chromium but does not support full firmware flashing due to BLE’s limited data rates and payload sizes [21]. Thus, for full browser-based flashing without extra software, Web Serial remains the most viable option, albeit limited to Chromium environments. Cross-browser support is currently not achievable due to the lack of Web Serial and WebUSB support in Firefox and Safari.
+#### Research - ESP32 compatible Webserial libraries
+After a thorough research several javascrip tools for browser-baser flasing of esp32 devices were found. These tools leverage the [Web Serial API][18], allowing direct communication with ESP32 boards through a USB connection and without requiring any locally installed software.
 
+##### Adafruit WebSerial ESPTool
+Adafruit_WebSerial_ESPTool is a polished, browser-based firmware flasher developed by Adafruit. It provides a complete graphical interface that supports multiple ESP32 variants, with convenient features such as automatic chip detection and baud rate configuration. This project is actively maintained and designed for users who prefer an out-of-the-box solution without needing to write custom code. However, because it wraps around an existing library, it is less suitable if you require a deeply customized flashing UI for integration into a larger application.
+
+##### esptool.js (from tiware)
+esptool.js was one of the first projects to bring ESP32 flashing to the web by porting functionality from the Python-based esptool. Its main advantage lies in its minimal design, which makes it easy to embed into simple web applications. However, the project has not seen updates in over four years, and it lacks support for more recent ESP32 variants such as the ESP32-S3. In addition, documentation is sparse, and integration into modern toolchains may be cumbersome. Given the lack of maintenance, it is not recommended for new projects.
+
+##### esptool-js (Espressif)
+The official esptool-js project from Espressif is actively maintained and well documented. It brings most of the functionality of the widely used esptool.py to the browser and is designed specifically for modern Web Serial integration. Unlike older projects, this version keeps pace with new chip variants and is the basis for tools like ESP Web Tools. It offers lower-level control over the flashing process and is intended for developers who want to integrate ESP32 flashing directly into their custom interfaces. While it does not include a graphical interface, it is a solid foundation for building one.
+
+The candidate that best fits the requirements of this project is the official esptool-js from Espressif. It is actively maintained, well documented, and designed for modern Web Serial integration.
 
 
 #### References
@@ -346,12 +364,16 @@ The idea would be to create an application that exposes a rest api that can be u
 [15] http://community.heltec.cn/t/cubecellflash-tool/1953/3
 [16] http://community.heltec.cn/t/cubecell-firmware-upload/1063
 [17] https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
-
+[18] Mozilla Developer Network, “Web Serial API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
+[19] Mozilla Developer Network, “WebUSB API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/USB
+[20] Mozilla Developer Network, “WebHID API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API
+[21] Mozilla Developer Network, “Web Bluetooth API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API
 https://github.com/arduino/arduino-create-agent
 https://github.com/HelTecAutomation/CubeCell-Arduino
 https://github.com/kaelhem/avrbro
 https://resource.heltec.cn/download/
 https://github.com/arduino/arduino-create-agent/issues/150
+https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
 ### Frontend webserver and reverse proxy
 It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Thus is was decided to separate this two components. This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
 After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.

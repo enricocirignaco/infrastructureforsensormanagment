@@ -97,15 +97,19 @@ class CompilationService:
             if response.status_code == 200:
                 return Response(
                     content=response.content,
+                    headers={
+                        "Content-Disposition": response.headers.get("content-disposition"),
+                        "Content-Type": response.headers.get("content-type")
+                    },
                     status_code=response.status_code,
-                    media_type="application/zip"
+                    media_type=response.headers.get("content-type")
                 )
             elif response.status_code == 400:
                 raise ValueError(f"Bad request: {response.text}")
             elif response.status_code == 404:
                 raise NotFoundError(f"Build job with ID {job_id} not found.")
             else:
-                raise ExternalServiceError(status_code=response.status_code, detail=response.text)
+                raise ExternalServiceError(f"Failed to get build job artifacts: {response.text}")
 
         except httpx.RequestError as e:
             raise ExternalServiceError(f"Request to compiler service failed: {e}")

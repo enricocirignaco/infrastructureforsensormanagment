@@ -95,6 +95,14 @@
               <v-divider />
               <v-list-item style="min-height: 72px;">
                 <template #prepend>
+                  <v-icon style="font-size: 32px;">mdi-source-repository</v-icon>
+                </template>
+                <v-list-item-title>{{ sensorNode.gitlab_ref }}</v-list-item-title>
+                <v-list-item-subtitle>Gitlab Ref</v-list-item-subtitle>
+              </v-list-item>
+              <v-divider />
+              <v-list-item style="min-height: 72px;">
+                <template #prepend>
                   <v-icon style="font-size: 32px;">mdi-identifier</v-icon>
                 </template>
                 <v-list-item-title>{{ sensorNode.uuid }}</v-list-item-title>
@@ -105,13 +113,15 @@
             <!-- sensor location map -->
             <v-row class="mb-6">
               <v-col cols="12">
-                <v-card elevation="1" rounded="lg">
+                <v-card
+                  v-if="(sensorNode?.location?.latitude && sensorNode?.location?.longitude) || sensorNode?.location?.postalcode || sensorNode?.location?.altitude"
+                  elevation="1"
+                  rounded="lg">
                   <v-card-title>
                     <h3 class="text-h6 mb-0">Sensor Node Location</h3>
                   </v-card-title>
-                  <v-card-text>
+                  <v-card-text v-if="sensorNode?.location?.latitude && sensorNode?.location?.longitude">
                     <LMap
-                      v-if="sensorNode?.location"
                       class="rounded-lg"
                       style="height: 400px; width: 100%;"
                       :zoom="13"
@@ -180,6 +190,23 @@
             </v-sheet>
             </v-col>
           </v-row>
+          <!-- Firmware Tools Section -->
+          <v-divider class="my-6" />
+          <v-card class="mb-4" rounded="lg">
+            <v-card-title class="d-flex justify-space-between align-center">
+              <h3 class="text-h6 mb-0">Firmware Tools</h3>
+              <v-spacer />
+              <v-btn color="primary" @click="showFirmwareTools = !showFirmwareTools">
+                {{ showFirmwareTools ? 'Hide' : 'Show' }}
+              </v-btn>
+            </v-card-title>
+            <v-expand-transition>
+              <v-card-text v-show="showFirmwareTools">
+                <FlashEsp :sensor-id="sensorNodeId" />
+              </v-card-text>
+            </v-expand-transition>
+          </v-card>
+
           </v-card-text>
         </v-card>
         <v-divider class="my-6" />
@@ -212,8 +239,6 @@
       </v-col>
     </v-row>
   </v-container>
-
-
   
   <!-- delete dialog -->
   <v-dialog v-model="confirmDelete" max-width="500">
@@ -257,6 +282,7 @@ import { computed } from 'vue'
 import { LMap, LTileLayer, LMarker, LPopup } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
+import FlashEsp from '@/components/FlashEsp.vue'
 
 const authStore = useAuthStore()
 const textStore = useTextStore()
@@ -265,6 +291,7 @@ const sensorNode = ref(null)
 const loading = ref(true)
 const confirmDelete = ref(false)
 const sensorNodeToDelete = ref(null)
+const showFirmwareTools = ref(false)
 const deleteConfirmInput = ref('')
 const sensorNodeId = ref(useRoute().params.id)
 const userLocale = typeof navigator !== 'undefined' ? navigator.language : 'en-US'

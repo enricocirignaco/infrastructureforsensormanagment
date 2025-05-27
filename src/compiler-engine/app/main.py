@@ -11,6 +11,7 @@ import zipfile
 import uuid
 from datetime import datetime, timezone
 import uvicorn
+import yaml
 
 # Initialize the FastAPI app
 app = FastAPI(title="Compiler Engine",version="1.0")
@@ -28,6 +29,7 @@ DEFAULT_LOG_DIR = os.getenv("DEFAULT_LOG_DIR")
 DEFAULT_ARDUINO_DIR = os.getenv("DEFAULT_ARDUINO_DIR")
 DEFAULT_ARDUINO_BINARY = os.getenv("DEFAULT_ARDUINO_BINARY")
 DEFAULT_COMPILER_REGISTRY_URL = os.getenv("DEFAULT_COMPILER_REGISTRY_URL")
+YAML_FILE_NAME = os.getenv("YAML_FILE_NAME")
 
 # Pydantic models for request bodies and responses
 class Board(BaseModel):
@@ -40,7 +42,6 @@ class StandardBuildRequest(BaseModel):
     git_repo_url: str
     firmware_tag: str
     board: Board
-    libraries: Optional[List[str]] = None
     config: Optional[List[ConfigProperty]] = None
 
 class CustomBuildRequest(BaseModel):
@@ -140,23 +141,35 @@ async def get_build_artifacts(
     job_id: str,
     get_source_code: bool = Query(False, description="Include the source code in the artifacts"),
     get_logs: bool = Query(False, description="Include the logs in the artifacts"),
-    hex_only: bool = Query(False, description="Return only the compiled hex file")
+    bin_only: bool = Query(False, description="Return only the compiled binary file")
 ):
     if job_id not in jobs_status_map:
         raise HTTPException(status_code=404, detail="Job ID not found")
     if jobs_status_map[job_id]["status"] != BuildStatus.successful and jobs_status_map[job_id]["status"] != BuildStatus.delivered:
         raise HTTPException(status_code=400, detail="Job is not successful, use GET /status to get more informations")
-    if hex_only and (get_source_code or get_logs):
-        raise HTTPException(status_code=400, detail="Cannot include source code or logs when hex_only is set to true")
+    if bin_only and (get_source_code or get_logs):
+        raise HTTPException(status_code=400, detail="Cannot include source code or logs when bin_only is set to true")
     
     try:
-        # Return only the compiled hex file if hex_only is set to true
-        if hex_only:
-            try:
-                jobs_status_map[job_id]["status"] = BuildStatus.delivered
-                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename=DEFAULT_ARDUINO_BINARY)
-            except Exception:
-                raise HTTPException(status_code=404, detail="Compiled hex file not found")
+        # Return only the compiled binary file if bin_only is set to true
+        if bin_only:
+            binary_path = os.path.join(DEFAULT_OUTPUT_DIR, job_id, DEFAULT_ARDUINO_BINARY)
+            if not os.path.isfile(binary_path):
+                # fallback to any .bin file in the output directory
+                output_dir = os.path.join(DEFAULT_OUTPUT_DIR, job_id)
+                bin_files = [f for f in os.listdir(output_dir) if f.endswith(".bin")]
+                if bin_files:
+                    binary_path = os.path.join(output_dir, bin_files[0])
+                else:
+                    # fallback to .hex file if no .bin file is found
+                    hex_files = [f for f in os.listdir(output_dir) if f.endswith(".hex")]
+                    if hex_files:
+                        binary_path = os.path.join(output_dir, hex_files[0])
+                    else:
+                        raise HTTPException(status_code=404, detail="Compiled binary file not found")
+            jobs_status_map[job_id]["status"] = BuildStatus.delivered
+            binary_filename = os.path.basename(binary_path)
+            return FileResponse(binary_path, media_type="application/octet-stream", filename=f"job_id_{job_id}_{binary_filename}")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
         zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artifacts.zip"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
@@ -189,7 +202,7 @@ async def get_build_artifacts(
                     zipf.write(log_file_path, arcname="compilation.log")
 
         jobs_status_map[job_id]["status"] = BuildStatus.delivered
-        return FileResponse(zip_path, media_type="application/zip", filename="artifacts.zip")
+        return FileResponse(zip_path, media_type="application/zip", filename= 'job_id_' + job_id + '_artifacts.zip')
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error {str(e)}")
 
@@ -233,9 +246,8 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
     git_repo_url = f"{DEFAULT_GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?sha={request.firmware_tag}&path={DEFAULT_ARDUINO_DIR}"
     compile_command = f"""bash -c "
             mkdir -p /cache/boards /cache/arduino && \
-            arduino-cli core install {request.board.core} && \
-            arduino-cli lib install {" ".join(request.libraries)} && \
             arduino-cli core update-index && \
+            arduino-cli core install {request.board.core} && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
@@ -247,10 +259,10 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
     if request.config:
         try:
             config_file = "// Auto-generated config.h\n"
-            config_file += "#ifndef CONFIG_H\n#define CONFIG_H\n\n"
+            config_file += "#ifndef COMPILER_ENGINE_CONFIG_H\n#define COMPILER_ENGINE_CONFIG_H\n\n"
             for prop in request.config:
                 config_file += f"#define {prop.key} \"{prop.value}\"\n"
-            config_file += "\n#endif // CONFIG_H\n"
+            config_file += "\n#endif // COMPILER_ENGINE_CONFIG_H\n"
         except Exception as e:
             jobs_status_map[job_id] = {
                 "status": BuildStatus.error,
@@ -319,7 +331,37 @@ def generic_compile_task(
                 "message": f"Error including config.h in main.ino: {str(e)}"
             }
             return
+    # Extract libraries and additional board URLs from arduino-deps.yaml if present
+    deps_file_path = f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/{YAML_FILE_NAME}"
+    if os.path.isfile(deps_file_path):
+        try:
+            with open(deps_file_path, "r") as f:
+                deps = yaml.safe_load(f)
+                libraries = deps.get("libraries", [])
+                additional_boards = deps.get("board_manager", {}).get("additional_urls", [])
 
+                if additional_boards:
+                    board_urls = ",".join(additional_boards)
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli core update-index",
+                        f"arduino-cli core update-index --additional-urls {board_urls}"
+                    )
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli core install",
+                        f"arduino-cli core install --additional-urls {board_urls}"
+                    )
+                if libraries:
+                    install_libs_cmd = f"arduino-cli lib install {' '.join(libraries)} &&"
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli compile",
+                        f"{install_libs_cmd} arduino-cli compile"
+                    )
+        except Exception as e:
+            jobs_status_map[job_id] = {
+                "status": BuildStatus.error,
+                "message": f"Error reading arduino-deps.yaml: {str(e)}"
+            }
+            return
     # Build source code in the Docker container
     try:
         docker_client.images.pull(

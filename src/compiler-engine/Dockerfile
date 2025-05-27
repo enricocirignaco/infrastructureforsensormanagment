@@ -2,7 +2,7 @@
 FROM python:3.10-slim
 
 # Install FastAPI dependencies
-RUN pip install fastapi uvicorn docker
+RUN pip install fastapi uvicorn docker pyyaml
 
 # Copy the Python application
 COPY ./app /app
