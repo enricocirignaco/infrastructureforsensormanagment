@@ -109,7 +109,7 @@ class CompilationService:
             elif response.status_code == 404:
                 raise NotFoundError(f"Build job with ID {job_id} not found.")
             else:
-                raise ExternalServiceError(status_code=response.status_code, detail=response.text)
+                raise ExternalServiceError(f"Failed to get build job artifacts: {response.text}")
 
         except httpx.RequestError as e:
             raise ExternalServiceError(f"Request to compiler service failed: {e}")
