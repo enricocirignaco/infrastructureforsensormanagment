@@ -31,6 +31,7 @@ class NodeTemplateRepository:
         g.add((template_uri, URIRef(self.schema + "description"), Literal(node_template.description)))
         g.add((template_uri, URIRef(self.schema + "url"), Literal(str(node_template.gitlab_url))))
         g.add((template_uri, URIRef(self.bfh + "state"), URIRef(node_template.state.rdf_uri)))
+        g.add((template_uri, URIRef(self.bfh + "protobufMessageName"), Literal(node_template.protobuf_message_name)))
 
         # Board
         g.add((template_uri, URIRef(self.bfh + "boardCore"), Literal(node_template.board.core)))
@@ -261,16 +262,49 @@ class NodeTemplateRepository:
         return self.create_node_template(node_template)
     
     
+    def find_protobuf_schema_by_uuid(self, uuid: UUID) -> ProtobufSchema | None:
+        sparql_query = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?fieldName ?datatype ?messageName
+        WHERE {{
+            <http://data.bfh.ch/nodeTemplates/{uuid}> a bfh:NodeTemplate ;
+                bfh:identifier "{uuid}" ;
+                bfh:protobufMessageName ?messageName ;
+                bfh:hasField ?field .
+            ?field a bfh:Field ;
+                bfh:fieldName ?fieldName ;
+                bfh:protobufDatatype ?datatype .
+        }}
+        """
+        res = self.triplestore_client.query(sparql_query)
+        
+        if not res.get('results', {}).get('bindings'):
+            return None
+        
+        message_name = res['messageName']['value']
+        fields = [
+            ProtobufSchemaField(
+                field_name=row['fieldName']['value'],
+                protobuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row['datatype']['value'])
+            )
+            for row in res['results']['bindings']
+        ]
+        
+        return ProtobufSchema(message_name=message_name, fields=fields)
+    
     def find_all_protobuf_schemas(self) -> List[ProtobufSchema]:
         sparql_query = f"""
         PREFIX schema: <http://schema.org/>
         PREFIX bfh: <http://data.bfh.ch/>
 
-        SELECT ?name ?fieldName ?datatype
+        SELECT ?uuid ?fieldName ?messageName ?datatype
         WHERE {{
             ?template a bfh:NodeTemplate ;
-                    schema:name ?name ;
-                    bfh:hasField ?field .
+                bfh:identifier ?uuid ;
+                bfh:protobufMessageName ?messageName ;
+                bfh:hasField ?field .
             ?field a bfh:Field ;
                 bfh:fieldName ?fieldName ;
                 bfh:protobufDatatype ?datatype .
@@ -280,9 +314,7 @@ class NodeTemplateRepository:
 
         schemas = {}
         for row in res.get('results', {}).get('bindings', []):
-            name = row['name']['value']
-            sanitized_name = re.sub(r'\s+', '', name)
-            message_name = f"Message_{sanitized_name}"
+            message_name = row['messageName']['value']
             
             if message_name not in schemas:
                 schemas[message_name] = ProtobufSchema(

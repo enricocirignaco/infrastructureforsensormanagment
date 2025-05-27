@@ -78,6 +78,7 @@ class NodeTemplateDB(NodeTemplateBase):
     uuid: UUID
     logbook: List[NodeTemplateLogbookEntry]
     state: NodeTemplateStateEnum
+    protobuf_message_name: Optional[str] = None
 
 # Models used to return data
 

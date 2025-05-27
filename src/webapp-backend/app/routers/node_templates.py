@@ -69,7 +69,7 @@ async def download_protobuf_schema_of_node_template(uuid: UUID,
                                                 request: Request,
                                                 _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                                                 node_template_service: NodeTemplateService = Depends(get_node_template_service)):
-    schema = node_template_service.get_protobuf_schema(uuid=uuid)
+    schema = await node_template_service.get_protobuf_schema(uuid=uuid)
 
     accept_header = request.headers.get("accept", "")
     if "application/json" in accept_header:

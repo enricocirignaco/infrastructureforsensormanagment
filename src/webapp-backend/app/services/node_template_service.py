@@ -40,7 +40,8 @@ class NodeTemplateService:
             **node_template.model_dump(), 
             uuid=uuid, 
             logbook=logbook,
-            state=NodeTemplateStateEnum.UNUSED
+            state=NodeTemplateStateEnum.UNUSED,
+            protobuf_message_name=f"Msg_{uuid.hex}"
         )
         for config in system_defined_configurables:
             node_template_db.configurables.append(
@@ -130,16 +131,26 @@ class NodeTemplateService:
         self.node_template_repository.delete_node_template(uuid=uuid)
 
 
-    def get_protobuf_schema(self, uuid: UUID) -> str:
-        # TODO replace with calling external service
-        return """edition = "2023";
-
-        message Person {
-        string name = 1;
-        int32 id = 2;
-        string email = 3;
+    async def get_protobuf_schema(self, uuid: UUID) -> str:
+        protobuf_schema = self.node_template_repository.find_protobuf_schema_by_uuid(uuid).model_dump()
+        
+        url = f"{self.protobuf_service_base_url}/protobuf/schema"
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "text/plain"
         }
-        """
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url=url, json=protobuf_schema, headers=headers)
+                if response.is_success:
+                    print(response.text)
+                    return response.text
+                else:
+                    raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
+                
+        except httpx.RequestError as e:
+            raise ExternalServiceError(f"Request to protobuf service failed: {e}")
     
     def get_protobuf_code(self, uuid: UUID):
         pass
@@ -148,7 +159,7 @@ class NodeTemplateService:
         protobuf_schemas = self.node_template_repository.find_all_protobuf_schemas()
         protobuf_schemas_json = [schema.model_dump() for schema in protobuf_schemas]
         
-        url = f"{self.protobuf_service_base_url}/protobuf/schema"
+        url = f"{self.protobuf_service_base_url}/protobuf/descriptor-file"
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/octet-stream"
@@ -160,7 +171,7 @@ class NodeTemplateService:
                 
                 if response.is_success:
                     octet_stream = response.content
-                    print(octet_stream.decode('utf-8'))
+                    print(octet_stream)
                 else:
                     raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
                 
