@@ -11,6 +11,7 @@ import zipfile
 import uuid
 from datetime import datetime, timezone
 import uvicorn
+import yaml
 
 # Initialize the FastAPI app
 app = FastAPI(title="Compiler Engine",version="1.0")
@@ -28,6 +29,7 @@ DEFAULT_LOG_DIR = os.getenv("DEFAULT_LOG_DIR")
 DEFAULT_ARDUINO_DIR = os.getenv("DEFAULT_ARDUINO_DIR")
 DEFAULT_ARDUINO_BINARY = os.getenv("DEFAULT_ARDUINO_BINARY")
 DEFAULT_COMPILER_REGISTRY_URL = os.getenv("DEFAULT_COMPILER_REGISTRY_URL")
+YAML_FILE_NAME = os.getenv("YAML_FILE_NAME")
 
 # Pydantic models for request bodies and responses
 class Board(BaseModel):
@@ -156,11 +158,18 @@ async def get_build_artifacts(
                 # fallback to any .bin file in the output directory
                 output_dir = os.path.join(DEFAULT_OUTPUT_DIR, job_id)
                 bin_files = [f for f in os.listdir(output_dir) if f.endswith(".bin")]
-                if not bin_files:
-                    raise HTTPException(status_code=404, detail="Compiled binary file not found")
-                binary_path = os.path.join(output_dir, bin_files[0])
+                if bin_files:
+                    binary_path = os.path.join(output_dir, bin_files[0])
+                else:
+                    # fallback to .hex file if no .bin file is found
+                    hex_files = [f for f in os.listdir(output_dir) if f.endswith(".hex")]
+                    if hex_files:
+                        binary_path = os.path.join(output_dir, hex_files[0])
+                    else:
+                        raise HTTPException(status_code=404, detail="Compiled binary file not found")
             jobs_status_map[job_id]["status"] = BuildStatus.delivered
-            return FileResponse(binary_path, media_type="application/octet-stream", filename='job_id_' + job_id + '.bin')
+            binary_filename = os.path.basename(binary_path)
+            return FileResponse(binary_path, media_type="application/octet-stream", filename=f"job_id_{job_id}_{binary_filename}")
         # Package the compiled output folder, source folder, and log file into a ZIP archive
         zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artifacts.zip"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
@@ -237,8 +246,8 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
     git_repo_url = f"{DEFAULT_GITLAB_API_URL}/{encoded_repo_path}/repository/archive.zip?sha={request.firmware_tag}&path={DEFAULT_ARDUINO_DIR}"
     compile_command = f"""bash -c "
             mkdir -p /cache/boards /cache/arduino && \
-            arduino-cli core install {request.board.core} && \
             arduino-cli core update-index && \
+            arduino-cli core install {request.board.core} && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
@@ -322,19 +331,35 @@ def generic_compile_task(
                 "message": f"Error including config.h in main.ino: {str(e)}"
             }
             return
-    # Extract libraries from libraries.txt if present
-    libraries_file_path = f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/libraries.txt"
-    if os.path.isfile(libraries_file_path):
+    # Extract libraries and additional board URLs from arduino-deps.yaml if present
+    deps_file_path = f"{DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}/{YAML_FILE_NAME}"
+    if os.path.isfile(deps_file_path):
         try:
-            with open(libraries_file_path, "r") as lib_file:
-                libraries = [line.strip() for line in lib_file if line.strip()]
+            with open(deps_file_path, "r") as f:
+                deps = yaml.safe_load(f)
+                libraries = deps.get("libraries", [])
+                additional_boards = deps.get("board_manager", {}).get("additional_urls", [])
+
+                if additional_boards:
+                    board_urls = ",".join(additional_boards)
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli core update-index",
+                        f"arduino-cli core update-index --additional-urls {board_urls}"
+                    )
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli core install",
+                        f"arduino-cli core install --additional-urls {board_urls}"
+                    )
                 if libraries:
-                    install_libs_cmd = f"arduino-cli lib install {' '.join(libraries)}"
-                    compiler_command = compiler_command.replace("arduino-cli core update-index &&", f"{install_libs_cmd} && arduino-cli core update-index &&")
+                    install_libs_cmd = f"arduino-cli lib install {' '.join(libraries)} &&"
+                    compiler_command = compiler_command.replace(
+                        "arduino-cli compile",
+                        f"{install_libs_cmd} arduino-cli compile"
+                    )
         except Exception as e:
             jobs_status_map[job_id] = {
                 "status": BuildStatus.error,
-                "message": f"Error reading libraries.txt: {str(e)}"
+                "message": f"Error reading arduino-deps.yaml: {str(e)}"
             }
             return
     # Build source code in the Docker container
