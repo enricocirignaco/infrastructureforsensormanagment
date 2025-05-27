@@ -5,9 +5,9 @@ export const useTextStore = defineStore('text', {
     sloganMultiLine: 'Innovating Nature-Care<br>with Smart Technology',
     slogan: 'Innovating Nature-Care with Smart Technology',
     applicationName: 'Leaf Link',
-    // restApiBaseUrl: `${window.location.origin}/api/v1`,
+    restApiBaseUrl: `${window.location.origin}/api/v1`,
     // restApiBaseUrl: 'http://mip3-cirie1.tail60817a.ts.net/api/v1',
-     restApiBaseUrl: 'http://localhost:8001',
+    //  restApiBaseUrl: 'http://localhost:8001',
 
     serialBaudrate: 921600,
     defaultFlashAddress: 0x0000,
