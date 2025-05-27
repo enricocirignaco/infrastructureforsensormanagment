@@ -1,14 +1,14 @@
 from app.utils.triplestore_client import TripleStoreClient
 from app.models.node_template import (
-    NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum)
+    NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum, ProtobufSchema, ProtobufSchemaField)
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
-from rdflib import Graph, URIRef, Literal, RDF
+from rdflib import Graph, URIRef, Literal, RDF, Namespace
 
 from typing import List
 from uuid import UUID
 from datetime import datetime
-
+import re
 
 class NodeTemplateRepository:
 
@@ -259,3 +259,71 @@ class NodeTemplateRepository:
     def update_node_template(self, node_template: NodeTemplateDB) -> NodeTemplateDB:
         self.delete_node_template(node_template.uuid)
         return self.create_node_template(node_template)
+    
+    
+    def find_all_protobuf_schemas(self) -> List[ProtobufSchema]:
+        sparql_query = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?name ?fieldName ?datatype
+        WHERE {{
+            ?template a bfh:NodeTemplate ;
+                    schema:name ?name ;
+                    bfh:hasField ?field .
+            ?field a bfh:Field ;
+                bfh:fieldName ?fieldName ;
+                bfh:protobufDatatype ?datatype .
+        }}
+        """
+        res = self.triplestore_client.query(sparql_query)
+
+        schemas = {}
+        for row in res.get('results', {}).get('bindings', []):
+            name = row['name']['value']
+            sanitized_name = re.sub(r'\s+', '', name)
+            message_name = f"Message_{sanitized_name}"
+            
+            if message_name not in schemas:
+                schemas[message_name] = ProtobufSchema(
+                    message_name=message_name,
+                    fields=[]
+                )
+            
+            schemas[message_name].fields.append(
+                ProtobufSchemaField(
+                    field_name=row['fieldName']['value'],
+                    protobuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row['datatype']['value'])
+                )
+            )
+        
+        return list(schemas.values())
+
+    def write_protobuf_schema(self, schema: bytes) -> None:
+        BFH = Namespace("http://data.bfh.ch/")
+        SCHEMA = Namespace("http://schema.org/")
+        description_uri = URIRef("http://data.bfh.ch/protobufDescriptionFile")
+        
+        delete_query = f"""
+        PREFIX bfh: <http://data.bfh.ch/>
+        DELETE WHERE {{
+            <{description_uri}> ?p ?o .
+        }}
+        """
+        self.triplestore_client.update(delete_query)
+    
+        g = Graph()
+        g.bind('schema', self.schema)
+        g.bind('bfh', self.bfh)
+        
+        g.parse(data=schema.decode('utf-8'), format='nt')
+
+        # 3. Metadaten hinzufügen
+        #g.add((description_uri, RDF.type, BFH.ProtobufDescriptionFile))
+        #g.add((description_uri, SCHEMA.name, Literal(schema_name)))
+        #g.add((description_uri, SCHEMA.description, Literal(description)))
+        #g.add((description_uri, SCHEMA.dateCreated, Literal(datetime.utcnow().isoformat())))
+#
+        ## 4. In den Triplestore schreiben
+        #sparql_update = f"INSERT DATA {{ {g.serialize(format='nt')} }}"
+        #triplestore_client.update(sparql_update)

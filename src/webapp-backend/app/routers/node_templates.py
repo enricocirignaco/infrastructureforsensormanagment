@@ -35,7 +35,7 @@ async def read_specific_node_template(uuid: UUID,
 async def create_new_node_template(project: NodeTemplateCreate,
                              logged_in_user: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                              node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> NodeTemplateOutFull:
-    return node_template_service.create_node_template(node_template=project, logged_in_user=logged_in_user)
+    return await node_template_service.create_node_template(node_template=project, logged_in_user=logged_in_user)
 
 @router.put("/{uuid}", response_model=NodeTemplateOutFull)
 async def update_specific_node_template(uuid: UUID,

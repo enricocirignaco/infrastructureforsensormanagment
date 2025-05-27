@@ -1,16 +1,20 @@
 from uuid import UUID, uuid4
+import re
+import httpx
 
 from app.repositories.node_template_repository import NodeTemplateRepository
-from app.models.node_template import NodeTemplateDB, NodeTemplateUpdate, NodeTemplateCreate, ConfigurableDefinition, ConfigurableTypeEnum, NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateLogbookEntry, NodeTemplateLogbookEnum, NodeTemplateStateEnum
-from app.utils.exceptions import NotFoundError
+from app.models.node_template import NodeTemplateDB, NodeTemplateUpdate, NodeTemplateCreate, ConfigurableDefinition, ConfigurableTypeEnum, NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateLogbookEntry, NodeTemplateLogbookEnum, NodeTemplateStateEnum, ProtobufSchema, ProtobufSchemaField
+from app.utils.exceptions import NotFoundError, ExternalServiceError
 from app.constants import system_defined_configurables
 from app.models.user import UserInDB, UserOut
+from app.config import settings
 from datetime import datetime
 from typing import List
 
 class NodeTemplateService:    
     def __init__(self, node_template_repository: NodeTemplateRepository):
         self.node_template_repository = node_template_repository
+        self.protobuf_service_base_url = settings.PROTOBUF_SERVICE_BASE_URL
 
     def get_node_template_by_uuid(self, uuid: UUID) -> NodeTemplateOutFull:
         node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid)
@@ -21,7 +25,7 @@ class NodeTemplateService:
     def get_all_node_templates(self) -> List[NodeTemplateOutSlim]:
         return self.node_template_repository.find_all_node_templates()
 
-    def create_node_template(self, node_template: NodeTemplateCreate, logged_in_user: UserInDB) -> NodeTemplateDB:
+    async def create_node_template(self, node_template: NodeTemplateCreate, logged_in_user: UserInDB) -> NodeTemplateDB:
         field_names = [field.field_name for field in node_template.fields]
         if len(field_names) != len(set(field_names)):
             raise ValueError("Field names must be unique")
@@ -45,7 +49,11 @@ class NodeTemplateService:
                     type=ConfigurableTypeEnum.SYSTEM_DEFINED
                 )
             )
-        return self.node_template_repository.create_node_template(node_template_db)
+        node_template_db = self.node_template_repository.create_node_template(node_template_db)
+        
+        await self._update_protobuf_schema()
+        
+        return node_template_db
 
     def update_node_template(self, uuid: UUID, node_template: NodeTemplateUpdate, logged_in_user: UserInDB) -> NodeTemplateDB:
         node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid=uuid)
@@ -135,3 +143,27 @@ class NodeTemplateService:
     
     def get_protobuf_code(self, uuid: UUID):
         pass
+    
+    async def _update_protobuf_schema(self) -> bytes:
+        protobuf_schemas = self.node_template_repository.find_all_protobuf_schemas()
+        protobuf_schemas_json = [schema.model_dump() for schema in protobuf_schemas]
+        
+        url = f"{self.protobuf_service_base_url}/protobuf/schema"
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/octet-stream"
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url=url, json=protobuf_schemas_json, headers=headers)
+                
+                if response.is_success:
+                    octet_stream = response.content
+                    print(octet_stream.decode('utf-8'))
+                else:
+                    raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
+                
+        except httpx.RequestError as e:
+            raise ExternalServiceError(f"Request to protobuf service failed: {e}")
+        

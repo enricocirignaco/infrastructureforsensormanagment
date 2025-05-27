@@ -1,5 +1,6 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, field_validator
 from datetime import datetime
+import re
 
 from enum import Enum
 from uuid import UUID
@@ -90,3 +91,26 @@ class NodeTemplateOutFull(NodeTemplateBase):
     uuid: UUID
     logbook: List[NodeTemplateLogbookEntry]
     state: NodeTemplateStateEnum
+
+# Models used for API requests to protobuf service
+class ProtobufSchemaField(BaseModel):
+    field_name: str
+    protobuf_datatype: ProtobufDatatypeEnum
+    
+    @field_validator('field_name')
+    @classmethod
+    def validate_field_name(cls, v):
+        if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', v):
+            raise ValueError('Invalid field_name: must be a valid identifier without spaces')
+        return v
+
+class ProtobufSchema(BaseModel):
+    message_name: str
+    fields: List[ProtobufSchemaField]
+    
+    @field_validator('message_name')
+    @classmethod
+    def validate_message_name(cls, v):
+        if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', v):
+            raise ValueError('Invalid message_name: must be a valid identifier without spaces')
+        return v

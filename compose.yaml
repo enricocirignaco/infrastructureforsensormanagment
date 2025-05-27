@@ -78,6 +78,15 @@ services:
       - mqtt-broker
       - fuseki
       - influxdb
+  protobuf-service:
+    build: src/protobuf-service
+    container_name: protobuf-service
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
   mqtt-broker:
     image: eclipse-mosquitto:2.0.21
     container_name: mqtt-broker

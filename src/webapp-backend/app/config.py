@@ -10,8 +10,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MIN: int = Field(60, env="ACCESS_TOKEN_EXPIRE_MIN")
     
     # External services
-    TRIPLESTORE_ENDPOINT: str = Field("http://localhost:3030/testing/", env="TRIPLESTORE_ENDPOINT")    
+    TRIPLESTORE_ENDPOINT: str = Field("http://fuseki:3030/testing/", env="TRIPLESTORE_ENDPOINT")
     COMPILER_ENGINE_BASE_URL: str = Field("http://compiler-engine:8000", env="COMPILER_ENGINE_BASE_URL")
+    PROTOBUF_SERVICE_BASE_URL: str = Field("http://protobuf-service:8000", env="PROTOBUF_SERVICE_BASE_URL")
     
     # TTN settings
     FEATURE_TTN_ENABLED: bool = Field(True, env="FEATURE_TTN_ENABLED")
