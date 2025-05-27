@@ -151,11 +151,16 @@ async def get_build_artifacts(
     try:
         # Return only the compiled binary file if bin_only is set to true
         if bin_only:
-            try:
-                jobs_status_map[job_id]["status"] = BuildStatus.delivered
-                return FileResponse(f"{DEFAULT_OUTPUT_DIR}/{job_id}/{DEFAULT_ARDUINO_BINARY}", media_type="application/octet-stream", filename= 'job_id_' + job_id + '_' + DEFAULT_ARDUINO_BINARY)
-            except Exception:
-                raise HTTPException(status_code=404, detail="Compiled binary file not found")
+            binary_path = os.path.join(DEFAULT_OUTPUT_DIR, job_id, DEFAULT_ARDUINO_BINARY)
+            if not os.path.isfile(binary_path):
+                # fallback to any .bin file in the output directory
+                output_dir = os.path.join(DEFAULT_OUTPUT_DIR, job_id)
+                bin_files = [f for f in os.listdir(output_dir) if f.endswith(".bin")]
+                if not bin_files:
+                    raise HTTPException(status_code=404, detail="Compiled binary file not found")
+                binary_path = os.path.join(output_dir, bin_files[0])
+            jobs_status_map[job_id]["status"] = BuildStatus.delivered
+            return FileResponse(binary_path, media_type="application/octet-stream", filename='job_id_' + job_id + '.bin')
         # Package the compiled output folder, source folder, and log file into a ZIP archive
         zip_path = f"{DEFAULT_OUTPUT_DIR}/{job_id}/artifacts.zip"
         with zipfile.ZipFile(zip_path, 'w') as zipf:
