@@ -40,8 +40,7 @@ class NodeTemplateService:
             **node_template.model_dump(), 
             uuid=uuid, 
             logbook=logbook,
-            state=NodeTemplateStateEnum.UNUSED,
-            protobuf_message_name=f"Msg_{uuid.hex}"
+            state=NodeTemplateStateEnum.UNUSED
         )
         for config in system_defined_configurables:
             node_template_db.configurables.append(
@@ -79,8 +78,7 @@ class NodeTemplateService:
             # Update node template that is currently unused
             node_template_update = NodeTemplateDB(
                 **node_template.model_dump(), 
-                logbook=node_template_db.logbook,
-                protobuf_message_name=f"Msg_{uuid.hex}")
+                logbook=node_template_db.logbook)
         elif node_template_db.state != NodeTemplateStateEnum.UNUSED and node_template_db.state == node_template.state:
             # Update node template that is currently in use or archived but state is not changed
             return node_template_db
@@ -149,7 +147,6 @@ class NodeTemplateService:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url=url, json=protobuf_schema, headers=headers)
                 if response.is_success:
-                    print(response.text)
                     return response.text
                 else:
                     raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
@@ -164,7 +161,7 @@ class NodeTemplateService:
         protobuf_schemas = self.node_template_repository.find_all_protobuf_schemas()
         protobuf_schemas_json = [schema.model_dump() for schema in protobuf_schemas]
         
-        url = f"{self.protobuf_service_base_url}/protobuf/descriptor-file"
+        url = f"{self.protobuf_service_base_url}/protobuf/file-descriptor"
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/octet-stream"

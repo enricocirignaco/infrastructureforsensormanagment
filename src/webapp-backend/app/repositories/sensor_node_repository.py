@@ -1,6 +1,6 @@
 from app.utils.triplestore_client import TripleStoreClient
-from app.models.sensor_node import SensorNodeDB, SensorNodeOutSlim, SensorNodeLocation, SensorNodeStateEnum, ConfigurableAssignment, ConfigurableTypeEnum, SensorNodeLogbookEntry, SensorNodeLogbookEnum
-from app.models.node_template import NodeTemplateOutSlim, HardwareBoard, NodeTemplateStateEnum
+from app.models.sensor_node import SensorNodeDB, SensorNodeOutSlim, SensorNodeLocation, SensorNodeStateEnum, ConfigurableAssignment, ConfigurableTypeEnum, SensorNodeLogbookEntry, SensorNodeLogbookEnum, TimeseriesData, TimeseriesField
+from app.models.node_template import NodeTemplateOutSlim, HardwareBoard, NodeTemplateStateEnum, ProtobufDatatypeEnum
 from app.models.user import UserOut, RoleEnum
 from app.models.project import ProjectOutSlim, ProjectStateEnum
 
@@ -242,6 +242,89 @@ class SensorNodeRepository:
             )
 
         return sensor_node
+    
+    def find_timeseries_by_sensor_node_uuid(self, uuid: UUID) -> TimeseriesData | None:
+        sensor_uri = f"<http://data.bfh.ch/sensorNodes/{uuid}>"
+
+        # 1. Letzte Observation für SensorNode finden
+        sparql_latest_observation = f"""
+        PREFIX sosa: <http://www.w3.org/ns/sosa/>
+        PREFIX bfh: <http://data.bfh.ch/>
+        
+        SELECT ?obs ?resultTime
+        WHERE {{
+            ?obs a sosa:Observation ;
+                sosa:madeBySensor {sensor_uri} ;
+                sosa:resultTime ?resultTime .
+        }}
+        ORDER BY DESC(?resultTime)
+        LIMIT 1
+        """
+        res_obs = self.triplestore_client.query(sparql_latest_observation)
+        obs_binding = res_obs["results"]["bindings"]
+        if not obs_binding:
+            return None
+
+        obs_uri = obs_binding[0]["obs"]["value"]
+        result_time = datetime.fromisoformat(obs_binding[0]["resultTime"]["value"])
+
+        # 2. Alle Ergebnisse (Felder + Werte) dieser Observation laden
+        sparql_results = f"""
+        PREFIX sosa: <http://www.w3.org/ns/sosa/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?fieldName ?value
+        WHERE {{
+            <{obs_uri}> sosa:hasResult ?res .
+            ?res bfh:fieldName ?fieldName ;
+                sosa:hasSimpleResult ?value .
+        }}
+        """
+        res_results = self.triplestore_client.query(sparql_results)
+        result_fields = res_results["results"]["bindings"]
+
+        # 3. Template-Feldinfos laden
+        # (Finde nodeTemplate vom SensorNode)
+        sparql_template_fields = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?fieldName ?protobuf ?unit
+        WHERE {{
+            {sensor_uri} bfh:usesNodeTemplate ?template .
+            ?template bfh:hasField ?fieldUri .
+            ?fieldUri bfh:fieldName ?fieldName ;
+                    bfh:protobufDatatype ?protobuf ;
+                    bfh:unit ?unit .
+        }}
+        """
+        res_template_fields = self.triplestore_client.query(sparql_template_fields)
+        field_meta = {
+            row["fieldName"]["value"]: {
+                "protobuf": ProtobufDatatypeEnum.from_rdf_uri(row["protobuf"]["value"]),
+                "unit": row["unit"]["value"]
+            }
+            for row in res_template_fields["results"]["bindings"]
+        }
+
+        fields = []
+        for row in result_fields:
+            field_name = row["fieldName"]["value"]
+            value = row["value"]["value"]
+            metadata = field_meta.get(field_name, {"protobuf": "unknown", "unit": ""})
+
+            fields.append(TimeseriesField(
+                field_name=field_name,
+                value=value,
+                protobuf_datatype=metadata["protobuf"],
+                unit=metadata["unit"]
+            ))
+
+        return TimeseriesData(
+            timestamp=result_time,
+            fields=fields
+        )
+
 
     def delete_sensor_node(self, uuid: UUID) -> None:
         sparql_query = f"""

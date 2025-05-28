@@ -32,7 +32,7 @@ class NodeTemplateRepository:
         g.add((template_uri, URIRef(self.schema + "description"), Literal(node_template.description)))
         g.add((template_uri, URIRef(self.schema + "url"), Literal(str(node_template.gitlab_url))))
         g.add((template_uri, URIRef(self.bfh + "state"), URIRef(node_template.state.rdf_uri)))
-        g.add((template_uri, URIRef(self.bfh + "protobufMessageName"), Literal(node_template.protobuf_message_name)))
+        g.add((template_uri, URIRef(self.bfh + "protobufMessageName"), Literal(f"Msg_{node_template.uuid.hex}")))
 
         # Board
         g.add((template_uri, URIRef(self.bfh + "boardCore"), Literal(node_template.board.core)))
@@ -336,9 +336,9 @@ class NodeTemplateRepository:
         return list(schemas.values())
 
     def write_protobuf_schema(self, schema: bytes) -> None:
-        description_uri = URIRef("http://data.bfh.ch/protobufDescriptorFile")
+        description_uri = URIRef("http://data.bfh.ch/protobufFileDescriptor")
         
-        # Remove existing descriptor file
+        # Remove existing file descriptor
         delete_query = f"""
         PREFIX bfh: <http://data.bfh.ch/>
         DELETE WHERE {{
@@ -351,7 +351,7 @@ class NodeTemplateRepository:
         g.bind('schema', self.schema)
         g.bind('bfh', self.bfh)
         
-        g.add((description_uri, RDF.type, URIRef("http://data.bfh.ch/ProtobufDescriptionFile")))
+        g.add((description_uri, RDF.type, URIRef("http://data.bfh.ch/ProtobufFileDescriptor")))
         encoded_bytes = base64.b64encode(schema).decode('ascii')
         g.add((description_uri, URIRef(self.bfh + "binaryContent"), Literal(encoded_bytes, datatype=XSD.base64Binary)))
         g.add((description_uri, URIRef(self.schema + "dateModified"), Literal(datetime.now(timezone.utc).isoformat(), datatype=XSD.dateTime)))

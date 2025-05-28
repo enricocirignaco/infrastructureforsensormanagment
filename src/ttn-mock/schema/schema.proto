@@ -1,8 +1,7 @@
 edition = "2023";
 
-message SensorData {
-    uint32 firmwareVersion = 1;
-    sint32 temp1 = 10; // degrees Celsius
-    sint32 temp2 = 11; // degrees Celsius
-    uint32 hum1 = 12; // percentual value between 0 and 100
+message Msg_ba60aa1c3a024f7691ef43739f570062 {
+  uint32 hum1 = 1;
+  uint32 temp1 = 2;
+  uint32 temp2 = 3;
 }

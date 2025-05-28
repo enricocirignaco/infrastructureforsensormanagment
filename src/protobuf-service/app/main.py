@@ -52,7 +52,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.post("/descriptor-file", response_class=Response, status_code=status.HTTP_200_OK)
+@router.post("/file-descriptor", response_class=Response, status_code=status.HTTP_200_OK)
 async def generate_descriptor_file(schemas: List[ProtobufSchema]) -> Response:
     with tempfile.TemporaryDirectory() as tmpdir:
         proto_file = f"{tmpdir}/schema.proto"
@@ -65,16 +65,16 @@ async def generate_descriptor_file(schemas: List[ProtobufSchema]) -> Response:
                 f.write("}\n\n")
 
         # Kompiliere mit protoc
-        descriptor_file = f"{tmpdir}/schema.desc"
+        desc_file = f"{tmpdir}/schema.desc"
         subprocess.run([
             "protoc",
             f"-I={tmpdir}",
-            f"--descriptor_set_out={descriptor_file}",
+            f"--descriptor_set_out={desc_file}",
             proto_file
         ], check=True)
 
-        # Lies das Descriptor-File und gib es zurück
-        with open(descriptor_file, "rb") as f:
+        # Lies das File-Descriptor-File und gib es zurück
+        with open(desc_file, "rb") as f:
             content = f.read()
             return Response(content=content, media_type="application/octet-stream")
 

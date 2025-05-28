@@ -6,7 +6,7 @@ from uuid import UUID
 from typing import Optional, List
 from app.models.user import UserOut
 from app.models.common import RDFEnumMixin, ConfigurableTypeEnum
-from app.models.node_template import NodeTemplateOutSlim
+from app.models.node_template import NodeTemplateOutSlim, ProtobufDatatypeEnum
 from app.models.project import ProjectOutSlim
 
 class SensorNodeStateEnum(RDFEnumMixin, str, Enum):
@@ -39,7 +39,7 @@ class ConfigurableAssignment(BaseModel):
     
 class TimeseriesField(BaseModel):
     field_name: str
-    protobuf_datatype: str
+    protobuf_datatype: ProtobufDatatypeEnum
     unit: str
     value: str    
 
