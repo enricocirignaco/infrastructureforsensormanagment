@@ -88,5 +88,18 @@ export default {
     }
     return fetch(url, options)
       .then(response => response.ok ? response.json() : response.json().then(errorData => Promise.reject(errorData)))
+  },
+  getProtoBufCode(id) {
+    let url = BASE_URL + '/node-templates/' + id + '/code'
+    const options = {
+      method: 'GET',
+      headers: {
+        Accept: 'application/zip',
+        'Content-Type': 'application/json',
+        ...authStore.getAuthHeader(),
+      },
+    }
+    return fetch(url, options)
+      .then(response => response.ok ? response : response.json().then(errorData => Promise.reject(errorData)))
   }
 }
