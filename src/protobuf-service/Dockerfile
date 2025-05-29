@@ -7,6 +7,10 @@ RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v31.0/pro
     unzip protoc.zip -d /out && \
     rm protoc.zip
 
+RUN wget https://jpa.kapsi.fi/nanopb/download/nanopb-0.4.9.1-linux-x86.tar.gz -O nanopb.tar.gz && \
+    mkdir -p /nanopb && \
+    tar -xzf nanopb.tar.gz -C /nanopb --strip-components=1 && \
+    rm nanopb.tar.gz
 
 FROM python:3.11-slim AS runtime
 
@@ -15,6 +19,11 @@ RUN apt-get update && \
 
 COPY --from=builder /out/bin/protoc /usr/local/bin/protoc
 COPY --from=builder /out/include /usr/local/include
+COPY --from=builder /nanopb/generator /nanopb/generator
+COPY --from=builder /nanopb/pb.h /nanopb/
+COPY --from=builder /nanopb/pb_common.* /nanopb/
+COPY --from=builder /nanopb/pb_encode.* /nanopb/
+COPY --from=builder /nanopb/pb_decode.* /nanopb/
 
 RUN protoc --version
 

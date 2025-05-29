@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from typing import List
 from uuid import UUID
 
@@ -74,7 +74,14 @@ async def download_protobuf_schema_of_node_template(uuid: UUID,
                                                 request: Request,
                                                 _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
                                                 node_template_service: NodeTemplateService = Depends(get_node_template_service)):
-    schema = await node_template_service.get_protobuf_schema(uuid=uuid)
+    try:
+        schema = await node_template_service.get_protobuf_schema(uuid=uuid)
+    except NotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))
 
     accept_header = request.headers.get("accept", "")
     if "application/json" in accept_header:
@@ -87,12 +94,15 @@ async def download_protobuf_schema_of_node_template(uuid: UUID,
         )
 
 
-@router.get("/{uuid}/code", response_class=StreamingResponse)
+@router.get("/{uuid}/code", response_class=Response)
 async def download_generated_protobuf_code(uuid: UUID,
                                            _: UserInDB = Depends(require_roles_or_owner([RoleEnum.TECHNICIAN, RoleEnum.ADMIN])),
-                                           node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> StreamingResponse:
-    raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="Protobuf-Code-Generierung ist noch nicht implementiert."
-        )
-    return node_template_service.get_protobuf_code(uuid=uuid)
+                                           node_template_service: NodeTemplateService = Depends(get_node_template_service)) -> Response:
+    try:
+        return await node_template_service.get_generated_nanopb_code(uuid=uuid)
+    except NotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    except ExternalServiceError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err))

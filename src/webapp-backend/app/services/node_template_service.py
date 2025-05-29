@@ -1,6 +1,7 @@
 from uuid import UUID, uuid4
 import re
 import httpx
+from fastapi import Response
 
 from app.repositories.node_template_repository import NodeTemplateRepository
 from app.models.node_template import NodeTemplateDB, NodeTemplateUpdate, NodeTemplateCreate, ConfigurableDefinition, ConfigurableTypeEnum, NodeTemplateOutSlim, NodeTemplateOutFull, NodeTemplateLogbookEntry, NodeTemplateLogbookEnum, NodeTemplateStateEnum, ProtobufSchema, ProtobufSchemaField
@@ -136,6 +137,8 @@ class NodeTemplateService:
 
     async def get_protobuf_schema(self, uuid: UUID) -> str:
         protobuf_schema = self.node_template_repository.find_protobuf_schema_by_uuid(uuid).model_dump()
+        if not protobuf_schema:
+            raise NotFoundError("No node template found with the given UUID")
         
         url = f"{self.protobuf_service_base_url}/protobuf/schema"
         headers = {
@@ -154,8 +157,35 @@ class NodeTemplateService:
         except httpx.RequestError as e:
             raise ExternalServiceError(f"Request to protobuf service failed: {e}")
     
-    def get_protobuf_code(self, uuid: UUID):
-        pass
+    async def get_generated_nanopb_code(self, uuid: UUID) -> Response:
+        protobuf_schema = self.node_template_repository.find_protobuf_schema_by_uuid(uuid).model_dump()
+        if not protobuf_schema:
+            raise NotFoundError("No node template found with the given UUID")
+        
+        url = f"{self.protobuf_service_base_url}/protobuf/nanopb"
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/zip"
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url=url, json=protobuf_schema, headers=headers)
+                if response.is_success:
+                    return Response(
+                        content=response.content,
+                        headers={
+                            "Content-Disposition": response.headers.get("content-disposition"),
+                            "Content-Type": response.headers.get("content-type")
+                        },
+                        status_code=response.status_code,
+                        media_type=response.headers.get("content-type")
+                    )
+                else:
+                    raise ExternalServiceError(f"Protobuf service returned error: {response.status_code} - {response.text}")
+                
+        except httpx.RequestError as e:
+            raise ExternalServiceError(f"Request to protobuf service failed: {e}")
     
     async def _update_protobuf_schema(self) -> None:
         protobuf_schemas = self.node_template_repository.find_all_protobuf_schemas()

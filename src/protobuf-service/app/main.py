@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, FastAPI
+from fastapi import APIRouter, Response, status, FastAPI
 from pydantic import BaseModel, field_validator
 from typing import List
 import tempfile
 import subprocess
-from enum import Enum
 import re
+import os
+import zipfile
+from enum import Enum
+from fastapi.responses import StreamingResponse
+from io import BytesIO
 
 class ProtobufDatatypeEnum(str, Enum):
     DOUBLE = 'double'
@@ -91,6 +95,49 @@ async def generate_protobuf_schema(schema: ProtobufSchema) -> Response:
         content="\n".join(lines),
         media_type="text/plain; charset=utf-8"
     )
+
+@router.post("/nanopb", response_class=Response, status_code=status.HTTP_200_OK)
+async def generate_nanopb_code(schema: ProtobufSchema) -> StreamingResponse:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        proto_file = os.path.join(tmpdir, "schema.proto")
+        with open(proto_file, 'w') as f:
+            f.write('edition = "2023";\n\n')
+            f.write(f"message {schema.message_name} {{\n")
+            for idx, field in enumerate(schema.fields, start=1):
+                f.write(f"  {field.protobuf_datatype.value} {field.field_name} = {idx};\n")
+            f.write("}\n\n")
+
+        # Generiere Nanopb-Code (.pb.h, .pb.c)
+        output_dir = os.path.join(tmpdir, "out")
+        os.makedirs(output_dir, exist_ok=True)
+        subprocess.run([
+            "python3", "/nanopb/generator/nanopb_generator.py",
+            f"-I={tmpdir}",
+            f"--output-dir={output_dir}",
+            proto_file
+        ], check=True)
+
+        # Erstelle ein ZIP-Archiv mit .pb.h/.pb.c und Laufzeitdateien
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zipf:
+            # Alle generierten Dateien in nanopb/
+            for filename in os.listdir(output_dir):
+                filepath = os.path.join(output_dir, filename)
+                zipf.write(filepath, arcname=os.path.join("nanopb", filename))
+
+            # Laufzeitdateien ebenfalls in nanopb/
+            nanopb_files = [
+                "pb.h", "pb_common.c", "pb_common.h",
+                "pb_encode.c", "pb_encode.h",
+                "pb_decode.c", "pb_decode.h"
+            ]
+            for fname in nanopb_files:
+                src_path = os.path.join("/nanopb", fname)
+                if os.path.exists(src_path):
+                    zipf.write(src_path, arcname=os.path.join("nanopb", fname))
+
+        zip_buffer.seek(0)
+        return StreamingResponse(zip_buffer, media_type="application/zip", headers={"Content-Disposition": "attachment; filename=nanopb.zip"})
 
 app = FastAPI()
 app.include_router(router)
