@@ -1,0 +1,156 @@
+---
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  "/protobuf/file-descriptor":
+    post:
+      tags:
+      - protobuf
+      summary: Generate Descriptor File
+      operationId: generate_descriptor_file_protobuf_file_descriptor_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                "$ref": "#/components/schemas/ProtobufSchema"
+              type: array
+              title: Schemas
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/protobuf/schema":
+    post:
+      tags:
+      - protobuf
+      summary: Generate Protobuf Schema
+      operationId: generate_protobuf_schema_protobuf_schema_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProtobufSchema"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/protobuf/nanopb":
+    post:
+      tags:
+      - protobuf
+      summary: Generate Nanopb Code
+      operationId: generate_nanopb_code_protobuf_nanopb_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ProtobufSchema"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+        '404':
+          description: Not found
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ProtobufDatatypeEnum:
+      type: string
+      enum:
+      - double
+      - float
+      - int32
+      - int64
+      - uint32
+      - uint64
+      - sint32
+      - sint64
+      - fixed32
+      - fixed64
+      - sfixed32
+      - sfixed64
+      - bool
+      - string
+      - bytes
+      title: ProtobufDatatypeEnum
+    ProtobufSchema:
+      properties:
+        message_name:
+          type: string
+          title: Message Name
+        fields:
+          items:
+            "$ref": "#/components/schemas/ProtobufSchemaField"
+          type: array
+          title: Fields
+      type: object
+      required:
+      - message_name
+      - fields
+      title: ProtobufSchema
+    ProtobufSchemaField:
+      properties:
+        field_name:
+          type: string
+          title: Field Name
+        protobuf_datatype:
+          "$ref": "#/components/schemas/ProtobufDatatypeEnum"
+      type: object
+      required:
+      - field_name
+      - protobuf_datatype
+      title: ProtobufSchemaField
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
