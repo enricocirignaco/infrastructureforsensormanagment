@@ -134,18 +134,21 @@ class NodeTemplateService:
             raise ValueError("Only unused node templates can be deleted")
         self.node_template_repository.delete_node_template(uuid=uuid)
 
-
     async def get_protobuf_schema(self, uuid: UUID) -> str:
+        node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid)
+        if not node_template_db:
+            raise NotFoundError("Node Template with given UUID not found")
+        if node_template_db.fields is None or len(node_template_db.fields) == 0:
+            return ""
+
         protobuf_schema = self.node_template_repository.find_protobuf_schema_by_uuid(uuid).model_dump()
-        if not protobuf_schema:
-            raise NotFoundError("No node template found with the given UUID")
-        
+
         url = f"{self.protobuf_service_base_url}/protobuf/schema"
         headers = {
             "Content-Type": "application/json",
             "Accept": "text/plain"
         }
-        
+
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url=url, json=protobuf_schema, headers=headers)
@@ -158,16 +161,20 @@ class NodeTemplateService:
             raise ExternalServiceError(f"Request to protobuf service failed: {e}")
     
     async def get_generated_nanopb_code(self, uuid: UUID) -> Response:
+        node_template_db = self.node_template_repository.find_node_template_by_uuid(uuid)
+        if not node_template_db:
+            raise NotFoundError("Node Template with given UUID not found")
+        if node_template_db.fields is None or len(node_template_db.fields) == 0:
+            raise ValueError("Node Template has no fields defined, cannot generate code")
+
         protobuf_schema = self.node_template_repository.find_protobuf_schema_by_uuid(uuid).model_dump()
-        if not protobuf_schema:
-            raise NotFoundError("No node template found with the given UUID")
-        
+
         url = f"{self.protobuf_service_base_url}/protobuf/nanopb"
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/zip"
         }
-        
+
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(url=url, json=protobuf_schema, headers=headers)
