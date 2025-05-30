@@ -52,7 +52,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
+      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing/
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
       - FEATURE_TTN_ENABLED=false
@@ -65,8 +65,8 @@ services:
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
-      - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
-      - FUSEKI_ENDPOINT=http://fuseki:3030/testing/update
+      - MQTT_TOPIC=v3/leaf-link-mock@ttn/devices/#
+      - FUSEKI_ENDPOINT=http://fuseki:3030/testing/
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_ORG=bfh
       - INFLUX_BUCKET=default
@@ -78,6 +78,15 @@ services:
       - mqtt-broker
       - fuseki
       - influxdb
+  protobuf-service:
+    build: src/protobuf-service
+    container_name: protobuf-service
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
   mqtt-broker:
     image: eclipse-mosquitto:2.0.21
     container_name: mqtt-broker
@@ -127,12 +136,13 @@ services:
     depends_on:
       - mqtt-broker
     environment:
+      - DEVICE_ID=6aff84cc-9b94-4486-9fc5-09b464eea236
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
-      - MQTT_TOPIC=mock-v3/internet-of-soils-playground@ttn/devices/cubecell-1/up
-      - PUBLISH_INTERVAL_SEC=5
+      - PUBLISH_INTERVAL_SEC=60
       - PYTHONUNBUFFERED=1
-
+    env_file:
+      - .env-ttnmock
   yasgui:
     image: erikap/yasgui
     container_name: yasgui

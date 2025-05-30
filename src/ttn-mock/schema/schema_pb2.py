@@ -24,13 +24,13 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cschema.proto\"Q\n\nSensorData\x12\x17\n\x0f\x66irmwareVersion\x18\x01 \x01(\r\x12\r\n\x05temp1\x18\n \x01(\x11\x12\r\n\x05temp2\x18\x0b \x01(\x11\x12\x0c\n\x04hum1\x18\x0c \x01(\rb\x08\x65\x64itionsp\xe8\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cschema.proto\"R\n$Msg_ba60aa1c3a024f7691ef43739f570062\x12\x0c\n\x04hum1\x18\x01 \x01(\r\x12\r\n\x05temp1\x18\x02 \x01(\r\x12\r\n\x05temp2\x18\x03 \x01(\rb\x08\x65\x64itionsp\xe8\x07')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'schema_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_SENSORDATA']._serialized_start=16
-  _globals['_SENSORDATA']._serialized_end=97
+  _globals['_MSG_BA60AA1C3A024F7691EF43739F570062']._serialized_start=16
+  _globals['_MSG_BA60AA1C3A024F7691EF43739F570062']._serialized_end=98
 # @@protoc_insertion_point(module_scope)

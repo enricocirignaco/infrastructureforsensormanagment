@@ -1,10 +1,11 @@
 import paho.mqtt.client as mqtt
 from influxdb_client import InfluxDBClient, Point
 from google.protobuf import descriptor_pb2, descriptor_pool, message_factory
-from SPARQLWrapper import SPARQLWrapper, POST
+from SPARQLWrapper import SPARQLWrapper, POST, JSON
+from rdflib import Graph, URIRef, Literal, RDF, Namespace, XSD, SOSA
 import json
 import base64
-import uuid
+from uuid import uuid4
 import config
 from datetime import datetime
 
@@ -29,6 +30,7 @@ class MQTTClient:
         Connects to the MQTT broker and starts listening for messages.
         """
         try:
+            self.client.username_pw_set(config.MQTT_USERNAME, config.MQTT_PASSWORD)
             self.client.connect(config.MQTT_BROKER, config.MQTT_PORT)
             self.client.subscribe(config.MQTT_TOPIC)
             print("Listening for MQTT messages...")
@@ -50,23 +52,30 @@ class MQTTClient:
         Parses the payload and writes data to InfluxDB.
         """
         try:
+            # Step 1: Extract relevant data from MQTT message
             mqtt_payload = json.loads(msg.payload.decode("utf-8"))
-
-            # Extract relevant data
-            device_id = mqtt_payload.get("end_device_ids", {}).get("device_id")
+            device_id = mqtt_payload.get("end_device_ids", {}).get("device_id") # equals uuid of sensor node
             timestamp = mqtt_payload.get("received_at")
             frm_payload_b64 = mqtt_payload.get("uplink_message", {}).get("frm_payload")
 
-            # Only continue if payload is present
             if not frm_payload_b64:
                 print("No 'frm_payload' found!")
                 return
 
-            # Decode base64 and protobuf encoded payload
             frm_payload = base64.b64decode(frm_payload_b64)
-            sensor_data = self.proto_parser.parse_payload(frm_payload, "SensorData") # TODO Replace with dynamic naming
             
-            # Gather all fields and write them to triplestore and tsdb
+            # Step 2: Get current File Descriptor from Fuseki
+            file_descriptor: bytes = self.fuseki_client.read_filedescriptor()
+            if not file_descriptor:
+                raise RuntimeError("No file descriptor found in Fuseki.")
+            
+            # Step 3: Query matching message name from Fuseki 
+            message_name = self.fuseki_client.find_message_name(device_id)
+            
+            # Step 4: Parse the protobuf payload by applying the File Descriptor
+            sensor_data = self.proto_parser.parse_payload(payload=frm_payload, file_descriptor=file_descriptor, message_name=message_name)
+            
+            # Step 5: Gather all fields and write them into the triplestore and tsdb
             fields = {field.name: value for field, value in sensor_data.ListFields()}
             if fields:
                 self.influx_client.write_sensor_data(device_id, timestamp, fields)
@@ -75,19 +84,16 @@ class MQTTClient:
         except Exception as e:
             print(f"Error processing MQTT message: {e}")
 
+
+
 class ProtobufParser():
     """
     Parses protobuf payloads using FileDescriptors to dynamically reflect required Python classes.
     """
 
-    def __init__(self, schema_path):
-        # TODO: This shouldn't be read from a local file in production
-        with open(schema_path, "rb") as f:
-            self.descriptor_data = f.read()
-
-    def parse_payload(self, payload, message_name):
+    def parse_payload(self, payload: bytes, file_descriptor: bytes, message_name: str):
         try:
-            parsed_message = self._parse_payload_with_dynamic_schema(self.descriptor_data, message_name, payload)
+            parsed_message = self._parse_payload_with_dynamic_schema(file_descriptor, message_name, payload)
             return parsed_message
         except Exception as e:
             print(f"Protobuf Parsing Error: {e}")
@@ -134,6 +140,8 @@ class ProtobufParser():
         MessageClass = message_factory.GetMessageClass(message_descriptor)
         return MessageClass
 
+
+
 class FusekiClient:
     def __init__(self):
         """
@@ -145,54 +153,73 @@ class FusekiClient:
         self.sparql = SPARQLWrapper(self.endpoint)
         self.sparql.setHTTPAuth("BASIC")
         self.sparql.setCredentials(self.user, self.password)
+        self.sparql.setReturnFormat(JSON)
+        
+    def read_filedescriptor(self) -> bytes:
+        query = """
+        PREFIX bfh: <http://data.bfh.ch/>
+        PREFIX schema: <http://data.bfh.ch/schema/>
+        
+        SELECT ?content
+        WHERE {{
+            ?fileDescriptor a bfh:ProtobufFileDescriptor ;
+                bfh:binaryContent ?content .
+        }} 
+        """
+        
+        results = self._execucte_query(query)
+        bindings = results['results']['bindings']
+        if not bindings:
+            raise RuntimeError('No file descriptor found in Fuseki.')
+        
+        base64_content = bindings[0]['content']['value']
+        binary_content = base64.b64decode(base64_content)
+        return binary_content
+    
+    def find_message_name(self, sensor_node_uuid: str) -> str:
+        query = f"""
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?messageName WHERE {{
+            ?sensorNode a bfh:SensorNode ;
+                bfh:identifier "{sensor_node_uuid}" ;
+                bfh:usesNodeTemplate ?nodeTemplate .
+            ?nodeTemplate a bfh:NodeTemplate ;
+                bfh:protobufMessageName ?messageName .
+        }}
+        """
+        results = self._execucte_query(query)
+        bindings = results['results']['bindings']
+        if not bindings:
+            raise RuntimeError('Message name not found for sensor node UUID: ' + str(sensor_node_uuid))
+
+        return bindings[0]['messageName']['value']        
 
     def insert_sensor_data(self, device_id, timestamp, sensor_values):
         time_str = datetime.fromisoformat(timestamp).isoformat()
-        observation_id = f"obs_{uuid.uuid4()}"
-
-        observation_triples, result_triples = self._format_sensor_values(observation_id, sensor_values)
-
-        query = f"""
-        PREFIX sosa: <http://www.w3.org/ns/sosa/>
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-        PREFIX ex: <http://example.org/sensor/>
-
-        INSERT DATA {{
-            ex:{observation_id} a sosa:Observation ;
-                sosa:madeBySensor ex:{device_id} ;
-                sosa:resultTime "{time_str}"^^xsd:dateTime ;
-                {observation_triples}
-                .
-
-            {result_triples}
-        }}
-        """
-
-        self._execute_update(query)
-
-
-    def _format_sensor_values(self, observation_id, sensor_values):
-        """
-        Creates:
-        - observation_triples: all sosa:hasResult ... ;
-        - result_triples: ex:... a sosa:Result ; ex:... "value"^^xsd:float .
-        """
-        obs_parts = []
-        result_triples = []
-
+        observation_id = str(uuid4())
+            
+        g = Graph()
+        g.bind("sosa", SOSA)
+        g.bind("xsd", XSD)
+        bfh = Namespace("http://data.bfh.ch/")
+        g.bind("bfh", bfh)
+        
+        observation_uri = URIRef(f"http://data.bfh.ch/observations/{observation_id}")
+        
+        g.add((observation_uri, RDF.type, URIRef(SOSA.Observation)))
+        g.add((observation_uri, SOSA.madeBySensor, URIRef(f"http://data.bfh.ch/sensorNodes/{device_id}")))
+        g.add((observation_uri, SOSA.resultTime, Literal(time_str, datatype=XSD.dateTime)))
+        
         for key, value in sensor_values.items():
-            result_uri = f"ex:{observation_id}_{key}_result"
-            obs_parts.append(f"sosa:hasResult {result_uri} ;")
-            result_triples.append(f"""{result_uri} a sosa:Result ;
-                ex:{key} "{value}"^^xsd:float .""")
-
-        # Entferne letztes Semikolon beim letzten 'hasResult' Eintrag
-        if obs_parts:
-            obs_parts[-1] = obs_parts[-1].rstrip(" ;")
-
-        return "\n".join(obs_parts), "\n".join(result_triples)
-
-
+            result_uri = URIRef(f"http://data.bfh.ch/results/{observation_id}_{key}")
+            g.add((observation_uri, SOSA.hasResult, result_uri))
+            g.add((result_uri, RDF.type, URIRef(SOSA.Result)))
+            g.add((result_uri, bfh.fieldName, Literal(key)))
+            g.add((result_uri, SOSA.hasSimpleResult, Literal(value)))
+        
+        query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
+        self._execute_update(query)
 
     def _execute_update(self, query):
         """
@@ -204,6 +231,18 @@ class FusekiClient:
             self.sparql.query()
         except Exception as e:
             print(f"Error inserting data into Fuseki: {e}")
+            
+    def _execucte_query(self, query) -> dict:
+        """
+        Executes a SPARQL SELECT query.
+        """
+        try:
+            self.sparql.setQuery(query)
+            return self.sparql.query().convert()
+        except Exception as e:
+            print(f"Error executing query in Fuseki: {e}")
+
+
 
 class InfluxDBHandler:
     """
@@ -242,8 +281,10 @@ class InfluxDBHandler:
         self.client.close()
         print("InfluxDB connection closed.")
 
+
+
 def main():
-    parser = ProtobufParser("schema/schema.desc")
+    parser = ProtobufParser()
     fuseki = FusekiClient()
     influxdb = InfluxDBHandler()
     mqtt_client = MQTTClient(parser, fuseki, influxdb)

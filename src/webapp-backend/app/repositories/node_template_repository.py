@@ -1,14 +1,15 @@
 from app.utils.triplestore_client import TripleStoreClient
 from app.models.node_template import (
-    NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum)
+    NodeTemplateDB, ProtobufDatatypeEnum, NodeTemplateOutSlim, NodeTemplateLogbookEnum, NodeTemplateLogbookEntry, NodeTemplateStateEnum, NodeTemplateField, ConfigurableDefinition, HardwareBoard, ConfigurableTypeEnum, ProtobufSchema, ProtobufSchemaField)
 from app.models.user import UserOut, RoleEnum
 from app.models.commercial_sensor import CommercialSensorOutSlim
-from rdflib import Graph, URIRef, Literal, RDF
+from rdflib import Graph, URIRef, Literal, RDF, Namespace, XSD
 
 from typing import List
 from uuid import UUID
-from datetime import datetime
-
+from datetime import datetime, timezone
+import re
+import base64
 
 class NodeTemplateRepository:
 
@@ -31,6 +32,7 @@ class NodeTemplateRepository:
         g.add((template_uri, URIRef(self.schema + "description"), Literal(node_template.description)))
         g.add((template_uri, URIRef(self.schema + "url"), Literal(str(node_template.gitlab_url))))
         g.add((template_uri, URIRef(self.bfh + "state"), URIRef(node_template.state.rdf_uri)))
+        g.add((template_uri, URIRef(self.bfh + "protobufMessageName"), Literal(f"Msg_{node_template.uuid.hex}")))
 
         # Board
         g.add((template_uri, URIRef(self.bfh + "boardCore"), Literal(node_template.board.core)))
@@ -259,3 +261,100 @@ class NodeTemplateRepository:
     def update_node_template(self, node_template: NodeTemplateDB) -> NodeTemplateDB:
         self.delete_node_template(node_template.uuid)
         return self.create_node_template(node_template)
+    
+    
+    def find_protobuf_schema_by_uuid(self, uuid: UUID) -> ProtobufSchema | None:
+        sparql_query = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?fieldName ?datatype ?messageName
+        WHERE {{
+            <http://data.bfh.ch/nodeTemplates/{uuid}> a bfh:NodeTemplate ;
+                bfh:identifier "{uuid}" ;
+                bfh:protobufMessageName ?messageName ;
+                bfh:hasField ?field .
+            ?field a bfh:Field ;
+                bfh:fieldName ?fieldName ;
+                bfh:protobufDatatype ?datatype .
+        }}
+        """
+        res = self.triplestore_client.query(sparql_query)
+        
+        bindings = res.get('results', {}).get('bindings', [])
+        if not bindings:
+            return None
+        
+        message_name = bindings[0]['messageName']['value']
+        
+        fields = [
+            ProtobufSchemaField(
+                field_name=row['fieldName']['value'],
+                protobuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row['datatype']['value'])
+            )
+            for row in bindings
+        ]
+        
+        return ProtobufSchema(message_name=message_name, fields=fields)
+
+    
+    def find_all_protobuf_schemas(self) -> List[ProtobufSchema]:
+        sparql_query = f"""
+        PREFIX schema: <http://schema.org/>
+        PREFIX bfh: <http://data.bfh.ch/>
+
+        SELECT ?uuid ?fieldName ?messageName ?datatype
+        WHERE {{
+            ?template a bfh:NodeTemplate ;
+                bfh:identifier ?uuid ;
+                bfh:protobufMessageName ?messageName ;
+                bfh:hasField ?field .
+            ?field a bfh:Field ;
+                bfh:fieldName ?fieldName ;
+                bfh:protobufDatatype ?datatype .
+        }}
+        """
+        res = self.triplestore_client.query(sparql_query)
+
+        schemas = {}
+        for row in res.get('results', {}).get('bindings', []):
+            message_name = row['messageName']['value']
+            
+            if message_name not in schemas:
+                schemas[message_name] = ProtobufSchema(
+                    message_name=message_name,
+                    fields=[]
+                )
+            
+            schemas[message_name].fields.append(
+                ProtobufSchemaField(
+                    field_name=row['fieldName']['value'],
+                    protobuf_datatype=ProtobufDatatypeEnum.from_rdf_uri(row['datatype']['value'])
+                )
+            )
+        
+        return list(schemas.values())
+
+    def write_protobuf_schema(self, schema: bytes) -> None:
+        description_uri = URIRef("http://data.bfh.ch/protobufFileDescriptor")
+        
+        # Remove existing file descriptor
+        delete_query = f"""
+        PREFIX bfh: <http://data.bfh.ch/>
+        DELETE WHERE {{
+            <{description_uri}> ?p ?o .
+        }}
+        """
+        self.triplestore_client.update(delete_query)
+        
+        g = Graph()
+        g.bind('schema', self.schema)
+        g.bind('bfh', self.bfh)
+        
+        g.add((description_uri, RDF.type, URIRef("http://data.bfh.ch/ProtobufFileDescriptor")))
+        encoded_bytes = base64.b64encode(schema).decode('ascii')
+        g.add((description_uri, URIRef(self.bfh + "binaryContent"), Literal(encoded_bytes, datatype=XSD.base64Binary)))
+        g.add((description_uri, URIRef(self.schema + "dateModified"), Literal(datetime.now(timezone.utc).isoformat(), datatype=XSD.dateTime)))
+        
+        sparql_update = f"INSERT DATA {{ {g.serialize(format='nt')} }}"
+        self.triplestore_client.update(sparql_update)

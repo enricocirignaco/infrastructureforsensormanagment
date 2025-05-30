@@ -237,6 +237,16 @@ class CommercialSensorRepository:
         """
         self.triplestore_client.update(sparql_delete)
 
+    def check_commercial_sensor_linked(self, uuid: UUID) -> bool:
+        sparql_check = f"""
+        PREFIX bfh: <http://data.bfh.ch/>
+        
+        ASK WHERE {{
+            ?s bfh:linkedCommercialSensor <http://data.bfh.ch/commercialSensors/{uuid}> .
+        }}
+        """
+        res = self.triplestore_client.query(sparql_check)
+        return res.get('boolean', True)
 
     def update_commercial_sensor(self, commercial_sensor: CommercialSensorOutFull) -> CommercialSensorInDB:
         self.delete_commercial_sensor(commercial_sensor.uuid)

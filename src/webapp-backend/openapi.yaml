@@ -3,6 +3,8 @@ openapi: 3.1.0
 info:
   title: FastAPI
   version: 0.1.0
+servers:
+- url: "/api/v1"
 paths:
   "/token":
     post:
@@ -623,7 +625,7 @@ paths:
           title: Uuid
       responses:
         '200':
-          description: Protobug schema ready and returned
+          description: Protobuf schema ready and returned
           content:
             application/json:
               schema: {}
@@ -1139,7 +1141,7 @@ components:
           type: string
           title: Unit
         precision:
-          type: integer
+          type: number
           title: Precision
         range:
           "$ref": "#/components/schemas/CommercialSensorRange"
@@ -1153,10 +1155,10 @@ components:
     CommercialSensorRange:
       properties:
         min:
-          type: integer
+          type: number
           title: Min
         max:
-          type: integer
+          type: number
           title: Max
       type: object
       required:
@@ -1213,6 +1215,11 @@ components:
         value:
           type: string
           title: Value
+        display_value:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Value
       type: object
       required:
       - name
@@ -1917,8 +1924,7 @@ components:
           type: string
           title: Field Name
         protobuf_datatype:
-          type: string
-          title: Protobuf Datatype
+          "$ref": "#/components/schemas/ProtobufDatatypeEnum"
         unit:
           type: string
           title: Unit

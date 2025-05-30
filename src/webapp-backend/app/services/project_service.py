@@ -79,7 +79,6 @@ class ProjectService:
         project_db.state = ProjectStateEnum.PREPARED
         self._project_repository.update_project(project=project_db)
 
-
     def delete_project(self, uuid: UUID):
         project_db = self._project_repository.find_project_by_uuid(uuid=uuid)
         if not project_db:

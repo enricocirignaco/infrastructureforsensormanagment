@@ -8,10 +8,12 @@ class Settings(BaseSettings):
     INIT_ADMIN_PW: str = Field("", env="INIT_ADMIN_PW")
     JWT_SECRET: str = Field(..., env="JWT_SECRET")
     ACCESS_TOKEN_EXPIRE_MIN: int = Field(60, env="ACCESS_TOKEN_EXPIRE_MIN")
+    SENSOR_NODE_MAX_ACTIVE_HOURS: int = Field(24, env="SENSOR_NODE_MAX_ACTIVE_HOURS") # How many hours before sensor node is labled as inactive
     
     # External services
-    TRIPLESTORE_ENDPOINT: str = Field("http://localhost:3030/testing/", env="TRIPLESTORE_ENDPOINT")    
+    TRIPLESTORE_ENDPOINT: str = Field("http://fuseki:3030/testing/", env="TRIPLESTORE_ENDPOINT")
     COMPILER_ENGINE_BASE_URL: str = Field("http://compiler-engine:8000", env="COMPILER_ENGINE_BASE_URL")
+    PROTOBUF_SERVICE_BASE_URL: str = Field("http://protobuf-service:8000", env="PROTOBUF_SERVICE_BASE_URL")
     
     # TTN settings
     FEATURE_TTN_ENABLED: bool = Field(True, env="FEATURE_TTN_ENABLED")

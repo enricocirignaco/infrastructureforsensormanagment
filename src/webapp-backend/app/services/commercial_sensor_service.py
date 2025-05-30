@@ -42,5 +42,7 @@ class CommercialSensorService:
         commercial_sensor_db = self._commercial_sensor_repository.find_commercial_sensor_by_uuid(uuid=uuid)
         if not commercial_sensor_db:
             raise NotFoundError("Commercial Sensor not found")
-        # TODO Check if project is not used anywhere
+        commercial_sensor_linked = self._commercial_sensor_repository.check_commercial_sensor_linked(uuid=uuid)
+        if commercial_sensor_linked:
+            raise ValueError("Commercial Sensor is linked to other resources and cannot be deleted")
         self._commercial_sensor_repository.delete_commercial_sensor(uuid=uuid)

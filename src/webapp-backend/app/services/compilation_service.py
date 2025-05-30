@@ -48,7 +48,6 @@ class CompilationService:
 
             if response.status_code == 200:
                 data = response.json()
-                print(data)  # TODO remove
                 return InitBuildResponse(
                     job_id=data["job_id"],
                     status=data["status"],

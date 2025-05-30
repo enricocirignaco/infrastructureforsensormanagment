@@ -157,15 +157,15 @@
             </v-data-table>
 
             <!-- protobuff scheme -->
-            <v-row class="align-center mb-2 mt-6">
+            <v-row v-if="nodeTemplate?.fields?.length !== 0" class="align-center mb-2 mt-6">
               <v-col>
-                <h3 class="text-h6 mb-0">Protobuf Scheme</h3>
+                <h3 class="text-h6 mb-0">Protobuf Schema</h3>
               </v-col>
               <v-col cols="auto">
                 <v-btn
                   color="secondary"
                   size="small"
-                  :href="`/node-template/${nodeTemplateId}/code`"
+                  @click="downloadProtoBufCode"
                   download
                   style="text-transform: none;"
                 >
@@ -175,6 +175,7 @@
               </v-col>
             </v-row>
             <v-sheet
+              v-if="nodeTemplate?.fields?.length !== 0"
               elevation="1"
               class="pa-4 mt-4 position-relative"
               style="background-color: #272822; color: #f8f8f2; font-family: monospace; white-space: pre; overflow: auto; border-radius: 8px; max-height: 300px;"
@@ -188,8 +189,7 @@
                 style="top: 8px; right: 8px;"
               >
                 <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-              {{ protobuf_schema.schema }}
+              </v-btn>{{ protobuf_schema.schema }}
             </v-sheet>
           </v-card-text>
         </v-card>
@@ -362,12 +362,38 @@ const performDelete = () => {
     .catch(() => console.error(`Error deleting node template ${nodeTemplateToDelete.value}`))
 }
 const copySchema = () => {
-  const schemaText = JSON.stringify(protobuf_schema.value, null, 2)
-  navigator.clipboard.writeText(schemaText).catch(err => {
+  const schemaText = protobuf_schema.value.schema
+  const schemaFormatted = schemaText.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+  navigator.clipboard.writeText(schemaFormatted).catch(err => {
     console.error('Failed to copy schema: ', err)
   })
 }
 const openGitlabUrl = () => {
     window.open(nodeTemplate.value.gitlab_url, '_blank')
+}
+
+const downloadProtoBufCode = () => {
+  nodeTemplateService.getProtoBufCode(nodeTemplateId.value)
+  .then(response => {
+    const disposition = response.headers.get('Content-Disposition');
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+    const filename = match ? match[1].replace(/['"]/g, '') : 'firmware.bin';
+
+    return response.blob().then(blob => ({ blob, filename }));
+  })
+  .then(({ blob, filename }) => {
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  })
+  .catch(error => {
+    compilationLogs.value += `ERROR downloading artifact: ${error.message}\n`;
+  });
 }
 </script>
