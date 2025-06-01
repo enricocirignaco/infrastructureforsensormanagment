@@ -92,3 +92,22 @@
 | 2025-05-09 | 09:00 - 17:00 | 8,0   | CIRIE1         | 76, 49   | Buxfixing Node Template Page                                      |
 | 2025-05-11 | 13:00 - 22:30 | 9,5   | CIRIE1         | 77, 48   | Edit New sensor node pages, version banner                        |
 | 2025-05-12 | 08:30 - 11:30 | 3,0   | CIRIE1         | 49       | sesnor node finished, dashboard updated                           |
+| 2025-05-15 | 09:00 - 19:00 | 9,0   | CIRIE1         | 49       | working on frontend, node, template, project                      |
+| 2025-05-16 | 13:00 - 16:00 | 3,0   | CIRIE1         | 81       | testing esp32 flashing and webserial / esptools.js                |
+| 2025-05-19 | 09:00 - 12:00 | 3,0   | CIRIE1, DEGEL2 |          | implementing feedback from supervisor and fixing various bugs in the app |
+| 2025-05-19 | 13:00 - 14:30 | 1.5   | CIRIE1, DEGEL2 |          | Meeting with supervison and stakeholder                           |
+| 2025-05-20 | 09:00 - 12:00 | 3.0   | CIRIE1         |          | Research and development of compile engine integration with backend |
+| 2025-05-20 | 14:00 - 18:00 | 4.0   | CIRIE1         |  63      | Refinement of compiler engine (libraries and boards requirements) |
+| 2025-05-20 | 20:30 - 21:30 | 1.0   | CIRIE1, DEGEL2 |          | integration of compile engine into webapp and troubleshooting     |
+| 2025-05-22 | 10:00 - 13:00 | 3.0   | CIRIE1, DEGEL2 |          | poster                                                            |
+| 2025-05-23 | 10:00 - 12:00 | 2.0   | CIRIE1         |          | troubleshooting compiler engine webapp integration                |
+| 2025-05-23 | 13:00 - 16:00 | 3.0   | CIRIE1         |          | finalizing frontend, implementing minor features                  |
+| 2025-05-26 | 09:00 - 14:30 | 5.5   | CIRIE1         |  84, 14  | poster, working on webserial frontend                             |
+| 2025-05-27 | 08:00 - 12:30 | 4.5   | CIRIE1         |          | Merge requests and app deployment to production server            |
+| 2025-05-27 | 14:00 - 19:00 | 5.0   | CIRIE1         |  82, 83  | testing flashing heltec, script for heltec                        |
+| 2025-05-29 | 12:00 - 17:00 | 5.0   | CIRIE1, DEGEL2 |          | book                                                              |
+| 2025-05-30 | 10:00 - 11:00 | 1.0   | CIRIE1, DEGEL2 |          | Merge all dev branches in main                                    |
+
+
+
+
