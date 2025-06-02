@@ -9,16 +9,7 @@ Project members:
 Stakeholders:
 - Berner Fachhochschule BFH, Architektur, Holz und Bau
 - Hochschule für Agrar-, Forst- und Lebensmittelwissenschaften HAFL
-
-The project is managed using the Scrum methodology. The project is divided into sprints, each sprint is around 2 weeks long. A fixed sprint lenght is not fisible because supervisor and stakeholder are not always available. The project is managed using the gitlab project management tool. Not all aspect of the Scrum methodology are used, because deemed unnecessary for such small project. Issue are categorized with a priority label. 
-Scrum board consists of six columns:
-- Product Backlog
-- Sprint Backlog
-- In Progress
-- Waiting
-- In Review
-- Done
-The idea is to create issues throught the project and put it in the product backlog. During the spring planing sessions some issues can be picked from the product backlog and assigned to the sprint. The issues are then moved to the sprint backlog. Before a task can be set as done, it has to be reviewed by another team member and the changes has to be merged into the main branch.   
+ 
 ### Scrum events
 - Sprint Planning
 - Weekly Scrum Meeting
