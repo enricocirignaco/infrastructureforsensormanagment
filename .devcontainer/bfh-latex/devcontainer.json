@@ -1,0 +1,19 @@
+{
+    "name": "BFH LaTeX CI",
+    "image": "registry.gitlab.ti.bfh.ch/bfh-latex/registry/vscode:2.2.3",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "james-yu.latex-workshop",
+                "ban.spellright",
+                "valentjn.vscode-ltex"
+            ],
+            "settings": {
+                "terminal.integrated.cwd": "docs/report/"
+            }
+        }
+    },
+    "remoteUser": "vscode",
+
+    "postCreateCommand": "sudo tlmgr update --self  && sudo tlmgr instal unicode-math lualatex-math"
+}

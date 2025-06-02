@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Pandoc PDF",
+            "type": "shell",
+            "command": "pandoc",
+            "args": [
+                "-o",
+                "output.pdf",
+                "--pdf-engine=lualatex",
+//                "--citeproc",
+                "pandoc.md"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/docs/report"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
