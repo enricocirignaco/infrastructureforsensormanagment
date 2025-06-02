@@ -2,42 +2,53 @@
 
 # Introduction
 
-## Context & Background
+## Context & Background --> Linus
 - Description of MUG, IoS
 
 ## Goal of the project
 - Broad system overview 
 
-## Value Proposition for Stakeholder
+## Value Proposition for Stakeholder 
 
 # State of Research
 
-## Retrospect Project2
+## Retrospect Project2 --> Linus
 
-## Webserial
+## Webserial --> Enrico
+## Heltec ? --> Enrico
+## Linked Data --> Linus
 
-## Linked Data
+## Protobuf --> Linus
 
-## Protobuf
 
-# Methods
 
-## Project Methodology
+
+
+
+# Methods --> Enrico
+This chapter describes the methods used to organize and execute the project, including the project methodology, team structure, and chosen technologies. Since the project was carried out in a team of two, a structured approach was essential to avoid blocking progress due to interdependencies. Given the broad scope and limited timeframe, the project followed an iterative, practice-oriented methodology to maximize productivity. This approach allowed for continuous refinements based on supervisor feedback and evolving technical insights.
+## Team Organisation
+- Merge Requests / branch-based development
+- Division of work
+## Project Management Methodology
 - Sprintplaning / Scrum
 - Issues (Gitlab)
 - Milestones
 - Meetings (with tutor)
-
-## Group organisation
-- Merge Requests / branch-based development
-- Division of work
-
-## Technologies (modern application methods)
+## Modern Application Methods
 - git (source code management)
 - docker (containerization)
 - CI/CD (git tags)
 - environments (dev/prod)
 - microservice architecture
+## Technology Stack
+	•	Overview of used tools/languages
+	•	Reasoning for selection
+
+
+
+
+
 
 # System Architecture (Results)
 
@@ -88,3 +99,6 @@
 ### Final thoughts
 
 # Declaration of authorship
+## Who did what?
+### Enrico
+- Methods
