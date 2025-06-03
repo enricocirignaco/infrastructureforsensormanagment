@@ -7,9 +7,24 @@
 - Problems that may arise
 - Description of research projects
     - IoS, MUG
+        - two research project of the BFH-internal departements AHB and HAFL (collab)
+        - very similar in a technical-perspective (data transmission, hardware, used services/tools) as MUG was designed on the experiences made in IoS
+        - future research projects may arise with again similar architecture but difference in hardware, data model..
     - Technical details
-    - Current states
-    - pointing out certain problems
+        - remote sensing of environmental data.
+            - Design is as autonomous and long-living as possible, by:
+            - power provided by solar panel and lead battery
+            - IoS measures soil moisture and temperature in protection forests to estimate how good it's natural protection is
+            - MUG measures the impact of urban trees (in big pots) on the urban environemnt as well as many characterstics around the trees themselves
+        - transmissioning over LoRaWAN (TTN or Swisscom LPN)
+    - Current states **nikita fragen**
+        - IoS already was deployed in **ort** for about **time** 
+        - MUG had an alpha test but should be deployed this summer
+    - pointing out certain problems that hinder the scalability and robunstness of the systems:
+        - data gets transmitted in an own binary format, has to be known and correctly handled both in encoding and decoding. May introduce problems when evolving data format by introducing for example a new sensor (all sensor nodes need same format or per node parsing-logic)
+        - new sensor nodes have to be flashed manually and the right keys (DevEUI, AppKey) have to be written inside Arduino IDE before compilation. Before that, each end devices gets manually created over the TTN Dashboard. These manual steps may lead to confusing keys and hardware
+        - data generated during research projects exist in various formats (excel, csv etc.)
+
 ## Goal of the project
 *Broad system overview (technical range)*
 
