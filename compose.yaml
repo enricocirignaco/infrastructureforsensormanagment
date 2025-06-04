@@ -90,14 +90,14 @@ services:
   mqtt-broker:
     build: src/mqtt-broker
     container_name: mqtt-broker
-    restart: unless-stopped
     ports:
       - "1883:1883"
     volumes:
       - mqtt-broker-config:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
-
+    env_file:
+      - .env-mosquitto
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore

@@ -17,10 +17,11 @@ if [ ! -f "$PASSWD_FILE" ]; then
 fi
 
 # Create bridge configuration file at first run
+mkdir -p /mosquitto/config/bridges
 if [ ! -f "$TTN_BRIDGE_FILE" ]; then
   echo "[INFO] No TTN bridge configuration file found. Creating new one..."
   
-  if [ -z "$TTN_USER" ] || [ -z "$TTN_PASSWORD" ]; then
+  if [ -z "$TTN_USERNAME" ] || [ -z "$TTN_PASSWORD" ]; then
     echo "[ERROR] TTN bridge configuration variables must be set to create a bridge file."
     exit 1
   fi
@@ -33,9 +34,10 @@ try_private false
 start_type automatic
 bridge_cafile /etc/ssl/certs/ca-certificates.crt
 bridge_insecure false
-remote_username=$TTN_USER
-remote_password=$TTN_PASSWORD
+remote_username $TTN_USERNAME
+remote_password $TTN_PASSWORD
 EOF
+    echo "[INFO] TTN bridge configuration file created at $TTN_BRIDGE_FILE"
 fi
 
 exec mosquitto -c /mosquitto/config/mosquitto.conf
