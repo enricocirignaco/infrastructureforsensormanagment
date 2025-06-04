@@ -11,6 +11,8 @@ services:
       - compiler-engine-output:/output
       - compiler-engine-logs:/logs
       - compiler-engine-cache:/cache
+    environment:
+      - PYTHONUNBUFFERED=1
     env_file:
       - .env-compiler-engine
 
@@ -22,6 +24,8 @@ services:
       - compiler-engine-output:/output
       - compiler-engine-logs:/logs
       - ./src/compiler-engine/app/cleaner.py:/app/cleaner.py
+    environment:
+      - PYTHONUNBUFFERED=1
     env_file:
       - .env-compiler-engine
     restart: unless-stopped

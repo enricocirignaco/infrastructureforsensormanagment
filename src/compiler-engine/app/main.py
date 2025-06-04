@@ -252,6 +252,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             --fqbn {request.board.core}:{request.board.variant} \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
             --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
+            --log-level=debug \
             --verbose \
             {DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}
         " """
