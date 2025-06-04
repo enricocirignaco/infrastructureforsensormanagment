@@ -64,7 +64,7 @@ services:
     environment:
       - MQTT_BROKER=mqtt-broker
       - MQTT_PORT=1883
-      - MQTT_TOPIC=v3/leaf-link-mock@ttn/devices/#
+      - MQTT_TOPIC=v3/leaf-link-prod@ttn/devices/#
       - FUSEKI_ENDPOINT=http://fuseki:3030/core/
       - INFLUX_URL=http://influxdb:8086
       - INFLUX_ORG=bfh
