@@ -250,7 +250,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             arduino-cli core install {request.board.core} && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
-            --build-property \"build.extra_flags=-DAT_SUPPORT=0\" \
+            --build-property build.LORAWAN_AT_SUPPORT=0 \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
             --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
             --log-level=debug \
