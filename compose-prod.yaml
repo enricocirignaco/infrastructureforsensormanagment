@@ -13,6 +13,7 @@ services:
       - compiler-engine-cache:/cache
     env_file:
       - .env-compiler-engine
+
   compiler-engine-cleaner:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/compiler-engine-cleaner:${TAG}
     container_name: compiler-engine-cleaner
@@ -24,6 +25,7 @@ services:
     env_file:
       - .env-compiler-engine
     restart: unless-stopped
+
   reverse-proxy:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/reverse-proxy:${TAG}
     container_name: reverse-proxy
@@ -45,11 +47,55 @@ services:
     ports:
       - "8001:8000"
     environment:
-      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/testing
+      - TRIPLESTORE_ENDPOINT=http://fuseki:3030/core/
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
     env_file:
       - .env-backend
+
+  timeseries-parser:
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/timeseries-parser:${TAG}
+    container_name: timeseries-parser
+    restart: always
+    environment:
+      - MQTT_BROKER=mqtt-broker
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=v3/leaf-link-mock@ttn/devices/#
+      - FUSEKI_ENDPOINT=http://fuseki:3030/core/
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_ORG=bfh
+      - INFLUX_BUCKET=default
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
+    env_file:
+      - .env-parser
+    depends_on:
+      - mqtt-broker
+      - fuseki
+      - influxdb
+
+  protobuf-service:
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/protobuf-service:${TAG}
+    container_name: protobuf-service
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Europe/Zurich
+      
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0.21
+    container_name: mqtt-broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config/mqtt-broker:/mosquitto/config
+      - mqtt-broker-data:/mosquitto/data
+      - mqtt-broker-logs:/mosquitto/log
+    entrypoint: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+  
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
@@ -64,24 +110,42 @@ services:
       - ENABLE_SHACL=false # Used for rdf-structure validation
       - TDB=2
       - FUSEKI_DATASET_1=core # Creates empty dataset with given name
-      - FUSEKI_DATASET_2=testing
     env_file:
       - .env-fuseki
 
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_ORG=bfh
+      - DOCKER_INFLUXDB_INIT_BUCKET=default
+    env_file:
+      - .env-influxdb
+
   yasgui:
     image: erikap/yasgui
-    container_name: yasgui
+    container_name: yasgui-sparql-ui
     restart: unless-stopped
     ports:
       - "3031:80"
     depends_on:
       - fuseki
     environment:
-      - DEFAULT_SPARQL_ENDPOINT=http://leaflink.ti.bfh.ch:3030/testing/sparql
-      - ENABLE_ENDPOINT_SELECTOR=true
+      - DEFAULT_SPARQL_ENDPOINT=http://leaflink.ti.bfh.ch:3030/core/sparql
+      - ENABLE_ENDPOINT_SELECTOR=false
 volumes:
+  reverse-proxy-conf:
+    name: reverse-proxy-config
   reverse-proxy-data:
+    name: reverse-proxy-data
   reverse-proxy-config:
+    name: reverse-proxy-config
   compiler-engine-source:
     name: compiler-engine-source
   compiler-engine-output:
@@ -90,4 +154,11 @@ volumes:
     name: compiler-engine-logs
   compiler-engine-cache:
     name: compiler-engine-cache
+  mqtt-broker-data:
+    name: mqtt-broker-data
+  mqtt-broker-logs:
+    name: mqtt-broker-logs
   fuseki-data:
+    name: fuseki-data
+  influxdb-data:
+    name: influxdb-data
