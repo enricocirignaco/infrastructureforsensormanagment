@@ -83,19 +83,19 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
-      
+
   mqtt-broker:
-    image: eclipse-mosquitto:2.0.21
+    image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/mqtt-broker:${TAG}
     container_name: mqtt-broker
-    restart: unless-stopped
     ports:
       - "1883:1883"
     volumes:
-      - ./config/mqtt-broker:/mosquitto/config
+      - mqtt-broker-config:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
-    entrypoint: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
-  
+    env_file:
+      - .env-mosquitto
+
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
@@ -154,6 +154,8 @@ volumes:
     name: compiler-engine-logs
   compiler-engine-cache:
     name: compiler-engine-cache
+  mqtt-broker-config:
+    name: mqtt-broker-config
   mqtt-broker-data:
     name: mqtt-broker-data
   mqtt-broker-logs:
