@@ -84,17 +84,12 @@ build-protobuf-service:
     - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/protobuf-service/Dockerfile src/protobuf-service
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
-
-# # Test SSH connection job
-# test-ssh-connection:
-#   stage: test
-#   image: alpine
-#   before_script:
-#     - apk add --no-cache openssh
-#     - echo "$SSH_PRIVATE_KEY_B64" | base64 -d > id_rsa
-#     - chmod 600 id_rsa
-#   script:
-#     - ssh -i id_rsa -o StrictHostKeyChecking=no bfh@10.248.11.94 'echo "SSH connection successful"'
-#   rules:
-#     - when: always
-# Command to run: export TAG=v0.0.4 && docker compose -f compose-prod.yaml pull && docker compose -f compose-prod.yaml up -d
+build-mqtt-broker:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "mqtt-broker"
+  script:
+    - echo "Building MQTT Broker Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/mqtt-broker/Dockerfile src/mqtt-broker
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
