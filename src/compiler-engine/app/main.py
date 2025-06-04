@@ -251,7 +251,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
             --build-property build.LORAWAN_AT_SUPPORT=0 \
-            --build-property build.band=REGION_EU_868 \
+            --build-property build.band=EU868 \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
             --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
             --log-level=debug \
