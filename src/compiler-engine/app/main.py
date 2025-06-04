@@ -250,6 +250,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             arduino-cli core install {request.board.core} && \
             arduino-cli compile \
             --fqbn {request.board.core}:{request.board.variant} \
+            --build-property \"build.extra_flags=-DAT_SUPPORT=0\" \
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
             --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
             --log-level=debug \
@@ -262,7 +263,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             config_file = "// Auto-generated config.h\n"
             config_file += "#ifndef COMPILER_ENGINE_CONFIG_H\n#define COMPILER_ENGINE_CONFIG_H\n\n"
             for prop in request.config:
-                config_file += f"#define {prop.key} \"{prop.value}\"\n"
+                config_file += f"#define {prop.key} {prop.value}\n"
             config_file += "\n#endif // COMPILER_ENGINE_CONFIG_H\n"
         except Exception as e:
             jobs_status_map[job_id] = {
