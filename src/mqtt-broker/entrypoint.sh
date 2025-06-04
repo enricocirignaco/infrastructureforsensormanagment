@@ -13,6 +13,8 @@ if [ ! -f "$PASSWD_FILE" ]; then
   fi
 
   mosquitto_passwd -b -c "$PASSWD_FILE" "$MQTT_USERNAME" "$MQTT_PASSWORD"
+  chown mosquitto:mosquitto "$PASSWD_FILE"
+  chmod 640 "$PASSWD_FILE"
   echo "[INFO] Password file created at $PASSWD_FILE"
 fi
 
