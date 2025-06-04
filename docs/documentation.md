@@ -46,13 +46,15 @@ In addition to tracking technical progress, the team implemented simple but effe
 | Feedback Integration & Optional Features | 2 weeks        | - Adjust or implement components based on feedback  <br> - Technical wrap-up |
 | Project Finalization                      | 2 weeks          | - Finalize documentation  <br> - Poster, project book entry, presentation, and video |
 
+## Modern Application Methods
+The project followed modern application development principles, drawing inspiration from the Twelve-Factor App methodology [2]. The goal was to build a modular, portable, and maintainable system that could easily be extended or adapted by future organizations. These principles ensured a clean separation of concerns, environment-agnostic deployment, and a consistent developer experience across all components. The following sections describe the key practices adopted during implementation.
+### Version Control with Git
+The Codebase was managed using Git, a single project repositry hosted on github. This allowed for collaborative development, version control, and avoid loosing code. each feature was developed in a separate branch, which was merged into the main branch after review and approval by the other team member. Not only code was versioned with git but all documents related to the project like documentation, diagram and presentations. Documents that were not code were allowed to be pushed directly to the main branch. Tags were used to mark points in the project history when the system was integrated togheter and deployed to the server, allowing for easy rollback if needed. A three version schema was used. the first number was incremented for major releases (0 for the whole development pahse and was then incremented to 1 for the first alpha release.), the second for minor releases (those are everx time a new integration is deployed to prod server), and the third for bugfixes within the prod deployment. Those tags also serverd as triggers for the CI pipeline. this bit will be discummes in details in the section Multistaged GitHub CI Pipeline.
+### Microservice Architecture
+### Containerization with Docker
+### Multistaged GitHub CI Pipeline
+### Local Development with Production Parity
 
-## Modern Application Methods --> Enrico
-- git (source code management)
-- docker (containerization)
-- CI/CD (git tags)
-- environments (dev/prod)
-- microservice architecture
 ## Technology Stack --> Enrico
 	•	Overview of used tools/languages
 	•	Reasoning for selection
@@ -102,6 +104,7 @@ ept,
 
 # Bibliography
 [1] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game, Scrum.org, Nov. 2020. [Online]. Available: https://scrumguides.org/
+[2] A. Wiggins, The Twelve-Factor App, Heroku, 2011. [Online]. Available: https://12factor.net/
 # Declaration of authorship
 ## Who did what?
 ### Enrico
