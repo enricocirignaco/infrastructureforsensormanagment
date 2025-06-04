@@ -88,16 +88,16 @@ services:
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
   mqtt-broker:
-    image: eclipse-mosquitto:2.0.21
+    build: src/mqtt-broker
     container_name: mqtt-broker
     restart: unless-stopped
     ports:
       - "1883:1883"
     volumes:
-      - ./config/mqtt-broker:/mosquitto/config
+      - mqtt-broker-config:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
       - mqtt-broker-logs:/mosquitto/log
-    entrypoint: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+
   fuseki:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
@@ -157,8 +157,11 @@ services:
 
 volumes:
   reverse-proxy-conf:
+    name: reverse-proxy-config
   reverse-proxy-data:
+    name: reverse-proxy-data
   reverse-proxy-config:
+    name: reverse-proxy-config
   compiler-engine-source:
     name: compiler-engine-source
   compiler-engine-output:
@@ -167,6 +170,8 @@ volumes:
     name: compiler-engine-logs
   compiler-engine-cache:
     name: compiler-engine-cache
+  mqtt-broker-config:
+    name: mqtt-broker-config
   mqtt-broker-data:
     name: mqtt-broker-data
   mqtt-broker-logs:
@@ -175,3 +180,4 @@ volumes:
     name: fuseki-data
   influxdb-data:
     name: influxdb-data
+
