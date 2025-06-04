@@ -10,9 +10,6 @@
 
 **/__pycache__/
 
-config/mqtt-broker/pwfile
-config/mqtt-broker/bridges/*.conf
-
 src/webapp-frontend/www/
 
 docs/report/*.pdf
