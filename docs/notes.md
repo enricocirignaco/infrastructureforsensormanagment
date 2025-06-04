@@ -1,22 +1,4 @@
 # Documentation Draft
----
-## Project Management
-Project members:
-- Linus Deggen - Developer
-- Enrico Cirignaco - Developer - Scrum Master
-- Pascal Mainini - Project Supervisor
-- Nikita Aigner - Product Owner
-Stakeholders:
-- Berner Fachhochschule BFH, Architektur, Holz und Bau
-- Hochschule für Agrar-, Forst- und Lebensmittelwissenschaften HAFL
- 
-### Scrum events
-- Sprint Planning
-- Weekly Scrum Meeting
-- Sprint Review
-- Sprint Retrospective
-
-Sprint planing, review and retrospective are not done as separate meetings but are executed in a customized form. The following workflow will be used: At the end of each sprint short before the Sprint review with the Supervisor and Product Owner the team will do a short review so that everyone is informed of the progress of the team. The Progress made in the last spring is then shared with the Supervisor and Product Owner in a dedicated meeting. Here can both stakeholder give a feedback and the team can start discussing what has to be done in the next spring. In this meeting the date for the next Sprint review must be set. Afterwards the developer team can summarize the decision made and concretely plan the next sprint. Every week the dev team meetings to discuss the progress, probles encountered and design decisions.
 ### Git
 Direct push into the main branch are forbidden. Exception can be made for minor modification to markdown files. The rest of the changes have to be made in a "issue-brnach" and after completation the branch can be merged into the main branch with a merge request. A new branch and a merge request for a specific issue can be created directly from the issues page in gitlab.
 
