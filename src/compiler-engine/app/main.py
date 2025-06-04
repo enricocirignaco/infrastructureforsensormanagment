@@ -261,7 +261,7 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             config_file = "// Auto-generated config.h\n"
             config_file += "#ifndef COMPILER_ENGINE_CONFIG_H\n#define COMPILER_ENGINE_CONFIG_H\n\n"
             for prop in request.config:
-                config_file += f"#define {prop.key} \"{prop.value}\"\n"
+                config_file += f"#define {prop.key} {prop.value}\n"
             config_file += "\n#endif // COMPILER_ENGINE_CONFIG_H\n"
         except Exception as e:
             jobs_status_map[job_id] = {
