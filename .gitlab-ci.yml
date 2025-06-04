@@ -66,6 +66,24 @@ build-backend:
     - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/webapp-backend/Dockerfile src/webapp-backend
     - echo "Pushing image to GitLab Container Registry..."
     - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+build-timeseries-parser:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "timeseries-parser"
+  script:
+    - echo "Building Timeseries-Parser Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/timeseries-parser/Dockerfile src/timeseries-parser
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
+build-protobuf-service:
+  <<: *docker-build
+  variables:
+    IMAGE_NAME: "protobuf-service"
+  script:
+    - echo "Building Protobuf-Service Image..."
+    - docker build -t "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG" -f src/protobuf-service/Dockerfile src/protobuf-service
+    - echo "Pushing image to GitLab Container Registry..."
+    - docker push "$REGISTRY_IMAGE/$IMAGE_NAME:$IMAGE_TAG"
 
 # # Test SSH connection job
 # test-ssh-connection:
