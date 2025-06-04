@@ -253,7 +253,6 @@ def default_compile_task(job_id: str, request: StandardBuildRequest):
             --output-dir {DEFAULT_OUTPUT_DIR}/{job_id} \
             --log-file {DEFAULT_LOG_DIR}/{job_id}.log \
             --verbose \
-            --build-property build.extra_flags="-DLORAWAN_AT_SUPPORT=1 -DDEBUG=1" \
             {DEFAULT_SOURCE_DIR}/{job_id}/{DEFAULT_ARDUINO_DIR}
         " """
     # generate config.h file content
