@@ -49,8 +49,22 @@ In addition to tracking technical progress, the team implemented simple but effe
 ## Modern Application Methods
 The project followed modern application development principles, drawing inspiration from the Twelve-Factor App methodology [3]. The goal was to build a modular, portable, and maintainable system that could easily be extended or adapted by future organizations. These principles ensured a clean separation of concerns, environment-agnostic deployment, and a consistent developer experience across all components. The following sections describe the key practices adopted during implementation.
 ### Version Control with Git
-The Codebase was managed using Git, a single project repositry hosted on github. This allowed for collaborative development, version control, and avoid loosing code. each feature was developed in a separate branch, which was merged into the main branch after review and approval by the other team member. Not only code was versioned with git but all documents related to the project like documentation, diagram and presentations. Documents that were not code were allowed to be pushed directly to the main branch. Tags were used to mark points in the project history when the system was integrated togheter and deployed to the server, allowing for easy rollback if needed. A three version schema was used. the first number was incremented for major releases (0 for the whole development pahse and was then incremented to 1 for the first alpha release.), the second for minor releases (those are everx time a new integration is deployed to prod server), and the third for bugfixes within the prod deployment. Those tags also serverd as triggers for the CI pipeline. this bit will be discummes in details in the section Multistaged GitHub CI Pipeline.
+The codebase was managed using Git, with a single project repository hosted on BFH’s GitLab instance. This enabled effective version control, collaborative development, and reduced the risk of code loss. Each feature was developed in a dedicated branch and merged into the main branch only after review and approval by the other team member.
+
+Not only the source code, but also all project-related documents—such as documentation, diagrams, and presentation materials—were versioned in the same repository. Non-code files were allowed to be pushed directly to the main branch.
+
+Git tags were used to mark key integration points in the project timeline, especially when the system was successfully deployed to the production server. This tagging allowed for easy rollback if needed. A three-part versioning scheme was adopted:
+- The first number indicated major versions (e.g., 0.x.x during development, incremented to 1.0.0 for the first alpha release),
+- The second number for minor releases (typically used for new deployments to production), and
+- The third number for bugfixes and small patches.
+
+These tags also served as triggers for the CI pipeline, which is discussed in detail in the section [Multistaged GitHub CI Pipeline](#multistaged-github-ci-pipeline).
 ### Microservice Architecture
+The system was built using a microservice architecture, where each service is dedicated to a specific responsibility within the overall system. This approach promotes modularity, simplifies maintenance, and enables teams to develop, test, and deploy components independently.
+
+Each microservice includes its own configuration and dependencies, allowing it to operate in isolation. Services expose RESTful interfaces for communication, making them easy to integrate or replace without disrupting others. All services are deployed behind a reverse proxy, which handles routing and load balancing, ensuring flexibility and scalability.
+
+Details about individual services can be found in the [System Architecture](#system-architecture) section.
 ### Containerization with Docker
 ### Multistaged GitHub CI Pipeline
 ### Local Development with Production Parity
