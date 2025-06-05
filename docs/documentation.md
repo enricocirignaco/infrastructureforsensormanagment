@@ -24,7 +24,7 @@ After a joint planning and conceptualization phase, where the system architectur
 To maintain alignment, the team held regular internal meetings to discuss progress and synchronize development. A recurring practice called the “marriage” ensured that frontend and backend components were periodically integrated and tested together. Approximately every two weeks, the team also met with the project supervisor and stakeholder to demonstrate the current state of the system and gather feedback. Before these sessions, the latest features were merged, tested, and deployed to the server to provide a working prototype for review. This iterative process supported rapid, incremental improvements.
 
 ## Project Management Methodology
-Given the complexity and time limitations of the project, a structured yet adaptable project management approach was required. The team followed an iterative, practice-oriented methodology inspired by agile principles, with particular reference to SCRUM [1]. While SCRUM provided a useful framework for organizing work and integrating feedback, it was adapted to fit the context of a small, part-time team.
+Given the complexity and time limitations of the project, a structured yet adaptable project management approach was required. The team followed an iterative, practice-oriented methodology inspired by agile principles, with particular reference to SCRUM [2]. While SCRUM provided a useful framework for organizing work and integrating feedback, it was adapted to fit the context of a small, part-time team.
 
 The project was planned using a combination of milestones and sprints. During the initial conceptual phase, the team gathered and defined the system requirements. Based on those requirements, the team outlined rough milestones representing major project components and their estimated durations. These high-level goals helped assess the feasibility of planned features within the available timeframe. Although flexible, they provided structure and helped maintain overall direction throughout the project.
 
@@ -47,7 +47,7 @@ In addition to tracking technical progress, the team implemented simple but effe
 | Project Finalization                      | 2 weeks          | - Finalize documentation  <br> - Poster, project book entry, presentation, and video |
 
 ## Modern Application Methods
-The project followed modern application development principles, drawing inspiration from the Twelve-Factor App methodology [2]. The goal was to build a modular, portable, and maintainable system that could easily be extended or adapted by future organizations. These principles ensured a clean separation of concerns, environment-agnostic deployment, and a consistent developer experience across all components. The following sections describe the key practices adopted during implementation.
+The project followed modern application development principles, drawing inspiration from the Twelve-Factor App methodology [3]. The goal was to build a modular, portable, and maintainable system that could easily be extended or adapted by future organizations. These principles ensured a clean separation of concerns, environment-agnostic deployment, and a consistent developer experience across all components. The following sections describe the key practices adopted during implementation.
 ### Version Control with Git
 The Codebase was managed using Git, a single project repositry hosted on github. This allowed for collaborative development, version control, and avoid loosing code. each feature was developed in a separate branch, which was merged into the main branch after review and approval by the other team member. Not only code was versioned with git but all documents related to the project like documentation, diagram and presentations. Documents that were not code were allowed to be pushed directly to the main branch. Tags were used to mark points in the project history when the system was integrated togheter and deployed to the server, allowing for easy rollback if needed. A three version schema was used. the first number was incremented for major releases (0 for the whole development pahse and was then incremented to 1 for the first alpha release.), the second for minor releases (those are everx time a new integration is deployed to prod server), and the third for bugfixes within the prod deployment. Those tags also serverd as triggers for the CI pipeline. this bit will be discummes in details in the section Multistaged GitHub CI Pipeline.
 ### Microservice Architecture
@@ -103,8 +103,9 @@ ept,
 ### Final thoughts
 
 # Bibliography
-[1] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game, Scrum.org, Nov. 2020. [Online]. Available: https://scrumguides.org/
-[2] A. Wiggins, The Twelve-Factor App, Heroku, 2011. [Online]. Available: https://12factor.net/
+[1] L. Degen, "Project2: Internet of Soils Revised," unpublished student report, BFH-TI, Biel/Bienne, Jan. 2025.  
+[2] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game, Scrum.org, Nov. 2020. [Online]. Available: https://scrumguides.org/  
+[3] A. Wiggins, The Twelve-Factor App, Heroku, 2011. [Online]. Available: https://12factor.net/
 # Declaration of authorship
 ## Who did what?
 ### Enrico

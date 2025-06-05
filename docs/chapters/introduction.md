@@ -23,7 +23,8 @@
     - pointing out certain problems that hinder the scalability and robunstness of the systems:
         - data gets transmitted in an own binary format, has to be known and correctly handled both in encoding and decoding. May introduce problems when evolving data format by introducing for example a new sensor (all sensor nodes need same format or per node parsing-logic)
         - new sensor nodes have to be flashed manually and the right keys (DevEUI, AppKey) have to be written inside Arduino IDE before compilation. Before that, each end devices gets manually created over the TTN Dashboard. These manual steps may lead to confusing keys and hardware
-        - data generated during research projects exist in various formats (excel, csv etc.)
+        - data generated during research projects exist in various formats (excel, csv etc.) and is spread over different locations (gitlab, sharepoint, influxdb). The fragmented filing complicates the linking/collection of data, especially during analysis. These problems also apply to metadata of sensor nodes as firmware-version, exact coordinates of the deployment and TTN keys.
+        [1]
 
 ## Goal of the project
 *Broad system overview (technical range)*
@@ -44,3 +45,9 @@
     -  single source of truth, no scattered data anymore
     - referenced external data can be easily accessed (manuals of sensor node, ttn end devices, positioning of sensor nodes) 
 -
+
+
+
+
+## Bibliography
+[1] L. Degen, "Project2: Internet of Soils Revised," unpublished student report, BFH-TI, Biel/Bienne, 2025.
