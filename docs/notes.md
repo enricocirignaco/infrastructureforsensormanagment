@@ -1,7 +1,4 @@
 # Documentation Draft
-### Git
-Direct push into the main branch are forbidden. Exception can be made for minor modification to markdown files. The rest of the changes have to be made in a "issue-brnach" and after completation the branch can be merged into the main branch with a merge request. A new branch and a merge request for a specific issue can be created directly from the issues page in gitlab.
-
 ## Project Milestones
 1. Konzept Phase (3 Wochen)
     - Lösungsvorschläge erstellen
@@ -229,52 +226,6 @@ The following variables are used:
 The command above can be used to compile arduino source code manually but in a cli enviroment. The next step is to be able to use this command from within the main application.
 #### Main Compiler Engine Service
 After source code could successfully be built using the toolchain image made available in the gitlab registry of the project, a main service responsible for managing the compilation process was developed. The service consists of a docker container running two python script. One is used as garbage collector to delete old generated files and the other is the main service implementing a REST API that enable the user or another service to interface with the compiler engine service.
-##### REST Frameworks Evaluation
-To implement a simple REST service, several technologies were evaluated, focusing on performance, ease of use, community support, and Docker compatibility. While the programming language was not a strict requirement, the development team is comfortable with Python, Java, Rust, and JavaScript. The following frameworks were considered:
-
-###### Express.js (JavaScript)  
-**Pros**:
-- Lightweight and minimalistic  
-- Large ecosystem and community  
-- Fast prototyping  
-**Cons**:
-- Lacks built-in type safety  
-- Requires manual setup for validation and documentation [1]
-
-###### Spring Boot (Java)  
-**Pros**:
-- Enterprise-grade features  
-- Mature ecosystem and tooling  
-- Built-in validation and dependency injection  
-**Cons**:
-- Heavy for simple services  
-- Slower startup time [2]
-
-###### Actix-Web (Rust)  
-**Pros**:
-- High performance and low memory usage  
-- Strong type safety  
-**Cons**:
-- Steep learning curve  
-- Smaller ecosystem  
-- Tooling not as mature [3]
-
-###### FastAPI (Python)  
-**Pros**:
-- Simple and clean syntax  
-- Automatic OpenAPI documentation  
-- Asynchronous by default  
-- Strong typing with Pydantic  
-- Fast development cycle  
-**Cons**:
-- Slightly slower than Actix or Spring in raw performance [4]
-
-FastAPI was ultimately chosen due to its excellent balance of developer ergonomics, async support, built-in documentation, and suitability for quick iteration. It aligned well with the team's Python experience and the simplicity of the service.
-###### References
-[1] Express, “Express - Node.js web application framework,” [Online]. Available: https://expressjs.com  
-[2] Spring, “Spring Boot,” [Online]. Available: https://spring.io/projects/spring-boot  
-[3] Actix Project, “Actix Web,” [Online]. Available: https://actix.rs  
-[4] FastAPI, “FastAPI - The modern Python web framework,” [Online]. Available: https://fastapi.tiangolo.com  
 
 FastAPI is very straightforward to use, a simple dockerfile was written that used python:3.10-slim as a base image and then fast api dependencies were installed with pip and filally the main script was copied into the image. Note that is not advised to use the *latest* when choosing the base image because new versions can introduce braking changes to the system. Before an API specification could be written using the OpenAPI stadard, some experimenting had to be done to understand how the FastAPI framework works and how this could be integrated with the compiler toolchain.
 ##### DinD vs Docker Socket Binding
