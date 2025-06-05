@@ -7,7 +7,6 @@
 }
 
 # Tailscale VPN
-leaflink.tail60817a.ts.net
 http://leaflink.tail60817a.ts.net {
   handle_path /api/v1/* {
 	reverse_proxy webapp-backend:8000
@@ -18,6 +17,7 @@ http://leaflink.tail60817a.ts.net {
 }
 # Tailscale VPN
 https://leaflink.tail60817a.ts.net {
+  tls internal
   handle_path /api/v1/* {
 	reverse_proxy webapp-backend:8000
   }
@@ -54,7 +54,7 @@ https://sparql.leaflink.ti.bfh.ch {
 	reverse_proxy yasgui-sparql-ui:3031
 }
 
-http://triplestore.leaflink.ti.bfh.ch {
+https://triplestore.leaflink.ti.bfh.ch {
 	tls internal
 	reverse_proxy fuseki-triplestore:3030
 }
