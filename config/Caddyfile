@@ -15,17 +15,6 @@ http://leaflink.tail60817a.ts.net {
       import common_static
   }
 }
-http://influx.leaflink.tail60817a.ts.net {
-	reverse_proxy influxdb:8086
-}
-
-http://sparql.leaflink.tail60817a.ts.net {
-	reverse_proxy yasgui-sparql-ui:3031
-}
-
-http://triplestore.leaflink.tail60817a.ts.net {
-	reverse_proxy fuseki-triplestore:3030
-}
 
 # Internal DNS 
 http://leaflink.ti.bfh.ch {
@@ -47,7 +36,7 @@ https://influx.leaflink.ti.bfh.ch {
 
 https://sparql.leaflink.ti.bfh.ch {
 	tls internal
-	reverse_proxy yasgui-sparql-ui:3031
+	reverse_proxy yasgui-sparql-ui:80
 }
 
 https://triplestore.leaflink.ti.bfh.ch {

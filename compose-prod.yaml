@@ -2,8 +2,8 @@ services:
   compiler-engine:
     container_name: compiler-engine
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/compiler-engine:${TAG}
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -48,8 +48,8 @@ services:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/webapp-backend:${TAG}
     container_name: webapp-backend
     restart: unless-stopped
-    ports:
-      - "8001:8000"
+    expose:
+      - "8000"
     environment:
       - TRIPLESTORE_ENDPOINT=http://fuseki:3030/core/
       - PYTHONUNBUFFERED=1
@@ -82,8 +82,8 @@ services:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/protobuf-service:${TAG}
     container_name: protobuf-service
     restart: unless-stopped
-    ports:
-      - "8002:8000"
+    expose:
+      - "8000"
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=Europe/Zurich
@@ -91,8 +91,8 @@ services:
   mqtt-broker:
     image: registry.gitlab.ti.bfh.ch/internetofsoils/infrastructureforsensormanagment/mqtt-broker:${TAG}
     container_name: mqtt-broker
-    ports:
-      - "1883:1883"
+    expose:
+      - "1883"
     volumes:
       - mqtt-broker-config:/mosquitto/config
       - mqtt-broker-data:/mosquitto/data
@@ -104,8 +104,8 @@ services:
     image: stain/jena-fuseki:5.1.0
     container_name: fuseki-triplestore
     restart: unless-stopped
-    ports:
-      - "3030:3030"
+    expose:
+      - "3030"
     volumes:
       - fuseki-data:/fuseki
     environment:
@@ -121,8 +121,8 @@ services:
     image: influxdb:2.7
     container_name: influxdb
     restart: unless-stopped
-    ports:
-      - "8086:8086"
+    expose:
+      - "8086"
     volumes:
       - influxdb-data:/var/lib/influxdb2
     environment:
@@ -136,8 +136,8 @@ services:
     image: erikap/yasgui
     container_name: yasgui-sparql-ui
     restart: unless-stopped
-    ports:
-      - "3031:80"
+    expose:
+      - "80"
     depends_on:
       - fuseki
     environment:
