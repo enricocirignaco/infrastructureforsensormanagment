@@ -7,7 +7,8 @@
 }
 
 # Tailscale VPN
-http://mip3-cirie1.tail60817a.ts.net {
+leaflink.tail60817a.ts.net
+http://leaflink.tail60817a.ts.net {
   handle_path /api/v1/* {
 	reverse_proxy webapp-backend:8000
   }
@@ -16,7 +17,7 @@ http://mip3-cirie1.tail60817a.ts.net {
   }
 }
 # Tailscale VPN
-http://leaflink {
+https://leaflink.tail60817a.ts.net {
   handle_path /api/v1/* {
 	reverse_proxy webapp-backend:8000
   }
