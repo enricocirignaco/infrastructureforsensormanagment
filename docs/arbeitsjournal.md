@@ -37,7 +37,7 @@
 | 2025-03-18 | 10:00 - 14:00 | 4,0   | DEGEL2         | 33       | Nanopb Integration in Dummy Projekt                               |
 | 2025-03-19 | 09:00 - 12:00 | 3,0   | DEGEL2         | 40       | MQTT-Broker Bridge für TTN konfigurieren                          |
 | 2025-03-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting       
-| 2025-03-21 | 09:00 - 12:00 | 3     | CIRIE1         |          | Documentation, Refactoring, Testing                               |
+| 2025-03-21 | 09:00 - 12:00 | 3,0   | CIRIE1         |          | Documentation, Refactoring, Testing                               |
 | 2025-03-25 | 09:00 - 15:00 | 6,0   | DEGEL2         |          | Linked Data Entities, Protobuf                                    |
 | 2025-03-25 | 09:00 - 17:00 | 7,0   | CIRIE1         |          | Compiler Engine Documentation                                     |
 | 2025-03-26 | 10:00 - 15:00 | 5,0   | DEGEL2         | 28, 40   | Docker Setup                                                      |
@@ -60,13 +60,13 @@
 | 2025-04-07 | 09:00 - 11:00 | 2,0   | CIRIE1         |          | Review Merge Requests                                             |
 | 2025-04-08 | 10:00 - 22:00 | 10,0  | CIRIE1         | 43, 51   | Frontend development, Research component framework, vue initialization|
 | 2025-04-10 | 10:00 - 17:30 | 7,0   | CIRIE1         | 43, 51   | Frontend development, vue Trobleshooting                          |
-| 2025-04-11 | 09:00 - 17:00 | 7.0   | CIRIE1         | 52, 51   | Frontend development, Setting Page, Rest Services, Review MR, journal|
-| 2025-04-14 | 10:00 - 16:00 | 6.0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
-| 2025-04-20 | 17:00 - 20:00 | 3.0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
-| 2025-04-21 | 16:00 - 21:30 | 5.5   | CIRIE1         | 44, 45   | Frontend development, Project Page, Deployed Node view, Router refactoring|
-| 2025-04-22 | 10:00 - 16:00 | 5.5   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
-| 2025-04-24 | 08:00 - 11:00 | 3     | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
-| 2025-04-24 | 13:00 - 20:00 | 7     | CIRIE1         |          | Gitlab CICD, bugfixing compose prod, Deploying webapp to prod server|
+| 2025-04-11 | 09:00 - 17:00 | 7,0   | CIRIE1         | 52, 51   | Frontend development, Setting Page, Rest Services, Review MR, journal|
+| 2025-04-14 | 10:00 - 16:00 | 6,0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
+| 2025-04-20 | 17:00 - 20:00 | 3,0   | CIRIE1         | 44, 45   | Frontend development, Projects Overview, Project Page, New/Edit Page|
+| 2025-04-21 | 16:00 - 21:30 | 5,5   | CIRIE1         | 44, 45   | Frontend development, Project Page, Deployed Node view, Router refactoring|
+| 2025-04-22 | 10:00 - 16:00 | 5,5   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+| 2025-04-24 | 08:00 - 11:00 | 3,0   | CIRIE1         | 50       | Frontend development, Commercial Nodes Overview, Node Page, New/Edit Page|
+| 2025-04-24 | 13:00 - 20:00 | 7,0   | CIRIE1         |          | Gitlab CICD, bugfixing compose prod, Deploying webapp to prod server|
 | 2025-04-14 | 08:00 - 13:00 | 5,0   | DEGEL2         | 65       | Backend docker, init admin                                        |
 | 2025-04-16 | 12:00 - 19:30 | 7,5   | DEGEL2         | 65, 54   | Userhandling, password change, user update                        |
 | 2025-04-22 | 10:00 - 12:30 | 2,5   | DEGEL2         | 57       | Sketch out commercial sensor                                      |
@@ -77,14 +77,15 @@
 | 2025-04-29 | 09:00 - 15:30 | 6,5   | CIRIE1, DEGEL2 |          | Meeting, Experte-Meeting, Setup Infrastructure                    |
 | 2025-04-30 | 11:00 - 12:00 | 1,0   | DEGEL2         |          | Organisational work, Arbeitsjournal                               |
 | 2025-04-30 | 12:00 - 13:00 | 1,0   | DEGEL2         | 68, 61   | Logbook for commercial sensor                                     |
-| 2025-04-25 | 08:00 - 13:00 | 5     | CIRIE1         | 69       | Marriage Frontend, Backend, troubleshooting reverse proxy         |
-| 2025-04-25 | 14:00 - 17:00 | 3     | CIRIE1         | 69, 64   | Marriage Frontend, Backend, bugfixing frontend, deployment to server|
-| 2025-04-28 | 11:00 - 13:00 | 2     | CIRIE1         | 67       | Logbook feature frontend                                          |
-| 2025-04-28 | 14:00 - 22:00 | 8     | CIRIE1         | 70, 42,69| Marriage Frontend, Backend, deployment to server, overview page   |
+| 2025-04-25 | 08:00 - 13:00 | 5,0   | CIRIE1         | 69       | Marriage Frontend, Backend, troubleshooting reverse proxy         |
+| 2025-04-25 | 14:00 - 17:00 | 3,0   | CIRIE1         | 69, 64   | Marriage Frontend, Backend, bugfixing frontend, deployment to server|
+| 2025-04-28 | 11:00 - 13:00 | 2,0   | CIRIE1         | 67       | Logbook feature frontend                                          |
+| 2025-04-28 | 14:00 - 22:00 | 8,0   | CIRIE1         | 70, 42,69| Marriage Frontend, Backend, deployment to server, overview page   |
 | 2025-05-01 | 13:00 - 14:00 | 1,0   | DEGEL2         | 61       | Current state of openapi spec                                     |
 | 2025-05-06 | 13:00 - 18:00 | 5,0   | DEGEL2         | 55, 68   | Logbook Commercial Sensor, Node Template CRUD                     |
 | 2025-05-08 | 14:00 - 18:00 | 4,0   | DEGEL2         | 55       | Node Template Update                                              |
 | 2025-05-08 | 10:00 - 17:00 | 7,0   | DEGEL2         | 46       | Marry Node Template and fix bugs                                  |
+| 2025-05-09 | 10:00 - 13:00 | 3,0   | DEGEL2         | 46       | Fix bug in marriage of node template                              |
 | 2025-05-04 | 12:30 - 18:00 | 5,5   | CIRIE1         | 47       | Node Template Overview, Logbook Commercial Sensor                 |
 | 2025-05-05 | 08:00 - 12:30 | 4,5   | CIRIE1         | 47       | Node Template Overview, Node Template overview                    |
 | 2025-05-06 | 08:00 - 17:00 | 9,0   | CIRIE1         | 46, 75   | NOde Template page, fix token expiration bug                      |
@@ -95,19 +96,35 @@
 | 2025-05-15 | 09:00 - 19:00 | 9,0   | CIRIE1         | 49       | working on frontend, node, template, project                      |
 | 2025-05-16 | 13:00 - 16:00 | 3,0   | CIRIE1         | 81       | testing esp32 flashing and webserial / esptools.js                |
 | 2025-05-19 | 09:00 - 12:00 | 3,0   | CIRIE1, DEGEL2 |          | implementing feedback from supervisor and fixing various bugs in the app |
-| 2025-05-19 | 13:00 - 14:30 | 1.5   | CIRIE1, DEGEL2 |          | Meeting with supervison and stakeholder                           |
-| 2025-05-20 | 09:00 - 12:00 | 3.0   | CIRIE1         |          | Research and development of compile engine integration with backend |
-| 2025-05-20 | 14:00 - 18:00 | 4.0   | CIRIE1         |  63      | Refinement of compiler engine (libraries and boards requirements) |
-| 2025-05-20 | 20:30 - 21:30 | 1.0   | CIRIE1, DEGEL2 |          | integration of compile engine into webapp and troubleshooting     |
-| 2025-05-22 | 10:00 - 13:00 | 3.0   | CIRIE1, DEGEL2 |          | poster                                                            |
-| 2025-05-23 | 10:00 - 12:00 | 2.0   | CIRIE1         |          | troubleshooting compiler engine webapp integration                |
-| 2025-05-23 | 13:00 - 16:00 | 3.0   | CIRIE1         |          | finalizing frontend, implementing minor features                  |
-| 2025-05-26 | 09:00 - 14:30 | 5.5   | CIRIE1         |  84, 14  | poster, working on webserial frontend                             |
-| 2025-05-27 | 08:00 - 12:30 | 4.5   | CIRIE1         |          | Merge requests and app deployment to production server            |
-| 2025-05-27 | 14:00 - 19:00 | 5.0   | CIRIE1         |  82, 83  | testing flashing heltec, script for heltec                        |
-| 2025-05-29 | 12:00 - 17:00 | 5.0   | CIRIE1, DEGEL2 |          | book                                                              |
-| 2025-05-30 | 10:00 - 11:00 | 1.0   | CIRIE1, DEGEL2 |          | Merge all dev branches in main                                    |
-
-
-
-
+| 2025-05-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting with supervison and stakeholder                           |
+| 2025-05-20 | 09:00 - 12:00 | 3,0   | CIRIE1         |          | Research and development of compile engine integration with backend |
+| 2025-05-20 | 14:00 - 18:00 | 4,0   | CIRIE1         |  63      | Refinement of compiler engine (libraries and boards requirements) |
+| 2025-05-20 | 20:30 - 21:30 | 1,0   | CIRIE1, DEGEL2 |          | integration of compile engine into webapp and troubleshooting     |
+| 2025-05-22 | 10:00 - 13:00 | 3,0   | CIRIE1, DEGEL2 |          | poster                                                            |
+| 2025-05-22 | 16:00 - 19:00 | 3,0   | CIRIE1, DEGEL2 |          | poster                                                            |
+| 2025-05-23 | 10:00 - 12:00 | 2,0   | CIRIE1         |          | troubleshooting compiler engine webapp integration                |
+| 2025-05-23 | 13:00 - 16:00 | 3,0   | CIRIE1         |          | finalizing frontend, implementing minor features                  |
+| 2025-05-26 | 09:00 - 14:30 | 5,5   | CIRIE1         |  84, 14  | poster, working on webserial frontend                             |
+| 2025-05-27 | 08:00 - 12:30 | 4,5   | CIRIE1         |          | Merge requests and app deployment to production server            |
+| 2025-05-27 | 14:00 - 19:00 | 5,0   | CIRIE1         |  82, 83  | testing flashing heltec, script for heltec                        |
+| 2025-05-29 | 12:00 - 17:00 | 5,0   | CIRIE1, DEGEL2 |          | book                                                              |
+| 2025-05-30 | 10:00 - 11:00 | 1,0   | CIRIE1, DEGEL2 |          | Merge all dev branches in main                                    |
+| 2025-05-10 | 10:00 - 15:00 | 5,0   | DEGEL2         | 56       | Sketch out sensor node model and service                          |
+| 2025-05-12 | 07:00 - 09:00 | 2,0   | DEGEL2         | 56       | Sensor node repository first functionality                        |
+| 2025-05-13 | 08:00 - 13:00 | 5,0   | DEGEL2         | 56       | Update mechanic for sensor node in backend                        |
+| 2025-05-15 | 10:00 - 13:00 | 3,0   | DEGEL2         | 56, 49   | Marriage of sensor node, small fixes                              |
+| 2025-05-15 | 10:00 - 11:00 | 1,0   | DEGEL2         | 56       | Adapt handling of configrables in sensor node                     |
+| 2025-05-20 | 09:00 - 15:00 | 6,0   | DEGEL2         | 58       | Connect compiler engine to backend via REST interface             |
+| 2025-05-22 | 08:00 - 16:00 | 8,0   | DEGEL2         | 59       | Implement sensor provisioning over TTN                            |
+| 2025-05-23 | 09:00 - 12:00 | 3,0   | DEGEL2         | 58       | Marry compile actions of frontend and backend                     |
+| 2025-05-25 | 11:00 - 15:00 | 4,0   | DEGEL2         | 59       | Finish TTN Service and document TTN provisioning                  |
+| 2025-05-27 | 09:00 - 15:00 | 7,0   | DEGEL2         | 62       | Protobuf Service                                                  |
+| 2025-05-28 | 09:00 - 18:00 | 10,0  | DEGEL2         | 62       | Protobuf Service, dynamic parser, data in frontend                |
+| 2025-05-29 | 09:00 - 12:00 | 3,0   | DEGEL2         | 62       | Compile nanopb code over protobuf service                         |
+| 2025-05-30 | 09:00 - 10:00 | 1,0   | DEGEL2         | 62       | Small fixed when integrating protobuf service                     |
+| 2025-09-01 | 10:00 - 12:30 | 2,5   | DEGEL2         |          | Docs: Sketch out backend architecture                             |
+| 2025-09-02 | 10:00 - 12:00 | 2,0   | DEGEL2         | 10       | Pandoc/Pipeline in VSCode                                         |
+| 2025-09-02 | 14:00 - 15:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-09-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-09-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
+| 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
