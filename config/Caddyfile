@@ -15,6 +15,15 @@ http://mip3-cirie1.tail60817a.ts.net {
       import common_static
   }
 }
+# Tailscale VPN
+http://leaflink {
+  handle_path /api/v1/* {
+	reverse_proxy webapp-backend:8000
+  }
+  handle {
+      import common_static
+  }
+}
 http://fuseki.mip3-cirie1.tail60817a.ts.net {
 	reverse_proxy fuseki-triplestore:3030
 }
@@ -34,15 +43,17 @@ https://leaflink.ti.bfh.ch {
       import common_static
   	}	
 }
+https://influx.leaflink.ti.bfh.ch {
+	tls internal
+	reverse_proxy influxdb:8086
+}
 
+https://sparql.leaflink.ti.bfh.ch {
+	tls internal
+	reverse_proxy yasgui-sparql-ui:3031
+}
 
-
-# Local dev testing
-http://localhost {
-	handle_path /api/v1/* {
-		reverse_proxy webapp-backend:8000
-	}
-	  handle {
-      import common_static
-  }
+http://triplestore.leaflink.ti.bfh.ch {
+	tls internal
+	reverse_proxy fuseki-triplestore:3030
 }
