@@ -6,11 +6,12 @@
             "type": "shell",
             "command": "pandoc",
             "args": [
+                "--verbose",
                 "-o",
-                "output.pdf",
+                "report.pdf",
                 "--pdf-engine=lualatex",
 //                "--citeproc",
-                "pandoc.md"
+                "report.md"
             ],
             "options": {
                 "cwd": "${workspaceFolder}/docs/report"
