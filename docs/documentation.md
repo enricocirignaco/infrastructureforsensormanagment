@@ -59,15 +59,22 @@ Git tags were used to mark key integration points in the project timeline, espec
 - The third number for bugfixes and small patches.
 
 These tags also served as triggers for the CI pipeline, which is discussed in detail in the section [Multistaged GitHub CI Pipeline](#multistaged-github-ci-pipeline).
-### Microservice Architecture
-The system was built using a microservice architecture, where each service is dedicated to a specific responsibility within the overall system. This approach promotes modularity, simplifies maintenance, and enables teams to develop, test, and deploy components independently.
+### Containerized Microservice Architecture
+The system was built using a microservice architecture, where each service is dedicated to a specific responsibility within the overall system. This approach promotes modularity, simplifies maintenance, and enables independent development, testing, and deployment of individual components.
 
-Each microservice includes its own configuration and dependencies, allowing it to operate in isolation. Services expose RESTful interfaces for communication, making them easy to integrate or replace without disrupting others. All services are deployed behind a reverse proxy, which handles routing and load balancing, ensuring flexibility and scalability.
+Each microservice includes its own configuration and dependencies, allowing it to run in isolation. Services expose RESTful interfaces for communication, making them easy to integrate or replace without affecting the rest of the system. A reverse proxy handles internal routing and load balancing, enabling flexibility in scaling and deployment.
 
-Details about individual services can be found in the [System Architecture](#system-architecture) section.
-### Containerization with Docker
+From the start, each service was developed and deployed as a Docker container. Containerization ensures strong isolation between services and simplifies dependency management. It also guarantees consistency across development and production environments by replicating the same runtime conditions. More details about the deployment setup are provided in the [Deployment & Integration](#deployment--integration) section.
+
+Descriptions of the individual services can be found in the [System Architecture](#system-architecture) section.
 ### Multistaged GitHub CI Pipeline
-### Local Development with Production Parity
+A clear separation between the build and run stages is a key principle of modern application architecture [3]. In this project, each service was packaged as a custom Docker image. The build stage was fully automated using a GitHub CI pipeline, while the run stage consisted of deploying these images as containers on the production server.
+
+The pipeline is triggered by the creation of a new Git tag. Once triggered, parallel jobs build the Docker images for each service. The resulting images are tagged according to the Git version and pushed to a private container registry hosted on BFH’s GitLab. From there, the server can securely pull and run the containers.
+
+This approach ensures reproducible, versioned deployments and centralized control over image distribution. Using a private registry improves reliability and avoids dependency on public registries. Versioning with Git tags also allows for easy rollbacks in case of errors or regressions.
+
+Because the build stage does not run on the deployment environment, it avoids spreading the full Git repository across multiple systems, reducing the risk of accidental source code leakage. Although this is not critical for this project, since the codebase is not proprietary, it reflects good practice. It’s worth noting, however, that this protection does not apply to services written in interpreted languages, where source code remains accessible within the container.
 
 ## Technology Stack --> Enrico
 	•	Overview of used tools/languages
