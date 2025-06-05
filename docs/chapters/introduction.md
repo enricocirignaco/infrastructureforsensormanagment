@@ -1,5 +1,6 @@
 # Introduction
 ## Context & Background
+- motivation / relevance today
 - Typical aspects of an IoT application
     - remote sensing and gathering of time-based data
     - transmissioning via (wireless) network
@@ -28,14 +29,28 @@
 
 ## Goal of the project
 *Broad system overview (technical range)*
+- title of this thesis already implies that the goal is to build an infrastructure which streamlines all processes around handling sensor nodes
+- Especially the mentioned problems in the chapter before shall be adressed and solution implemented
 
+- concrete features which :
 - Centralized management of all data-entities
+    - Projects to bundle other entities.
+    - Templating of sensor nodes to efficiently create multiple similar ones
+    - Relevant attributes of sensor nodes, 
 - Compiling of (hardware-specific) firmware
-    - enrich firmware with per-node configurations 
-- Templating of sensor nodes to efficiently create mutliple similar ones
+    - enrich firmware with per-node configurations
+- transmissioning of time series data in a speficied format using binary protobuf schemas
+    - data should be stored both in a influxdb (time series database) and a triplestore to have a graph containing all relevant data
 - Automatic provisioning of end devices on TTN
     - Keys get generated (on our side) and saved
     - As soon as keys get compiled into firmware and flashed onto hardware, data already reaches TTN
+
+general goals:
+- architecture of both system (big picture) and specific software components (small picutre) should follow modern guidelines to ensure:
+- division of responsibilities (layers/microservices) so that they could be exchanged or used on their own
+- usage of well-established technologies to build a long-lasting platform 
+- built in a portable (right word for containerized?) way so that it can be deployed on various platforms with only a handful of configs
+- system should be designed as generic as possible so that it could be used for any similar IoT project (better wording)
 
 ## Value Proposition for Stakeholder
 *What problems should be solved? Which aspects of a researcher's life becomes easier?*

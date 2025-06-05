@@ -15,5 +15,5 @@
     },
     "remoteUser": "vscode",
 
-    "postCreateCommand": "sudo tlmgr update --self  && sudo tlmgr instal unicode-math lualatex-math"
+    "postCreateCommand": "sudo tlmgr update --self  && sudo tlmgr instal unicode-math lualatex-math booktabs mdwtools"
 }

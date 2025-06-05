@@ -2,7 +2,11 @@
 
 # Introduction --> Linus
 ## Context & Background --> Linus
-- Description of MUG, IoS
+Such a typical IoT system consists of several core components that together enable the continuous collection, transmission, and utilization of data from distributed edge devices. At its foundation lies the ability to gather time-based data remotely. Sensor nodes are deployed in environments where manual data collection would be impractical or inefficient, and they measure physical phenomena such as temperature or humidity at regular intervals. The gathered data is transmitted via wireless technologies like WiFi, LoRaWAN, or cellular networks, each with different trade-offs regarding range, energy usage, and bandwidth. Once received by a central system, the data is stored—often in time-series databases—for later analysis, visualization, or integration into other systems.
+
+
+
+
 ## Goal of the project --> Linus
 - Broad system overview 
 ## Value Proposition for Stakeholder --> Linus

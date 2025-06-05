@@ -6,7 +6,7 @@
             "type": "shell",
             "command": "pandoc",
             "args": [
-                "--verbose",
+//                "--verbose",
                 "-o",
                 "report.pdf",
                 "--pdf-engine=lualatex",
