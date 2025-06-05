@@ -270,91 +270,22 @@ A strategy for flashing the compiled firmware on the hardware should be develope
 - The compilation process should be as straightforward as possible because the user most likely has no technical experience.
 - **If possible**:The firmware should be flashed on the hardware without the need of any additional software. (irectly over the browser).
 - In case the adopted solution (via browser) requires internet connection, an alternative solution that works offline should be also provided.
-#### Research
-After reading the poorly documented documentation of the CubeCell board if was discovered that neigher the bootloader that works with the arduino enviroment nor the utility to flash the arduino code on the board are open source. Only their binaries are provided. This complicate the work of the developers a lot.
-As described here [10] the Cubecell in question supports two different bootloaders, one of them is arduino compatible but as can be seen from the screenshoot on the same page this bootloader is closed source and it's not avalable to the public. Different issues on the matter were already started on github like this [11]. In this gitlab issue[12] someone is even accusing Heltec of misusing the GCC compiler that is under GPL license. So it's clear that this company is not interrested in open sourcing it's development tools and thus aworkaround should be found.
-To better understand what exactly it's missing to be able to flash a firmware on the cubecell board the compilation and flashing process via the arduino IDE was closely investigated. Before any code can be compiled for this board the Hardware-specific files must be installed to the Arduino IDE using its board manager. The Board manange does nothing else than downloading the content of the following gitlab repository [13]. By getting a look at the get.py file in the tools folder the following line can be seen:
-```python
-tools_to_download = load_tools_list(current_dir + '/../package/package_CubeCell_index.template.json', identified_platform)
-```
-This hints that the links to the files to be downloaded are in the package_CubeCell_index.template.json file.
-In this json file multiple url pointing to a download server hosted by heltec automation can be found. As for example:
-```json
-    "url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0-BoardManager.zip",
-```
-This file server reveal interesting findings over what's available for download for the users. Not only that by multiple PDFs are scattered all over the place with maybe usefull information.
-
-As far as understood ( not official documentation was found) there are three propetary tools that are used by the arduino IDE to compile and flash the firmware on the board:
-- **CubeCellelftool**: it's used to convert the hex file compiled by the gcc / arduino IDE to a 
-- **CubeCellflash**: This tool is usedd to flash boards with a ASR650x series chip [14]
-- **flash6601**: This tool is used to flash boards with a ASR6601 series chip [14]
-Those tools are provided as binaries for linux and macos and as exe for windows but only for x86 CPU architecture. Additionally a arm binary compatible with raspberry Pi is provided for the CubeCellflash utility.
-There is some sparse informations on how to use those tools in different forum posts like this[15] and this [16] but no official documentation was found. The exact usage can be reverse engineered by looking enabling verbose logging in the arduino IDE and trying to compile and flash a test firmware on the board.
-<!-- write here your findings with arduino ide -->
-
-Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
-
-Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[17]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
-If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
-
-The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
-#### Followups
-After further analysis and siscussion with the team and stakeholders it was decided to move in two different directions. The first high priority task is to implement a solution so that the user can program the heltech hardware in a as hasslyfree as possible way without using the invaiable webserial API. This means that the requirements that no addtional software is allowedto be installed on the host machine is lifted. The second task is to try to get a working solution using the webserial API for flashing a compatible Hardware board. This will provide a proof of concept for the webserial API and the idel workflow can be demostraded. This proof of concept can also be used in future project to convince the stakeholders to adopt an hardware platform conpatible with the webserial API and thus leveraging the advantages of this technology.
-### Webserial ESP32-S3
-Although this is the task with a lower priority, it was decided to research the feasibility of this solution first because this will have a great impact on to what extens the specific solution for the heltec will be delevoped and refined.
-#### Research - Browser Serial APIs
-A brief research was conducted to find out if the webserial thecnology is the only and best candidate for this task. While Web Serial (supported only in Chromium-based browsers like Chrome, Edge, and Brave) is currently the most practical way to flash ESP32 devices directly via the browser [18], there are a few alternative Web APIs worth noting. WebUSB allows direct USB access but requires custom USB descriptors and is only available in Chromium-based browsers — not Firefox or Safari [19]. WebHID, designed for HID-class devices, is unsuitable for flashing and also lacks cross-browser support [20]. WebBluetooth is supported in Firefox and Chromium but does not support full firmware flashing due to BLE’s limited data rates and payload sizes [21]. Thus, for full browser-based flashing without extra software, Web Serial remains the most viable option, albeit limited to Chromium environments. Cross-browser support is currently not achievable due to the lack of Web Serial and WebUSB support in Firefox and Safari.
-#### Research - ESP32 compatible Webserial libraries
-After a thorough research several javascrip tools for browser-baser flasing of esp32 devices were found. These tools leverage the [Web Serial API][18], allowing direct communication with ESP32 boards through a USB connection and without requiring any locally installed software.
-
-##### Adafruit WebSerial ESPTool
-Adafruit_WebSerial_ESPTool is a polished, browser-based firmware flasher developed by Adafruit. It provides a complete graphical interface that supports multiple ESP32 variants, with convenient features such as automatic chip detection and baud rate configuration. This project is actively maintained and designed for users who prefer an out-of-the-box solution without needing to write custom code. However, because it wraps around an existing library, it is less suitable if you require a deeply customized flashing UI for integration into a larger application.
-
-##### esptool.js (from tiware)
-esptool.js was one of the first projects to bring ESP32 flashing to the web by porting functionality from the Python-based esptool. Its main advantage lies in its minimal design, which makes it easy to embed into simple web applications. However, the project has not seen updates in over four years, and it lacks support for more recent ESP32 variants such as the ESP32-S3. In addition, documentation is sparse, and integration into modern toolchains may be cumbersome. Given the lack of maintenance, it is not recommended for new projects.
-
-##### esptool-js (Espressif)
-The official esptool-js project from Espressif is actively maintained and well documented. It brings most of the functionality of the widely used esptool.py to the browser and is designed specifically for modern Web Serial integration. Unlike older projects, this version keeps pace with new chip variants and is the basis for tools like ESP Web Tools. It offers lower-level control over the flashing process and is intended for developers who want to integrate ESP32 flashing directly into their custom interfaces. While it does not include a graphical interface, it is a solid foundation for building one.
-
-The candidate that best fits the requirements of this project is the official esptool-js from Espressif. It is actively maintained, well documented, and designed for modern Web Serial integration.
 
 
 #### References
 [9]  https://heltec.org/project/htcc-ab01-v2/
-[10] https://docs.heltec.org/en/node/asr650x/htcc_am01/programming_cubecell.html
-[11] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/80
-[12] https://github.com/HelTecAutomation/CubeCell-Arduino/issues/281
-[13] https://github.com/HelTecAutomation/CubeCell-Arduino/tree/master
-[14] http://community.heltec.cn/t/cubecell-download-tool-for-raspberry-pi/2522/12
-[15] http://community.heltec.cn/t/cubecellflash-tool/1953/3
-[16] http://community.heltec.cn/t/cubecell-firmware-upload/1063
-[17] https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
-[18] Mozilla Developer Network, “Web Serial API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
-[19] Mozilla Developer Network, “WebUSB API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/USB
-[20] Mozilla Developer Network, “WebHID API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API
-[21] Mozilla Developer Network, “Web Bluetooth API”, [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API
-https://github.com/arduino/arduino-create-agent
-https://github.com/HelTecAutomation/CubeCell-Arduino
-https://github.com/kaelhem/avrbro
-https://resource.heltec.cn/download/
-https://github.com/arduino/arduino-create-agent/issues/150
-https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
+Arduino, “arduino-create-agent,” GitHub repository, [Online]. Available: https://github.com/arduino/arduino-create-agent
+Heltec Automation, “CubeCell-Arduino,” GitHub repository, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino
+Kaelhem, “AVRBRO – Web-based AVR Flasher,” GitHub repository, [Online]. Available: https://github.com/kaelhem/avrbro
+Heltec Automation, “Downloads,” [Online]. Available: https://resource.heltec.cn/download/
+Arduino, “Issue #150: Web Serial Conflicts,” GitHub, [Online]. Available: https://github.com/arduino/arduino-create-agent/issues/150
+Toit.io, “Flash your ESP32 from the Browser Using Web Serial,” Medium, [Online]. Available: https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
 ### Frontend webserver and reverse proxy
 It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Thus is was decided to separate this two components. This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
 After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
-#### Frontend Framework
-It was clear from the beginning that a frontend framework should be used for the development of the web application. Modern frameworks are:
-- React: 
-    - upsides: popular, large community, many libraries and tools available, good documentation
-    - downsides: large bundle size, complex state management, steep learning curve
-- Vue: 
-    - upsides: easy to learn, good documentation, small bundle size, good performance
-    - downsides: smaller community than React, less libraries and tools available
-- Angular:
-    - upsides: large community, good documentation, many libraries and tools available, good performance
-    - downsides: large bundle size, complex state management, steep learning curve
 
-The team was already leaning toward Vue but the fact than one team member cover Vue in the "Javascript Frameworks" class made the decision easier. Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
+
+ Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
 #### Deployment
 The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
 ```javascript
