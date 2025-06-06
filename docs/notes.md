@@ -288,7 +288,7 @@ Heltec Automation, “CubeCell-Arduino,” GitHub repository, [Online]. Availabl
 Kaelhem, “AVRBRO – Web-based AVR Flasher,” GitHub repository, [Online]. Available: https://github.com/kaelhem/avrbro
 Heltec Automation, “Downloads,” [Online]. Available: https://resource.heltec.cn/download/
 Arduino, “Issue #150: Web Serial Conflicts,” GitHub, [Online]. Available: https://github.com/arduino/arduino-create-agent/issues/150
-Toit.io, “Flash your ESP32 from the Browser Using Web Serial,” Medium, [Online]. Available: https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
+
 [27] Arduino, “Arduino Cloud Agent,” [Online]. Available: https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
 
 ### Frontend webserver and reverse proxy
