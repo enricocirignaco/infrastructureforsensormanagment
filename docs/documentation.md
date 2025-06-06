@@ -12,39 +12,81 @@ Such a typical IoT system consists of several core components that together enab
 ## Value Proposition for Stakeholder --> Linus
 
 # State of Research
-This chapter provides an overview of existing research and available technologies relevant to the project. The focus lies on niche or emerging tools and methods that appeared promising but required feasibility evaluation before adoption. Most of the research was conducted during the conceptual phase, where assessing the practicality and integration potential of such technologies was critical for planning and system design.
+This chapter provides an overview of research carried out and available technologies relevant to the project. The focus lies on niche or emerging tools and methods that appeared promising but required feasibility evaluation before adoption. Most of the research was conducted during the conceptual phase, where assessing the practicality and integration potential of such technologies was critical for planning and system design.
 ## Retrospect Project2 --> Linus
-## Webserial --> Enrico
-#### Research
-After reading the poorly documented documentation of the CubeCell board if was discovered that neigher the bootloader that works with the arduino enviroment nor the utility to flash the arduino code on the board are open source. Only their binaries are provided. This complicate the work of the developers a lot.
-As described here [20] the Cubecell in question supports two different bootloaders, one of them is arduino compatible but as can be seen from the screenshoot on the same page this bootloader is closed source and it's not avalable to the public. Different issues on the matter were already started on github like this [21]. In this gitlab issue[22] someone is even accusing Heltec of misusing the GCC compiler that is under GPL license. So it's clear that this company is not interrested in open sourcing it's development tools and thus aworkaround should be found.
-To better understand what exactly it's missing to be able to flash a firmware on the cubecell board the compilation and flashing process via the arduino IDE was closely investigated. Before any code can be compiled for this board the Hardware-specific files must be installed to the Arduino IDE using its board manager. The Board manange does nothing else than downloading the content of the following gitlab repository [23]. By getting a look at the get.py file in the tools folder the following line can be seen:
+## Programming and Toolchain Analysis for CubeCell
+A key requirement of the project was the reuse of existing hardware from previous initiatives. Specifically, the board selected was the Heltec HTCC-AB01, which integrates the ASR6501 chip. The board comes preloaded with an Arduino-compatible bootloader that allows firmware flashing via the Arduino IDE. However, another important requirement was to enable future programming of the board without relying on the Arduino IDE. This made it necessary to find a method for flashing compiled binaries to the board via USB using the original bootloader. As a result, research was conducted into the Heltec CubeCell board, its bootloader behavior, and its available toolchain options.
+
+As described in the official documentation[20], the CubeCell board supports two different bootloaders, one of which is Arduino-compatible. However, as visible in the screenshots provided on the same page, this bootloader is closed-source and not publicly available. Several related issues have already been opened on GitHub, such as [21], where users express concerns about the lack of transparency. In another thread [22], a user even accuses Heltec of violating the GPL license by misusing the GCC compiler. These concerns indicate that Heltec is not interested in open-sourcing its development tools, making it necessary to find a workaround.
+
+To better understand the programming process, the behavior of the Arduino IDE must first be analyzed. Before any code can be compiled for the CubeCell board, the hardware-specific configuration must be installed via the Arduino Board Manager. This manager downloads configuration files from the Heltec GitHub repository [23]. In particular, the get.py script in the tools folder contains the following line:
 ```python
 tools_to_download = load_tools_list(current_dir + '/../package/package_CubeCell_index.template.json', identified_platform)
 ```
-This hints that the links to the files to be downloaded are in the package_CubeCell_index.template.json file.
-In this json file multiple url pointing to a download server hosted by heltec automation can be found. As for example:
+This suggests that the actual download URLs are listed in the package_CubeCell_index.template.json file. Indeed, the json file contains multiple links pointing to Heltec’s download server, such as:
 ```json
     "url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0-BoardManager.zip",
 ```
-This file server reveal interesting findings over what's available for download for the users. Not only that by multiple PDFs are scattered all over the place with maybe usefull information.
+Browsing this file server reveals not only the expected binaries, but also scattered PDF documents, some of which may contain useful technical information.
 
-As far as understood ( not official documentation was found) there are three propetary tools that are used by the arduino IDE to compile and flash the firmware on the board:
-- **CubeCellelftool**: it's used to convert the hex file compiled by the gcc / arduino IDE to a 
-- **CubeCellflash**: This tool is usedd to flash boards with a ASR650x series chip [24]
-- **flash6601**: This tool is used to flash boards with a ASR6601 series chip [24]
-Those tools are provided as binaries for linux and macos and as exe for windows but only for x86 CPU architecture. Additionally a arm binary compatible with raspberry Pi is provided for the CubeCellflash utility.
-There is some sparse informations on how to use those tools in different forum posts like this[25] and this [26] but no official documentation was found. The exact usage can be reverse engineered by looking enabling verbose logging in the arduino IDE and trying to compile and flash a test firmware on the board.
-<!-- write here your findings with arduino ide -->
+As far as could be determined—since no official documentation was found—the Arduino IDE relies on three proprietary tools for compiling and flashing firmware onto the board:
+- **CubeCellElfTool**: Likely used to convert the compiled hex file into an intermediate format.
+- **CubeCellFlash**: Used to flash boards with ASR650x-series chips [24].
+- **flash6601**: Used to flash boards with ASR6601-series chips [24].
 
-Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
+These tools are provided as binaries for Windows (EXE), macOS, and Linux—but only for x86 CPU architectures. One notable exception is a Raspberry Pi-compatible ARM binary available for the CubeCellFlash tool.
+Some fragmented usage instructions can be found in forum posts such as [25] and [26], but no comprehensive official documentation is currently available.
 
-Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
-If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
+To confirm that the proprietary utilities mentioned earlier are indeed used by the Arduino IDE for compiling and flashing the firmware—and to better understand their function—a test was conducted using the IDE’s verbose logging mode.
+![arduino ideverbose settings](./images/arduino_verbose_settings.png)
+A firmware upload was performed with verbose output enabled. The following snippet was extracted from the build log, immediately after the compiled binaries were generated. The output has been trimmed to highlight only the relevant portions of the flashing process:
+```
+/Users/macbook/Library/Arduino15/packages/CubeCell/tools/CubeCellelftool/0.0.1/CubeCellelftool /Users/macbook/Library/Arduino15/packages/CubeCell/tools/gcc-arm-none-eabi/8-2019-q3/bin/arm-none-eabi-objcopy /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.elf /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.hex /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd
+/Users/macbook/Library/Arduino15/packages/CubeCell/tools/gcc-arm-none-eabi/8-2019-q3/bin/arm-none-eabi-size -A /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.elf
+Sketch uses 23380 bytes (17%) of program storage space. Maximum is 131072 bytes.
+"/Users/macbook/Library/Arduino15/packages/CubeCell/tools/CubeCellflash/0.0.1/CubeCellflash" -serial "/dev/cu.usbserial-0001" "/Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd"
+Initialising bootloader.
+Silicon ID 0x256a11b5, revision 0.
+Verifying rows.
+Array 0: first row 34, last row 511.
+Starting upload.
+Uploading  ( 10 / 100 )
+Uploading  ( 20 / 100 )
+Uploading  ( 30 / 100 )
+Uploading  ( 40 / 100 )
+Uploading  ( 50 / 100 )
+Uploading  ( 60 / 100 )
+Uploading  ( 70 / 100 )
+Uploading  ( 80 / 100 )
+Uploading  ( 90 / 100 )
+Uploading  ( 100 / 100 )
+Checksum verifies OK.
+Rebooting.
+Total upload time 3.07s
+```
+A more detailed analysis of the build logs revealed that a utility called **CubeCellElfTool** is used to merge the ELF and HEX files into a .cyacd file. Its usage appears to follow the syntax:
+```bash
+CubeCellelftool <path_to_objcopy> <path_to_elf_file> <path_to_hex_file> <output_cyacd_file>
+```
+The objcopy utility, part of the GCC toolchain, converts the ELF file into a HEX file, which is then combined with additional metadata into the .cyacd format. Further research indicated that .cyacd stands for Cypress Application Code, a firmware update format originally developed by Cypress (now part of Infineon) for their PSoC (Programmable System-on-Chip) devices. It includes both application code and metadata required by the bootloader for programming flash memory [32]. This suggests that the Heltec CubeCell board might rely on a variant of a Cypress bootloader.
 
-The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
-#### Followups
-After further analysis and siscussion with the team and stakeholders it was decided to move in two different directions. The first high priority task is to implement a solution so that the user can program the heltech hardware in a as hasslyfree as possible way without using the invaiable webserial API. This means that the requirements that no addtional software is allowedto be installed on the host machine is lifted. The second task is to try to get a working solution using the webserial API for flashing a compatible Hardware board. This will provide a proof of concept for the webserial API and the idel workflow can be demostraded. This proof of concept can also be used in future project to convince the stakeholders to adopt an hardware platform conpatible with the webserial API and thus leveraging the advantages of this technology.
+In the second part of the logs, the CubeCellFlash utility was identified as the tool responsible for flashing the generated .cyacd file to the board. Its usage follows the pattern:
+```bash
+CubeCellflash -serial <serial_port> <path_to_cyacd_file>
+```
+
+These findings confirm that CubeCellFlash is the primary flashing utility used in the Arduino toolchain and reveal its exact usage syntax.
+
+With these insights, the team was faced with three options:
+	•	Investigate the bootloader further to determine if it conforms to Cypress standards and whether third-party tools could be used for flashing.
+	•	Reverse engineer the CubeCell utilities to understand their internal workings and re-implement them as open-source tools.
+	•	Use the provided proprietary binaries and integrate them into a custom flashing solution.
+
+The first option was discarded due to the time required for in-depth bootloader analysis. The second option was also initially rejected, but later reconsidered after an accidental misuse of the **CubeCellelftool** triggered a Python traceback, suggesting that the CubeCell utilities are likely packaged Python scripts. A partial decompilation confirmed this, and some source code was recovered. However, fully reverse engineering and integrating the tools into the project was deemed too time-consuming and ultimately abandoned.
+
+The third option was selected as the most practical and time-efficient solution. Despite the drawback of relying on closed-source binaries, raising concerns about transparency and security, it enabled the team to proceed without blocking other parts of the project.
+
+
 ## Heltec
 ### Webserial ESP32-S3
 Although this is the task with a lower priority, it was decided to research the feasibility of this solution first because this will have a great impact on to what extens the specific solution for the heltec will be delevoped and refined.
@@ -229,11 +271,11 @@ ept,
 [24] Heltec Community Forum, “CubeCell Download Tool for Raspberry Pi,” [Online]. Available: http://community.heltec.cn/t/cubecell-download-tool-for-raspberry-pi/2522/12
 [25] Heltec Community Forum, “CubeCellFlash Tool,” [Online]. Available: http://community.heltec.cn/t/cubecellflash-tool/1953/3
 [26] Heltec Community Forum, “CubeCell Firmware Upload,” [Online]. Available: http://community.heltec.cn/t/cubecell-firmware-upload/1063
-[27] Arduino, “Arduino Cloud Agent,” [Online]. Available: https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
 [28] Mozilla Developer Network, “Web Serial API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
 [29] Mozilla Developer Network, “WebUSB API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/USB
 [30] Mozilla Developer Network, “WebHID API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API
 [31] Mozilla Developer Network, “Web Bluetooth API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API
+[32] Infineon Technologies AG, Format of .cyacd File for PSoC 3 or PSoC 5LP Bootloader, Knowledge Base Article, Oct. 2020. [Online]. Available: https://community.infineon.com/t5/Knowledge-Base-Articles/Format-of-cyacd-File-for-PSoC-3-or-PSoC-5LP-Bootloader/ta-p/249707
 # Declaration of authorship
 ## Who did what?
 ### Enrico

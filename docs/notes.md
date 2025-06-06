@@ -270,7 +270,16 @@ A strategy for flashing the compiled firmware on the hardware should be develope
 - The compilation process should be as straightforward as possible because the user most likely has no technical experience.
 - **If possible**:The firmware should be flashed on the hardware without the need of any additional software. (irectly over the browser).
 - In case the adopted solution (via browser) requires internet connection, an alternative solution that works offline should be also provided.
+<!-- write here your findings with arduino ide -->
 
+Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
+
+Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
+If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
+
+The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
+#### Followups
+After further analysis and siscussion with the team and stakeholders it was decided to move in two different directions. The first high priority task is to implement a solution so that the user can program the heltech hardware in a as hasslyfree as possible way without using the invaiable webserial API. This means that the requirements that no addtional software is allowedto be installed on the host machine is lifted. The second task is to try to get a working solution using the webserial API for flashing a compatible Hardware board. This will provide a proof of concept for the webserial API and the idel workflow can be demostraded. This proof of concept can also be used in future project to convince the stakeholders to adopt an hardware platform conpatible with the webserial API and thus leveraging the advantages of this technology.
 
 #### References
 [9]  https://heltec.org/project/htcc-ab01-v2/
@@ -280,6 +289,8 @@ Kaelhem, “AVRBRO – Web-based AVR Flasher,” GitHub repository, [Online]. Av
 Heltec Automation, “Downloads,” [Online]. Available: https://resource.heltec.cn/download/
 Arduino, “Issue #150: Web Serial Conflicts,” GitHub, [Online]. Available: https://github.com/arduino/arduino-create-agent/issues/150
 Toit.io, “Flash your ESP32 from the Browser Using Web Serial,” Medium, [Online]. Available: https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
+[27] Arduino, “Arduino Cloud Agent,” [Online]. Available: https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
+
 ### Frontend webserver and reverse proxy
 It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Thus is was decided to separate this two components. This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
 After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
