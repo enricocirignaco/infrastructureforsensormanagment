@@ -25,32 +25,51 @@
         - data gets transmitted in an own binary format, has to be known and correctly handled both in encoding and decoding. May introduce problems when evolving data format by introducing for example a new sensor (all sensor nodes need same format or per node parsing-logic)
         - new sensor nodes have to be flashed manually and the right keys (DevEUI, AppKey) have to be written inside Arduino IDE before compilation. Before that, each end devices gets manually created over the TTN Dashboard. These manual steps may lead to confusing keys and hardware
         - data generated during research projects exist in various formats (excel, csv etc.) and is spread over different locations (gitlab, sharepoint, influxdb). The fragmented filing complicates the linking/collection of data, especially during analysis. These problems also apply to metadata of sensor nodes as firmware-version, exact coordinates of the deployment and TTN keys.
-        [1]
 
 ## Goal of the project
 *Broad system overview (technical range)*
-- title of this thesis already implies that the goal is to build an infrastructure which streamlines all processes around handling sensor nodes
-- Especially the mentioned problems in the chapter before shall be adressed and solution implemented
+- title of this thesis already implies that the goal is to build a generic infrastructure which streamlines all processes around handling sensor nodes
+- Especially the mentioned problems in the chapter before shall be addressed and solution implemented
+- The whole system should be made accessible / used via an intuitive web-based User interface which follows proven guidelines to ensure usability
 
-- concrete features which :
+- concrete features:
 - Centralized management of all data-entities
-    - Projects to bundle other entities.
-    - Templating of sensor nodes to efficiently create multiple similar ones
-    - Relevant attributes of sensor nodes, 
+    - Projects group all other entities, so different project with different deployments, sizes, background can all be administrated over one platform
+    - Templating of sensor nodes to efficiently create multiple similar ones, shall be reusable across different projects
+    - 
+    - Relevant attributes of sensor nodes like hardware type, location of deployment, 
+
 - Compiling of (hardware-specific) firmware
+    - right source code for firmware should be fetched from Gitlab 
     - enrich firmware with per-node configurations
-- transmissioning of time series data in a speficied format using binary protobuf schemas
-    - data should be stored both in a influxdb (time series database) and a triplestore to have a graph containing all relevant data
+    - products should be binaries (for flashing), compilation logs as well as generated code for debugging/development
+
+- Flashing of generated binaries onto the hardware
+    - Should be as automatically as possible, if contraints (hardware etc.) allow it directly over the developed webapplication
+    - alternatively flashed via a script 
+
+- transmissioning of time series data in a speficied schema
+    - time series data should be parsed back on a central point independent of data format and then persisted:
+        - data should be stored in an influxdb (time series database) because:
+            - requirement by stakeholders as this was already used in existing projects
+            - influxdb offers a strong UI whcih allows filtering and visualization of data in a straightforward way
+        - triplestore to have one linked graph containing all data of the project
+
 - Automatic provisioning of end devices on TTN
     - Keys get generated (on our side) and saved
     - As soon as keys get compiled into firmware and flashed onto hardware, data already reaches TTN
 
+
 general goals:
-- architecture of both system (big picture) and specific software components (small picutre) should follow modern guidelines to ensure:
+- all data stored in triplestore 
+
+- architecture of both system (big picture) and specific software components (small picutre) should follow modern software guidelines to ensure:
 - division of responsibilities (layers/microservices) so that they could be exchanged or used on their own
 - usage of well-established technologies to build a long-lasting platform 
 - built in a portable (right word for containerized?) way so that it can be deployed on various platforms with only a handful of configs
-- system should be designed as generic as possible so that it could be used for any similar IoT project (better wording)
+
+- system should be designed as generic as possible so that it could be used for any similar IoT project (better wording) even outside of academic research for example in the industry
+- modular software design simplifies later addition of new specific features for which can be turn on/off 
 
 ## Value Proposition for Stakeholder
 *What problems should be solved? Which aspects of a researcher's life becomes easier?*
