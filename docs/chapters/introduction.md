@@ -61,7 +61,6 @@
 
 
 general goals:
-- all data stored in triplestore 
 
 - architecture of both system (big picture) and specific software components (small picutre) should follow modern software guidelines to ensure:
 - division of responsibilities (layers/microservices) so that they could be exchanged or used on their own
@@ -79,7 +78,7 @@ general goals:
     -  single source of truth, no scattered data anymore
     - referenced external data can be easily accessed (manuals of sensor node, ttn end devices, positioning of sensor nodes) 
 -
-
+- groundwork for role based workflows
 
 
 
