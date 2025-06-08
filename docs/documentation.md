@@ -1,11 +1,33 @@
 # Abstract 
 
-# Introduction --> Linus
-## Context & Background --> Linus
-Such a typical IoT system consists of several core components that together enable the continuous collection, transmission, and utilization of data from distributed edge devices. At its foundation lies the ability to gather time-based data remotely. Sensor nodes are deployed in environments where manual data collection would be impractical or inefficient, and they measure physical phenomena such as temperature or humidity at regular intervals. The gathered data is transmitted via wireless technologies like WiFi, LoRaWAN, or cellular networks, each with different trade-offs regarding range, energy usage, and bandwidth. Once received by a central system, the data is stored—often in time-series databases—for later analysis, visualization, or integration into other systems.
+# Introduction
+This chapter introduces the context, objectives, and practical relevance of the thesis. It outlines the typical structure of IoT systems, highlights common challenges, and describes how these are addressed by the proposed infrastructure. In addition, it highlights the practical value of the system for its intended users by describing how it addresses common pain points and improves day-to-day workflows.
 
+## Context & Background
+The increasing affordability of sensor hardware and the maturation of low-power wireless communication solutions have significantly lowered the barrier to deploying distributed IoT systems for environmental monitoring and similar applications. These factors enable the large-scale collection of time-series data from remote locations in a cost-effective manner, creating new opportunities for both research and practical use.
 
+### IoT-System Design
 
+A typical IoT application consists of several key components that together enable remote and continuous data collection. These systems generally include:
+
+1. **Remote sensing** of time-based data, using distributed sensor nodes to measure environmental or technical parameters such as temperature, humidity, or pressure at regular intervals.
+
+2. **Wireless transmission**, commonly via technologies like LoRaWAN, WiFi, or cellular networks, which allow data to be sent efficiently from remote locations to a central system.
+
+3. **Persistent storage of data**, typically in time-series databases or cloud storage systems, enabling later access for visualization, analysis, or integration with other tools.
+
+Setting up a basic IoT system, such as the kind outlined above, is relatively straightforward with today’s technologies. However, turning such a setup into a scalable, maintainable, and well-structured project presents a very different set of challenges. Collecting data from a few sensor nodes and storing it in a database is easily achievable using modern microcontrollers, communication protocols, and off-the-shelf software tools. But as the number of devices grows, and as project requirements become more complex, the need for clear structure, automation, and integration becomes essential.
+
+To ensure long-term usability and robustness, several challenges may arise that require careful consideration. For example, data needs to be stored in a consistent and queryable format to support effective analysis. The structure and meaning of transmitted payloads should be clearly defined and adaptable to future changes. It may also become important to keep track of the status and configuration of each deployed sensor node, including firmware versions and activity levels. Furthermore, well-structured operational workflows are essential to minimize complexity and ensure that repeated tasks can be performed consistently and efficiently as the system scales.
+
+### Research Projects at BFH
+Two collaborative research projects at the Bern University of Applied Sciences, conducted jointly by the departments AHB and HAFL, illustrate many of the practical challenges associated with managing distributed sensor systems: *Internet of Soils (IoS)* and *Mobile Urban Green (MUG)*.
+- **IoS** focuses on measuring soil moisture in protection forests using an autonomous, solar-powered sensor network based on LoRaWAN technology. The goal is to support long-term environmental monitoring by capturing time-series data from remote locations. [37]
+- **MUG** builds on insights from IoS and focuses on assessing the cooling effects of trees placed in large movable containers within urban areas. The project combines environmental measurements such as temperature, solar radiation, and water usage with modeling approaches to evaluate and simulate their impact at both the individual tree and neighborhood scale. [38]
+
+Although the two projects differ in focus and context, they share a similar technical foundation regarding sensor hardware, wireless data transmission, and data management workflows. This similarity revealed several recurring issues that limit scalability and maintainability, especially as new deployments introduce variations in hardware, data models, or project-specific requirements.
+
+These two projects not only illustrate the typical structure and challenges of distributed sensing systems, but also form the direct foundation for this thesis. While the goal of the work is to develop a generic and reusable infrastructure, the technical and organizational requirements of IoS and MUG serve as the immediate design context. The platform is therefore developed with the intention of supporting these ongoing research activities at BFH AHB and HAFL, while at the same time being extensible enough to serve similar projects in the future.
 
 ## Goal of the Project
 The goal of this thesis is to design and implement a generic infrastructure that streamlines the processes involved in managing distributed sensor nodes. While the system is initially developed in the context of academic environmental monitoring projects, its intended scope is much broader. The underlying concepts and components are designed to be flexible and reusable across a wide range of applications that rely on sensor-based data collection, regardless of domain or deployment scale. In particular, the previously discussed issues such as fragmented metadata, manual provisioning steps, and the lack of a defined data format are targeted with concrete technical solutions.
@@ -47,7 +69,9 @@ The previously manual steps of firmware compilation and flashing will also be si
 
 The system also includes state management features that improve the clarity and usability of the platform. Each entity, such as sensor nodes or projects, can be assigned a status that reflects its current role within the deployment. For example, entities that are no longer in active use can be archived and hidden from the default view, while their data remains fully accessible in the background. In addition, the system indicates whether deployed sensor nodes are still actively transmitting data or have become inactive. This allows users to quickly assess the operational status of all nodes at a glance. For active deployments, the most recent transmitted values are displayed directly in the interface, providing immediate insight into current measurements without the need to navigate through separate data views.
 
-Lastly, the platform is designed as a generic and modular solution that can be tailored to fit the needs of individual projects. It lays the foundation for role-based workflows, where users only see actions and data relevant to their responsibilities. This flexibility not only improves usability but also opens the door for broader adoption beyond the original project scope.
+Finally, the platform adopts a generic and modular design that supports both project-specific customization and broader reuse across diverse IoT applications. It lays the foundation for role-based workflows, where users only see actions and data relevant to their responsibilities. This flexibility not only improves usability but also opens the door for broader adoption beyond the original project scope.
+
+Before diving into the concrete system architecture, the next chapter evaluates existing approaches and tools that were considered during the conceptual phase.
 
 # State of Research
 This chapter provides an overview of research carried out and available technologies relevant to the project. The focus lies on niche or emerging tools and methods that appeared promising but required feasibility evaluation before adoption. Most of the research was conducted during the conceptual phase, where assessing the practicality and integration potential of such technologies was critical for planning and system design.
@@ -356,6 +380,9 @@ ept,
 [34] Adafruit, “Adafruit WebSerial ESPTool,” GitHub, [Online]. Available: https://github.com/adafruit/Adafruit_WebSerial_ESPTool
 [35] Toit.io, “Flash your ESP32 from the Browser Using Web Serial,” Medium, [Online]. Available: https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
 [36] Espressif, “esptool-js,” GitHub, [Online]. Available: https://github.com/espressif/esptool-js
+[37] Berner Fachhochschule, "Internet of Soils – Vernetzte Bodenfeuchtesensorik in Schutzwäldern," [Online]. Available: https://www.bfh.ch/en/research/research-projects/2022-288-394-015/.
+[38] Berner Fachhochschule, "Mobile Urban Green – Kühleffekte von mobilen Stadtbäumen," [Online]. Available: https://www.bfh.ch/de/forschung/forschungsprojekte/2023-527-998-470/.
+
 
 # Declaration of authorship
 ## Who did what?
