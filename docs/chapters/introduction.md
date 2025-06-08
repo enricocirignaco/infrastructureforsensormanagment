@@ -74,11 +74,28 @@ general goals:
 *What problems should be solved? Which aspects of a researcher's life becomes easier?*
 
 - The goal of this project is to simply the workflow of provisioning and managing sensor nodes while making the whole process less error-prune
-- All relevant meta-data in one place, external resources can be linked
-    -  single source of truth, no scattered data anymore
-    - referenced external data can be easily accessed (manuals of sensor node, ttn end devices, positioning of sensor nodes) 
--
-- groundwork for role based workflows
+
+- System offers an intuitive UI which acts as a central administration platform that bundles all actions for managing the IoT projects (or sensor nodes/entities?) in one place.
+
+- All relevant meta-data in one data storage, external resources can be linked
+    - single source of truth, no scattered data anymore
+    - underlying RDF data model is flexible and allows easy extension/adaption for future datamodel changes
+    - referenced external data can be easily accessed (manuals of sensor node, ttn end devices, positioning of sensor nodes)
+    - time series data stored as well to allow agregated queries over the whole data structure
+
+- Process of compiling and flashing of firmware is streamlined 
+    - no more manual looking up and writing of TTN keys when flashing
+    - 
+
+- TTN console has not to be touched anymore, fully automatic. Can be directly accessed per sensor node in one click to get more infos
+
+
+- state management offers easy overview and handling of status of each entity. For example entities that are not used anymore can be archived and thefore hidden in the UI, the data is still accessiable though.
+- additional state also shows if deployed sensor node is still sending data or is inactive. This way, a quick overview over all deployed sensor nodes can be gathered
+- Deployed and working nodes also display their last transmitted values on the UI, allowing quick insight into current measurements
+
+- Whole system ist built as a generic software solution and can be tailored to specific needs of each project
+- groundwork for role based workflows, tailor user interface to the workflow of the user's role and hide irrelevant actions
 
 
 

@@ -35,7 +35,19 @@ Beyond the functional aspects described above, the system should also follow mod
 
 The system should be designed to be as generic as possible, enabling its use beyond the scope of academic research. It should serve as a flexible foundation for a broad range of IoT applications, including those in industrial or commercial settings. To support future extensibility, the software architecture should follow a modular approach, allowing new or project-specific features to be added without impacting the stability of the core system. Where appropriate, such features should be optional and easily enabled or disabled based on the requirements of a given deployment.
 
-## Value Proposition for Stakeholder --> Linus
+## Value Proposition
+
+The system is intended to significantly reduce the complexity and error-proneness of managing distributed sensor deployments. By centralizing key functionalities and offering a streamlined workflow, it simplifies the provisioning, configuration, and maintenance of sensor nodes across all phases of a project.
+
+A core advantage is the intuitive web-based user interface, which serves as a central platform for managing all entities involved in an IoT deployment. This interface unifies actions that were previously scattered across multiple tools and platforms, making the system more accessible and efficient in everyday use.
+
+All relevant metadata is stored in a single, structured storage. This not only eliminates the need to maintain data across disconnected files and platforms, but also enables seamless access to linked external resources such as device manuals, TTN registrations, or deployment locations. Thanks to the underlying RDF-based data model, the system remains flexible and extensible, supporting future changes in data structures or project requirements. Time-series data is integrated into this structure as well, allowing queries that combine sensor readings with metadata for richer analysis.
+
+The previously manual steps of firmware compilation and flashing will also be simplified. Configuration values such as TTN credentials will be automatically integrated during the build process, eliminating the need to manually look up and copy keys. This reduces the risk of mismatches or incorrect configurations. The TTN console no longer needs to be accessed directly, as all relevant information and actions are available within the system itself, linked to each sensor node.
+
+The system also includes state management features that improve the clarity and usability of the platform. Each entity, such as sensor nodes or projects, can be assigned a status that reflects its current role within the deployment. For example, entities that are no longer in active use can be archived and hidden from the default view, while their data remains fully accessible in the background. In addition, the system indicates whether deployed sensor nodes are still actively transmitting data or have become inactive. This allows users to quickly assess the operational status of all nodes at a glance. For active deployments, the most recent transmitted values are displayed directly in the interface, providing immediate insight into current measurements without the need to navigate through separate data views.
+
+Lastly, the platform is designed as a generic and modular solution that can be tailored to fit the needs of individual projects. It lays the foundation for role-based workflows, where users only see actions and data relevant to their responsibilities. This flexibility not only improves usability but also opens the door for broader adoption beyond the original project scope.
 
 # State of Research
 This chapter provides an overview of research carried out and available technologies relevant to the project. The focus lies on niche or emerging tools and methods that appeared promising but required feasibility evaluation before adoption. Most of the research was conducted during the conceptual phase, where assessing the practicality and integration potential of such technologies was critical for planning and system design.
