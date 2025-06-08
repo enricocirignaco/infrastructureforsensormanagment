@@ -245,7 +245,27 @@ In addition to validation, the demo served as a reference for understanding how 
 
 ## Linked Data --> Linus
 
-## Protobuf --> Linus
+## Binary Serialization for IoT Communication
+
+In any system that transmits structured data between components, there must be a clear, unambiguous way to represent and interpret that data. This is particularly relevant in IoT environments, where sensor nodes, gateways, and backend services often run on different platforms and are implemented in different programming languages. To ensure that a measurement recorded on a microcontroller can later be interpreted correctly in a cloud service or analysis tool, the transmitted data must follow a clearly defined format.
+
+Schema-based serialization formats address this problem by explicitly defining the structure and types of data. This makes it possible to validate data automatically, catch errors at compile time, and generate consistent, type-safe code across multiple programming languages. In comparison to textual formats such as JSON or XML, binary serialization formats such as Protocol Buffers additionally offer significant performance advantages [39]. They reduce message size and speed up parsing, which is particularly important in IoT environments with limited bandwidth and processing power.
+
+### Evaluating Binary Format 
+
+To select an appropriate format for this project, several binary serialization libraries were evaluated and compared with regard to their efficiency, tooling support, and suitability for both embedded systems and backend services.
+
+- **Protocol Buffers (Protobuf)** is a widely adopted format developed by Google. It provides a well-documented schema definition language, strong cross-platform tooling, and supports efficient encoding and schema evolution. Its simplicity and broad ecosystem make it especially attractive for general-purpose use [40].
+
+- **Nanopb** is a minimal implementation of Protobuf for embedded systems written in C. It is optimized for extremely constrained environments and is therefore well suited for microcontroller-based sensor nodes. It omits reflection and advanced runtime features to minimize memory usage [41].
+
+- **FlatBuffers** offers very high performance and supports random access without full deserialization. It is commonly used in latency-sensitive applications like gaming. However, it requires more complex code to build messages and is less developer-friendly for smaller use cases [42].
+
+- **Apache Avro** is schema-based and commonly used in big data platforms. Although powerful, it is less suited for embedded systems due to its design focus on big data infrastructure [43].
+
+- **MessagePack** is a lightweight format similar to JSON but in binary form. While compact and widely supported, it lacks explicit schema enforcement, which complicates validation, versioning, and long-term maintainability [44].
+
+### Protobuf
 
 \newpage
 
@@ -484,6 +504,13 @@ To summarize the data flow in the system, sensor nodes deployed in the field col
 [36] Espressif, “esptool-js,” GitHub, [Online]. Available: https://github.com/espressif/esptool-js
 [37] Berner Fachhochschule, "Internet of Soils – Vernetzte Bodenfeuchtesensorik in Schutzwäldern," [Online]. Available: https://www.bfh.ch/en/research/research-projects/2022-288-394-015/.
 [38] Berner Fachhochschule, "Mobile Urban Green – Kühleffekte von mobilen Stadtbäumen," [Online]. Available: https://www.bfh.ch/de/forschung/forschungsprojekte/2023-527-998-470/.
+[39] M. Raza, “JSON vs Protobuf vs Avro – Serialization Showdown,” Auth0 Blog, 2018. [Online]. Available: https://auth0.com/blog/beating-json-performance-with-protobuf/.
+[40] Google, “Protocol Buffers,” [Online]. Available: https://protobuf.dev/.
+[41] J. Palmu, “Nanopb – Protocol Buffers for Embedded Systems,” [Online]. Available: https://jpa.kapsi.fi/nanopb/.
+[42] Google, “FlatBuffers: Memory Efficient Serialization Library,” [Online]. Available: https://google.github.io/flatbuffers/.
+[43] Apache Software Foundation, “Apache Avro,” [Online]. Available: https://avro.apache.org/.
+[44] MessagePack Project, “MessagePack: It’s like JSON. But fast and small.,” [Online]. Available: https://msgpack.org/.
+
 
 ::: {#refs}
 :::
