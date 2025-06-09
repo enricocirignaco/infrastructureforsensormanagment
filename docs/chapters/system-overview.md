@@ -27,13 +27,18 @@ reverse proxy
 - caddy is a light-weight reverse proxy, explained in a later chapter
 
 web application
-- central place where users interact with the system, most other services are hidden behind this
+- central place where users interact with the system
+- most other services are hidden behind this, directly called by the backend when needed and to minimize the number of services that access the database
 - Is secured, needs authentication and has also role-based authorization
 - Backend has a good designed REST interface that frontend consumes and uses
 - 
 
 triplestore
-- aa
+- The triplestore is an instance of the jena fuseki and acts as the central database in the system
+- users, meta data and timeseries are saved in this database
+- as the underlying datamodel is RDF, all entities are identified with an unique URI
+- access to the database goes over a SPARL endpoint that implements the SPARQL standard
+- the data in the triplestore is structured according to well known ontologies 
 
 protobuf service
 - handles all the logic that has to do with protobuf. this way backend can delegate this functionality and the service bundles all logic around protobuf
