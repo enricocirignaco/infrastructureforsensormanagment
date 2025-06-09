@@ -636,11 +636,103 @@ options:
 - ttn mock
 ## Webapplication 
 ### Frontend --> Enrico
+## Web Application
+
+The web application serves as a centralized interface for managing the entire lifecycle of the sensor network, ranging from node provisioning and firmware flashing to deployment monitoring and data visualization. To ensure clear separation of concerns and enable independent development, the application is divided into two main components: frontend and backend. The frontend is responsible for the user interface and user interaction, while the backend manages business logic, data handling, and communication with external services such as the Compiler Engine and InfluxDB. These components interact via a REST API, allowing for modularity, maintainability, and flexible deployment.
+### Frontend
+The frontend of the web application is implemented as a single-page application (SPA) using the Vue.js framework. It adopts the Vuetify component library to provide a consistent design system and accelerate UI development. Application state is managed using Pinia, which offers a reactive and modular store architecture, allowing components to efficiently share and synchronize data.
+
+Communication with the backend occurs via a REST API, enabling real-time interaction and data updates without full page reloads. The project is built and managed using Vite, a modern frontend toolchain that ensures fast development workflows and optimized production builds.
+The following sections describe the key features of the frontend interface, its structure, and the deployment approach.
+
+**Architecture and Design**
+
+The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
+
+The application provides different functionalities depending on the user’s role:
+- **Researchers** have read-only access to data and can only change their password.
+- **Technicians** can modify system elements (e.g., nodes, sensors) and update their password.
+- **Administrators** have full access, including user management capabilities such as creating new accounts.
+
+The core of the application is organized around four main entities:
+- **Commercial Sensors**: Commercial Sensors serve as standardized, reusable definitions for real-world sensor types. They are used exclusively for documentation purposes and do not directly influence the behavior of sensor templates or sensor nodes. Instead, they function as centralized metadata containers that help organize and describe sensor characteristics in a consistent and reusable manner across the application. For example, a Commercial Sensor entry could represent a typical temperature sensor, including its expected measurement range (e.g., -40°C to +85°C), unit (°C), and a link to its datasheet. Similarly, a more complex Commercial Sensor could represent an entire meteorological station, listing each measured variable (temperature, humidity, wind speed), the expected ranges for each channel, calibration notes, and even field-specific deployment considerations. By storing this information in a dedicated Commercial Sensor entity, technicians and researchers can avoid redundancy, maintain traceability, and ensure that sensor definitions are consistent throughout the system. This also enables teams to quickly understand which type of hardware a given sensor node is designed to work with, without having to consult scattered documentation or external resources.
+
+- **Sensor Templates**: Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define Configurables—parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The Protobuf schema generated from this definition can be previewed in the template overview, and the corresponding NanoPB-compatible code can be downloaded by developers to embedded in the source code.
+3. **Sensor Nodes**: Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as GPS coordinates, altitude and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. TThe overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node—for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and do not need to be modified by the user. These system Configurables are required for network-level communication and typically include LoRa and TTN credentials. Their values are pre-filled and managed by the backend to ensure consistency and prevent misconfiguration. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The overview also includes a Firmware Tools section (described in detail in a later chapter), which provides direct access to firmware binaries and flashing utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
+
+4. **Projects**: Projects act as containers for organizing sensor nodes into meaningful groups. Each project typically corresponds to a field study, deployment site, or research objective. Projects simplify management by grouping related nodes under a shared context and allow researchers to monitor aggregated data. Projects can also store metadata in form of links such as wiki pages, documentation.
+
+Each entity follows a standardized view structure:
+- **List View**: Displays a searchable list of items (e.g., all sensor nodes). Allows navigation to detail or create views.
+- **Detail View**: Shows all properties of a selected item, with contextual actions (edit, delete).
+- **Create View**: Presents a form for adding a new item.
+- **Edit View**: Similar to create, but prefilled with existing data for updating.
+
+Additionally, a dashboard view provides a high-level overview of key system metrics, such as the total number of registered sensors, templates, sensor nodes, and projects. This modular architecture allows for scalable feature development, consistent UX patterns, and clean role-based access control.
+
+![Web Appliation Dashboard](./images/frontend-overview.png)
+
+**Firmawre Tools**
+The Firmware Tool section allows users to initiate a compilation job for the selected sensor node. During the build process, logs are displayed in real time, and upon completion, the outcome is shown. If the compilation is successful, artifacts become available for download. Users can choose to download only the binary files or include the compilation logs and enriched source code.
+
+Additionally, for ESP32-based nodes, successful compilation enables firmware flashing directly via the browser using WebSerial. This feature requires a Chromium-based browser. Once a compatible board is connected and a serial port is selected, the flashing process can be launched.
+
+A Serial Monitor is also available independently of the build process. It allows users to connect to an already-programmed board and view its serial output in real time.
+![Firmware Tools Overview](./images/firmaware-tools.jpg)
+
+
+**Core Features**
+**Development Workflow**
+#### Concepts & Components
+The most important componets of the application are:
+- components: The components are reusable parts of the application. They can be used in multiple views and are the building blocks of the application. The components are stored in the *components* folder. Parts of the application that need to be reused mutiple times in different views should be implemented as components.
+- plugins: The plugins are used to add additional functionality to the application. They can be used to add global components, directives or filters. The plugins are stored in the *plugins* folder. The only plugin used in this project is the Vuetify component library.
+- router: The router is used to define the routes of the application. The routes are used to navigate between different views of the application. The router is stored in the *router* folder. Redirects, default routes and nested routes can be defined in this file. The router is used to load the views of the application.
+- services: The services are used to interact with the backend. They are used to send requests to the backend and handle the responses. The services are stored in the *services* folder. The idea is to have a separate service files for each resource endpoint of the rest api.
+- stores: The stores are used to manage the state of the application. They are used to store data that needs to be shared between different components. The stores are stored in the *stores* folder. Static content like application title and slogan are also stored in stores.
+- views: The views are the main pages of the application. They are used to display the content of the application. The views are stored in the *views* folder. The views are loaded by the router and are displayed in the routerview. The views can be constructed using multiple components. Each view rappresent a web page.
+- App.vue: This is the base view of the application. It acts like a container for the differnet views that can be exchanged. Part of the application that must be present in all views can be implemented in the App.vue file. 
+- main.js: Is the application entrypoint. Here the application is initialized and the plugins are loaded. The router is also initialized here.
+##### Components library
+Altho the developers has already some experience with vue, before the development of the application could start an overview of the newest features and best practices must be established. In order to speed up the development a component library was needed so that the developers don't have to reinvent the wheel and design every single component by theirselfs and can focus on more complex problem. There are multiple approches when it come to use a component library with vue. Some of the most popular component libraries that integrates well with vue are:
+- Vuetify: vuetify is a material design component library that is very popular and has a large community. It offers a lot of components and is very easy to use. The downside is that it is quite heavy and can slow down the application.
+- Naive UI: naive UI is a newer component library that is very lightweight and offers a lot of components. The downside is that it is not as popular as vuetify and has a smaller community.
+- Quasar: quasar is a very powerful component library that offers a lot of components and features. The downside is that it is quite heavy and can slow down the application.
+- Tailwind: tailwind is a utility first CSS framework that allows to create custom components. The downside is that it requires more work to create the components and is not as easy to use as the other libraries.
+
+Vuetify was used because of the excellent integration within the vue ecosystem and the ease of use. Some of the more usefull features of vuetify are:
+- Theming: Multiple themes with different color palettes can be definited and used interchangeably. This is a very usefull feature that allows to create a dark and light theme for the application hasslefree.
+- Ready to use component: The ready to use components of the vuetify library are well documented and easy to use.
+##### Main Layout Nesting
+Part of the application that must be visibile on all views can be implemnted in the App.vue file. For example header, footer, nav bar and other global components. In our use-case those element must be visibile in almost all views but not on all of them. The login view doest have a footer or a nav bar. For this reason those global elelment can't be implemented in the App.vue. Instead anotehr solution had to be found. The idea is to create a **MainLayout.vue** view. This view act like a wrapper for the other views. much like the App.vue file. The MainLayout.vue file contains the header, footer and nav bar. …the root path '/', and all relevant subroutes are defined as child routes of this path. These child routes are then rendered inside the <router-view /> of MainLayout.vue. This approach ensures that the header, footer, and navigation bar remain consistent across all main views, while only the inner content changes dynamically based on the route. For example, when a user navigates to /projects, the ProjectsView.vue component is loaded within the MainLayout.vue layout. Similarly, navigating to /settings or /commercial-sensor/:id loads their respective views without affecting the layout structure. This setup is especially useful when you want to exclude layout elements (e.g., on the login or error pages). In those cases, separate routes outside the '/' base path can be defined without using MainLayout.vue as their wrapper. This modular routing approach allows flexibility while maintaining a clean and consistent user interface for authenticated or main application views.
+// TODO: form component for creating new projects and also for editing existing ones. Authentication with JWT toker stored in auth store.
+## references:
+- https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/
+- https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/
+
+ Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
+
+
 ### Backend --> Linus
 ### Reverse Proxy --> Enrico
 ## Protobuf Service --> Linus
 ## Deployment & Integration --> Enrico
 At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project.
+
+### Frontend webserver and reverse proxy
+This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
+After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
+#### Deployment
+The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
+```javascript
+  build: {
+    outDir: '../www',
+  },
+```
+For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
+The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
+
+
 - DevOps
 
 ## Testing --> Linus

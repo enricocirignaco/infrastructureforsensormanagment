@@ -121,64 +121,6 @@ Prioritäten:
 ---
 
 
-
-
-#### References
-[9]  https://heltec.org/project/htcc-ab01-v2/
-Arduino, “arduino-create-agent,” GitHub repository, [Online]. Available: https://github.com/arduino/arduino-create-agent
-Heltec Automation, “CubeCell-Arduino,” GitHub repository, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino
-Kaelhem, “AVRBRO – Web-based AVR Flasher,” GitHub repository, [Online]. Available: https://github.com/kaelhem/avrbro
-Heltec Automation, “Downloads,” [Online]. Available: https://resource.heltec.cn/download/
-Arduino, “Issue #150: Web Serial Conflicts,” GitHub, [Online]. Available: https://github.com/arduino/arduino-create-agent/issues/150
-
-[27] Arduino, “Arduino Cloud Agent,” [Online]. Available: https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
-
-### Frontend webserver and reverse proxy
-It's generally a good idea to separate the frontentend webserver handling the delivery of static content (html, css, JS) and the backend webserver, handling the REST API. This common practice helps scalability, security, and maintainability of the application. Thus is was decided to separate this two components. This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
-After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
-
-
- Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
-#### Deployment
-The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
-```javascript
-  build: {
-    outDir: '../www',
-  },
-```
-For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
-The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
-### Frontend Application Concept
-#### Concepts & Components
-The most important componets of the application are:
-- components: The components are reusable parts of the application. They can be used in multiple views and are the building blocks of the application. The components are stored in the *components* folder. Parts of the application that need to be reused mutiple times in different views should be implemented as components.
-- plugins: The plugins are used to add additional functionality to the application. They can be used to add global components, directives or filters. The plugins are stored in the *plugins* folder. The only plugin used in this project is the Vuetify component library.
-- router: The router is used to define the routes of the application. The routes are used to navigate between different views of the application. The router is stored in the *router* folder. Redirects, default routes and nested routes can be defined in this file. The router is used to load the views of the application.
-- services: The services are used to interact with the backend. They are used to send requests to the backend and handle the responses. The services are stored in the *services* folder. The idea is to have a separate service files for each resource endpoint of the rest api.
-- stores: The stores are used to manage the state of the application. They are used to store data that needs to be shared between different components. The stores are stored in the *stores* folder. Static content like application title and slogan are also stored in stores.
-- views: The views are the main pages of the application. They are used to display the content of the application. The views are stored in the *views* folder. The views are loaded by the router and are displayed in the routerview. The views can be constructed using multiple components. Each view rappresent a web page.
-- App.vue: This is the base view of the application. It acts like a container for the differnet views that can be exchanged. Part of the application that must be present in all views can be implemented in the App.vue file. 
-- main.js: Is the application entrypoint. Here the application is initialized and the plugins are loaded. The router is also initialized here.
-##### Components library
-Altho the developers has already some experience with vue, before the development of the application could start an overview of the newest features and best practices must be established. In order to speed up the development a component library was needed so that the developers don't have to reinvent the wheel and design every single component by theirselfs and can focus on more complex problem. There are multiple approches when it come to use a component library with vue. Some of the most popular component libraries that integrates well with vue are:
-- Vuetify: vuetify is a material design component library that is very popular and has a large community. It offers a lot of components and is very easy to use. The downside is that it is quite heavy and can slow down the application.
-- Naive UI: naive UI is a newer component library that is very lightweight and offers a lot of components. The downside is that it is not as popular as vuetify and has a smaller community.
-- Quasar: quasar is a very powerful component library that offers a lot of components and features. The downside is that it is quite heavy and can slow down the application.
-- Tailwind: tailwind is a utility first CSS framework that allows to create custom components. The downside is that it requires more work to create the components and is not as easy to use as the other libraries.
-
-Vuetify was used because of the excellent integration within the vue ecosystem and the ease of use. Some of the more usefull features of vuetify are:
-- Theming: Multiple themes with different color palettes can be definited and used interchangeably. This is a very usefull feature that allows to create a dark and light theme for the application hasslefree.
-- Ready to use component: The ready to use components of the vuetify library are well documented and easy to use.
-##### Main Layout Nesting
-Part of the application that must be visibile on all views can be implemnted in the App.vue file. For example header, footer, nav bar and other global components. In our use-case those element must be visibile in almost all views but not on all of them. The login view doest have a footer or a nav bar. For this reason those global elelment can't be implemented in the App.vue. Instead anotehr solution had to be found. The idea is to create a **MainLayout.vue** view. This view act like a wrapper for the other views. much like the App.vue file. The MainLayout.vue file contains the header, footer and nav bar. …the root path '/', and all relevant subroutes are defined as child routes of this path. These child routes are then rendered inside the <router-view /> of MainLayout.vue. This approach ensures that the header, footer, and navigation bar remain consistent across all main views, while only the inner content changes dynamically based on the route. For example, when a user navigates to /projects, the ProjectsView.vue component is loaded within the MainLayout.vue layout. Similarly, navigating to /settings or /commercial-sensor/:id loads their respective views without affecting the layout structure. This setup is especially useful when you want to exclude layout elements (e.g., on the login or error pages). In those cases, separate routes outside the '/' base path can be defined without using MainLayout.vue as their wrapper. This modular routing approach allows flexibility while maintaining a clean and consistent user interface for authenticated or main application views.
-// TODO: form component for creating new projects and also for editing existing ones. Authentication with JWT toker stored in auth store.
-## references:
-- https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/
-- https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/
-
-
-# Evaluation
-
 ## TTN-Mock
 
 For easier and more rapid development, we decided to create an additional microservice that mocks the timeseries data that would usually come from The Things Network over MQTT. There are multiple reasons why the use of "real data" that was sent from a microcontroller over LoraWAN is not really pratical during development:
@@ -336,3 +278,15 @@ Afterwards restart the container:
 ```bash
 docker compose restart mqtt-broker
 ```
+
+
+
+#### References
+[9]  https://heltec.org/project/htcc-ab01-v2/
+Arduino, “arduino-create-agent,” GitHub repository, [Online]. Available: https://github.com/arduino/arduino-create-agent
+Heltec Automation, “CubeCell-Arduino,” GitHub repository, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino
+Kaelhem, “AVRBRO – Web-based AVR Flasher,” GitHub repository, [Online]. Available: https://github.com/kaelhem/avrbro
+Heltec Automation, “Downloads,” [Online]. Available: https://resource.heltec.cn/download/
+Arduino, “Issue #150: Web Serial Conflicts,” GitHub, [Online]. Available: https://github.com/arduino/arduino-create-agent/issues/150
+
+[27] Arduino, “Arduino Cloud Agent,” [Online]. Available: https://docs.arduino.cc/arduino-cloud/hardware/cloud-agent/
