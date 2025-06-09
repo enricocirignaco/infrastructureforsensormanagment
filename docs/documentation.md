@@ -140,9 +140,9 @@ CubeCellflash -serial <serial_port> <path_to_cyacd_file>
 These findings confirm that CubeCellFlash is the primary flashing utility used in the Arduino toolchain and reveal its exact usage syntax.
 
 With these insights, the team was faced with three options:
-	•	Investigate the bootloader further to determine if it conforms to Cypress standards and whether third-party tools could be used for flashing.
-	•	Reverse engineer the CubeCell utilities to understand their internal workings and re-implement them as open-source tools.
-	•	Use the provided proprietary binaries and integrate them into a custom flashing solution.
+- Investigate the bootloader further to determine if it conforms to Cypress standards and whether third-party tools could be used for flashing.
+- Reverse engineer the CubeCell utilities to understand their internal workings and re-implement them as open-source tools.
+- Use the provided proprietary binaries and integrate them into a custom flashing solution.
 
 The first option was discarded due to the time required for in-depth bootloader analysis. The second option was also initially rejected, but later reconsidered after an accidental misuse of the **CubeCellelftool** triggered a Python traceback, suggesting that the CubeCell utilities are likely packaged Python scripts. A partial decompilation confirmed this, and some source code was recovered. However, fully reverse engineering and integrating the tools into the project was deemed too time-consuming and ultimately abandoned.
 
@@ -311,12 +311,220 @@ Both of these interfaces are also accessible via the browser, ensuring that all 
 To summarize the data flow in the system, sensor nodes deployed in the field collect data and transmit it in a standardized format to the IoT gateway. The gateway then forwards this data to the main system over the internet. Within the main system, the data is processed and stored in both a time-series database (InfluxDB) and an RDF triplestore. Users can then access and analyze the data either through the browser-based web application or directly via SPARQL queries (for semantic data) and InfluxDB queries (for time-series data).
 
 ![High-level System Overview](./images/general_system_architecture.png)
-- what building blocks are needed?
-- conceptional
 ## System Architecture (technical) --> Linus
 - diagram of system
 - short explanation of each service
-## Compiler Engine --> Enrico
+## Compiler Engine
+The Compiler Engine is a dedicated service within the system responsible for generating firmware customized for individual sensor nodes. It retrieves the source code from a Git repository, enriches it with user-provided configuration data, and compiles the final firmware. The resulting binary is returned to the user, optionally along with the enriched source code and compilation logs.
+
+This service is implemented as a standalone, Dockerized application accessible via a REST API. While its primary use is compiling Arduino-based source code, it was designed to support other toolchains as well. The concept involves containerizing each required toolchain: Docker images for different platforms (e.g., STM32, ESP32, Microchip) can be integrated and passed to the Compiler Engine as needed. This design makes the service extensible for a wide range of embedded development projects.
+
+A notable feature of the Compiler Engine is that it temporarily stores compiled binaries, allowing users to download them later without relying on webhooks or other asynchronous communication methods. To manage resources efficiently, a garbage collection mechanism automatically purges outdated binaries after a defined retention period.
+
+The Compiler Engine is composed of three Docker containers that work together to provide a modular and scalable compilation service.
+- **Main Service**: This is the core component of the system and is always running. It exposes a REST API that allows users or external systems to interact with the compiler engine. The main service is responsible for downloading the source code from a GitLab repository using a provided URL and access token, enriching the source code with variables included in the API request, and initiating the compilation process. To compile the source code, the main service dynamically launches a dedicated toolchain container. It also manages temporary storage for the resulting binaries, enriched source code, and compilation logs.
+- **Volume Cleaner**: This service runs continuously alongside the main service. Its task is to periodically delete old or unused files, such as previously downloaded repositories or generated binaries, to free up disk space and keep the system clean.
+- **Toolchain Container**: This container is created and launched by the main service for each individual build job. It encapsulates the toolchain required to compile the given source code. The specific Docker image used for the toolchain is defined per job, making the system easily adaptable to various platforms such as ESP32, STM32, or Microchip MCUs. Once the compilation finishes, the container is stopped and removed. This design allows the system to support multiple toolchains without changes to the main logic.
+
+This architecture ensures a clean separation of concerns and allows the system to scale or evolve without tightly coupling the compiler logic to the REST interface or storage system.
+
+![Service Architecture](./images/compile_engine_architecture.svg)
+
+### Arduino Toolchain
+The primary goal of the Compiler Engine is to support compilation of Arduino sketches (source code). To achieve this, a suitable toolchain had to be selected and containerized. The following requirements were identified to guide the evaluation:
+
+- **Headless**: Must run without a graphical interface and support full automation.  
+- **Docker Compatibility**: Must be able to operate reliably inside a Docker container.  
+- **Library Support**: Should allow installation of libraries via the Arduino Library Manager.  
+- **Board Support**: Should support a wide range of Arduino-compatible boards.  
+- **Open Source**: Preferably open-source and free to use.
+
+Several existing toolchains were evaluated:
+
+**Arduino IDE**:
+- **Pros**:  
+	- Official support  
+	- Full compatibility with Arduino boards and libraries  
+- **Cons**:  
+	- GUI-based, not intended for automation  
+	- Incompatible with Docker environments [39]  
+
+**PlatformIO**:
+- **Pros**:  
+	- Broad board and framework support  
+	- Advanced features and cross-platform  
+- **Cons**:  
+	- Designed primarily for interactive development  
+	- Docker and headless support are limited or complex [40]  
+
+**Arduino CLI**:
+- **Pros**:  
+	- Official command-line tool  
+	- Built for headless, automated environments  
+	- Supports board and library management  
+	- Easy to integrate with Docker [41]  
+- **Cons**:  
+	- Less customizable compared to PlatformIO  
+
+**Makefile-Based Toolchains (e.g., Arduino-Makefile)**:
+- **Pros**:  
+	- Lightweight and fully customizable  
+	- Docker-friendly [42]  
+- **Cons**:  
+	- Manual board/library setup  
+	- No official support  
+	- Higher maintenance burden  
+
+Based on these findings, **Arduino CLI** was selected as the most suitable tool for this project. It strikes a good balance between automation support, Docker compatibility, and official maintenance. Its lack of deep customization is not considered a limitation for the project's scope.
+
+Once Arduino CLI was chosen, efforts shifted to containerization. A brief survey of Docker Hub and GitHub revealed multiple Arduino CLI images, but none were actively maintained. The most promising candidate, `solarbotics/arduino-cli` [43], had not been updated in over two years, an unacceptable risk in terms of security and compatibility. Consequently, a custom Docker image was created from scratch.
+
+This custom image ensures control over the build environment and long-term maintainability. To ensure flexibility, the Compiler Engine expects all toolchain images, including the Arduino one, to follow a standardized Docker invocation pattern. This makes it easy to swap in new toolchain containers (e.g., for STM32, ESP32, or Microchip MCUs) without changes to the core service logic.
+
+### Arduino Toolchain Containerization
+The base image **debian:stable-slim** was chosen due to the development team’s familiarity with Debian and the fact that the stable-slim tag provides a good balance between image size and system stability.
+
+To install arduino-cli, the steps outlined in the official Arduino documentation were followed. However, since the curl utility, required by the installation script, is not included in the slim version of Debian, it had to be installed explicitly. Additionally, Python was added to the image, as it is required by certain platforms like ESP32.
+
+Once installation was complete, both the APT repositories and curl were removed to reduce image size. Standard mount points were created for volumes, and the container’s default entrypoint was set to return the arduino-cli version. This entrypoint can be overridden to execute any desired arduino-cli command.
+
+To accelerate subsequent compilations, a dedicated cache volume was provisioned. This volume is used by arduino-cli to store downloaded board cores and libraries. Once a board core is installed, it remains available for a defined duration, allowing repeated compilation jobs to reuse existing resources efficiently without redundant downloads.
+
+A minimal configuration for the toolchain was also included, based on a review of the official configuration keys. The configuration details can be found directly in the Dockerfile.
+
+The resulting Docker image can be used with the following command pattern:
+```bash
+docker run --rm \
+  -v <path_to_source_code>:/source \
+  -v <path_to_output_folder>:/output \
+  -v <path_to_logs>:/logs \
+  -v <path_to_cache>:/cache \
+  image:tag \
+  compile_command
+```
+Any custom toolchain image must adhere to this volume structure and command format. This ensures the compiler engine remains compatible with multiple toolchains without requiring modification.
+
+A Dockerized arduino-cli environment was successfully built. At this stage, the image is capable of returning the arduino-cli version, confirming that the environment is correctly set up. The next step was to construct the full Docker command used to compile Arduino sketches within the compiler engine. This command relies heavily on environment variables to ensure maximum flexibility and integration with the main service, making it suitable for a wide range of boards and projects.
+
+**Example command used by the compiler engine:**
+```bash
+mkdir -p /cache/boards /cache/arduino && \
+arduino-cli core update-index --additional-urls $BOARDS_URL && \
+arduino-cli core install --additional-urls $BOARDS_URL $BOARD_CORE && \
+arduino-cli lib install $LIBRARY_LIST && \
+arduino-cli compile \
+  	--fqbn $BOARD_CORE:$BOARD \
+	--output-dir $OUTPUT_FOLDER \
+	--log $LOG_FOLDER \
+	--verbose \
+$SOURCE_FOLDER
+```
+**Variable Descriptions**:
+- **BOARDS_URL**: A comma-separated list of URLs for additional board package indexes (used for third-party board support like Heltec).
+- **FQBN_CORE**: The name of the board core to install (e.g., arduino:avr, esp32:esp32).
+- **FQBN**: The Fully Qualified Board Name used for compilation (e.g., esp32:esp32:nodemcu-32s).
+- **LIBRARY_LIST**: A space-separated list of libraries required by the sketch, installable via the Arduino Library Manager.
+- **SOURCE_FOLDER**: Path to the folder containing the Arduino sketch (must include a .ino file).
+- **OUTPUT_FOLDER**: Path to the directory where the compiled binary will be saved.
+- **LOG_FOLDER**: Path to the directory where compilation logs will be written.
+
+To allow users to define source code dependencies for the compilation process, a build-requirements.yaml file must be placed in the root of the source code directory. This mechanism enables users to explicitly specify required libraries and board support packages, making the build process more robust and deterministic.
+
+This file is then parsed by the compiler engine, and the relevant information is injected into the Arduino CLI command to ensure the correct environment is set up during the build.
+
+Below is an example of what a typical build-requirements.yaml file might contain:
+```yaml
+board_manager:
+  additional_urls:
+    - https://resource.heltec.cn/download/package_CubeCell_index.json
+  libraries:
+  	- ArduinoJson@6.17.3
+```
+
+### Main Compiler Engine Service
+The core of the compilation infrastructure is a standalone Docker container running a Python-based service. This container exposes a REST API that allows users and other backend systems to trigger firmware build jobs, retrieve the resulting binaries, and optionally access enriched source code or compilation logs.
+
+The service is designed for modularity and automation: it pulls source code from a Git repository, integrates configuration data provided via the API request, and invokes a toolchain-specific Docker image to build the firmware. Build results are stored in docker volumes and made available for a limited time.
+
+The API was implemented using FastAPI, a framework previously assessed in the [Technology Stack](#technology-stack) chapter for its suitability and ease of integration. A lightweight image was built using python:3.10-slim, with only the necessary dependencies installed to minimize image size and startup time.
+
+The result is a service that is both easy to interact with and adaptable to future toolchain expansions, making it suitable for integration into larger automation pipelines.
+
+**Docker Socket Binding vs. Docker-in-Docker (DinD)**
+
+To enable the Python-based compiler service to spawn Docker containers for compilation, two approaches were evaluated: **Docker-in-Docker** (DinD) and **Docker socket binding**.
+
+Docker-in-Docker involves running a separate Docker daemon inside the container. Although this provides strong isolation from the host system, it introduces several disadvantages. It requires the container to run in privileged mode, consumes significantly more resources, and is known to be unstable in production environments.
+
+In contrast, Docker socket binding involves mounting the host’s Docker socket `/var/run/docker.sock` into the container, allowing the application inside to control the host’s Docker engine directly. This is the same mechanism used by the Docker CLI and official SDKs. With access to the socket, a containerized application can start and stop other containers, build images, or retrieve logs, effectively granting full control over the host Docker daemon.
+
+Here is a minimal example using the official Python Docker SDK[44]:
+```python
+import docker
+
+client = docker.from_env()
+client.containers.run("alpine", ["echo", "hello world"])
+```
+
+While socket binding is simpler and more resource-efficient than DinD, it introduces significant security concerns: any code running inside the container has unrestricted access to the host Docker engine, effectively equating to root access. Therefore, it must only be used in trusted and isolated environments.[45]
+
+Given these trade-offs, Docker socket binding was selected for this project due to its lower complexity and better performance. However, a dedicated security assessment should be performed in a future development phase to evaluate potential infrastructure risks, this lies outside the scope of the current work.
+
+**Source code download from Gitlab**
+
+The Compiler Engine retrieves the source code directly from GitLab using the GitLab REST API. Instead of cloning the entire repository, which includes version history and unnecessary overhead, the service uses GitLab’s archive endpoint to download a ZIP archive of a specific subdirectory. This significantly reduces the download time and bandwidth usage.
+
+A key feature of the archive endpoint is that it supports specifying a particular version of the code via the **sha** parameter. This can be a commit hash, branch name, or tag. However, it’s important to note that GitLab does not strictly validate this parameter: if an invalid or missing value is provided, the API defaults to the repository’s default branch. This behavior can lead to unintended results and should be carefully considered when issuing a compile request to ensure the correct code version is used.
+
+To access GitLab resources such as source code archives and container images, the service uses a **group-level access token**. This token grants permission to all repositories within the group, meaning all projects that are to be compiled using the default toolchain must reside in the same GitLab group. In the case of this project: InternetOfSoils. This token is stored securely in a **env file**.
+
+For cases where the source code resides outside this group, a custom compilation endpoint is provided. This endpoint allows the user to explicitly supply a repository URL and a personal or project access token, enabling the compilation of arbitrary GitLab-hosted codebases.
+
+**Integration of additional metadata**
+
+An essential feature of the Compiler Engine is its ability to dynamically inject configuration metadata into the source code prior to compilation. This metadata typically includes identifiers such as TTN (The Things Network) credentials and a firmware UUID, but the mechanism is designed to remain fully generic and extensible.
+
+The REST API accepts an optional **config** parameter within the request body. This parameter is defined as an array of key–value pairs. This approach enables maximum flexibility, allowing different builds to be created from the same base code by specifying varying configurations.
+
+During the compilation workflow, the provided configuration is parsed and used to generate a C header file. This file is automatically placed into the source code directory. To ensure the variables are correctly included during compilation, the following line is prepended to the main source file:
+```c
+#include "config.h"
+```
+To avoid naming conflicts with existing include guards, the file uses a specific header guard:
+```c
+#ifndef COMPILER_ENGINE_CONFIG_H
+#define COMPILER_ENGINE_CONFIG_H
+...
+#endif
+```
+This generated configuration file is not committed back to the Git repository. However, if needed, users can download the enriched version of the source code, including the generated config.h, via a dedicated REST endpoint. This enables reproducibility and debugging without polluting the original codebase. It also facilitates use cases where the same firmware template must be built for multiple deployments, each with unique metadata values.
+
+**API Design and Specification**
+
+An OpenAPI specification[46] was created based on the defined requirements of the compiler engine. This specification served as the blueprint for the system’s REST interface. Using FastAPI’s native support for OpenAPI, the core structure of the application was automatically generated from this specification. The business logic and tooling for the compilation process were implemented manually on top of this structure.
+
+To ensure robust and predictable behavior across all endpoints, the project used Pydantic[47] to define strict request and response schemas. Pydantic leverages Python type hints to enforce validation rules and guarantees well-structured data both at input and output. These models were automatically integrated into the OpenAPI documentation, ensuring synchronization between the live implementation and the generated documentation. This greatly improved reliability, clarity, and maintainability during development.
+
+Several iterations were required to define a clean, capable, and user-friendly API that met the project’s requirements. The final specification includes endpoints for initiating builds, retrieving status updates, and downloading artifacts:
+- **POST /build**: Initiate a standard build job
+- **POST /generic-build**: Initiate a custom build job with full control over source and toolchain image
+- **GET /job/{job_id}/status**: Retrieve the current status of a specific build job
+- **GET /job/{job_id}/artifacts**: Download the generated artifacts from a completed job
+
+A typical user workflow involves:
+1.	Sending a **POST /build** request with the desired configuration.
+2.	Polling **GET /job/{job_id}/status** to monitor progress.
+3.	Once the compilation is completed, retrieving results via **GET /job/{job_id}/artifacts**.
+
+### Volume cleaner service
+
+The Compiler Service is designed to retain generated data for a limited period. Once this retention period expires, the service no longer guarantees availability of the artifacts. To ensure proper storage hygiene and avoid unnecessary accumulation of outdated files, a dedicated Volume Cleaner Service was developed. This service automatically delete generated data that has exceeded its intended retention period.
+
+The Volume Cleaner is implemented as a Python script running in a Docker container. It is launched automatically when the main service starts and operates continuously in the background. The script regularly scans the mounted data volumes, such as those used for build outputs, and checks the modification timestamps of the files. If a file exceeds the configured retention period, it is deleted from the volume.
+
+All cleanup operations are logged in a dedicated file stored within the logs volume. This file, **cleaner.log**, is used to track which files have been deleted and when, providing transparency and traceability. To avoid self-deletion, the log file itself is explicitly ignored by the cleaner.
+
+The retention time and cleanup interval can be customized through environment variables, allowing flexible control based on deployment needs or available disk space. This service ensures that the system can remain efficient and reliable over long periods of use without manual intervention.
 ## Timeseries Parser --> Linus
 - fuseki
 - influxdb
@@ -327,6 +535,7 @@ To summarize the data flow in the system, sensor nodes deployed in the field col
 ### Reverse Proxy --> Enrico
 ## Protobuf Service --> Linus
 ## Deployment & Integration --> Enrico
+At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project.
 - DevOps
 
 ## Testing --> Linus
@@ -347,7 +556,8 @@ ept,
 ## Conclusion
 
 ### Future work
-
+	--build-property build.LORAWAN_AT_SUPPORT=0 \
+	--build-property build.band=REGION_EU868 \
 ### Final thoughts
 
 # Bibliography
@@ -382,7 +592,15 @@ ept,
 [36] Espressif, “esptool-js,” GitHub, [Online]. Available: https://github.com/espressif/esptool-js
 [37] Berner Fachhochschule, "Internet of Soils – Vernetzte Bodenfeuchtesensorik in Schutzwäldern," [Online]. Available: https://www.bfh.ch/en/research/research-projects/2022-288-394-015/.
 [38] Berner Fachhochschule, "Mobile Urban Green – Kühleffekte von mobilen Stadtbäumen," [Online]. Available: https://www.bfh.ch/de/forschung/forschungsprojekte/2023-527-998-470/.
-
+[39] Arduino, “Arduino IDE,” [Online]. Available: https://www.arduino.cc/en/software  
+[40] PlatformIO, “PlatformIO Documentation,” [Online]. Available: https://docs.platformio.org  
+[41] Arduino, “Arduino CLI,” [Online]. Available: https://arduino.github.io/arduino-cli  
+[42] Sudar, “Arduino Makefile,” [Online]. Available: https://github.com/sudar/Arduino-Makefile  
+[43] solarbotics, “solarbotics/arduino-cli,” Docker Hub, [Online]. Available: https://hub.docker.com/r/solarbotics/arduino-cli [Accessed: Jun. 4, 2025].
+[44] Docker Inc., “Docker SDK for Python,” [Online]. Available: https://docker-py.readthedocs.io/en/stable/
+[45] R. MacDonald, “The Dangers of Docker.sock,” Rory’s Blog, Mar. 6, 2016. [Online]. Available: https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/
+[46] OpenAPI Specification, version 3.1.0, Swagger.io. [Online]. Available: https://swagger.io/specification/ [Accessed: Jun. 4, 2025].
+[47] Pydantic Documentation. pydantic-dev, [Online]. Available: https://docs.pydantic.dev/latest/ [Accessed: 4-Jun-2025].
 
 # Declaration of authorship
 ## Who did what?
