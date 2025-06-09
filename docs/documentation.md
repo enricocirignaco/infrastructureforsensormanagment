@@ -381,8 +381,9 @@ To summarize the data flow in the system, sensor nodes deployed in the field col
 
 ![High-level System Overview](./images/general_system_architecture.png)
 ## System Architecture (technical) --> Linus
-- diagram of system
-- short explanation of each service
+
+![System Architecture](./images/system_architecture.png)
+
 ## Compiler Engine
 The Compiler Engine is a dedicated service within the system responsible for generating firmware customized for individual sensor nodes. It retrieves the source code from a Git repository, enriches it with user-provided configuration data, and compiles the final firmware. The resulting binary is returned to the user, optionally along with the enriched source code and compilation logs.
 
