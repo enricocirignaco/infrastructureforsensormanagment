@@ -646,7 +646,33 @@ Communication with the backend occurs via a REST API, enabling real-time interac
 The following sections describe the key features of the frontend interface, its structure, and the deployment approach.
 
 **Architecture and Design**
+Although the developers already had experience with Vue.js, the first step was to revisit current best practices and evaluate recent advancements in the Vue ecosystem. A key consideration was the selection of a component library to accelerate development by providing prebuilt UI elements, allowing the team to focus on application logic rather than basic UI implementation.
 
+Several options were evaluated:
+- **Vuetify**: A mature Material Design component library with strong Vue integration, excellent documentation, and a large community. While it is relatively heavy, its ease of use and robust feature set made it ideal for rapid prototyping and production use.
+- **Naive UI**: A lightweight modern alternative with a growing component set. However, its smaller community and less established ecosystem were limiting factors.
+- **Quasar**: A comprehensive framework that offers both components and tooling. Although powerful, it adds more overhead than required for this project.
+- **Tailwind CSS**: A utility-first CSS framework that allows full control over styling but requires manual component construction, which was deemed too time-consuming for the project scope.
+
+**Vuetify** was ultimately selected due to its seamless integration with Vue, extensive component library, and support for advanced features such as theming. In particular, the ability to define multiple themes (e.g., dark and light mode) and switch between them with minimal effort was a valuable addition. Its ready-to-use components are well-documented and enable fast, consistent UI development.
+
+The application was structured to follow Vue best practices, with a modular and maintainable layout that supports future growth and refactoring. The core folders and files of the project include:
+
+- **components**: The components are reusable parts of the application. They can be used in multiple views and are the building blocks of the application. The components are stored in the *components* folder. Parts of the application that need to be reused mutiple times in different views should be implemented as components.
+- **plugins**: The plugins are used to add additional functionality to the application. They can be used to add global components, directives or filters. The plugins are stored in the *plugins* folder. The only plugin used in this project is the Vuetify component library.
+- **router**: The router is used to define the routes of the application. The routes are used to navigate between different views of the application. The router is stored in the *router* folder. Redirects, default routes and nested routes can be defined in this file. The router is used to load the views of the application.
+- **services**: The services are used to interact with the backend. They are used to send requests to the backend and handle the responses. The services are stored in the *services* folder. The idea is to have a separate service files for each resource endpoint of the rest api.
+- **stores**: The stores are used to manage the state of the application. They are used to store data that needs to be shared between different components. The stores are stored in the *stores* folder. Static content like application title and slogan are also stored in stores.
+- **views**: The views are the main pages of the application. They are used to display the content of the application. The views are stored in the *views* folder. The views are loaded by the router and are displayed in the routerview. The views can be constructed using multiple components. Each view rappresent a web page.
+- **App.vue**: This is the base view of the application. It acts like a container for the differnet views that can be exchanged. Part of the application that must be present in all views can be implemented in the App.vue file. 
+- **main.js**: Is the application entrypoint. Here the application is initialized and the plugins are loaded. The router is also initialized here.
+
+Pinia was used for state management, as it is the official state management library for Vue 3 and offers a simple, modular API. It allows components to share state and reactively update when data changes, making it ideal for managing application-wide data such as user authentication status, settings, and other shared resources.
+Cmmunication with the backend is handled over a REST API and the authentication process is managed using JSON Web Tokens (JWT). The JWT is stored in the Pinia store, allowing the application to maintain user sessions and securely access protected resources.
+**Main Layout Nesting**
+In Vue applications, shared elements such as headers, footers, and navigation bars are often placed directly in App.vue. However, in this project, these elements are required on most—but not all—views. For instance, the login page intentionally omits both the footer and navigation bar. As a result, placing these components in App.vue would make it difficult to exclude them on specific routes. To solve this, a dedicated MainLayout.vue component was created. This layout acts as a wrapper for all authenticated or primary views of the application. It includes the shared interface components (header, footer, nav bar) and wraps the dynamic content using `<router-view />`. All primary routes (such as /projects) are defined as child routes of the root path '/'. Each of these child routes is rendered within the MainLayout.vue wrapper, ensuring consistent UI structure while dynamically loading the corresponding view. For routes like the login page or error views—where no layout elements should be displayed—standalone routes are defined outside of the MainLayout.vue context. This modular routing structure offers flexibility and enforces a clean separation between public and authenticated parts of the interface, while keeping the core UI consistent where needed.
+
+**Core Features**
 The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
 
 The application provides different functionalities depending on the user’s role:
@@ -680,32 +706,8 @@ Additionally, for ESP32-based nodes, successful compilation enables firmware fla
 A Serial Monitor is also available independently of the build process. It allows users to connect to an already-programmed board and view its serial output in real time.
 ![Firmware Tools Overview](./images/firmaware-tools.jpg)
 
-
-**Core Features**
 **Development Workflow**
-#### Concepts & Components
-The most important componets of the application are:
-- components: The components are reusable parts of the application. They can be used in multiple views and are the building blocks of the application. The components are stored in the *components* folder. Parts of the application that need to be reused mutiple times in different views should be implemented as components.
-- plugins: The plugins are used to add additional functionality to the application. They can be used to add global components, directives or filters. The plugins are stored in the *plugins* folder. The only plugin used in this project is the Vuetify component library.
-- router: The router is used to define the routes of the application. The routes are used to navigate between different views of the application. The router is stored in the *router* folder. Redirects, default routes and nested routes can be defined in this file. The router is used to load the views of the application.
-- services: The services are used to interact with the backend. They are used to send requests to the backend and handle the responses. The services are stored in the *services* folder. The idea is to have a separate service files for each resource endpoint of the rest api.
-- stores: The stores are used to manage the state of the application. They are used to store data that needs to be shared between different components. The stores are stored in the *stores* folder. Static content like application title and slogan are also stored in stores.
-- views: The views are the main pages of the application. They are used to display the content of the application. The views are stored in the *views* folder. The views are loaded by the router and are displayed in the routerview. The views can be constructed using multiple components. Each view rappresent a web page.
-- App.vue: This is the base view of the application. It acts like a container for the differnet views that can be exchanged. Part of the application that must be present in all views can be implemented in the App.vue file. 
-- main.js: Is the application entrypoint. Here the application is initialized and the plugins are loaded. The router is also initialized here.
-##### Components library
-Altho the developers has already some experience with vue, before the development of the application could start an overview of the newest features and best practices must be established. In order to speed up the development a component library was needed so that the developers don't have to reinvent the wheel and design every single component by theirselfs and can focus on more complex problem. There are multiple approches when it come to use a component library with vue. Some of the most popular component libraries that integrates well with vue are:
-- Vuetify: vuetify is a material design component library that is very popular and has a large community. It offers a lot of components and is very easy to use. The downside is that it is quite heavy and can slow down the application.
-- Naive UI: naive UI is a newer component library that is very lightweight and offers a lot of components. The downside is that it is not as popular as vuetify and has a smaller community.
-- Quasar: quasar is a very powerful component library that offers a lot of components and features. The downside is that it is quite heavy and can slow down the application.
-- Tailwind: tailwind is a utility first CSS framework that allows to create custom components. The downside is that it requires more work to create the components and is not as easy to use as the other libraries.
 
-Vuetify was used because of the excellent integration within the vue ecosystem and the ease of use. Some of the more usefull features of vuetify are:
-- Theming: Multiple themes with different color palettes can be definited and used interchangeably. This is a very usefull feature that allows to create a dark and light theme for the application hasslefree.
-- Ready to use component: The ready to use components of the vuetify library are well documented and easy to use.
-##### Main Layout Nesting
-Part of the application that must be visibile on all views can be implemnted in the App.vue file. For example header, footer, nav bar and other global components. In our use-case those element must be visibile in almost all views but not on all of them. The login view doest have a footer or a nav bar. For this reason those global elelment can't be implemented in the App.vue. Instead anotehr solution had to be found. The idea is to create a **MainLayout.vue** view. This view act like a wrapper for the other views. much like the App.vue file. The MainLayout.vue file contains the header, footer and nav bar. …the root path '/', and all relevant subroutes are defined as child routes of this path. These child routes are then rendered inside the <router-view /> of MainLayout.vue. This approach ensures that the header, footer, and navigation bar remain consistent across all main views, while only the inner content changes dynamically based on the route. For example, when a user navigates to /projects, the ProjectsView.vue component is loaded within the MainLayout.vue layout. Similarly, navigating to /settings or /commercial-sensor/:id loads their respective views without affecting the layout structure. This setup is especially useful when you want to exclude layout elements (e.g., on the login or error pages). In those cases, separate routes outside the '/' base path can be defined without using MainLayout.vue as their wrapper. This modular routing approach allows flexibility while maintaining a clean and consistent user interface for authenticated or main application views.
-// TODO: form component for creating new projects and also for editing existing ones. Authentication with JWT toker stored in auth store.
 ## references:
 - https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/
 - https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/
