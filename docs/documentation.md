@@ -352,8 +352,9 @@ The team ultimately selected Vue, as it offered the best balance between simplic
 The team ultimately selected Vue, as it offered the best balance between simplicity and capability for the project’s needs. Additionally, one team member was concurrently taking a university course on JavaScript frameworks, which included Vue, providing valuable hands-on experience during development.
 
 An overview of all key technologies used can be found in the system architecture diagram in the [System Architecture](#system-architecture) section. The following sections provide more details on the individual components and their interactions.
-# System Architecture (Concept) --> Linus
-# System Architecture (Results) --> Linus
+# Results
+This chapter presents the results of the implementation phase in detail. It provides a comprehensive overview of the developed system and its architecture, and documents all major design decisions to make the development process transparent and reproducible. Key components, services, and their interactions are discussed extensively to illustrate how the final system was constructed. In addition, deployment, integration, and testing aspects are included to complete the picture of the implemented solution.
+
 ## High-level System-overview
 The system developed in this project is designed to simplify the deployment, configuration, and monitoring of distributed IoT networks. It is intended for use by universities, research institutions, or companies seeking efficient management of sensor-based infrastructures. The architecture is modular and extensible, enabling the integration of new features or services as needed. While the design was guided by the specific case study described in the Introduction chapter, it was intentionally kept flexible to support a broad range of future use cases.
 
@@ -619,6 +620,7 @@ options:
 - fuseki
 - influxdb
 - parse from schema
+- ttn mock
 ## Webapplication 
 ### Frontend --> Enrico
 ### Backend --> Linus
