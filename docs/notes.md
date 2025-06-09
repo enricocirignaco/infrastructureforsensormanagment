@@ -121,22 +121,7 @@ Prioritäten:
 ---
 
 
-### Firmware Flashing
-A strategy for flashing the compiled firmware on the hardware should be developed. The hardware used thougout the project is the CubeCell – AB01 Dev-Board (V2) based on the ASR6502 Chip made by the cinese company heltec.[9] The board can act as a LoRa Node and it is fully arduino compatible. The board comes with a bootloader preinstalled so that it can be programmed via USB/Serial interface just like an arduino board.
-#### Requirements
-- The compilation process should be as straightforward as possible because the user most likely has no technical experience.
-- **If possible**:The firmware should be flashed on the hardware without the need of any additional software. (irectly over the browser).
-- In case the adopted solution (via browser) requires internet connection, an alternative solution that works offline should be also provided.
-<!-- write here your findings with arduino ide -->
 
-Because of the closed source nature and the lack of ready to use tools it's unlikely that upload-via-browser functionality can be implemented. The only way to flash the firmware on the board is to use the provided binaries, either directly of via arduino toolchain.
-
-Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
-If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
-
-The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
-#### Followups
-After further analysis and siscussion with the team and stakeholders it was decided to move in two different directions. The first high priority task is to implement a solution so that the user can program the heltech hardware in a as hasslyfree as possible way without using the invaiable webserial API. This means that the requirements that no addtional software is allowedto be installed on the host machine is lifted. The second task is to try to get a working solution using the webserial API for flashing a compatible Hardware board. This will provide a proof of concept for the webserial API and the idel workflow can be demostraded. This proof of concept can also be used in future project to convince the stakeholders to adopt an hardware platform conpatible with the webserial API and thus leveraging the advantages of this technology.
 
 #### References
 [9]  https://heltec.org/project/htcc-ab01-v2/

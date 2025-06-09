@@ -525,6 +525,28 @@ The Volume Cleaner is implemented as a Python script running in a Docker contain
 All cleanup operations are logged in a dedicated file stored within the logs volume. This file, **cleaner.log**, is used to track which files have been deleted and when, providing transparency and traceability. To avoid self-deletion, the log file itself is explicitly ignored by the cleaner.
 
 The retention time and cleanup interval can be customized through environment variables, allowing flexible control based on deployment needs or available disk space. This service ensures that the system can remain efficient and reliable over long periods of use without manual intervention.
+
+## Heltec Flashing Utils
+
+As outlined in the research chapter Programming and Toolchain Analysis for CubeCell, the Heltec CubeCell devices used in this project do not support standard USB serial flashing protocols commonly used with microcontrollers like the ESP32. Instead, Heltec provides proprietary binaries for firmware upload, requiring a custom solution to bridge the gap between firmware compilation and device flashing.
+
+To address this, a Python-based utility was developed to integrate these proprietary Heltec tools into a user-friendly flashing workflow. This script enables users to flash binaries downloaded from the web application directly to CubeCell devices via USB, without the need for manual setup or external tools.
+
+The utility guides the user through the process using a simple command-line interface. It begins by detecting available serial ports, then automatically determines the user’s operating system to select the appropriate pre-shipped binary for the task. The compiled firmware is first converted into the .cyacd format using the CubeCellElfTool. Once the conversion is complete, the resulting file is flashed to the board using the CubeCellFlashTool.
+
+The utility is a self-contained, platform-independent command-line tool designed to simplify firmware deployment to CubeCell devices. All necessary binaries for major operating systems are bundled with the script, eliminating the need for additional installations or dependencies. It requires only the path to a directory containing the compiled .elf and .hex files and supports a minimal set of arguments to ensure ease of use. Users can invoke the script with the -h flag to display a help message that outlines the expected input format and available options. The usage is as follows:
+```bash
+usage: main.py [-h] binary_dir
+
+Heltec firmware flasher
+
+positional arguments:
+  binary_dir  Path to the directory containing the ELF and HEX files
+
+options:
+  -h, --help  show this help message and exit
+```
+
 ## Timeseries Parser --> Linus
 - fuseki
 - influxdb
@@ -539,9 +561,7 @@ At first the image was built locally and tested. After the tests were successful
 - DevOps
 
 ## Testing --> Linus
-- Con
-
-ept,
+- Conept,
 
 # Discussion
 
@@ -558,6 +578,11 @@ ept,
 ### Future work
 	--build-property build.LORAWAN_AT_SUPPORT=0 \
 	--build-property build.band=REGION_EU868 \
+
+#### heltec agent:
+Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
+If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
+The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
 ### Final thoughts
 
 # Bibliography
@@ -609,4 +634,5 @@ ept,
 - Research heltec
 - Research webserial
 - High Level system overview
+- Compiler Engine
 
