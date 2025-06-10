@@ -197,7 +197,7 @@ In addition to validation, the demo served as a reference for understanding how 
 
 The term Linked Data denotes a set of best practices for publishing and interconnecting structured data on the Web. According to Bizer et al., these practices have led in the past three years to the emergence of a global data space containing billions of assertions, commonly referred to as the Web of Data [55, p. 1].
 
-At its core, Linked Data uses four principles—originally formulated by Tim Berners‑Lee—as a basic recipe for exposing and linking data using existing Web infrastructure [55, p. 2]:
+At its core, Linked Data uses four principles, originally formulated by Tim Berners‑Lee, as a basic recipe for exposing and linking data using existing Web infrastructure [55, p. 2]:
 
 1. **Use URIs to identify resources**. Every entity, such as a sensor, a location, or a measurement, is assigned a globally unique and persistent URI.
 
@@ -880,7 +880,7 @@ This routes all traffic from the influx subdomain to port 8086 of the influxdb c
 ## Protobuf Service --> Linus
 
 ## Deployment & Integration
-The system consists of several interconnected services—frontend, backend, compiler engine, database, and reverse proxy—all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
+The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
 
 To avoid manual setup and promote reproducibility, the team followed an Infrastructure as Code (IaC) approach, aiming to define and automate as much of the deployment process as possible. The infrastructure is described through several key components:
 - **Dockerfiles**: Each service has its own Dockerfile, specifying the base image, dependencies, and build steps needed to produce a functional Docker image.
@@ -1030,20 +1030,31 @@ The following table provides a breakdown of the main responsibilities:
 To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This journal is included in the appendix.
 
 ## Conclusion
+This chapter reflects on the outcomes of the project and discusses potential future directions. It begins by outlining areas for improvement and possible extensions. It then presents final thoughts, which represent the team’s subjective perspective on the project, summarizing key lessons learned and evaluating its overall impact and feasibility.
 
 ### Future work
-	--build-property build.LORAWAN_AT_SUPPORT=0 \
-	--build-property build.band=REGION_EU868 \
+The system is currently in an alpha phase and requires further testing and refinement to ensure a stable, reliable, and high-quality application. Before focusing on additional features, core components should be validated under real-world conditions and improved where necessary. This section highlights potential future enhancements and technical extensions identified during the project.
 
-#### heltec agent:
-Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
-If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
-The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
+#### Compiler Engine Enhancements
+A core design limitation in the compile engine was identified toward the end of the project: there is currently no way to specify custom compilation flags dynamically. This is a critical feature when working with more advanced hardware components in the Arduino ecosystem, such as LoRa modules. Parameters like frequency bands (e.g., build.band=REGION_EU868) must be set through build flags to ensure correct behavior.
+As a temporary workaround, these flags were hardcoded into the Arduino CLI command:
+```bash
+--build-property build.LORAWAN_AT_SUPPORT=0
+--build-property build.band=REGION_EU868
+```
+This solution is not scalable and should be treated as a high-priority item for future work. The recommended fix is to extend the REST compilation endpoint to accept user-defined build flags, which can then be dynamically included in the CLI command during compilation. Due to time constraints, this improvement could not be implemented within the project timeline.
 
 #### CD pipeline
-
-
+Initially, a full continuous deployment (CD) pipeline was envisioned, where tagging a new Git version would not only trigger the CI pipeline but also automatically redeploy the updated system to the production server. While technically feasible, this setup was not implemented due to network restrictions between the GitLab server and the project’s VM within the BFH internal network, likely caused by VLAN separation. Although a workaround would have been possible, the additional setup effort was considered unjustified given the project’s scope and timeline.
+#### Sensor Node Tagging
+Since the beginning of the project, the idea of equipping sensor nodes with a programmable identification device, such as an NFC tag, was considered. This would allow flashing multiple nodes without manually tracking which firmware corresponds to which node. An NFC tag could store the direct URL to the sensor node’s page in the web application. By scanning the tag with a smartphone, users could quickly access essential information such as the node’s ID, configuration, or intended installation location.
+While this feature was ultimately deemed out of scope due to the additional workload, it remains a realistic and valuable enhancement for future development. As a practical workaround, QR codes linking to the corresponding sensor node page can be generated, printed, and physically attached to each device.
 ### Final thoughts
+We found this project to be extremely enriching, both technically and personally. Throughout the development, we explored and adopted a wide range of new technologies and tools, significantly expanding our skill sets. The challenge of building a complex, cloud-native system from scratch motivated us to continuously raise the bar and pursue a high level of quality and completeness, right up to the final days of the project.
+
+Working together as a team was also a valuable learning experience. We learned how to challenge and motivate each other while also recognizing when compromise was necessary. The collaboration was productive and respectful, enabling us to leverage our individual strengths effectively.
+
+We truly appreciated the opportunity to design and implement such an ambitious system. The experience of applying modern development practices, especially cloud-native principles, was not only aligned with our interests but also provided insights and skills that will benefit us in our future careers.
 
 # Bibliography
 [1] L. Degen, "Project2: Internet of Soils Revised," unpublished student report, BFH-TI, Biel/Bienne, Jan. 2025.  
