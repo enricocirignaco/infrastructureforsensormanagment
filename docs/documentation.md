@@ -752,12 +752,6 @@ options:
   -h, --help  show this help message and exit
 ```
 
-## Timeseries Parser --> Linus
-- fuseki
-- influxdb
-- parse from schema
-- ttn mock
-
 ## Web Application
 The web application serves as a centralized interface for managing the entire lifecycle of the sensor network, ranging from node provisioning and firmware flashing to deployment monitoring and data visualization. To ensure clear separation of concerns and enable independent development, the application is divided into two main components: frontend and backend. The frontend is responsible for the user interface and user interaction, while the backend manages business logic, data handling, and communication with external services such as the Compiler Engine and InfluxDB. These components interact via a REST API, allowing for modularity, maintainability, and flexible deployment.
 ### Frontend
@@ -1068,7 +1062,42 @@ https://influx.leaflink.ti.bfh.ch {
 This routes all traffic from the influx subdomain to port 8086 of the influxdb container, while using a self-signed TLS certificate.
 ## Protobuf Service --> Linus
 
-## Timeseries Parser --> Linus
+## Timeseries Parser
+
+The Timeseries Parser is a crucial, standalone microservice designed to efficiently ingest, decode, and persist sensor data originating from LoRaWAN devices via the MQTT Broker. Operating as a core component of the data ingestion pipeline, it transforms raw, compact binary payloads into structured, semantically rich data suitable for diverse analytical and contextual applications.
+
+### Architecture and Core Components
+
+The parser's robust architecture is built around several key components, each playing a vital role in the data processing chain:
+
+- **MQTT Client**: At its foundation, an MQTT Client maintains a persistent connection to the MQTT Broker, actively subscribing to topics where LoRaWAN uplink messages are published. This client is responsible for reliable message reception and the initial extraction of essential metadata, such as the `device_id` and the Base64-encoded binary payload.
+- **Protobuf Parser**: A sophisticated Protobuf Parser handles the complex task of decoding binary sensor data. Crucially, it doesn't rely on pre-compiled schemas. Instead, it dynamically loads Protobuf File Descriptors at runtime, allowing the system to adapt seamlessly to evolving sensor data structures without requiring redeployment of the parser itself. This dynamic reflection ensures high flexibility for managing diverse and changing sensor templates.
+- **Fuseki Client**: The Fuseki Client serves as the interface to the Apache Jena Fuseki Triplestore. Its responsibilities include retrieving the necessary Protobuf schemas (as file descriptors) and dynamically querying for the specific message name associated with a given sensor device. More importantly, it is responsible for writing decoded sensor observations into the Triplestore, semantically annotating them using the SOSA (Sensor, Observation, Sample, and Actuator) ontology. This enables powerful semantic querying and contextual understanding of the sensor data.
+- **InfluxDB Handler**: For efficient storage and retrieval of high-volume, time-stamped numeric data, the InfluxDB Handler manages interactions with the InfluxDB time-series database. It's optimized for rapid writes and complex time-series queries, making it ideal for visualizing trends and performing time-based analytics on the raw sensor readings.
+
+### Detailed Data Flow
+
+Upon receiving an MQTT message, the Timeseries Parser executes a precise sequence of operations to process the data:
+
+1. **Message Reception and Extraction**: The MQTT Client decodes the incoming JSON payload from the MQTT message, extracting the `device_id` (which corresponds to the sensor node's UUID) and the Base64-encoded `frm_payload` containing the actual sensor measurements.
+2. **Payload Decoding**: The `frm_payload` is first Base64-decoded into its raw binary format.
+3. **Schema Retrieval**: The Fuseki Client then queries the Triplestore to retrieve the latest global Protobuf File Descriptor and the specific Protobuf message name linked to the `device_id`. This dynamic retrieval is critical for the parser's adaptability.
+4. **Dynamic Protobuf Parsing**: The Protobuf Parser uses the retrieved file descriptor and message name to dynamically construct the correct Protobuf message class at runtime. It then parses the binary sensor payload into a structured, readable format, extracting all individual sensor fields and their values.
+5. **Dual Database Persistence**: Finally, the parsed sensor data is simultaneously written to both databases to leverage their respective strengths:
+    - **InfluxDB**: Sensor measurements (e.g., temperature, humidity) are written as points tagged with the `device_id` and timestamp, enabling fast time-series analysis.
+    - **Fuseki**: A new semantic observation is created in the Triplestore, linking the sensor data to the `device_id`, timestamp, and relevant fields using the SOSA ontology. This provides a rich, queryable knowledge graph of sensor activity.
+
+Robust error handling is integrated throughout this flow, ensuring that issues like missing payloads, inaccessible schemas, or database write failures are logged and managed gracefully, preventing data loss where possible.
+
+### Configuration and Deployment
+
+The Timeseries Parser is designed for flexible and secure deployment. All critical configurations, such as MQTT broker addresses, database credentials, and topic subscriptions, are managed through environment variables. This approach enhances security by keeping sensitive information out of the codebase and simplifies deployment across different environments (development, testing, production). The entire service is containerized using Docker, providing a self-contained, portable, and reproducible runtime environment. This facilitates consistent operation, simplifies dependency management, and enables easy integration into container orchestration platforms like Kubernetes, ensuring scalability and reliability.
+
+### TTN-Mock
+
+For highly efficient and rapid backend development, a dedicated TTN-Mock microservice was created to simulate sensor data typically transmitted via The Things Network (TTN) over MQTT. This mock service addresses several practical limitations encountered when relying solely on physical LoRaWAN hardware during development. It eliminates the need to carry and install hardware, bypasses the strict duty cycle (commonly 1%) and fair use policies of actual LoRaWAN networks, which limit uplink airtime to as little as **30 seconds per day per node** [62] and severely restrict message frequency. This significantly speeds up development cycles by allowing on-the-fly configuration changes instead of requiring firmware flashes, enabling developers to test data ingestion and processing logic at a much higher cadence than real-world limitations would permit.
+
+Built in Python, the TTN-Mock leverages the `paho-mqtt` library to establish a connection to an MQTT broker. Its core functionality involves dynamically generating random sensor data, encoded using Protobuf, and embedding this into an MQTT message that faithfully emulates the structure of an actual TTN uplink message. For full fidelity, it can also include a `"simulated": true` field in the payload, as per TTN documentation [63]. This message is then published to a configurable MQTT topic at regular intervals. The service's behavior, including the device ID, MQTT broker details, topic, and publishing interval, is fully customizable through environment variables, providing flexible and isolated testing environments for the backend's data ingestion pipeline.
 
 ## Deployment & Integration
 The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
@@ -1302,6 +1331,8 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 [59] W3C, "Semantic Sensor Network Ontology", Oct. 2017. [Online]. https://www.w3.org/TR/vocab-ssn/  
 [60] Schema.org, "Schema.org vocabulary." [Online]. Available: https://schema.org/
 [61] Spring.io, "Spring Beans and Dependency Injection," Spring Boot Reference Documentation.   [Online]. Available: https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.spring-beans-and-dependency-injection. [Accessed: Jun. 10, 2025].   
+[62] The Things Network, "LoRaWAN Duty Cycle." Accessed: Jun. 10, 2025. [Online]. Available: https://www.thethingsnetwork.org/docs/lorawan/duty-cycle/   
+[63] The Things Industries, "Integrations / Data Formats." Accessed: Jun. 10, 2025. [Online]. Available: https://www.thethingsindustries.com/docs/integrations/data-formats/   
 [99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
 [100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
 
