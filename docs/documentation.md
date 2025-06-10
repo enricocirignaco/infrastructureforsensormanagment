@@ -878,21 +878,73 @@ https://influx.leaflink.ti.bfh.ch {
 ```
 This routes all traffic from the influx subdomain to port 8086 of the influxdb container, while using a self-signed TLS certificate.
 ## Protobuf Service --> Linus
-## Deployment & Integration --> Enrico
-At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project.
 
-#### Deployment
-The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
-```javascript
-  build: {
-    outDir: '../www',
-  },
+## Deployment & Integration
+The system consists of several interconnected services—frontend, backend, compiler engine, database, and reverse proxy—all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
+
+To avoid manual setup and promote reproducibility, the team followed an Infrastructure as Code (IaC) approach, aiming to define and automate as much of the deployment process as possible. The infrastructure is described through several key components:
+- **Dockerfiles**: Each service has its own Dockerfile, specifying the base image, dependencies, and build steps needed to produce a functional Docker image.
+- **Docker Compose Files**: These define how services are orchestrated, including image versions, environment variables, volumes, and inter-service dependencies. A single command can bring up the full stack in the correct order.
+- **GitLab CI/CD YAML File**: Defines the automated pipeline used to build, test, and push Docker images to the container registry.
+- **Environment Files (.env)**: Each service has a dedicated .env file that defines environment-specific variables, such as secrets and configuration settings. These are treated as part of the infrastructure definition.
+### Dockerfiles
+Each service in the system has its own Dockerfile, defining how the application is built and executed. Most Dockerfiles follow a standard pattern, specifying a base image, dependencies, and runtime instructions. The Dockerfile for the reverse proxy is notable for using a **multi-stage build**: it first uses a Node.js image to compile the frontend application, then copies the resulting static files into a lightweight Caddy image for serving. This approach keeps the final image clean and efficient.
+### Docker Compose Setup
+The project is structured to support two main Docker Compose configurations: a standard **compose.yaml** for local development and a **compose-prod.yaml** for production deployment.
+
+The development compose file builds each service image directly from source using the local Dockerfiles. This setup allows developers to make rapid code changes without needing to manually build or push images, making it ideal for testing and iteration.
+
+The production compose file relies on prebuilt Docker images hosted in the GitLab container registry. These images are referenced using a dynamic image tag, passed as an environment variable at runtime. This makes it easy to deploy specific versions of the system and simplifies rollback if needed.
+To use the compose-prod.yaml file, Docker must first authenticate with the GitLab container registry. This is necessary because the images referenced in the production file are private. Authentication can be done using the following command:
+```bash
+docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
 ```
-For deployment a 2 stages Dockefile was written that in the first stage gets the source code and build it using the node image. The second stage build the final image based on the caddy image. The dist folder generated in the previous stage together with the Caddyfile are copied into the image.
-The compose file will automatically build the image and start the container. In a second phase the image will be automatically built using a gitlab ci/cd pipeline. 
+### CI Pipeline
+The project uses GitLab CI/CD to automate the Docker image build and deployment process. This is defined in the **.gitlab-ci.yml** file, which outlines the pipeline stages and associated jobs. For this project, only the build stage was implemented. The pipeline builds Docker images for all services, tags them, and pushes them to the GitLab Container Registry.
+
+The pipeline is triggered by pushing a Git tag to the repository. The resulting Docker images are tagged using the same version string, ensuring traceability between source code and deployed containers.
+
+To streamline the configuration, a shared template job was created for defining the build environment in GitLab runners. This setup uses **Docker-in-Docker** to enable image building inside the CI environment. Before pushing to the registry, the runner authenticates using environment variables (non-interactively), following the same principle described in the previous section. Once authenticated, the images are built, tagged, and uploaded to the registry.
+
+### Secrets Management
+Secrets management is a crucial part of the deployment strategy. Secrets include any sensitive information such as API keys, admin credentials, and access tokens. For security reasons, these values must not be hardcoded into Docker images or committed to version control.
+
+To handle this, the team adopted a simple and reliable approach using environment variables. Each service is configured to load its secrets from a dedicated .env file at runtime. To guide setup without exposing secrets, template files with the .example extension are included in the repository. These .env.example files list all required environment variables, allowing users to copy and rename them to .env, and fill in the actual values before deployment.
+
+This step must be completed before the first production deployment, as the system relies on these variables for correct operation.
+
+To enforce this workflow and avoid accidental leaks, the following rules were added to .gitignore:
+```gitignore
+**/.env
+**/.env-*
+!**/.env-*.example
+```
+This setup ensures that real secrets remain untracked, while providing version-controlled templates for reproducibility and onboarding. However, care must still be taken to avoid accidental leaks.
+
+### Production Deployment
+This section guides DevOps engineers through the process of deploying the system to a production environment. It covers the essential steps, prerequisites, and configuration details for launching all services on a production server.
+Before beginning the deployment process, ensure the following:
+- **Server Access**: You have SSH access to the production server.
+- **Docker Installation**: Docker is already installed on the server.
+- **DNS Configuration**: DNS records for your domain and any subdomains are correctly configured to point to the server's IP address.
+
+Follow these steps to deploy the system:
+1. Transfer Docker Compose File: Copy the compose-prod.yaml file to your production server. You can use scp or any other secure file transfer method.
+2. Create Environment Files and Populate Secrets: Create the necessary environment files and populate them with the required secrets and configuration variables.
+3. Log in to GitLab Container Registry: Authenticate Docker with your GitLab Container Registry to pull the necessary images.
+```bash
+docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
+```
+4. Start Services with Docker Compose: Set the desired version tag and start the services using Docker Compose. This command will pull the specified images (if not already present) and run the containers in detached mode.
+```bash
+export TAG=v1.0.0 && docker compose -f compose-prod.yaml up -d --pull
+```
+After deployment, you can inspect the system's logs to ensure all services are running correctly.
+```bash
+docker compose logs
+```
 
 
-- DevOps
 
 ## Testing --> Linus
 - Conept,
@@ -917,6 +969,8 @@ The compose file will automatically build the image and start the container. In 
 Another interesting software is the arduino create agent (also named arduino cloud agent). This is an utility that needs to be locally installed on the host machine that can communicate with the arduino cloud (browser based arduino IDE) and practically giving the possibility to program and debug arduino boards via browser[27]. It's unclear if this software can be used to flash the firmware on the Heltec boards. 
 If the arduino create agent can be used for our project, it would simply and speed up the development process. Otherwise a custom solution with a similar approach as the arduino create agent has to be developed.
 The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
+
+#### CD pipeline
 ### Final thoughts
 
 # Bibliography
@@ -986,4 +1040,6 @@ The idea would be to create an application that exposes a rest api that can be u
 - High Level system overview
 - Compiler Engine
 - Web Application - Frontend
+- Reverse Proxy
+- Deployment & Integration
 
