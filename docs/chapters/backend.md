@@ -7,6 +7,9 @@
 
 
 # Outline / Notes
+- resposibility:
+    - acts as backend for webapp-frontend described in previous chapter.
+    - offers REST interface for frontend (which should only display)
 
 - MVC architecture inspired by spring boot
     - Project overview and mvc-similarieties explained

@@ -849,8 +849,197 @@ When running inside the Dev Container, the following command exposes the applica
 npm run dev -- --host 0.0.0.0
 ```
 
+### Webapp-Backend --> Linus
 
-### Backend --> Linus
+Following the discussion of the web application's user-facing components, this chapter shifts focus to the backend service specifically. This service acts as the central interface for the frontend, providing all necessary data and processing capabilities via a well-defined REST API. While the frontend is responsible solely for presentation, this dedicated backend orchestrates the complex interactions between various other internal and external services, managing everything from data persistence and sensor provisioning to firmware compilation and security.
+
+This chapter details the architectural decisions, key components, and underlying principles that govern the design of the webapp-backend service. It explores the chosen framework, FastAPI, and its application in structuring the project, managing data models, and implementing robust security measures. Additionally, the chapter highlights how this backend integrates with other essential services like the Triplestore, Compiler Engine, and The Things Network (TTN) to realize the system's comprehensive functionality. The aim is to provide a concise yet thorough understanding of the backend's role as the system's operational backbone.
+
+#### Architectural Principles and Design
+
+The backend service's architecture is primarily inspired by the well-established Model-View-Controller (MVC) pattern, though adapted to the specific characteristics of a RESTful API service developed with FastAPI. This approach was chosen to enforce a strict separation of concerns, ensuring that each part of the system: handling HTTP requests, business logic, and data access, operates independently. This modularity enhances maintainability, simplifies testing, and allows for clearer development responsibilities.
+
+##### MVC-Inspired Structure
+
+While MVC is traditionally applied to applications with a graphical user interface, its core principles of separating data, presentation, and control logic are highly beneficial for backend services. In this context, the backend service aligns with MVC as follows:
+
+- **Models**: Handled by Pydantic models, which define the structure and validation rules for data throughout the application, including API requests/responses and internal data representations.
+- **Views (in a REST context)**: Represented by the Routers, which expose the RESTful API endpoints. They are solely responsible for receiving HTTP requests, delegating tasks to services, and returning HTTP responses. They do not contain business logic.
+- **Controllers**: Embodied by the Services layer, which encapsulates the core business logic. These services process requests, interact with repositories for data persistence, and orchestrate complex workflows.
+
+This structure contrasts with frameworks like Spring Boot, which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
+
+##### Project-Root Structure
+
+The backend service adopts a clear, modular project structure. At its root level, several key files manage the application's core setup and configuration:
+
+- `main.py`: This is the application's entry point. It initializes the FastAPI application, includes the various API routers (endpoints), and configures cross-origin resource sharing (CORS) to allow secure communication with the frontend.
+- `config.py`: Centralizes all application configurations. Utilizing the pydantic_settings library (formerly part of Pydantic), this module handles settings such as the JWT secret key, initial administrator credentials, and connection details for external services like the Triplestore, Compiler Engine, Protobuf Service, and The Things Network (TTN). Configuration values are primarily read from environment variables, allowing for flexible deployment across different environments (e.g., Docker containers or direct command-line execution), while also defining sensible default values where appropriate. These configurations can then be seamlessly injected into other classes and services.
+- `constants.py`: Stores application-wide constants that are used across multiple modules, promoting consistency and reducing magic numbers or strings within the codebase.
+- `dependencies.py`: Crucial for implementing dependency injection, a core pattern used throughout the backend. This module defines reusable components like database repositories, business services, and utility functions that can be efficiently provided to other parts of the application, typically on a per-request basis.
+
+Beyond these foundational files, the architecture is further divided into dedicated directories, each encapsulating a specific concern of the application, such as data models, API endpoints, business logic, and data access.
+
+#### Dependency Injection
+
+The backend service extensively leverages the Dependency Injection (DI) pattern, a core concept inspired by frameworks like Spring Boot. DI is crucial for achieving modularity and testability by decoupling components. Instead of objects creating or managing their own dependencies, these dependencies are "injected" into them by an external entity, typically the framework itself. In Spring Boot, this is managed by the Inversion of Control (IoC) container, which instantiates and provides single instances of beans (objects) where needed [61].
+
+FastAPI implements DI on a request-based level. This means that for each incoming API request, FastAPI's dependency injection system instantiates the necessary objects (e.g., repositories, services, utility functions) and provides them to the route handlers. This ensures that each request operates with its own dedicated set of dependencies, avoiding potential state conflicts and simplifying concurrency management.
+
+The dependencies.py module plays a central role in this pattern. It defines reusable components that can be efficiently provided across the application. When a Router (API endpoint) requires a service or repository, it declares this need using FastAPI's Depends() construct. This instructs FastAPI to provide an instance of the specified dependency. Furthermore, nested dependency injection is employed: services themselves can declare their need for repositories or other utility functions via Depends(), creating a clear, hierarchical dependency graph. This structured approach simplifies the setup and teardown of resources per request, contributing significantly to the backend's robustness and maintainability.
+
+The following code snippet exemplifies how FastAPI's dependency injection system operates. Here, the get_auth_service function serves as a dependency provider. It declares its need for a UserRepository instance, which is itself provided by get_user_repository using Depends(). FastAPI automatically resolves and injects these dependencies when get_auth_service is called within a route handler. This mechanism ensures that components receive their necessary collaborators without explicit instantiation, simplifying the overall architecture and facilitating testability.
+
+```python
+def get_auth_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+) -> AuthService:
+    return AuthService(user_repository)
+```
+
+#### Data Models
+
+The `models` directory is central to defining the data structures used throughout the backend service. It houses all Pydantic models, which are crucial for ensuring data integrity, providing automatic type validation, and clearly defining the application's API contracts. Pydantic's strength lies in its ability to automatically validate data types, both when receiving data via API requests and when initializing models internally. It supports a wide range of standard Python data types, alongside specialized `BaseModels` like `HttpUrl` and `Optional` fields, enabling robust and flexible data definitions.
+
+A key design principle here is the use of distinct model formats for different purposes:
+
+- **Creation Models (DTOs)**: These are slim Data Transfer Objects specifically designed for receiving data from the frontend. They only include the fields necessary for creating a new entity, ensuring a clean and precise API input.
+- **Response Models**: These define the structure of data sent back to the frontend. They are carefully curated to expose only the relevant information, preventing the accidental exposure of internal or sensitive fields.
+- **Database Models**: Used internally for representing entities stored in the Triplestore. These might contain additional fields or relationships not exposed directly via the API.
+
+This clear separation ensures a well-defined and secure API, where external clients only interact with the necessary data. The models frequently incorporate Enums for fields with predefined choices, promoting consistency and making these types explicit within the API documentation and frontend.
+
+The backend service manages the following core business entities, each represented by a set of these Pydantic models:
+
+**Users**: This model defines user accounts within the system, which are central to its security and operational integrity. User accounts are differentiated by specific roles that control their access and permissions across the application, ensuring that only authorized actions are performed. These roles are fundamental for authenticating users and enforcing granular access control. Furthermore, every creation or update of an entity within the system automatically logs the initiating user, ensuring full traceability and accountability. The defined roles within the system are:
+
+- **Researcher**: Has read-only access to all data and can only modify their own password.
+- **Technician**: Possesses write access to system elements such as nodes and sensors, and can manage associated metadata. They also have password modification capabilities.
+- **Administrator**: Holds full access, including the ability to manage user accounts, create new users, and oversee all system configurations. 
+
+**Projects**: Serve as logical containers for grouping related sensor nodes, typically representing field studies, deployment sites, or research initiatives. They also store metadata like links to documentation.
+
+**Commercial Sensors**: Represent standardized, reusable definitions of real-world sensor types. These are primarily for documentation, detailing characteristics like measurement ranges, units, and links to datasheets, thereby ensuring consistent sensor descriptions across the system.
+
+**Node Templates**: Act as blueprints for configuring sensor nodes and their firmware. They define the microcontroller platform, GitLab repository URLs, and customizable `Configurables` (parameter placeholders like `SENDING_INTERVAL`). Crucially, they also specify the `Node Template Field` system, which formally outlines the data points a sensor is expected to measure, including name, Protobuf-compatible data type, and unit.
+
+**Sensor Nodes**: Represent the actual IoT devices deployed in the field. Each node is instantiated from a `Sensor Template` and stores deployment-specific metadata such as GPS coordinates and firmware versions. Upon creation, the backend automatically provisions a corresponding device on The Things Network (TTN). Nodes manage both user-defined Configurables (set per node) and system-injected Configurables (for LoRa/TTN credentials). They also display the latest sensor readings and provide access to firmware flashing tools.
+
+#### Routers
+
+The routers directory encapsulates the API endpoints of the backend service, aligning with the "Views" component in the MVC-inspired architecture. These modules are exclusively responsible for defining the RESTful API and handling incoming HTTP requests and outgoing responses. Their role is purely an interface layer: they receive requests, validate input using Pydantic models, delegate complex processing to the services layer, and format the results back for the client as HTTP responses.
+
+A key principle of the routers is their strict separation of concerns. They contain no business logic themselves, acting purely as a thin wrapper. This ensures the API definition remains clean, predictable, and focused on its role as a communication contract. For example, a simple router might define an endpoint to retrieve a user's details:
+
+```python
+router = APIRouter(prefix="/users", tags=["Users"])
+
+@router.get("/{uuid}", response_model=UserOut)
+async def read_specific_user(uuid: UUID, 
+                             _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
+                             auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
+    try:
+        return auth_service.find_user_uuid(uuid)
+    except NotFoundError as err:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+```
+
+This example showcases a more complex router definition. It utilizes a UUID as a path parameter, leveraging Pydantic's automatic type validation for robust input handling. Crucially, the _: parameter, combined with Depends(require_roles_or_owner(...)), demonstrates the implementation of role-based authorization and ownership checking. This dependency ensures that only users holding the ADMIN role, or the user who is the owner of the requested resource, are granted access to this specific endpoint. Furthermore, the try...except block illustrates robust error handling: a custom NotFoundError raised by the AuthService when a user is not found, is caught and directly translated into an HTTP 404 Not Found response, providing clear and standardized feedback to the client.
+
+FastAPI automatically generates OpenAPI documentation based on these defined endpoints and their associated Pydantic models. This documentation, exposed via the /docs endpoint, serves as a crucial contract for frontend developers, clearly outlining the expected request and response structures. It also provides an interactive UI (Swagger UI) invaluable for testing and debugging API interactions directly within the browser, significantly streamlining the development and integration process.
+
+The following screenshot, illustrates all available endpoints for the `Project` entity, which largely reflect the standardized set of RESTful operations provided for other entities within the system.
+
+![Typical endpoints per entity shown in Swagger UI](./images/backend_openapi.png)
+
+#### Services
+
+The `services` directory forms the core of the backend's business logic, functioning as the "Controllers" in the adapted MVC pattern. Each service encapsulates a distinct domain or functionality, processing complex requests, orchestrating workflows, and coordinating interactions between various other system components and external APIs. This rigorous separation ensures that all business rules are centralized, consistent, and independent of specific data storage technologies or the presentation layer. Services are responsible for validating business logic, performing transformations, and managing the overall state relevant to their domain. They serve as the central point for executing complex operations that span across multiple data entities or involve calls to other microservices within the overall system architecture (e.g., the Compiler Engine or Protobuf Service) or external platforms.
+
+##### Core Service Functionalities
+
+Services within this layer are responsible for managing the core entities and business processes of the application. These services act as central orchestrators, applying complex business rules and validations to ensure data integrity and consistency. They coordinate operations across multiple data repositories, handle intricate state transitions for entities, and manage audit trails or logging to track changes over time.
+
+Furthermore, these services often serve as clients to other internal microservices, delegating specific tasks such as code compilation or data transformation to dedicated components. This fosters a decoupled and scalable architecture where business logic is centralized, allowing for robust validation and complex data manipulation before information is persisted or exposed via the API.
+
+##### TTN-Service
+
+The TTN-Service is a critical component solely dedicated to interacting with The Things Network (TTN) platform through its official API. Its primary responsibilities are the automated provisioning and de-provisioning of LoRaWAN end devices on the TTN application. This service encapsulates all necessary interactions with TTN's various server components, ensuring that sensor nodes can securely join and operate within the LoRaWAN network.
+
+The device provisioning functionality automates the process of registering a new sensor node on TTN. This involves a four-step sequence of API calls to TTN's distinct server components:
+
+- **Identity Server (IS)**: The initial step registers the device's fundamental identifiers, including device_id, DevEUI, and JoinEUI, alongside its version information and network addresses. This creates the device's entry in TTN's central registry.
+- **Join Server (JS)**: Following registration on the Identity Server, the Join Server is updated with cryptographic keys, specifically the AppKey. This key is essential for the Over-the-Air Activation (OTAA) process, allowing the device to securely join the LoRaWAN network.
+- **Network Server (NS)**: This step configures the device's network-specific settings, including LoRaWAN version, physical layer version, and frequency plan. It ensures the device can communicate correctly with the LoRaWAN network infrastructure.
+- **Application Server (AS)**: Finally, the Application Server is configured for the device. While less complex for device creation, it is a crucial component for handling uplink and downlink messages, ensuring sensor data reaches the application.
+
+Each step in this process involves generating unique, random hexadecimal keys (like `DevEUI` and `AppKey`) and securely transmitting them to TTN, thereby fully preparing the device for LoRaWAN communication.
+
+The device de-provisioning functionality handles the complete removal of a sensor node from the TTN platform. This process mirrors the creation steps but in reverse order, ensuring that all device entries are cleanly removed from TTN's server components. It involves deleting the device from the Application Server, Network Server, Join Server, and finally the Identity Server. This systematic approach ensures that no orphaned device configurations remain on the TTN platform after a sensor node is decommissioned from the system.
+
+For robust development and testing, the TTN-Service implements a feature flag mechanism. This design allows the system to easily switch between a real TTN integration for production or end-to-end tests and a mock service for isolated unit and integration tests, eliminating dependencies on external networks. This flexibility is achieved through Python interfaces, specifically by defining an abstract base class. Both, the actual implementation interacting with TTN, and the mock implementation inherit from this abstract class. During dependency injection, the system automatically receives the correct TTN-Service instance based on the configured feature flag, thanks to this clear contract defined by the abstract class.
+
+##### Compilation Service
+
+The CompilationService acts as a crucial orchestrator between the backend and an external Compiler Engine. Its primary role is to manage the firmware compilation process for sensor nodes. This service serves mainly as a wrapper, translating requests from the backend into a format suitable for the Compiler Engine's API.
+
+Crucially, before initiating a build job, the CompilationService gathers all necessary information from the backend's data store. It retrieves details about the specific sensor node and its associated node template, such as Git repository URLs, firmware tags, board configurations, and custom sensor node configurations. This consolidated data is then sent to the Compiler Engine, which handles the actual compilation process. The CompilationService also provides functionalities to query the status of a build job and retrieve generated artifacts, including compiled binaries, source code, or logs. This ensures a seamless flow from sensor node definition to deployable firmware.
+
+
+##### Error Handling and Custom Exceptions
+
+The services layer extensively utilizes custom exceptions, which are defined in the utils/ folder. This approach provides a precise and semantic way to signal specific business-level error conditions from deep within the application logic. Instead of relying on generic error codes or boolean flags, custom exceptions convey precisely what went wrong, making debugging and error handling significantly more efficient for both developers and consuming clients.
+
+These custom exceptions are designed to be caught by the routers layer, where they are then consistently translated into appropriate HTTP status codes, as previously discussed. This mapping ensures a standardized API response for various error scenarios. The following table illustrates the mapping between common custom exceptions and their corresponding HTTP status codes:
+
+| Exception Name       | Status Code | Status Name  |
+|----------------------|-------------|--------------|
+| NotFoundException    | 404         | Not Found    |
+| ExternalServiceError | 502         | Bad gateway  |
+| AuthenticationError  | 401         | Unauthorized |
+| AuthorizationError   | 403         | Forbidden    |
+| EmailAlreadyExists   | 409         | Conflict     |
+
+#### Data Repositories
+
+.....
+
+
+#### Security
+
+Security is paramount for any backend service, ensuring the confidentiality, integrity, and availability of data and functionalities. This section outlines the key security measures implemented, covering user authentication, authorization, and the secure handling of sensitive information.
+
+##### Authentication: Verifying User Identity
+
+Authentication is the process of confirming a user's identity. In this backend, **JSON Web Tokens** (JWT) are employed for stateless authentication. When a user successfully logs in with their credentials, the server issues a JWT. This token contains a digitally signed payload (claims) that asserts the user's identity and relevant information.
+
+- **How it Works**: After initial login, the client receives this JWT and includes it in the `Authorization` header of subsequent requests. The server then validates the JWT's signature and expiration. Because the token is self-contained and signed, the server does not need to query the database for every authenticated request, which enhances scalability and performance.
+- **Benefits**: JWTs provide a stateless authentication mechanism, making the system highly scalable and suitable for distributed architectures. They also facilitate cross-domain and cross-platform compatibility.
+
+##### Authorization: Controlling Access
+
+Authorization determines what an authenticated user is permitted to do or access. The system employs a combination of Role-Based Access Control (RBAC) and Ownership-Based Access Control.
+
+- **Role-Based Access Control (RBAC)**: Users are assigned specific roles, and these roles are granted predefined permissions to access certain resources or perform specific actions. This simplifies access management by grouping users with similar responsibilities. For instance, an admin role is allowed to create new used accounts, while the researcher role is only allowed to read data.
+- **Ownership-Based Access Control**: In addition to roles, certain resources are protected based on ownership. This means a user can only perform actions (e.g., update, delete) on resources they explicitly own, even if their role might generally allow such actions on other resources. This fine-grained control adds an extra layer of security, preventing users from inadvertently or maliciously affecting data belonging to others. This logic is typically enforced within the services layer, where business rules are applied.
+
+##### Secure Communication
+
+In production, all communication with the backend API is enforced over HTTPS (Hypertext Transfer Protocol Secure). This uses TLS (Transport Layer Security) encryption to protect data in transit from eavesdropping, tampering, and message forgery. This ensures that sensitive information, including user credentials and API keys, remains confidential as it travels over the network.
+
+##### Sensitive Data Handling
+
+- **Password Hashing**: User passwords are never stored in plain text. Instead, a strong, computationally intensive hashing algorithm, specifically Argon2, is used to hash passwords before storage. Each password is also hashed with a unique, randomly generated salt. This prevents common attacks like rainbow table attacks and makes brute-force attempts significantly more difficult, even if the database is compromised.
+- **API Key Management**: API keys used for external service integrations (e.g., with the Compiler Engine, Protobuf Service, or TTN) are treated as sensitive secrets. They are stored securely as environment variables and are never hardcoded directly into the codebase or committed to version control.
+
+##### Initial Admin User Provisioning
+
+For simplified initial setup and management, the application includes a mechanism for provisioning an initial administrator user during startup. This process executes only if an administrator account doesn't already exist within the triplestore. The username and password for this initial admin can be configured via environment variables. If no password is explicitly provided through environment variables, the system will securely generate a strong, random password and output it to the console once upon startup. This ensures a secure administrative account is always available while minimizing the risk of insecure default credentials.
+
+##### Error Handling and Security
+
+As discussed in the Services chapter, custom exceptions are utilized to manage errors. This also has security implications, as it prevents the exposure of sensitive internal server details in API responses. Instead, specific, user-friendly error messages and appropriate HTTP status codes are returned, reducing the information available to potential attackers during reconnaissance.
+
 ### Reverse Proxy
 Because the system consists of multiple services, many of which must be accessible to users, a common, centralized entry point is required. Exposing each service on a separate port was not a feasible option, especially considering the need for TLS encryption, which is essential for any modern web application. To address this, a reverse proxy was used.
 
@@ -878,6 +1067,8 @@ https://influx.leaflink.ti.bfh.ch {
 ```
 This routes all traffic from the influx subdomain to port 8086 of the influxdb container, while using a self-signed TLS certificate.
 ## Protobuf Service --> Linus
+
+## Timeseries Parser --> Linus
 
 ## Deployment & Integration
 The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
@@ -1110,6 +1301,7 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 [58] W3C, "OWL Web Ontology Language," Feb. 2004. [Online]. Available: https://www.w3.org/TR/owl-features/  
 [59] W3C, "Semantic Sensor Network Ontology", Oct. 2017. [Online]. https://www.w3.org/TR/vocab-ssn/  
 [60] Schema.org, "Schema.org vocabulary." [Online]. Available: https://schema.org/
+[61] Spring.io, "Spring Beans and Dependency Injection," Spring Boot Reference Documentation.   [Online]. Available: https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.spring-beans-and-dependency-injection. [Accessed: Jun. 10, 2025].   
 [99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
 [100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
 
