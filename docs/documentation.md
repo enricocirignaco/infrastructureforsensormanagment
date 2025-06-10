@@ -475,7 +475,7 @@ Both of these interfaces are also accessible via the browser, ensuring that all 
 To summarize the data flow in the system, sensor nodes deployed in the field collect data and transmit it in a standardized format to the IoT gateway. The gateway then forwards this data to the main system over the internet. Within the main system, the data is processed and stored in both a time-series database (InfluxDB) and an RDF triplestore. Users can then access and analyze the data either through the browser-based web application or directly via SPARQL queries (for semantic data) and InfluxDB queries (for time-series data).
 
 ![High-level System Overview](./images/general_system_architecture.png)
-## System Architecture (technical) --> Linus
+## System Architecture
 
 While the previous chapter provided a conceptual overview of the system and its data flow, this section presents the technical implementation of the developed architecture. It introduces all core components of the system and explains how they interact within the cloud-based infrastructure. The aim is to offer a comprehensive overview of the deployed software services and the orchestration mechanisms behind them.
 
@@ -944,10 +944,32 @@ After deployment, you can inspect the system's logs to ensure all services are r
 docker compose logs
 ```
 
+## Quality Assurance and Testing
+For any software system of this scale, continuous testing is paramount to ensure long-term stability and reliability. While the primary focus of this thesis was on the complete implementation of the overall system and the successful achievement of its defined objectives, a robust approach to quality assurance remains a critical consideration. Although automated tests were not implemented during this project, it is crucial to document the testing methodologies employed and to outline how future testing efforts could be systematized. This chapter describes the testing approach applied within the project and conceptualizes a more comprehensive quality assurance strategy for the developed infrastructure.
 
+### Manual Testing and Functional Validation
 
-## Testing --> Linus
-- Conept,
+Throughout the development phases of this project, all components of the sensor infrastructure underwent continuous manual testing. This approach facilitated direct and iterative verification of the implemented functionalities. Each time a new feature was developed or an existing one modified, a manual check was performed to confirm its correct operation. The modular design of the microservices, many exposing well-defined APIs with predictable responses for each request, enabled each service to be tested as an independent unit before being integrated into the broader system. This comprehensive testing encompassed:
+
+- **Functional Tests:** Verification that individual services performed their intended tasks. For
+instance, manual checks confirmed whether the web application could correctly create and edit sensors, if the Compiler Engine compiled firmware, and if the Timeseries-Parser accurately decoded and stored incoming data. This also included probing edge cases by intentionally providing invalid inputs or executing interactions not explicitly designed into the system, to assess robustness and error handling.
+- **Integration Tests:** Validation of interactions between the various microservices. These tests were performed continuously as new functionalities and services were integrated, ensuring a *"marriage"* of components. For example, it was consistently tested whether the web application communicated correctly with the backend and the Triplestore, or if the MQTT Broker received messages from The Things Network and the Timeseries Parser processed them further. The entire end-to-end process of sensor provisioning and data transmission was thoroughly executed and re-verified with each integration.
+- **Usability Tests:** Evaluation of the user-friendliness of the web application. While the user interface was primarily developed by one team member, a second team member was regularly consulted to provide an external, neutral perspective. This ensured that the UI was intuitive and user-friendly, free from biases that might arise from prolonged exposure to the development process. This assessment included evaluating navigation, the clarity of interface elements, and the intuitive operation of functionalities.
+
+Manual testing was conducted by the development team itself. Each implementation task concluded with a set of predefined or ad-hoc test scenarios to confirm functional expectations and identify errors early. The use of Docker Compose played a crucial role in this context, as it enabled the straightforward setup of a consistent testing environment that mirrored the production environment. This ensured that tests could be performed in a representative setting.
+
+### Concept for Automated Testing
+
+While automated tests were not implemented as part of this Bachelor's thesis, their introduction is of significant importance for the long-term maintainability and extensibility of the infrastructure. A robust testing concept would typically encompass the following layers:
+
+- **Unit Tests:** For each individual microservice, unit tests should be developed to isolate and test the smallest logical units, such as functions or methods. The clean separation into layers and classes already achieved within the services significantly facilitates the introduction of unit tests, allowing for direct component-level testing. This would ensure the correct functioning of internal algorithms and logic before their integration into the overall architectural context. Languages like Python and JavaScript offer established frameworks for this purpose, including pytest for the Python FastAPI Backend and Jest or Vue Test Utils for the Vue.js frontend components.
+- **Integration Tests:** These tests would verify the interactions between individual services. For example, a test case could cover the complete chain from sensor registration via the web application to metadata storage in the Triplestore and the automated compilation of firmware. The existing feature flag in the web application's Backend, which allows for mocking and disabling the direct connection to The Things Network, exemplifies how such modularity can be achieved. Similar feature flags could be readily implemented to further enhance system modularity and facilitate comprehensive integration testing without relying on external live systems.
+- **End-to-End (E2E) Tests:** These tests would validate the entire system from a user's perspective. An E2E test could simulate the complete sensor commissioning process: from user login, through sensor data acquisition, firmware compilation and flashing, to the reception and storage of the first measurement values. Tools like Cypress could be employed for this purpose to automate UI interactions and API calls.
+- **Performance and Load Tests:** For future operation, it would be crucial to assess the scalability and robustness of the system under load. This would involve examining how the system responds to a high number of concurrently active sensors or a high data throughput. Tools such as Apache JMeter or Locust could be used to simulate load scenarios.
+
+Integrating these automated tests into the already existing Continuous Integration (CI/CD) pipelines would ensure that every code change is automatically validated against defined test cases. For instance, tests could be executed before merging a feature branch into the main branch, effectively blocking the merge if tests fail. This would facilitate early error detection, secure long-term code quality, and significantly reduce manual testing effort.
+
+This chapter has detailed the manual testing approach employed during the development of the sensor infrastructure, highlighting its iterative nature and comprehensive coverage of functional, integration, and usability aspects. Furthermore, it has outlined a strategic concept for the future implementation of automated testing, spanning unit, integration, end-to-end, and performance test layers. While the project's primary focus was on system implementation, these insights into quality assurance provide a clear path for ensuring the long-term stability, maintainability, and extensibility of the developed platform.
 
 # Discussion
 
