@@ -192,9 +192,102 @@ As part of the esptool-js repository, Espressif provides a minimal demo web appl
 
 In addition to validation, the demo served as a reference for understanding how the esptool-js library works in practice. It formed the basis for developing a custom integration within the project’s web application. Further implementation details are provided in the [Web Application Frontend](#web-application) section.
 ![esptool-js demo](./images/esp_tool_demo.png)
-## Linked Data --> Linus
-- sparql
-- ontologies
+
+## Linked Data
+
+The term Linked Data denotes a set of best practices for publishing and interconnecting structured data on the Web. According to Bizer et al., these practices have led in the past three years to the emergence of a global data space containing billions of assertions, commonly referred to as the Web of Data [55, p. 1].
+
+At its core, Linked Data uses four principles—originally formulated by Tim Berners‑Lee—as a basic recipe for exposing and linking data using existing Web infrastructure [55, p. 2]:
+
+1. **Use URIs to identify resources**. Every entity, such as a sensor, a location, or a measurement, is assigned a globally unique and persistent URI.
+
+2. **Use HTTP URIs**. These URIs should be dereferenceable, meaning that they can be accessed via the HTTP protocol.
+
+3. **Provide structured data**. When a URI is dereferenced, it should return useful information in standardized, machine-readable formats such as RDF or JSON-LD.
+
+4. **Include links to other URIs**. This enables discovery of related data and supports the construction of a broader knowledge graph.
+
+These simple yet powerful guidelines enable data providers to publish information in a way that is not only accessible but also inherently linkable. This emphasis on interlinking is what fundamentally sets Linked Data apart from earlier approaches to Web-based data sharing, such as static data dumps or traditional web services. By extending the Web’s hyperlink architecture to structured data through the use of URIs, HTTP, RDF, and semantic links between resources, Linked Data facilitates the construction of a decentralized, scalable, and machine-readable knowledge graph. This graph-based structure supports advanced data integration, semantic interoperability and exploratory analysis across diverse domains. At the core of this approach lies the *Resource Description Framework* (RDF), which serves as the fundamental data model for Linked Data applications.
+
+RDF is a standard for representing structured information in a formal and machine-readable way. It organizes data as triples, each consisting of a subject, predicate and object. This structure allows for the expression of simple statements about resources. Each element of a triple is typically identified by a Uniform Resource Identifier (URI) or a literal value, making the data unambiguous and interoperable. RDF supports multiple serialization formats such as Turtle, RDF/XML and JSON-LD, which offer flexibility for different systems and integration needs. The underlying concepts and structure of RDF are formally defined in the W3C RDF 1.1 specification [56].
+
+### Justification for Using Linked Data
+
+Our sensor management platform is designed to support a wide range of independent projects, each of which may involve different types and quantities of sensor nodes. These projects often have no shared context, resulting in highly diverse data formats, metadata structures and additional informations. Consequently, the underlying data infrastructure must be capable of handling heterogeneous and evolving datasets in a consistent and interoperable way. Traditional rigid data models quickly reach their limits in such environments.
+
+The use of RDF enables us to describe entities such as sensors, observed phenomena and spatial relationships in a structured and machine-readable way. For instance, a sensor can be represented by a triple stating that it "is located at" a specific place, with both the sensor and the location identified by URIs. This model not only facilitates semantic querying but also allows the system to evolve dynamically as new types of metadata or sensors are introduced. Through SPARQL, complex queries can be performed without needing to redesign the data schema.
+
+A further advantage of Linked Data is its ability to seamlessly integrate distributed knowledge sources. In our platform, relevant metadata such as data sheets, calibration data or manufacturer specifications are often stored externally and exist in a variety of formats. Rather than importing and replicating these documents, Linked Data enables us to reference them directly via persistent URIs. This avoids duplication and enables scalable metadata enrichment.
+
+In contrast to relational databases such as InfluxDB or PostgreSQL, which rely on fixed schemas and lack native support for semantic relationships, RDF-based triple stores offer a more adaptable solution. They are inherently suited to scenarios where data structures are not known in advance or change frequently over time. The ability to link internal datasets with external ontologies further enhances interoperability and long-term maintainability.
+
+Considering the need to manage diverse data structures, adapt to evolving project requirements and integrate distributed metadata, Linked Data proves to be a robust and future-oriented foundation for our sensor infrastructure. Its semantic flexibility supports consistent modeling across different projects, while enabling seamless integration with external ontologies and data sources. This approach not only enhances interoperability but also ensures that the platform remains maintainable and extensible as new use cases emerge.
+
+### Usage of existing Schemas and Ontologies
+
+In the context of Linked Data, schemas and ontologies are essential tools for adding semantic structure and meaning to data. While these terms are often used interchangeably, they differ in scope and expressiveness. A schema typically defines the structure and types of data entities, similar to a data model, whereas an ontology provides a richer semantic framework that includes relationships, constraints and inference rules. Ontologies can express not only what data exists but also how entities relate to one another and what logical conclusions can be derived from the data.
+
+The W3C has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [57]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [58].
+
+A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [59]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of Internet of Things (IoT) applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
+The following diagram from the official ontology description by W3C offers a concret overview over all classes and relationships that are described within SOSA [59]:
+
+![Structure of the SOSA ontology](./images/sosa-ontology.png)
+
+The following example shows how a sensor and an observation would be described and linked with the SOSA ontology. The example is written in the turtle format.
+
+```turtle
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix ex: <http://example.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:TempSensor1 a sosa:Sensor ;
+	sosa:madeObservation ex:Observation1 .
+
+ex:Observation1 a sosa:Observation ;
+	sosa:observedProperty ex:Temperature ;
+	sosa:hasSimpleResult "22.5"^^xsd:float ;
+	sosa:resultTime "2025-06-10T10:05:00Z"^^xsd:dateTime ;
+	sosa:madeBySensor ex:TempSensor1 .
+
+ex:Temperature a sosa:ObservableProperty .
+```
+
+In addition to SOSA, general-purpose vocabularies such as Schema.org are useful for modeling contextual metadata. Schema.org is widely used to describe common entities like people, places, organizations and events [60]. While SOSA captures the technical aspects of sensing, Schema.org can provide additional descriptive context, such as the institution operating a sensor or the geographic location where it is deployed. These complementary vocabularies allow for both domain-specific precision and broader semantic interoperability. In our platform, we use the Schema.org vocabulary to describe contextual information about sensor deployments, such as the projects in which they are used:
+
+```turtle
+@prefix schema: <https://schema.org/> .
+@prefix ex: <http://example.org/> .
+
+ex:InternetOfSoils a schema:Project ;
+	schema:name "Internet of Soils" ;
+	schema:alternateName "IoS" ;
+	schema:description "A project to monitor soil moisture in protection forests." ;
+```
+
+Using well-established ontologies provides several concrete advantages. First, they are typically developed and maintained by expert communities, ensuring conceptual clarity and practical relevance. Second, they enable semantic alignment across datasets, allowing data to be linked meaningfully across systems that follow the same ontological models. This is a core strength of Linked Data: enabling the integration of decentralized data sources through shared semantic structures. Furthermore, leveraging existing ontologies accelerates development, reduces modeling errors and supports long-term maintainability of data systems.
+
+### Triple Stores and Semantic Querying
+
+To store and query RDF data efficiently, our platform uses a triple store, a type of database specifically designed for managing RDF triples. Unlike relational databases, triple stores are optimized for semantic data structures and enable powerful querying based on graph patterns. One widely used triple store implementation is Apache Jena Fuseki, which provides a SPARQL endpoint for querying and updating RDF data.
+
+SPARQL (SPARQL Protocol and RDF Query Language) is the standard query language for RDF. It allows for expressive queries that match patterns of subjects, predicates and objects. The following example demonstrates a simple SPARQL query that retrieves all temperature values observed by a specific sensor:
+
+```sparql
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX ex: <http://example.org/>
+
+SELECT ?result ?time WHERE {
+  ?observation a sosa:Observation ;
+			   sosa:madeBySensor ex:TempSensor1 ;
+			   sosa:hasSimpleResult ?result ;
+			   sosa:resultTime ?time .
+}
+```
+
+This query returns a list of all observations made by `TempSensor1`, along with their recorded values and timestamps. SPARQL enables flexible data exploration and is a core tool in working with semantic sensor data.
+
+By integrating Linked Data technologies into our platform, we gain a flexible, scalable and semantically rich data architecture. RDF and established ontologies like SOSA and Schema.org allow us to model complex sensor infrastructures in a consistent and extensible way. Triple stores and SPARQL provide the foundation for querying and integrating diverse datasets across independent projects. This approach not only simplifies the management of heterogeneous sensor metadata but also opens up new possibilities for data reuse, interoperability and long-term system evolution.
 
 ## Binary Serialization for IoT Communication
 
@@ -874,6 +967,12 @@ The idea would be to create an application that exposes a rest api that can be u
 [52] Apache Software Foundation, “Apache Avro,” [Online]. Available: https://avro.apache.org/.
 [53] MessagePack Project, “MessagePack: It’s like JSON. But fast and small.,” [Online]. Available: https://msgpack.org/.
 [54] Google, "Protocol Buffers: Encoding," protobuf.dev, 2023. [Online]. Available: https://protobuf.dev/programming-guides/encoding/.
+[55] C. Bizer, T. Heath, and T. Berners-Lee, “Linked Data – The Story So Far,” International Journal on Semantic Web and Information Systems, vol. 5, no. 3, pp. 1–22, 2009.  
+[56] W3C, “RDF 1.1 Concepts and Abstract Syntax,” 2014. [Online]. Available: https://www.w3.org/TR/rdf11-concepts/  
+[57] W3C, "RDF Schema 1.1," Feb. 2014. [Online]. Available: https://www.w3.org/TR/rdf-schema/  
+[58] W3C, "OWL Web Ontology Language," Feb. 2004. [Online]. Available: https://www.w3.org/TR/owl-features/  
+[59] W3C, "Semantic Sensor Network Ontology", Oct. 2017. [Online]. https://www.w3.org/TR/vocab-ssn/  
+[60] Schema.org, "Schema.org vocabulary." [Online]. Available: https://schema.org/
 [99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
 [100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
 
