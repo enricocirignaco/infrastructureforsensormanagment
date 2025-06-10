@@ -971,16 +971,24 @@ Integrating these automated tests into the already existing Continuous Integrati
 
 This chapter has detailed the manual testing approach employed during the development of the sensor infrastructure, highlighting its iterative nature and comprehensive coverage of functional, integration, and usability aspects. Furthermore, it has outlined a strategic concept for the future implementation of automated testing, spanning unit, integration, end-to-end, and performance test layers. While the project's primary focus was on system implementation, these insights into quality assurance provide a clear path for ensuring the long-term stability, maintainability, and extensibility of the developed platform.
 
-# Discussion
-
-## Summary  
+# Discussion --> Enrico
+## Summary  (rückblick)(zusammenfassing	)
 
 ### Achieved goals
 
 ### Unachieved goals
 
 ### Workload per student
-
+ Who did what?
+### Enrico
+- Methods
+- Research heltec
+- Research webserial
+- High Level system overview
+- Compiler Engine
+- Web Application - Frontend
+- Reverse Proxy
+- Deployment & Integration
 ## Conclusion
 
 ### Future work
@@ -1052,16 +1060,6 @@ The idea would be to create an application that exposes a rest api that can be u
 [99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
 [100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
 
-
 # Declaration of authorship
-## Who did what?
-### Enrico
-- Methods
-- Research heltec
-- Research webserial
-- High Level system overview
-- Compiler Engine
-- Web Application - Frontend
-- Reverse Proxy
-- Deployment & Integration
+
 
