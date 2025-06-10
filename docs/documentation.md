@@ -676,6 +676,7 @@ Communication with the backend occurs via a REST API, enabling real-time interac
 The following sections describe the key features of the frontend interface, its structure, and the deployment approach.
 
 **Architecture and Design**
+
 Although the developers already had experience with Vue.js, the first step was to revisit current best practices and evaluate recent advancements in the Vue ecosystem. A key consideration was the selection of a component library to accelerate development by providing prebuilt UI elements, allowing the team to focus on application logic rather than basic UI implementation.
 
 Several options were evaluated:
@@ -700,9 +701,11 @@ The application was structured to follow Vue best practices, with a modular and 
 Pinia was used for state management, as it is the official state management library for Vue 3 and offers a simple, modular API. It allows components to share state and reactively update when data changes, making it ideal for managing application-wide data such as user authentication status, settings, and other shared resources.
 Cmmunication with the backend is handled over a REST API and the authentication process is managed using JSON Web Tokens (JWT). The JWT is stored in the Pinia store, allowing the application to maintain user sessions and securely access protected resources.
 **Main Layout Nesting**
+
 In Vue applications, shared elements such as headers, footers, and navigation bars are often placed directly in App.vue. However, in this project, these elements are required on most—but not all—views. For instance, the login page intentionally omits both the footer and navigation bar. As a result, placing these components in App.vue would make it difficult to exclude them on specific routes. To solve this, a dedicated MainLayout.vue component was created. This layout acts as a wrapper for all authenticated or primary views of the application. It includes the shared interface components (header, footer, nav bar) and wraps the dynamic content using `<router-view />`. All primary routes (such as /projects) are defined as child routes of the root path '/'. Each of these child routes is rendered within the MainLayout.vue wrapper, ensuring consistent UI structure while dynamically loading the corresponding view. For routes like the login page or error views—where no layout elements should be displayed—standalone routes are defined outside of the MainLayout.vue context. This modular routing structure offers flexibility and enforces a clean separation between public and authenticated parts of the interface, while keeping the core UI consistent where needed.
 
 **Core Features**
+
 The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
 
 The application provides different functionalities depending on the user’s role:
@@ -738,11 +741,26 @@ A Serial Monitor is also available independently of the build process. It allows
 
 **Development Workflow**
 
-## references:
-- https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/
-- https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/
+Vue applications can be developed and deployed using NPM, which simplifies setup and dependency management. NPM (Node Package Manager) is the standard tool for managing JavaScript packages and scripts in Node.js-based projects. A new project can be initialized using:
+```bash
+npm create vue@latest
+```
+To ensure a consistent and reproducible development environment across machines, the project uses Dev Containers, a feature of Visual Studio Code. A Dev Container is a Docker-based workspace that encapsulates all required tools, runtimes, and extensions. The configuration is defined in the .devcontainer directory, with the devcontainer.json specifying the container image and setup details. When opened in VS Code, the project runs automatically inside this container, eliminating environment inconsistencies and simplifying onboarding. Developers only need Docker and VS Code installed.
 
- Vue can be developed an deployed using the **NPM** utility. A new application can be easly created with this command:``npm create vue@latest``. As for the development enviroment it was choosen to take advantage of the *devcontainer* feature of VSCode. This  ensure a consistent and reproducible development environment. A Dev Container is a Docker-based workspace that includes all the necessary tools, runtimes, and configurations required to build and run the application. The configuration is defined in .devcontainer/ folder, where the devcontainer.json specifies the image, extensions, and workspace setup. When opened in a compatible editor like Visual Studio Code, the project automatically runs inside the container, allowing development to happen in a clean and isolated environment. This approach reduces system dependency issues and makes onboarding new developers easier, as no manual setup is required beyond Docker and VS Code. Additionally multiple configuration files can be added for developing different parts of the project. For example a devcontainer.json for the frontend and one for the backend. This way the developers can choose which part of the project they want to work on and the IDE will automatically set up the right environment. This development enviroment also allow for hot reloading of the code. This means that when the code is changed, the changes are automatically reflected in the browser without the need to refresh the page. This is a very useful feature for development and speeds up the development process a lot.
+The frontend is built using Vite, a modern build tool that offers fast startup times and hot module replacement (HMR), allowing developers to preview code changes in real time without refreshing the page. This results in a more efficient and responsive development process.
+
+To install dependencies:
+ ```bash
+npm install
+```
+To run the application locally:
+```bash
+npm run dev
+```
+When running inside the Dev Container, the following command exposes the application to external devices:
+```bash
+npm run dev -- --host 0.0.0.0
+```
 
 
 ### Backend --> Linus
@@ -840,6 +858,9 @@ The idea would be to create an application that exposes a rest api that can be u
 [52] Apache Software Foundation, “Apache Avro,” [Online]. Available: https://avro.apache.org/.
 [53] MessagePack Project, “MessagePack: It’s like JSON. But fast and small.,” [Online]. Available: https://msgpack.org/.
 [54] Google, "Protocol Buffers: Encoding," protobuf.dev, 2023. [Online]. Available: https://protobuf.dev/programming-guides/encoding/.
+[99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
+[100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
+
 
 # Declaration of authorship
 ## Who did what?
