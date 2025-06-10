@@ -971,24 +971,64 @@ Integrating these automated tests into the already existing Continuous Integrati
 
 This chapter has detailed the manual testing approach employed during the development of the sensor infrastructure, highlighting its iterative nature and comprehensive coverage of functional, integration, and usability aspects. Furthermore, it has outlined a strategic concept for the future implementation of automated testing, spanning unit, integration, end-to-end, and performance test layers. While the project's primary focus was on system implementation, these insights into quality assurance provide a clear path for ensuring the long-term stability, maintainability, and extensibility of the developed platform.
 
-# Discussion --> Enrico
-## Summary  (rückblick)(zusammenfassing	)
+# Discussion
+This chapter critically reflects on the development process, outcomes, and technical decisions made throughout the project. It provides a structured evaluation of the achieved and unachieved goals, the distribution of workload among contributors, and draws insights from challenges encountered and lessons learned. Additionally, the chapter summarizes the project’s overall contributions and suggests potential areas for future improvement or expansion.
+## Summary
+This chapter provides a concise overview of the work completed throughout the project.
 
-### Achieved goals
+The goal of the project was to design and implement an integrated platform for managing, deploying, and monitoring distributed sensor networks, with a particular focus on LoRaWAN-based systems. The result is a modular and extensible infrastructure composed of multiple interconnected services, each running in isolated containers and orchestrated via Docker Compose.
 
+At its core, the system features a modern web application that enables users to register and configure sensor nodes, initiate firmware compilations, and visualize deployment metrics. The frontend, built with Vue.js and Vuetify, offers a clean and responsive interface, while the backend handles API logic, authentication, and communication with auxiliary services.
+
+A custom compiler engine, triggered via REST API, automates the firmware build process. It supports multiple target platforms and produces binaries that users can download or flash directly via the browser using WebSerial. As an alternative, a standalone flashing utility is available for offline use, offering greater flexibility for fieldwork scenarios.
+
+Incoming data from sensor nodes is processed by a time series parser and stored in an RDF triplestore for long-term observation. Sensor payloads are described using Protocol Buffers, ensuring a compact and extensible data format. A triple store (RDF) is deployed in parallel to represent metadata and contextual information about the sensors, which can be queried via a YASGUI interface. This dual storage strategy supports both efficient time series analysis and semantic reasoning over sensor metadata.
+
+The infrastructure is secured and unified through a reverse proxy using Caddy, which handles HTTPS termination, domain-based routing, and static frontend delivery. This setup exposes only a single port to the public network, reducing the attack surface while offering seamless service access.
+
+From a DevOps perspective, the system was designed according to cloud-native principles. Infrastructure is defined entirely as code, and all services are containerized to guarantee consistent behavior across environments. GitLab CI/CD automates the build and deployment pipeline, reducing manual effort and increasing reliability. Configuration and secrets are externalized via environment variables, adhering to best practices for scalable, secure distributed systems. This modern approach ensures the platform is maintainable, portable, and ready for future growth.
+
+Overall, the system is designed to be reusable across different sensor-based projects, particularly those integrating with The Things Network. Thanks to its microservice architecture, it can be extended with minimal friction to support new protocols, data formats, or visualization tools. This platform provides a solid foundation for future sensor deployments in both research and applied settings.
+
+### Achieved Goals
+All core objectives outlined in the project scope were successfully implemented:
+1.	**Sensor Metadata Management**
+A central system was developed to manage all relevant sensor attributes, including hardware type, firmware version, location, and calibration references. The metadata is stored as RDF in a triplestore, leveraging Linked Data principles and existing ontologies where applicable.
+2.	**Integration with The Things Network (TTN)**
+The system includes a working interface to TTN for provisioning sensors and receiving LoRaWAN-based measurements. In parallel with the RDF storage, time series data continues to be stored in InfluxDB, preserving compatibility with existing infrastructure.
+3.	**Automated Firmware Compilation**
+A compilation engine was built to automatically generate firmware images based on sensor attributes. The engine fetches source code from GitLab, applies templating to inject custom values, and compiles the firmware without manual intervention.
+4.	**Firmware Deployment Process**
+Two flashing methods were implemented: a browser-based flasher using the WebSerial API and a standalone CLI tool. Both approaches eliminate the need for the Arduino IDE and support automated flashing with minimal user interaction.
+5.	**Modern Web Interface**
+An intuitive and modern web interface was developed to manage sensors, view metadata, monitor time series data, and interact with the firmware tools. The interface integrates all services and presents a seamless user experience.
+
+All core objectives outlined in the original project scope were successfully implemented, resulting in a fully functional, integrated system that meets both technical and usability requirements. The final solution addresses each aspect of the specified tasks with a strong emphasis on automation, modularity, and future scalability.
 ### Unachieved goals
+While all original requirements specified by the supervisor were fulfilled, the team decided early in the conceptual phase to revise and extend the project scope by adding technically detailed, optional features based on internal priorities and architectural considerations. These additions aimed to increase the system’s versatility and real-world applicability but were not critical for fulfilling the baseline project goals.
 
+Among these optional goals, the following were not implemented due to time constraints:
+- **Webhook Integration for Sensor Data**: The idea was to enable the backend to receive sensor data not only via MQTT but also through webhooks, allowing compatibility with LoRaWAN frameworks beyond The Things Network. Given its low priority and the solid existing MQTT integration, this feature was postponed.
+- **In-App Sensor Data Visualization and Export**: The application currently allows users to view the latest sensor readings along with timestamps, data types, and units. However, more advanced visualization tools (e.g., time series plots) and a CSV export feature were not developed. These tasks were deprioritized, as both can be performed directly via the InfluxDB web interface with minimal effort.
 ### Workload per student
- Who did what?
-### Enrico
-- Methods
-- Research heltec
-- Research webserial
-- High Level system overview
-- Compiler Engine
-- Web Application - Frontend
-- Reverse Proxy
-- Deployment & Integration
+From the beginning of the project, the team collaborated closely while maintaining a clear division of responsibilities. Tasks were distributed based on prior experience and expertise.
+Linus Degen, who had previously explored the use of RDF triplestores in the context of this project, took the lead on implementing the backend, the persistence layer, and the integration with The Things Network (TTN).
+Enrico Cirignaco, with a background in embedded systems and containerization, focused on the compiler engine, firmware flashing mechanisms, the web frontend, and DevOps tasks.
+
+The following table provides a breakdown of the main responsibilities:
+| Area                              | Linus Degen | Enrico Cirignaco |
+|-----------------------------------|-------------|------------------|
+| RDF Triplestore & Linked Data     | X           |                  |
+| TTN / LoRa Integration            | X           |                  |
+| Backend API                       | X           |                  |
+| Frontend Web Application          |             | X                |
+| Compiler Engine                   |             | X                |
+| Firmware Flashing Tools           |             | X                |
+| DevOps / CI / Deployment / Proxy  |             | X                |
+| System Architecture & Integration | X           | X                |
+
+To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This journal is included in the appendix.
+
 ## Conclusion
 
 ### Future work
@@ -1001,6 +1041,8 @@ If the arduino create agent can be used for our project, it would simply and spe
 The idea would be to create an application that exposes a rest api that can be used by the webapplication to send the binary and integrates the propetary flashing tools of heltec to be able to flash the binary on the board. The application should be packaged in a single executable for easy installation.
 
 #### CD pipeline
+
+
 ### Final thoughts
 
 # Bibliography
