@@ -1239,7 +1239,8 @@ The following table provides a breakdown of the main responsibilities:
 | Area                              | Linus Degen | Enrico Cirignaco |
 |-----------------------------------|-------------|------------------|
 | RDF Triplestore & Linked Data     | X           |                  |
-| TTN / LoRa Integration            | X           |                  |
+| Protobuf Handling                 | X           |                  |
+| TTN / LoRaWAN Integration         | X           |                  |
 | Backend API                       | X           |                  |
 | Frontend Web Application          |             | X                |
 | Compiler Engine                   |             | X                |
