@@ -664,10 +664,8 @@ options:
 - influxdb
 - parse from schema
 - ttn mock
-## Webapplication 
-### Frontend --> Enrico
-## Web Application
 
+## Web Application
 The web application serves as a centralized interface for managing the entire lifecycle of the sensor network, ranging from node provisioning and firmware flashing to deployment monitoring and data visualization. To ensure clear separation of concerns and enable independent development, the application is divided into two main components: frontend and backend. The frontend is responsible for the user interface and user interaction, while the backend manages business logic, data handling, and communication with external services such as the Compiler Engine and InfluxDB. These components interact via a REST API, allowing for modularity, maintainability, and flexible deployment.
 ### Frontend
 The frontend of the web application is implemented as a single-page application (SPA) using the Vue.js framework. It adopts the Vuetify component library to provide a consistent design system and accelerate UI development. Application state is managed using Pinia, which offers a reactive and modular store architecture, allowing components to efficiently share and synchronize data.
@@ -760,14 +758,36 @@ npm run dev -- --host 0.0.0.0
 
 
 ### Backend --> Linus
-### Reverse Proxy --> Enrico
+### Reverse Proxy
+Because the system consists of multiple services, many of which must be accessible to users, a common, centralized entry point is required. Exposing each service on a separate port was not a feasible option, especially considering the need for TLS encryption, which is essential for any modern web application. To address this, a reverse proxy was used.
+
+A reverse proxy is a server that sits in front of multiple backend services and forwards client requests to the appropriate service based on criteria like request paths or subdomains. This allows all traffic to go through a single exposed service, simplifying networking and improving security.
+
+In this project, the reverse proxy also serves as a static web server for the frontend application, an important factor when choosing the proxy software. Popular tools that support both static file serving and reverse proxying include Nginx, Apache, and Caddy.
+
+Caddy was selected due to:
+- Built-in TLS support with automatic certificate generation.
+- A simple configuration format (Caddyfile).
+- Prior experience of the development team.
+
+The Caddyfile defines how Caddy handles routing and encryption. Once a domain and subdomains were requested from the BFH IT department, the reverse proxy was configured to:
+1.	Route subdomains to their corresponding services.
+2.	Enable TLS encryption using Caddy’s internal certificate authority.
+3.	Serve the frontend application as static content.
+
+This design exposes only the HTTPS port (4443) to the network, with all other services accessible exclusively through the reverse proxy, reducing attack surface and simplifying the overall setup.
+An example Caddyfile rule:
+```caddyfile
+https://influx.leaflink.ti.bfh.ch {
+	tls internal
+	reverse_proxy influxdb:8086
+}
+```
+This routes all traffic from the influx subdomain to port 8086 of the influxdb container, while using a self-signed TLS certificate.
 ## Protobuf Service --> Linus
 ## Deployment & Integration --> Enrico
 At first the image was built locally and tested. After the tests were successful a gitlab ci/cd pipeline was created to use a gitlab runner to build the image and push it to the gitlab registry. The image is then pulled from the registry by the compiler engine service using a dedicated token. By doing so an up-to-date image is always available in the gilab registry of the project.
 
-### Frontend webserver and reverse proxy
-This chapter will explain how the frontend webserver work. Common static webservers are nginx, caddy and apache. Nginx and Caddy can also be used as Reverse Proxy so instead of having two different servers, one serving static content and on front handling reverse proxy, both functionalities can be handled by the same server. This is a good solution for small projects where the overhead of having two different servers is not justified. Caddy is a very good canditate because it also offers tls encryption out of the box and is very easy to configure, also the developers already had some experience deploying caddy.
-After the caddy service was added to the compose file, the caddyfile was created. The caddyfile is the configuration file for caddy and it defines how the server should behave. The caddyfile is very easy to read and understand. For testing purposes an index.html file was created and served by caddy. Afterward the reverse proxy rules could be added. This rules just describe which subdomain or path should be routed to which service. Additionally tls with self signed certificates was enabled. The CA had to be self signed because we don't own a public domain. For development purposes some aliases were created so that the services are also available via vpn at a readable hostname.
 #### Deployment
 The application can be built with the following command: `npm run build`. This will create a new folder called *dist* in the root of the project. This folder contains all the files needed to run the application. The location where the project is exported can be manually set in the vite.config.js file like that:
 ```javascript
@@ -866,4 +886,5 @@ The idea would be to create an application that exposes a rest api that can be u
 - Research webserial
 - High Level system overview
 - Compiler Engine
+- Web Application - Frontend
 
