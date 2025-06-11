@@ -71,6 +71,7 @@ To ensure long-term usability and robustness, several challenges may arise that 
 
 ## Research Projects at BFH
 Two collaborative research projects at the Bern University of Applied Sciences, conducted jointly by the departments AHB and HAFL, illustrate many of the practical challenges associated with managing distributed sensor systems: *Internet of Soils (IoS)* and *Mobile Urban Green (MUG)*.
+
 - **IoS** focuses on measuring soil moisture in protection forests using an autonomous, solar-powered sensor network based on LoRaWAN technology. The goal is to support long-term environmental monitoring by capturing time-series data from remote locations. [37]
 - **MUG** builds on insights from IoS and focuses on assessing the cooling effects of trees placed in large movable containers within urban areas. The project combines environmental measurements such as temperature, solar radiation, and water usage with modeling approaches to evaluate and simulate their impact at both the individual tree and neighborhood scale. [38]
 
@@ -542,19 +543,22 @@ This chapter presents the results of the implementation phase in detail. It prov
 The system developed in this project is designed to simplify the deployment, configuration, and monitoring of distributed IoT networks. It is intended for use by universities, research institutions, or companies seeking efficient management of sensor-based infrastructures. The architecture is modular and extensible, enabling the integration of new features or services as needed. While the design was guided by the specific case study described in the Introduction chapter, it was intentionally kept flexible to support a broad range of future use cases.
 
 The key components of the system are:
+
 - **Sensor Nodes**: These are embedded hardware devices deployed in outdoor or remote environments to measure real-world phenomena such as soil moisture, temperature, or light. Each sensor node consists of a microcontroller (e.g., ESP32 or CubeCell), one or more sensors, and a communication module,either wired or wireless, depending on the use case. Typically, the node must be programmed with custom firmware prior to deployment, defining its sensing logic and communication behavior.
 Once deployed, the nodes operate autonomously and transmit their data to the IoT Gateway. In this project, communication is handled wirelessly via LoRaWAN, a low-power wide-area network (LPWAN) protocol designed for long-range, energy-efficient data transmission,ideal for battery-powered devices in distributed sensor networks.
 - **IoT Gateway**: This component serves as a bridge between the sensor nodes and the main cloud infrastructure. It receives data from the sensor nodes and forwards it to the backend system for processing and storage. In a LoRaWAN-based architecture like the one used in this project, the concept of the IoT gateway is split into two layers:
-    - **LoRaWAN Gateways** are physical devices distributed across a geographic area. They receive wireless transmissions from sensor nodes using the LoRaWAN protocol and relay them over the internet via standard IP-based protocols.
-    - **The Things Network** (TTN) is a global, open LoRaWAN infrastructure that acts as the cloud-based backend for LoRaWAN gateways. It handles device management, message routing, and secure data delivery. TTN receives the sensor data from the gateways and makes it accessible to external systems like ours.
+    + **LoRaWAN Gateways** are physical devices distributed across a geographic area. They receive wireless transmissions from sensor nodes using the LoRaWAN protocol and relay them over the internet via standard IP-based protocols.
+    + **The Things Network** (TTN) is a global, open LoRaWAN infrastructure that acts as the cloud-based backend for LoRaWAN gateways. It handles device management, message routing, and secure data delivery. TTN receives the sensor data from the gateways and makes it accessible to external systems like ours.
 In this system, the backend connects to TTN to receive real-time sensor data. Data is transmitted using the MQTT protocol, a lightweight publish-subscribe messaging protocol designed specifically for low-bandwidth and high-latency IoT networks. Sensor provisioning (i.e., registering device metadata) on the TTN platform is handled through a REST API.
 - **Main Cloud Infrastructure**: This is the core of the system where all data processing, storage, and user interaction takes place. It also represents the primary focus of this project. The infrastructure is hosted on BFH’s private cloud and is accessible to users through a web-based application. The system consists of multiple backend services, databases, and interfaces, which are discussed in detail in the following chapters.
+
 - **Users**: The most important component of the system is the user base. The system supports three distinct user roles:
   - **Admin**: Responsible for managing the system and creating or maintaining user accounts.
   - **Technicians**: Handle the deployment and configuration of sensor nodes. Through the web application, they can create projects, provision and flash nodes, and monitor node status.
   - **Researchers**: Access, visualize, and analyze sensor data via the web application. They do not have permissions to modify system configurations or manage devices.
 
 Users interact with the system primarily through a browser-based web application. For advanced data access and querying, two additional interfaces are available:
+
 - **YASGUI SPARQL Editor**, which enables querying the RDF triplestore using SPARQL for semantic or linked data use cases.
 - **InfluxDB UI**, which provides time-series data visualization and querying through a graphical interface.
 
@@ -616,6 +620,7 @@ This service is implemented as a standalone, Dockerized application accessible v
 A notable feature of the Compiler Engine is that it temporarily stores compiled binaries, allowing users to download them later without relying on webhooks or other asynchronous communication methods. To manage resources efficiently, a garbage collection mechanism automatically purges outdated binaries after a defined retention period.
 
 The Compiler Engine is composed of three Docker containers that work together to provide a modular and scalable compilation service.
+
 - **Main Service**: This is the core component of the system and is always running. It exposes a REST API that allows users or external systems to interact with the compiler engine. The main service is responsible for downloading the source code from a GitLab repository using a provided URL and access token, enriching the source code with variables included in the API request, and initiating the compilation process. To compile the source code, the main service dynamically launches a dedicated toolchain container. It also manages temporary storage for the resulting binaries, enriched source code, and compilation logs.
 - **Volume Cleaner**: This service runs continuously alongside the main service. Its task is to periodically delete old or unused files, such as previously downloaded repositories or generated binaries, to free up disk space and keep the system clean.
 - **Toolchain Container**: This container is created and launched by the main service for each individual build job. It encapsulates the toolchain required to compile the given source code. The specific Docker image used for the toolchain is defined per job, making the system easily adaptable to various platforms such as ESP32, STM32, or Microchip MCUs. Once the compilation finishes, the container is stopped and removed. This design allows the system to support multiple toolchains without changes to the main logic.
@@ -635,39 +640,25 @@ The primary goal of the Compiler Engine is to support compilation of Arduino ske
 
 Several existing toolchains were evaluated:
 
-**Arduino IDE**:
-- **Pros**:  
-  - Official support  
-  - Full compatibility with Arduino boards and libraries  
-- **Cons**:  
-  - GUI-based, not intended for automation  
-  - Incompatible with Docker environments [39]  
++-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
+| Tool                              | Pros                                                              | Cons                                                               |
++===================================+===================================================================+====================================================================+
+| Arduino IDE                       | - Official support                                                | - GUI-based                                                        |
+|                                   | - Full compatibility with Arduino boards and libraries            | - Incompatible with Docker environments [39]                       |
++-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
+| PlatformIO                        | - Broad board and framework support                               | - Designed primarily for interactive development                   |
+|                                   | - Advanced features and cross-platform                            | - Docker and headless support are limited or complex [40]          |
++-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
+| Arduino CLI                       | - Official command-line tool                                      | - Less customizable compared to PlatformIO                         |
+|                                   | - Built for headless, automated environments                      |                                                                    |
+|                                   | - Supports board and library management                           |                                                                    |
+|                                   | - Easy to integrate with Docker [41]                              |                                                                    |
++-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
+| Makefile-Based Toolchains         | - Lightweight and fully customizable                              | - Manual board/library setup                                       |
+| (e.g., Arduino-Makefile)          | - Docker-friendly [42]                                            | - No official support                                              |
+|                                   |                                                                   | - Higher maintenance burden                                        |
++-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 
-**PlatformIO**:
-- **Pros**:  
-  - Broad board and framework support  
-  - Advanced features and cross-platform  
-- **Cons**:  
-  - Designed primarily for interactive development  
-  - Docker and headless support are limited or complex [40]  
-
-**Arduino CLI**:
-- **Pros**:  
-  - Official command-line tool  
-  - Built for headless, automated environments  
-  - Supports board and library management  
-  - Easy to integrate with Docker [41]  
-- **Cons**:  
-  - Less customizable compared to PlatformIO  
-
-**Makefile-Based Toolchains (e.g., Arduino-Makefile)**:
-- **Pros**:  
-  - Lightweight and fully customizable  
-  - Docker-friendly [42]  
-- **Cons**:  
-  - Manual board/library setup  
-  - No official support  
-  - Higher maintenance burden  
 
 Based on these findings, **Arduino CLI** was selected as the most suitable tool for this project. It strikes a good balance between automation support, Docker compatibility, and official maintenance. Its lack of deep customization is not considered a limitation for the project's scope.
 
@@ -713,7 +704,9 @@ arduino-cli compile \
   --verbose \
 $SOURCE_FOLDER
 ```
+
 **Variable Descriptions**:
+
 - **BOARDS_URL**: A comma-separated list of URLs for additional board package indexes (used for third-party board support like Heltec).
 - **FQBN_CORE**: The name of the board core to install (e.g., arduino:avr, esp32:esp32).
 - **FQBN**: The Fully Qualified Board Name used for compilation (e.g., esp32:esp32:nodemcu-32s).
@@ -800,12 +793,14 @@ An OpenAPI specification[46] was created based on the defined requirements of th
 To ensure robust and predictable behavior across all endpoints, the project used Pydantic[47] to define strict request and response schemas. Pydantic leverages Python type hints to enforce validation rules and guarantees well-structured data both at input and output. These models were automatically integrated into the OpenAPI documentation, ensuring synchronization between the live implementation and the generated documentation. This greatly improved reliability, clarity, and maintainability during development.
 
 Several iterations were required to define a clean, capable, and user-friendly API that met the project’s requirements. The final specification includes endpoints for initiating builds, retrieving status updates, and downloading artifacts:
+
 - **POST /build**: Initiate a standard build job
 - **POST /generic-build**: Initiate a custom build job with full control over source and toolchain image
 - **GET /job/{job_id}/status**: Retrieve the current status of a specific build job
 - **GET /job/{job_id}/artifacts**: Download the generated artifacts from a completed job
 
 A typical user workflow involves:
+
 1.	Sending a **POST /build** request with the desired configuration.
 2.	Polling **GET /job/{job_id}/status** to monitor progress.
 3.	Once the compilation is completed, retrieving results via **GET /job/{job_id}/artifacts**.
@@ -854,6 +849,7 @@ The following sections describe the key features of the frontend interface, its 
 Although the development team was already experienced with Vue.js, the project began with a review of current best practices and recent advancements in the Vue ecosystem. A key priority was choosing a component library to accelerate UI development and allow the team to focus on the application's core logic.
 
 Several options were considered:
+
 - **Vuetify**: Mature and feature-rich with great Vue integration; slightly heavy but ideal for fast development.
 - **Naive UI**: Lightweight and modern, but limited by a smaller ecosystem.
 - **Quasar**: Powerful and full-featured, but more complex than necessary.
@@ -861,6 +857,7 @@ Several options were considered:
 
 Vuetify was ultimately selected due to its robust feature set and seamless integration within the Vue ecosystem. 
 The application structure follows Vue 3 best practices, designed to be modular, maintainable, and easily extensible. The key components of the project structure include:
+
 - **components**: Contains reusable UI elements used across different views.
 - **plugins**: Hosts application-wide plugins; in this project, primarily the Vuetify setup.
 - **router**: Manages the navigation and routing logic, including nested routes and redirects.
@@ -880,15 +877,18 @@ In Vue applications, shared elements such as headers, footers, and navigation ba
 The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
 
 The application provides different functionalities depending on the user’s role:
+
 - **Researchers** have read-only access to data and can only change their password.
 - **Technicians** can modify system elements (e.g., nodes, sensors) and update their password.
 - **Administrators** have full access, including user management capabilities such as creating new accounts.
 
 The core of the application is organized around four main entities:
-- **Commercial Sensors**: Commercial Sensors serve as standardized, reusable definitions for real-world sensor types. They are used exclusively for documentation purposes and do not directly influence the behavior of sensor templates or sensor nodes. Instead, they function as centralized metadata containers that help organize and describe sensor characteristics in a consistent and reusable manner across the application. For example, a Commercial Sensor entry could represent a typical temperature sensor, including its expected measurement range (e.g., -40°C to +85°C), unit (°C), and a link to its datasheet. Similarly, a more complex Commercial Sensor could represent an entire meteorological station, listing each measured variable (temperature, humidity, wind speed), the expected ranges for each channel, calibration notes, and even field-specific deployment considerations. By storing this information in a dedicated Commercial Sensor entity, technicians and researchers can avoid redundancy, maintain traceability, and ensure that sensor definitions are consistent throughout the system. This also enables teams to quickly understand which type of hardware a given sensor node is designed to work with, without having to consult scattered documentation or external resources.
 
-- **Sensor Templates**: Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define Configurables, parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The Protobuf schema generated from this definition can be previewed in the template overview, and the corresponding NanoPB-compatible code can be downloaded by developers to embedded in the source code.
-3. **Sensor Nodes**: Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as GPS coordinates, altitude and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. TThe overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and do not need to be modified by the user. These system Configurables are required for network-level communication and typically include LoRa and TTN credentials. Their values are pre-filled and managed by the backend to ensure consistency and prevent misconfiguration. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The overview also includes a Firmware Tools section (described in detail in a later chapter), which provides direct access to firmware binaries and flashing utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
+1. **Commercial Sensors**: Commercial Sensors serve as standardized, reusable definitions for real-world sensor types. They are used exclusively for documentation purposes and do not directly influence the behavior of sensor templates or sensor nodes. Instead, they function as centralized metadata containers that help organize and describe sensor characteristics in a consistent and reusable manner across the application. For example, a Commercial Sensor entry could represent a typical temperature sensor, including its expected measurement range (e.g., -40°C to +85°C), unit (°C), and a link to its datasheet. Similarly, a more complex Commercial Sensor could represent an entire meteorological station, listing each measured variable (temperature, humidity, wind speed), the expected ranges for each channel, calibration notes, and even field-specific deployment considerations. By storing this information in a dedicated Commercial Sensor entity, technicians and researchers can avoid redundancy, maintain traceability, and ensure that sensor definitions are consistent throughout the system. This also enables teams to quickly understand which type of hardware a given sensor node is designed to work with, without having to consult scattered documentation or external resources.
+
+2. **Sensor Templates**: Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define Configurables, parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The Protobuf schema generated from this definition can be previewed in the template overview, and the corresponding NanoPB-compatible code can be downloaded by developers to embedded in the source code.
+
+3.  **Sensor Nodes**: Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as GPS coordinates, altitude and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. TThe overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and do not need to be modified by the user. These system Configurables are required for network-level communication and typically include LoRa and TTN credentials. Their values are pre-filled and managed by the backend to ensure consistency and prevent misconfiguration. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The overview also includes a Firmware Tools section (described in detail in a later chapter), which provides direct access to firmware binaries and flashing utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
 
 4. **Projects**: Projects act as containers for organizing sensor nodes into meaningful groups. Each project typically corresponds to a field study, deployment site, or research objective. Projects simplify management by grouping related nodes under a shared context and allow researchers to monitor aggregated data. Projects can also store metadata in form of links such as wiki pages, documentation.
 
@@ -941,7 +941,7 @@ This chapter details the architectural decisions, key components, and underlying
 
 ### Architectural Principles and Design
 
-The backend service's architecture is primarily inspired by the well-established Model-View-Controller (MVC) pattern, though adapted to the specific characteristics of a RESTful API service developed with FastAPI. This approach was chosen to enforce a strict separation of concerns, ensuring that each part of the system: handling HTTP requests, business logic, and data access, operates independently. This modularity enhances maintainability, simplifies testing, and allows for clearer development responsibilities.
+The backend service's architecture is primarily inspired by the well-established Model-View-Controller (MVC) pattern, though adapted to the specific characteristics of a RESTful API service developed with FastAPI. This approach was chosen to enforce a strict separation of concerns, ensuring that each part of the system -- handling HTTP requests, business logic, and data access -- operates independently. This modularity enhances maintainability, simplifies testing, and allows for clearer development responsibilities.
 
 #### MVC-Inspired Structure
 
@@ -1193,6 +1193,7 @@ Built in Python, the TTN-Mock leverages the `paho-mqtt` library to establish a c
 The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
 
 To avoid manual setup and promote reproducibility, the team followed an Infrastructure as Code (IaC) approach, aiming to define and automate as much of the deployment process as possible. The infrastructure is described through several key components:
+
 - **Dockerfiles**: Each service has its own Dockerfile, specifying the base image, dependencies, and build steps needed to produce a functional Docker image.
 - **Docker Compose Files**: These define how services are orchestrated, including image versions, environment variables, volumes, and inter-service dependencies. A single command can bring up the full stack in the correct order.
 - **GitLab CI/CD YAML File**: Defines the automated pipeline used to build, test, and push Docker images to the container registry.
@@ -1236,22 +1237,28 @@ This setup ensures that real secrets remain untracked, while providing version-c
 ## Production Deployment
 This section guides DevOps engineers through the process of deploying the system to a production environment. It covers the essential steps, prerequisites, and configuration details for launching all services on a production server.
 Before beginning the deployment process, ensure the following:
+
 - **Server Access**: You have SSH access to the production server.
 - **Docker Installation**: Docker is already installed on the server.
 - **DNS Configuration**: DNS records for your domain and any subdomains are correctly configured to point to the server's IP address.
 
 Follow these steps to deploy the system:
+
 1. Transfer Docker Compose File: Copy the compose-prod.yaml file to your production server. You can use scp or any other secure file transfer method.
 2. Create Environment Files and Populate Secrets: Create the necessary environment files and populate them with the required secrets and configuration variables.
 3. Log in to GitLab Container Registry: Authenticate Docker with your GitLab Container Registry to pull the necessary images.
+
 ```bash
 docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
 ```
+
 4. Start Services with Docker Compose: Set the desired version tag and start the services using Docker Compose. This command will pull the specified images (if not already present) and run the containers in detached mode.
+
 ```bash
 export TAG=v1.0.0 && docker compose -f compose-prod.yaml up -d --pull
 ```
 After deployment, you can inspect the system's logs to ensure all services are running correctly.
+
 ```bash
 docker compose logs
 ```
@@ -1307,14 +1314,19 @@ Overall, the system is designed to be reusable across different sensor-based pro
 
 ## Achieved Goals
 All core objectives outlined in the project scope were successfully implemented:
+
 1.	**Sensor Metadata Management**
 A central system was developed to manage all relevant sensor attributes, including hardware type, firmware version, location, and calibration references. The metadata is stored as RDF in a triplestore, leveraging Linked Data principles and existing ontologies where applicable.
+
 2.	**Integration with The Things Network (TTN)**
 The system includes a working interface to TTN for provisioning sensors and receiving LoRaWAN-based measurements. In parallel with the RDF storage, time series data continues to be stored in InfluxDB, preserving compatibility with existing infrastructure.
+
 3.	**Automated Firmware Compilation**
 A compilation engine was built to automatically generate firmware images based on sensor attributes. The engine fetches source code from GitLab, applies templating to inject custom values, and compiles the firmware without manual intervention.
+
 4.	**Firmware Deployment Process**
 Two flashing methods were implemented: a browser-based flasher using the WebSerial API and a standalone CLI tool. Both approaches eliminate the need for the Arduino IDE and support automated flashing with minimal user interaction.
+
 5.	**Modern Web Interface**
 An intuitive and modern web interface was developed to manage sensors, view metadata, monitor time series data, and interact with the firmware tools. The interface integrates all services and presents a seamless user experience.
 
@@ -1324,7 +1336,9 @@ All core objectives outlined in the original project scope were successfully imp
 While all original requirements specified by the supervisor were fulfilled, the team decided early in the conceptual phase to revise and extend the project scope by adding technically detailed, optional features based on internal priorities and architectural considerations. These additions aimed to increase the system’s versatility and real-world applicability but were not critical for fulfilling the baseline project goals.
 
 Among these optional goals, the following were not implemented due to time constraints:
+
 - **Webhook Integration for Sensor Data**: The idea was to enable the backend to receive sensor data not only via MQTT but also through webhooks, allowing compatibility with LoRaWAN frameworks beyond The Things Network. Given its low priority and the solid existing MQTT integration, this feature was postponed.
+
 - **In-App Sensor Data Visualization and Export**: The application currently allows users to view the latest sensor readings along with timestamps, data types, and units. However, more advanced visualization tools (e.g., time series plots) and a CSV export feature were not developed. These tasks were deprioritized, as both can be performed directly via the InfluxDB web interface with minimal effort.
 
 ## Workload per student
