@@ -427,14 +427,33 @@ In addition to tracking technical progress, the team implemented simple but effe
 
 ## Milestones
 
-| Milestone     | Duration | Key Objectives        |
-|---------------|----------|-----------------------|
-| Concept Phase | 3 weeks | • Propose solution ideas\ • Detailed system diagram\ • PoC of key technologies\ • Data model diagram |
-| Infrastructure Setup & Proof of Concept                   | 3 weeks          | - Set up development and production environment  <br> - Live data flow from sensor nodes to triplestore via Flatbuffers  <br> - PoC Compile and flash firmware via browser |
-| Webapp Frontend & Backend                     | 4 weeks          | - User authentication  <br> - Frontend UI for data entry and visualization  <br> - Backend as middleware between services  <br> - Implement REST interface |
-| End-to-End Testing                     | 2 weeks          | - Integrate all system components and services  <br> - Deployment of the v1 system  <br> - Stakeholder testing |
-| Feedback Integration & Optional Features | 2 weeks        | - Adjust or implement components based on feedback  <br> - Technical wrap-up |
-| Project Finalization                      | 2 weeks          | - Finalize documentation  <br> - Poster, project book entry, presentation, and video |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| Milestone                                 | Duration       | Key Objectives                                                    |
++===========================================+================+===================================================================+
+| Concept Phase                             | 3 weeks        | - Propose solution ideas                                          |
+|                                           |                | - Detailed system diagram                                         |
+|                                           |                | - PoC of key technologies                                         |
+|                                           |                | - Data model diagram                                              |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| Infrastructure Setup & Proof of Concept   | 3 weeks        | - Set up development and production environment                   |
+|                                           |                | - Live data flow from sensor nodes to triplestore via Flatbuffers |
+|                                           |                | - PoC: Compile and flash firmware via browser                     |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| Webapp Frontend & Backend                 | 4 weeks        | - User authentication                                             |
+|                                           |                | - Frontend UI for data entry and visualization                    |
+|                                           |                | - Backend as middleware between services                          |
+|                                           |                | - Implement REST interface                                        |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| End-to-End Testing                        | 2 weeks        | - Integrate all system components and services                    |
+|                                           |                | - Deployment of the v1 system                                     |
+|                                           |                | - Stakeholder testing                                             |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| Feedback Integration & Optional Features  | 2 weeks        | - Adjust or implement components based on feedback                |
+|                                           |                | - Technical wrap-up                                               |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
+| Project Finalization                      | 2 weeks        | - Finalize documentation                                          |
+|                                           |                | - Poster, project book entry, presentation, and video             |
++-------------------------------------------+----------------+-------------------------------------------------------------------+
 
 # Modern Application Methods
 The project followed modern application development principles, drawing inspiration from the Twelve-Factor App methodology [3]. The goal was to build a modular, portable, and maintainable system that could easily be extended or adapted by future organizations. These principles ensured a clean separation of concerns, environment-agnostic deployment, and a consistent developer experience across all components. The following sections describe the key practices adopted during implementation.

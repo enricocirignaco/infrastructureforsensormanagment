@@ -1,6 +1,6 @@
 {
     "name": "BFH LaTeX CI",
-    "image": "registry.gitlab.ti.bfh.ch/bfh-latex/registry/vscode:2.2.3",
+    "image": "registry.gitlab.ti.bfh.ch/bfh-latex/registry/vscode:latest",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -15,5 +15,10 @@
     },
     "remoteUser": "vscode",
 
-    "postCreateCommand": "sudo tlmgr update --self  && sudo tlmgr install unicode-math lualatex-math booktabs mdwtools fancyvrb"
+    "postCreateCommand": "sudo tlmgr update --self  && sudo tlmgr install unicode-math lualatex-math booktabs mdwtools fancyvrb luatexbase etoolbox xstring fontspec csquotes logreq selnolig"
 }
+
+// Pandoc is super old in the image, install version 3.1
+// curl -L https://github.com/jgm/pandoc/releases/download/3.1.12.2/pandoc-3.1.12.2-1-amd64.deb -o pandoc.deb
+// sudo dpkg -i pandoc.deb
+// rm pandoc.deb
