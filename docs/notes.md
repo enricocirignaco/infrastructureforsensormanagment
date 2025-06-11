@@ -120,11 +120,22 @@ Prioritäten:
 - Daten-Löschung von nicht gebrauchten Entitäten / Fälschlicherweise erstellt
 
 
-
-
 # Future Work Notes
 - Mark end devices as "archived" on TTN when set so over 
 - Improved state management. Certain data should still be changeable even when "In-use"
 - data repositores, clean strucuture
     - generate from linkml?
     - use more ontologies?
+
+
+# Aufgaben letzter Tag
+- Formatierung
+- Backend/Frontend abgleichen
+- Appendix: Meeting Notes
+- Appendix: Journal updaten und einfügen
+- Appendix: Setup Guide
+- Appendix: Requirements
+- Abstract schreiben
+- Discussion vervollständigen
+- who has done what?
+- unterschrift dings + absatz bezüglich GPT

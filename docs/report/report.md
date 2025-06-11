@@ -826,7 +826,7 @@ All cleanup operations are logged in a dedicated file stored within the logs vol
 
 The retention time and cleanup interval can be customized through environment variables, allowing flexible control based on deployment needs or available disk space. This service ensures that the system can remain efficient and reliable over long periods of use without manual intervention.
 
-# Heltec programming Utils
+# Heltec Programming Utils
 
 As outlined in the research chapter Programming and Toolchain Analysis for CubeCell, the Heltec CubeCell devices used in this project do not support standard USB serial programming protocols commonly used with microcontrollers like the ESP32. Instead, Heltec provides proprietary binaries for firmware upload, requiring a custom solution to bridge the gap between firmware compilation and device programming.
 
@@ -847,16 +847,13 @@ options:
   -h, --help  show this help message and exit
 ```
 
-# Web Application
-The web application serves as a centralized interface for managing the entire lifecycle of the sensor network, ranging from node provisioning and firmware programming to deployment monitoring and data visualization. To ensure clear separation of concerns and enable independent development, the application is divided into two main components: frontend and backend. The frontend is responsible for the user interface and user interaction, while the backend manages business logic, data handling, and communication with external services such as the Compiler Engine and InfluxDB. These components interact via a REST API, allowing for modularity, maintainability, and flexible deployment.
-
-## Frontend
-The frontend of the web application is implemented as a single-page application (SPA) using the Vue.js framework. It adopts the Vuetify component library to provide a consistent design system and accelerate UI development. Application state is managed using Pinia, which offers a reactive and modular store architecture, allowing components to efficiently share and synchronize data.
+# Webapp-Frontend
+The frontend of the web application is implemented as a single-page application (SPA) using the Vue.js framework. Serving as the centralized interface for managing the entire lifecycle of the sensor network, it handles everything from node provisioning and firmware programming to deployment monitoring and data visualization. It adopts the Vuetify component library to provide a consistent design system and accelerate UI development. Application state is managed using Pinia, which offers a reactive and modular store architecture, allowing components to efficiently share and synchronize data.
 
 Communication with the backend occurs via a REST API, enabling real-time interaction and data updates without full page reloads. The project is built and managed using Vite, a modern frontend toolchain that ensures fast development workflows and optimized production builds.
 The following sections describe the key features of the frontend interface, its structure, and the deployment approach.
 
-### Architecture and Design
+## Architecture and Design
 Although the development team was already experienced with Vue.js, the project began with a review of current best practices and recent advancements in the Vue ecosystem. A key priority was choosing a component library to accelerate UI development and allow the team to focus on the application's core logic.
 
 Several options were considered:
@@ -884,7 +881,7 @@ Communication with the backend is handled via a REST API, with authentication ma
 **Main Layout Nesting**
 In Vue applications, shared elements such as headers, footers, and navigation bars are often placed directly in App.vue. However, in this project, these elements are required on most, but not all views. For instance, the login page intentionally omits both the footer and navigation bar. As a result, placing these components in App.vue would make it difficult to exclude them on specific routes. To solve this, a dedicated MainLayout.vue component was created. This layout acts as a wrapper for all authenticated or primary views of the application. It includes the shared interface components (header, footer, nav bar) and wraps the dynamic content using `<router-view />`. All primary routes (such as /projects) are defined as child routes of the root path '/'. Each of these child routes is rendered within the MainLayout.vue wrapper, ensuring consistent UI structure while dynamically loading the corresponding view. For routes like the login page or error views, where no layout elements should be displayed, standalone routes are defined outside of the MainLayout.vue context. This modular routing structure offers flexibility and enforces a clean separation between public and authenticated parts of the interface, while keeping the core UI consistent where needed.
 
-### Core Features
+## Core Features
 The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
 
 The application provides different functionalities depending on the user’s role:
@@ -922,7 +919,7 @@ Additionally, for ESP32-based nodes, successful compilation enables firmware pro
 A Serial Monitor is also available independently of the build process. It allows users to connect to an already-programmed board and view its serial output in real time.
 ![Firmware Tools Overview](./images/firmaware-tools.jpg)
 
-### Development Workflow
+## Development Workflow
 Vue applications can be developed and deployed using NPM, which simplifies setup and dependency management. NPM (Node Package Manager) is the standard tool for managing JavaScript packages in Node.js-based projects. A new project can be initialized using:
 ```bash
 npm create vue@latest
@@ -944,17 +941,17 @@ When running inside the Dev Container, the following command exposes the applica
 npm run dev -- --host 0.0.0.0
 ```
 
-## Webapp-Backend
+# Webapp-Backend
 
-Following the discussion of the web application's user-facing components, this chapter shifts focus to the backend service specifically. This service acts as the central interface for the frontend, providing all necessary data and processing capabilities via a well-defined REST API. While the frontend is responsible solely for presentation, this dedicated backend orchestrates the complex interactions between various other internal and external services, managing everything from data persistence and sensor provisioning to firmware compilation and security.
+Following the discussion of the web application's user-facing components, this chapter shifts focus to the backend service specifically. This service acts as the central interface for the frontend, providing all necessary data and processing capabilities via a well-defined REST API. It forms the other half of the web application, working in conjunction with the frontend to manage the sensor network's lifecycle. While the frontend is responsible solely for presentation, this dedicated backend orchestrates the complex interactions between various other internal and external services, managing everything from data persistence and sensor provisioning to firmware compilation and security.
 
 This chapter details the architectural decisions, key components, and underlying principles that govern the design of the webapp-backend service. It explores the chosen framework, FastAPI, and its application in structuring the project, managing data models, and implementing robust security measures. Additionally, the chapter highlights how this backend integrates with other essential services like the Triplestore, Compiler Engine, and The Things Network (TTN) to realize the system's comprehensive functionality. The aim is to provide a concise yet thorough understanding of the backend's role as the system's operational backbone.
 
-### Architectural Principles and Design
+## Architectural Principles and Design
 
 The backend service's architecture is primarily inspired by the well-established Model-View-Controller (MVC) pattern, though adapted to the specific characteristics of a RESTful API service developed with FastAPI. This approach was chosen to enforce a strict separation of concerns, ensuring that each part of the system -- handling HTTP requests, business logic, and data access -- operates independently. This modularity enhances maintainability, simplifies testing, and allows for clearer development responsibilities.
 
-#### MVC-Inspired Structure
+### MVC-Inspired Structure
 
 While MVC is traditionally applied to applications with a graphical user interface, its core principles of separating data, presentation, and control logic are highly beneficial for backend services. In this context, the backend service aligns with MVC as follows:
 
@@ -964,7 +961,7 @@ While MVC is traditionally applied to applications with a graphical user interfa
 
 This structure contrasts with frameworks like Spring Boot, which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
 
-#### Project-Root Structure
+### Project-Root Structure
 
 The backend service adopts a clear, modular project structure. At its root level, several key files manage the application's core setup and configuration:
 
@@ -975,7 +972,7 @@ The backend service adopts a clear, modular project structure. At its root level
 
 Beyond these foundational files, the architecture is further divided into dedicated directories, each encapsulating a specific concern of the application, such as data models, API endpoints, business logic, and data access.
 
-### Dependency Injection
+## Dependency Injection
 
 The backend service extensively leverages the Dependency Injection (DI) pattern, a core concept inspired by frameworks like Spring Boot. DI is crucial for achieving modularity and testability by decoupling components. Instead of objects creating or managing their own dependencies, these dependencies are "injected" into them by an external entity, typically the framework itself. In Spring Boot, this is managed by the Inversion of Control (IoC) container, which instantiates and provides single instances of beans (objects) where needed [@spring-boot-di].
 
@@ -992,7 +989,7 @@ def get_auth_service(
     return AuthService(user_repository)
 ```
 
-### Data Models
+## Data Models
 
 The `models` directory is central to defining the data structures used throughout the backend service. It houses all Pydantic models, which are crucial for ensuring data integrity, providing automatic type validation, and clearly defining the application's API contracts. Pydantic's strength lies in its ability to automatically validate data types, both when receiving data via API requests and when initializing models internally. It supports a wide range of standard Python data types, alongside specialized `BaseModels` like `HttpUrl` and `Optional` fields, enabling robust and flexible data definitions.
 
@@ -1020,7 +1017,7 @@ The backend service manages the following core business entities, each represent
 
 **Sensor Nodes**: Represent the actual IoT devices deployed in the field. Each node is instantiated from a `Sensor Template` and stores deployment-specific metadata such as GPS coordinates and firmware versions. Upon creation, the backend automatically provisions a corresponding device on The Things Network (TTN). Nodes manage both user-defined Configurables (set per node) and system-injected Configurables (for LoRa/TTN credentials). They also display the latest sensor readings and provide access to firmware programming tools.
 
-### Routers
+## Routers
 
 The routers directory encapsulates the API endpoints of the backend service, aligning with the "Views" component in the MVC-inspired architecture. These modules are exclusively responsible for defining the RESTful API and handling incoming HTTP requests and outgoing responses. Their role is purely an interface layer: they receive requests, validate input using Pydantic models, delegate complex processing to the services layer, and format the results back for the client as HTTP responses.
 
@@ -1047,17 +1044,17 @@ The following screenshot, illustrates all available endpoints for the `Project` 
 
 ![Typical endpoints per entity shown in Swagger UI](./images/backend_openapi.png)
 
-### Services
+## Services
 
 The `services` directory forms the core of the backend's business logic, functioning as the "Controllers" in the adapted MVC pattern. Each service encapsulates a distinct domain or functionality, processing complex requests, orchestrating workflows, and coordinating interactions between various other system components and external APIs. This rigorous separation ensures that all business rules are centralized, consistent, and independent of specific data storage technologies or the presentation layer. Services are responsible for validating business logic, performing transformations, and managing the overall state relevant to their domain. They serve as the central point for executing complex operations that span across multiple data entities or involve calls to other microservices within the overall system architecture (e.g., the Compiler Engine or Protobuf Service) or external platforms.
 
-#### Core Service Functionalities
+### Core Service Functionalities
 
 Services within this layer are responsible for managing the core entities and business processes of the application. These services act as central orchestrators, applying complex business rules and validations to ensure data integrity and consistency. They coordinate operations across multiple data repositories, handle intricate state transitions for entities, and manage audit trails or logging to track changes over time.
 
 Furthermore, these services often serve as clients to other internal microservices, delegating specific tasks such as code compilation or data transformation to dedicated components. This fosters a decoupled and scalable architecture where business logic is centralized, allowing for robust validation and complex data manipulation before information is persisted or exposed via the API.
 
-#### TTN-Service
+### TTN-Service
 
 The TTN-Service is a critical component solely dedicated to interacting with The Things Network (TTN) platform through its official API. Its primary responsibilities are the automated provisioning and de-provisioning of LoRaWAN end devices on the TTN application. This service encapsulates all necessary interactions with TTN's various server components, ensuring that sensor nodes can securely join and operate within the LoRaWAN network.
 
@@ -1074,14 +1071,14 @@ The device de-provisioning functionality handles the complete removal of a senso
 
 For robust development and testing, the TTN-Service implements a feature flag mechanism. This design allows the system to easily switch between a real TTN integration for production or end-to-end tests and a mock service for isolated unit and integration tests, eliminating dependencies on external networks. This flexibility is achieved through Python interfaces, specifically by defining an abstract base class. Both, the actual implementation interacting with TTN, and the mock implementation inherit from this abstract class. During dependency injection, the system automatically receives the correct TTN-Service instance based on the configured feature flag, thanks to this clear contract defined by the abstract class.
 
-#### Compilation Service
+### Compilation Service
 
 The CompilationService acts as a crucial orchestrator between the backend and an external Compiler Engine. Its primary role is to manage the firmware compilation process for sensor nodes. This service serves mainly as a wrapper, translating requests from the backend into a format suitable for the Compiler Engine's API.
 
 Crucially, before initiating a build job, the CompilationService gathers all necessary information from the backend's data store. It retrieves details about the specific sensor node and its associated node template, such as Git repository URLs, firmware tags, board configurations, and custom sensor node configurations. This consolidated data is then sent to the Compiler Engine, which handles the actual compilation process. The CompilationService also provides functionalities to query the status of a build job and retrieve generated artifacts, including compiled binaries, source code, or logs. This ensures a seamless flow from sensor node definition to deployable firmware.
 
 
-#### Error Handling and Custom Exceptions
+### Error Handling and Custom Exceptions
 
 The services layer extensively utilizes custom exceptions, which are defined in the utils/ folder. This approach provides a precise and semantic way to signal specific business-level error conditions from deep within the application logic. Instead of relying on generic error codes or boolean flags, custom exceptions convey precisely what went wrong, making debugging and error handling significantly more efficient for both developers and consuming clients.
 
@@ -1095,20 +1092,21 @@ These custom exceptions are designed to be caught by the routers layer, where th
 | AuthorizationError   | 403         | Forbidden    |
 | EmailAlreadyExists   | 409         | Conflict     |
 
-### Data Repositories
+## Data Repositories
 
 Repositories function as an **abstraction layer** between the backend's business logic (services) and the data storage (Triplestore). Their core responsibility is to manage **CRUD (Create, Read, Update, Delete) operations** for specific entities, ensuring that services don't directly interact with raw SPARQL queries. This separation of concerns promotes a cleaner architecture and enhances maintainability.
 
 The flow of data involves a transformation: **Python objects** (defined by **Pydantic models**) from the service layer are converted into **RDF triples** for storage in the Triplestore (Apache Jena Fuseki). Conversely, data retrieved from the Triplestore as RDF triples is parsed back into corresponding Python objects.
 
 
-#### Semantic Data Modeling and Ontologies
+### Semantic Data Modeling and Ontologies
 
 The system leverages several established ontologies to define the structure and meaning of stored data, ensuring semantic interoperability and consistency:
 
 * **Schema.org (schema):** Used for general descriptive properties applicable across various domains, such as `schema:name` for entity names and `schema:url` for linking to external resources (e.g., datasheets). It also models core entities like `schema:Project` or `schema:Person` (User accounts).
 * **SOSA (sosa):** Essential for representing **sensor observations and measurements**. This includes `sosa:Sensor` for sensor devices, `sosa:Observation` for individual readings, and `sosa:hasSimpleResult` for the literal measured value.
 * **BFH Custom Ontology (bfh):** For specific attributes and relationships not covered by existing general-purpose ontologies, a custom namespace (`http://data.bfh.ch/`) was defined. This includes entity types like `bfh:SensorNode` or `bfh:CommercialSensor`, and properties such as `bfh:state` (for system states), `bfh:gitlabRef` (for linking to GitLab repositories), and `bfh:hasLogEntry` (for associating logbook entries).
+* **XML Schema Definition (XSD):** Employed for defining the **datatypes** of literal values, ensuring type consistency for data such as `xsd:dateTime` for timestamps.
 
 It's important to note that these ontologies, including the custom BFH namespace, offer a much broader range of properties and classes than those specifically mentioned here. The listed examples illustrate their core usage within this system. These ontologies enable a rich, interconnected graph of data. For instance, a **SensorNode** is modeled as a `bfh:SensorNode`, incorporating `schema:name`, `bfh:state`, and relationships to associated **`bfh:NodeTemplate`** (via `bfh:usesNodeTemplate`) and **`schema:Project`** (via `bfh:partOfProject`) entities, as well as linking to `sosa:Observation` instances it has made.
 
@@ -1124,11 +1122,11 @@ class RDFEnumMixin:
 
 This approach ensures that enum values are semantically well-defined and can be consistently resolved within the graph.
 
-#### Implementing Repository Operations
+### Implementing Repository Operations
 
 Each repository class is dedicated to a specific entity (e.g., `SensorNodeRepository`) and contains methods for **CRUD operations**. These methods encapsulate the logic for constructing and executing **SPARQL queries** against the Triplestore. The `rdflib` library is used to programmatically construct RDF graphs before serializing them into N-Triples format for insertion into the Triplestore.
 
-##### Creating Entities (INSERT DATA)
+#### Creating Entities (INSERT DATA)
 
 When creating a new entity, the repository method converts the Python object into a comprehensive set of RDF triples. These triples are then serialized and inserted into the Triplestore using an `INSERT DATA` query. The following simplified example from the `SensorNodeRepository` demonstrates this process:
 
@@ -1152,7 +1150,7 @@ def create_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
 
 This snippet illustrates how `rdflib.Graph` builds the RDF representation. Each property of the Python object translates into an RDF triple using defined URIs from `schema.org` or the custom BFH ontology. Notice how `sensor_node.state.rdf_uri` is used to store the enum value as a URI.
 
-##### Reading Entities (SELECT Queries)
+#### Reading Entities (SELECT Queries)
 
 For **reading data**, `SELECT` queries are formulated to retrieve specific triples based on given criteria, typically an entity's unique identifier. The process involves executing the SPARQL query and then parsing the results back into the corresponding Pydantic data models.
 
@@ -1184,7 +1182,7 @@ def find_sensor_node_by_uuid(self, uuid: UUID) -> SensorNodeDB | None:
 
 The `find_sensor_node_by_uuid` method highlights the need for SPARQL queries to reconstruct a complex Python object. The raw dictionary-like results are manually parsed and mapped back into the Pydantic models. Notably, the `from_rdf_uri` class method of the `RDFEnumMixin` is used to convert the retrieved state URI back into its corresponding Python Enum member.
 
-##### Updating and Deleting Entities
+#### Updating and Deleting Entities
 
 Updating entities typically involves a **two-step process**: first, deleting all existing triples related to the entity and its sub-entities, and then inserting the updated set of triples. The `delete_sensor_node` method illustrates how `DELETE WHERE` and `STRSTARTS` are used to remove an entity and all its associated nested data (e.g., configurables, log entries) based on their URI patterns:
 
@@ -1212,14 +1210,14 @@ def update_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
 
 The `update_sensor_node` method highlights that a full "delete and re-insert" strategy is often employed for updates due to the nature of RDF graph modifications.
 
-#### Centralized Logbook for Entities
+### Centralized Logbook for Entities
 
 A crucial aspect of data management is the **Logbook**, which records significant events for **every entity** in the system. While the example above focuses on `SensorNode` operations, analogous logbook entries are created for other entities like `Project` or `User`. These log entries share a consistent URI pattern and structure, making them universally accessible across the system.
 
 Each logbook entry uses specific types, such as `LogEntryType/CREATED` or `LogEntryType/UPDATED`, implemented as `Enum` values and persisted as URIs via the `RDFEnumMixin`. This design provides a flexible and extensible mechanism for tracking entity lifecycle events; new log entry types can be easily added as required. The shared structure and URI schema for logbook entries across all entities ensure a unified historical record and simplify querying for audit trails.
 
 
-#### Challenges and Limitations
+### Challenges and Limitations
 
 Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain **limitations when compared to traditional relational databases employing ORMs**.
 
@@ -1232,42 +1230,42 @@ A primary challenge is the **absence of an Object-Relational Mapper (ORM)** for 
 
 These challenges highlight areas where the development experience with Triplestores can be more demanding than with traditional relational databases. Potential approaches to address these limitations will be further discussed in the **Future work** section.
 
-### Security
+## Security
 
 Security is paramount for any backend service, ensuring the confidentiality, integrity, and availability of data and functionalities. This section outlines the key security measures implemented, covering user authentication, authorization, and the secure handling of sensitive information.
 
-#### Authentication: Verifying User Identity
+### Authentication: Verifying User Identity
 
 Authentication is the process of confirming a user's identity. In this backend, **JSON Web Tokens** (JWT) are employed for stateless authentication. When a user successfully logs in with their credentials, the server issues a JWT. This token contains a digitally signed payload (claims) that asserts the user's identity and relevant information.
 
 - **How it Works**: After initial login, the client receives this JWT and includes it in the `Authorization` header of subsequent requests. The server then validates the JWT's signature and expiration. Because the token is self-contained and signed, the server does not need to query the database for every authenticated request, which enhances scalability and performance.
 - **Benefits**: JWTs provide a stateless authentication mechanism, making the system highly scalable and suitable for distributed architectures. They also facilitate cross-domain and cross-platform compatibility.
 
-#### Authorization: Controlling Access
+### Authorization: Controlling Access
 
 Authorization determines what an authenticated user is permitted to do or access. The system employs a combination of Role-Based Access Control (RBAC) and Ownership-Based Access Control.
 
 - **Role-Based Access Control (RBAC)**: Users are assigned specific roles, and these roles are granted predefined permissions to access certain resources or perform specific actions. This simplifies access management by grouping users with similar responsibilities. For instance, an admin role is allowed to create new used accounts, while the researcher role is only allowed to read data.
 - **Ownership-Based Access Control**: In addition to roles, certain resources are protected based on ownership. This means a user can only perform actions (e.g., update, delete) on resources they explicitly own, even if their role might generally allow such actions on other resources. This fine-grained control adds an extra layer of security, preventing users from inadvertently or maliciously affecting data belonging to others. This logic is typically enforced within the services layer, where business rules are applied.
 
-#### Secure Communication
+### Secure Communication
 
 In production, all communication with the backend API is enforced over HTTPS (Hypertext Transfer Protocol Secure). This uses TLS (Transport Layer Security) encryption to protect data in transit from eavesdropping, tampering, and message forgery. This ensures that sensitive information, including user credentials and API keys, remains confidential as it travels over the network.
 
-#### Sensitive Data Handling
+### Sensitive Data Handling
 
 - **Password Hashing**: User passwords are never stored in plain text. Instead, a strong, computationally intensive hashing algorithm, specifically Argon2, is used to hash passwords before storage. Each password is also hashed with a unique, randomly generated salt. This prevents common attacks like rainbow table attacks and makes brute-force attempts significantly more difficult, even if the database is compromised.
 - **API Key Management**: API keys used for external service integrations (e.g., with the Compiler Engine, Protobuf Service, or TTN) are treated as sensitive secrets. They are stored securely as environment variables and are never hardcoded directly into the codebase or committed to version control.
 
-#### Initial Admin User Provisioning
+### Initial Admin User Provisioning
 
 For simplified initial setup and management, the application includes a mechanism for provisioning an initial administrator user during startup. This process executes only if an administrator account doesn't already exist within the triplestore. The username and password for this initial admin can be configured via environment variables. If no password is explicitly provided through environment variables, the system will securely generate a strong, random password and output it to the console once upon startup. This ensures a secure administrative account is always available while minimizing the risk of insecure default credentials.
 
-#### Error Handling and Security
+### Error Handling and Security
 
 As discussed in the Services chapter, custom exceptions are utilized to manage errors. This also has security implications, as it prevents the exposure of sensitive internal server details in API responses. Instead, specific, user-friendly error messages and appropriate HTTP status codes are returned, reducing the information available to potential attackers during reconnaissance.
 
-## Reverse Proxy
+# Reverse Proxy
 Because the system consists of multiple services, many of which must be accessible to users, a common, centralized entry point is required. Exposing each service on a separate port was not a feasible option, especially considering the need for TLS encryption, which is essential for any modern web application. To address this, a reverse proxy was used.
 
 A reverse proxy is a server that sits in front of multiple backend services and forwards client requests to the appropriate service based on criteria like request paths or subdomains. This allows all traffic to go through a single exposed service, simplifying networking and improving security.
@@ -1602,6 +1600,10 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 <!-- Appendix -->
 
 \appendix
+
+\chapter{Project Requirements}
+
+\chapter{Setup Instructions}
 
 \chapter{Time Tracking Sheet}
 
