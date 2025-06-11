@@ -9,8 +9,9 @@
 //                "--verbose",
                 "-o",
                 "report.pdf",
-                "--bibliography=bibliography.bib",
-                "--biblatex",
+//                "--toc",
+                "--citeproc",
+//                "--resource-path=.",
                 "--pdf-engine=lualatex",
                 "report.md"
             ],
