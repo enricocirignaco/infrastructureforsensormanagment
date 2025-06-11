@@ -53,7 +53,7 @@ toccolor: BFH-Gray
 <!-- Chapter 1: Introduction -->
 \chapter{Introduction}
 
-This chapter introduces the context, objectives, and practical relevance of the thesis. It outlines the typical structure of *Distributed IoT Systems*, highlights common challenges, and describes how these are addressed by the proposed infrastructure. Furthermore, it highlights the system's practical value by showing how it addresses user difficulties and improves workflows.
+This chapter introduces the context, objectives, and practical relevance of the thesis. It outlines the typical structure of *Distributed IoT Systems*, highlights common challenges, and describes how these are addressed by the proposed system. Furthermore, it highlights the system's practical value by showing how it addresses user difficulties and improves workflows.
 
 # Context & Background
 The increasing affordability of sensor hardware and the advancement of low-power wireless communication technologies have made it significantly easier to deploy Distributed IoT Systems. These factors enable the large-scale collection of time-series data from remote locations in a cost-effective manner, creating new opportunities for both research and practical use.
@@ -64,7 +64,7 @@ A typical Distributed IoT System consists of several key components that togethe
 
 1. **Sensor Nodes**: These are edge devices, often embedded systems, that directly interface with sensors and/or actuators to collect raw data. They process this data and transmit useful information. A single sensor node can host multiple sensors and/or actuators connected via various interfaces.
 
-2. **Local Network (Sensor/Actuator Network - SAN)**: This network connects all sensor nodes to an IoT gateway. It can utilize a variety of wired or wireless technologies, such as LoRaWAN, WiFi, or cellular networks, depending on the specific application scenario and requirements.
+2. **Local Network (Sensor/Actuator Network - SAN)**: This network connects all sensor nodes to an IoT gateway. It can utilize a variety of wired or wireless technologies, such as LoRaWAN, WiFi, or cellular networks, depending on the specific application requirements.
 
 3. **IoT Gateway**: As the name suggests, this component serves as the gateway between the local IoT system and the external world, typically the Internet. It is usually an embedded device capable of supporting both the local network technology and the IP protocol, enabling seamless communication and data transfer to central systems.
 
@@ -74,15 +74,15 @@ Setting up a basic Distributed IoT System is relatively straightforward with tod
 For example, data needs to be stored in a consistent and queryable format to support effective analysis. The structure and meaning of transmitted payloads should be clearly defined and adaptable to future changes. It also becomes crucial to track the status and configuration of each deployed sensor node, including firmware versions and activity levels. Furthermore, well-structured operational workflows are essential to minimize complexity and ensure repeated tasks can be performed consistently and efficiently as the system scales.
 
 ## Research Projects at BFH
-Two collaborative research projects at the Bern University of Applied Sciences highlight practical challenges in managing Distributed IoT Systems. These projects, *Internet of Soils (IoS)* and *Mobile Urban Green (MUG)*, are conducted jointly by the departments of Architecture, Wood and Civil Engineering (AHB) and Agricultural, Forest and Food Sciences (HAFL).
+Two collaborative research projects at the Bern University of Applied Sciences highlight practical challenges in managing Distributed IoT Systems. These projects, *Internet of Soils (IoS)* and *Mobile Urban Green (MUG)*, are conducted jointly by the department of Architecture, Wood and Civil Engineering (AHB) and the department of Agricultural, Forest and Food Sciences (HAFL).
 
-- **IoS** focuses on monitoring and analyzing soil moisture in protection forests using an autonomous, solar-powered Distributed IoT System based on LoRaWAN technology. The goal is to support long-term environmental monitoring by collecting time-series data from remote locations. [@bfh-ios]
-- **MUG** builds on insights from IoS and focuses on assessing the cooling effects of trees placed in large, mobile urban planters within urban areas. The project combines environmental measurements such as temperature, solar radiation, and water usage with modeling approaches to evaluate and simulate their impact at both the individual tree and neighborhood scale. [@bfh-mug]
+- **IoS** focuses on monitoring and analyzing soil moisture in protection forests using a Distributed IoT System based on LoRaWAN technology. The goal is to support long-term environmental monitoring by collecting time-series data from remote locations. [@bfh-ios]
+- **MUG** builds on insights from IoS and focuses on assessing the cooling effects of trees placed in large, mobile planters within urban areas. The project combines environmental measurements such as temperature, solar radiation, and water usage with modeling approaches to evaluate and simulate their impact at both the individual tree and neighborhood scale. [@bfh-mug]
 
 Although the two projects differ in focus and context, they share a similar technical foundation in their underlying architecture, particularly concerning sensor hardware, wireless data transmission, and data management workflows. This shared technical foundation revealed several recurring issues that limit scalability and maintainability, especially as new deployments introduce variations in hardware, data models, or project-specific requirements.
 
 These two projects serve as the direct foundation for this thesis by illustrating the typical structure and challenges of Distributed IoT Systems. Building upon the limitations identified in IoS and MUG, a preceding semester assignment, *Internet of Soils – Revised* [@project2-degel2], specifically examined their existing sensor architecture. \
-This prior work revealed critical technical and organizational issues in metadata management, data transmission, and system scalability, thereby confirming the need for a more robust and streamlined infrastructure. The findings from *Project 2* directly informed the requirements for the system developed in this thesis, which is designed to support these ongoing research activities at BFH AHB and HAFL and to be extensible for similar future projects.
+This prior work revealed critical technical and organizational issues in metadata management, data transmission, and system scalability, thereby confirming the need for a more robust and streamlined infrastructure. The findings from *Project 2* directly shaped the requirements for the system developed in this thesis. The system is designed to support ongoing research activities at BFH AHB and HAFL, and is built to be easily extendable for similar future projects.
 
 # Goal of the Project
 The goal of this thesis is to design and implement a generic system that streamlines the processes involved in managing Distributed IoT Systems. Although developed within the context of academic environmental monitoring projects, its intended scope is much broader. The underlying concepts and components are designed to be flexible and reusable across a wide range of applications that rely on sensor-based data collection, regardless of domain or deployment scale. \
@@ -119,7 +119,7 @@ While primarily functional, the system also aims to provide an intuitive and use
 
 For users and researchers managing Distributed IoT Systems, the infrastructure developed in this thesis will deliver several tangible benefits, significantly improving their workflows and research outcomes.
 
-Firstly, users will experience a significant **reduction in manual effort** by centralizing metadata and automating routine workflows. This means less time spent on tedious tasks like sensor setup, firmware programming, and data preparation, allowing researchers to focus more on their core scientific activities.
+Firstly, users will experience a significant **reduction in manual effort** by centralizing metadata and automating routine workflows. This means less time spent on tedious tasks such as sensor setup, firmware programming, and data preparation, allowing researchers to focus more on their core scientific activities.
 
 Secondly, researchers can trust in the long-term usability and **shareability of their data**. By adopting Linked Data principles, the system ensures that data is not only interoperable and easily integrated with other tools but also adheres to FAIR principles (Findable, Accessible, Interoperable, Reusable) [@fair-principles], facilitating collaboration and future research utilization.
 
