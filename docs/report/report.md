@@ -256,9 +256,9 @@ In addition to validation, the demo served as a reference for understanding how 
 
 # Linked Data
 
-The term Linked Data denotes a set of best practices for publishing and interconnecting structured data on the Web. According to Bizer et al., these practices have led in the past three years to the emergence of a global data space containing billions of assertions, commonly referred to as the Web of Data [55, p. 1].
+The term Linked Data denotes a set of best practices for publishing and interconnecting structured data on the Web. According to Bizer et al., these practices have led in the past three years to the emergence of a global data space containing billions of assertions, commonly referred to as the Web of Data [@linked-data-story].
 
-At its core, Linked Data uses four principles, originally formulated by Tim Berners‑Lee, as a basic recipe for exposing and linking data using existing Web infrastructure [55, p. 2]:
+At its core, Linked Data uses four principles, originally formulated by Tim Berners‑Lee, as a basic recipe for exposing and linking data using existing Web infrastructure [@linked-data-story]:
 
 1. **Use URIs to identify resources**. Every entity, such as a sensor, a location, or a measurement, is assigned a globally unique and persistent URI.
 
@@ -270,7 +270,7 @@ At its core, Linked Data uses four principles, originally formulated by Tim Bern
 
 These simple yet powerful guidelines enable data providers to publish information in a way that is not only accessible but also inherently linkable. This emphasis on interlinking is what fundamentally sets Linked Data apart from earlier approaches to Web-based data sharing, such as static data dumps or traditional web services. By extending the Web’s hyperlink architecture to structured data through the use of URIs, HTTP, RDF, and semantic links between resources, Linked Data facilitates the construction of a decentralized, scalable, and machine-readable knowledge graph. This graph-based structure supports advanced data integration, semantic interoperability and exploratory analysis across diverse domains. At the core of this approach lies the *Resource Description Framework* (RDF), which serves as the fundamental data model for Linked Data applications.
 
-RDF is a standard for representing structured information in a formal and machine-readable way. It organizes data as triples, each consisting of a subject, predicate and object. This structure allows for the expression of simple statements about resources. Each element of a triple is typically identified by a Uniform Resource Identifier (URI) or a literal value, making the data unambiguous and interoperable. RDF supports multiple serialization formats such as Turtle, RDF/XML and JSON-LD, which offer flexibility for different systems and integration needs. The underlying concepts and structure of RDF are formally defined in the W3C RDF 1.1 specification [56].
+RDF is a standard for representing structured information in a formal and machine-readable way. It organizes data as triples, each consisting of a subject, predicate and object. This structure allows for the expression of simple statements about resources. Each element of a triple is typically identified by a Uniform Resource Identifier (URI) or a literal value, making the data unambiguous and interoperable. RDF supports multiple serialization formats such as Turtle, RDF/XML and JSON-LD, which offer flexibility for different systems and integration needs. The underlying concepts and structure of RDF are formally defined in the W3C RDF 1.1 specification [@rdf-concepts].
 
 ## Justification for Using Linked Data
 
@@ -288,10 +288,10 @@ Considering the need to manage diverse data structures, adapt to evolving projec
 
 In the context of Linked Data, schemas and ontologies are essential tools for adding semantic structure and meaning to data. While these terms are often used interchangeably, they differ in scope and expressiveness. A schema typically defines the structure and types of data entities, similar to a data model, whereas an ontology provides a richer semantic framework that includes relationships, constraints and inference rules. Ontologies can express not only what data exists but also how entities relate to one another and what logical conclusions can be derived from the data.
 
-The W3C has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [57]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [58].
+The W3C has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [@rdf-schema]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [@owl-features].
 
-A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [59]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of Internet of Things (IoT) applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
-The following diagram from the official ontology description by W3C offers a concret overview over all classes and relationships that are described within SOSA [59]:
+A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [@ssn-ontology]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of Internet of Things (IoT) applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
+The following diagram from the official ontology description by W3C offers a concret overview over all classes and relationships that are described within SOSA [@ssn-ontology]:
 
 ![Structure of the SOSA ontology](./images/sosa-ontology.png)
 
@@ -314,7 +314,7 @@ ex:Observation1 a sosa:Observation ;
 ex:Temperature a sosa:ObservableProperty .
 ```
 
-In addition to SOSA, general-purpose vocabularies such as Schema.org are useful for modeling contextual metadata. Schema.org is widely used to describe common entities like people, places, organizations and events [60]. While SOSA captures the technical aspects of sensing, Schema.org can provide additional descriptive context, such as the institution operating a sensor or the geographic location where it is deployed. These complementary vocabularies allow for both domain-specific precision and broader semantic interoperability. In our platform, we use the Schema.org vocabulary to describe contextual information about sensor deployments, such as the projects in which they are used:
+In addition to SOSA, general-purpose vocabularies such as Schema.org are useful for modeling contextual metadata. Schema.org is widely used to describe common entities like people, places, organizations and events [@schema-org]. While SOSA captures the technical aspects of sensing, Schema.org can provide additional descriptive context, such as the institution operating a sensor or the geographic location where it is deployed. These complementary vocabularies allow for both domain-specific precision and broader semantic interoperability. In our platform, we use the Schema.org vocabulary to describe contextual information about sensor deployments, such as the projects in which they are used:
 
 ```turtle
 @prefix schema: <https://schema.org/> .
@@ -944,7 +944,7 @@ When running inside the Dev Container, the following command exposes the applica
 npm run dev -- --host 0.0.0.0
 ```
 
-## Webapp-Backend --> Linus
+## Webapp-Backend
 
 Following the discussion of the web application's user-facing components, this chapter shifts focus to the backend service specifically. This service acts as the central interface for the frontend, providing all necessary data and processing capabilities via a well-defined REST API. While the frontend is responsible solely for presentation, this dedicated backend orchestrates the complex interactions between various other internal and external services, managing everything from data persistence and sensor provisioning to firmware compilation and security.
 
@@ -1097,8 +1097,140 @@ These custom exceptions are designed to be caught by the routers layer, where th
 
 ### Data Repositories
 
-.....
+Repositories function as an **abstraction layer** between the backend's business logic (services) and the data storage (Triplestore). Their core responsibility is to manage **CRUD (Create, Read, Update, Delete) operations** for specific entities, ensuring that services don't directly interact with raw SPARQL queries. This separation of concerns promotes a cleaner architecture and enhances maintainability.
 
+The flow of data involves a transformation: **Python objects** (defined by **Pydantic models**) from the service layer are converted into **RDF triples** for storage in the Triplestore (Apache Jena Fuseki). Conversely, data retrieved from the Triplestore as RDF triples is parsed back into corresponding Python objects.
+
+
+#### Semantic Data Modeling and Ontologies
+
+The system leverages several established ontologies to define the structure and meaning of stored data, ensuring semantic interoperability and consistency:
+
+* **Schema.org (schema):** Used for general descriptive properties applicable across various domains, such as `schema:name` for entity names and `schema:url` for linking to external resources (e.g., datasheets). It also models core entities like `schema:Project` or `schema:Person` (User accounts).
+* **SOSA (sosa):** Essential for representing **sensor observations and measurements**. This includes `sosa:Sensor` for sensor devices, `sosa:Observation` for individual readings, and `sosa:hasSimpleResult` for the literal measured value.
+* **BFH Custom Ontology (bfh):** For specific attributes and relationships not covered by existing general-purpose ontologies, a custom namespace (`http://data.bfh.ch/`) was defined. This includes entity types like `bfh:SensorNode` or `bfh:CommercialSensor`, and properties such as `bfh:state` (for system states), `bfh:gitlabRef` (for linking to GitLab repositories), and `bfh:hasLogEntry` (for associating logbook entries).
+
+It's important to note that these ontologies, including the custom BFH namespace, offer a much broader range of properties and classes than those specifically mentioned here. The listed examples illustrate their core usage within this system. These ontologies enable a rich, interconnected graph of data. For instance, a **SensorNode** is modeled as a `bfh:SensorNode`, incorporating `schema:name`, `bfh:state`, and relationships to associated **`bfh:NodeTemplate`** (via `bfh:usesNodeTemplate`) and **`schema:Project`** (via `bfh:partOfProject`) entities, as well as linking to `sosa:Observation` instances it has made.
+
+To ensure consistency and semantic correctness, **Python `Enum` types** are persisted as **RDF URIs** in the Triplestore. This is achieved by having all relevant Enums inherit from an `RDFEnumMixin`. This mixin automatically generates a unique RDF URI for each enum member, based on a defined base URI and the enum's name and value. For example, an enum member representing a specific state would be stored as a URI like `http://data.bfh.ch/SensorNodeStateEnum/ACTIVE`. The `rdf_uri` property facilitates this conversion:
+
+```python
+class RDFEnumMixin:
+    # ...
+    @property
+    def rdf_uri(self) -> str:
+        return f'{self._rdf_base_uri}{self.__class__.__name__}/{self.value}'
+```
+
+This approach ensures that enum values are semantically well-defined and can be consistently resolved within the graph.
+
+#### Implementing Repository Operations
+
+Each repository class is dedicated to a specific entity (e.g., `SensorNodeRepository`) and contains methods for **CRUD operations**. These methods encapsulate the logic for constructing and executing **SPARQL queries** against the Triplestore. The `rdflib` library is used to programmatically construct RDF graphs before serializing them into N-Triples format for insertion into the Triplestore.
+
+##### Creating Entities (INSERT DATA)
+
+When creating a new entity, the repository method converts the Python object into a comprehensive set of RDF triples. These triples are then serialized and inserted into the Triplestore using an `INSERT DATA` query. The following simplified example from the `SensorNodeRepository` demonstrates this process:
+
+```python
+# Simplified example for creating a SensorNode
+from rdflib import Graph, URIRef, Literal, RDF
+
+def create_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
+    g = Graph()
+    sensor_uri = URIRef(f"http://data.bfh.ch/sensorNodes/{sensor_node.uuid}")
+
+    g.add((sensor_uri, RDF.type, URIRef(self.bfh + "SensorNode")))
+    g.add((sensor_uri, URIRef(self.schema + "name"), Literal(sensor_node.name)))
+    g.add((sensor_uri, URIRef(self.bfh + "state"), URIRef(sensor_node.state.rdf_uri)))
+    # ... additional triples for relationships and other properties
+    
+    query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
+    self.triplestore_client.update(query)
+    return self.find_sensor_node_by_uuid(sensor_node.uuid)
+```
+
+This snippet illustrates how `rdflib.Graph` builds the RDF representation. Each property of the Python object translates into an RDF triple using defined URIs from `schema.org` or the custom BFH ontology. Notice how `sensor_node.state.rdf_uri` is used to store the enum value as a URI.
+
+##### Reading Entities (SELECT Queries)
+
+For **reading data**, `SELECT` queries are formulated to retrieve specific triples based on given criteria, typically an entity's unique identifier. The process involves executing the SPARQL query and then parsing the results back into the corresponding Pydantic data models.
+
+Reading complex entities often requires multiple `SELECT` queries to gather all related information, as demonstrated by `find_sensor_node_by_uuid`:
+
+```python
+# Simplified example for reading a SensorNode
+def find_sensor_node_by_uuid(self, uuid: UUID) -> SensorNodeDB | None:
+    sensor_uri = f"<http://data.bfh.ch/sensorNodes/{uuid}>"
+
+    sparql_query = f"""
+    PREFIX schema: <http://schema.org/>
+    PREFIX bfh: <http://data.bfh.ch/>
+
+    SELECT ?name ?state ?templateUri ?projectUri
+    WHERE {{
+        {sensor_uri} a bfh:SensorNode ;
+                    schema:name ?name ;
+                    bfh:state ?state ;
+                    bfh:usesNodeTemplate ?templateUri ;
+                    bfh:partOfProject ?projectUri .
+    }}
+    """
+    result = self.triplestore_client.query(sparql_query)
+    # ... manual parsing of result into SensorNodeDB object,
+    #     including conversion of URI for 'state' back to Python Enum
+    return sensor_node # once fully populated
+```
+
+The `find_sensor_node_by_uuid` method highlights the need for SPARQL queries to reconstruct a complex Python object. The raw dictionary-like results are manually parsed and mapped back into the Pydantic models. Notably, the `from_rdf_uri` class method of the `RDFEnumMixin` is used to convert the retrieved state URI back into its corresponding Python Enum member.
+
+##### Updating and Deleting Entities
+
+Updating entities typically involves a **two-step process**: first, deleting all existing triples related to the entity and its sub-entities, and then inserting the updated set of triples. The `delete_sensor_node` method illustrates how `DELETE WHERE` and `STRSTARTS` are used to remove an entity and all its associated nested data (e.g., configurables, log entries) based on their URI patterns:
+
+```python
+# Example for deleting a SensorNode
+def delete_sensor_node(self, uuid: UUID) -> None:
+    sparql_query = f"""
+    PREFIX bfh: <http://data.bfh.ch/>
+
+    DELETE WHERE {{
+        ?s ?p ?o .
+        FILTER (
+            STRSTARTS(STR(?s), "http://data.bfh.ch/sensorNodes/{uuid}/") ||
+            STR(?s) = "http://data.bfh.ch/sensorNodes/{uuid}"
+        )
+    }}
+    """
+    self.triplestore_client.update(sparql_query)
+
+def update_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
+    # Deleting all old triples and re-creating with new data
+    self.delete_sensor_node(sensor_node.uuid)
+    return self.create_sensor_node(sensor_node)
+```
+
+The `update_sensor_node` method highlights that a full "delete and re-insert" strategy is often employed for updates due to the nature of RDF graph modifications.
+
+#### Centralized Logbook for Entities
+
+A crucial aspect of data management is the **Logbook**, which records significant events for **every entity** in the system. While the example above focuses on `SensorNode` operations, analogous logbook entries are created for other entities like `Project` or `User`. These log entries share a consistent URI pattern and structure, making them universally accessible across the system.
+
+Each logbook entry uses specific types, such as `LogEntryType/CREATED` or `LogEntryType/UPDATED`, implemented as `Enum` values and persisted as URIs via the `RDFEnumMixin`. This design provides a flexible and extensible mechanism for tracking entity lifecycle events; new log entry types can be easily added as required. The shared structure and URI schema for logbook entries across all entities ensure a unified historical record and simplify querying for audit trails.
+
+
+#### Challenges and Limitations
+
+Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain **limitations when compared to traditional relational databases employing ORMs**.
+
+A primary challenge is the **absence of an Object-Relational Mapper (ORM)** for SPARQL and RDF. This necessitates **manual construction of all SPARQL queries**. Unlike ORMs, which provide type-safe query builders and automatic mapping, developers must meticulously craft each query string. This leads to:
+
+* **Lack of Compile-Time Schema Enforcement:** There is no mechanism to validate SPARQL queries against the defined ontologies at development time. A simple typo in a predicate URI or an incorrect data type in a query will not raise an error until runtime, potentially leading to silently inconsistent data rather than immediate failure.
+* **Consistency Overhead:** Developers bear a significant burden in ensuring that all repository methods for a single entity (create, read, update, delete) consistently use the *exact same RDF predicates and object types*. Any deviation, even minor, can fragment the data graph, making subsequent queries incomplete or erroneous. This requires rigorous adherence to internal conventions and thorough testing.
+* **Complexity of Updates:** In relational databases, updating a few fields is straightforward with a single `UPDATE` statement. In RDF, a partial update often requires deleting the old triples associated with the property and then inserting the new ones, which adds considerable boilerplate and complexity, particularly for frequently changing data.
+* **Debugging Challenges:** Debugging data inconsistencies or incorrect query results can be intricate. The Triplestore may accept syntactically valid but semantically incorrect data, making it difficult to pinpoint the source of logical errors within the graph. This often requires direct inspection of the Triplestore content, which can be time-consuming.
+
+These challenges highlight areas where the development experience with Triplestores can be more demanding than with traditional relational databases. Potential approaches to address these limitations will be further discussed in the **Future work** section.
 
 ### Security
 
