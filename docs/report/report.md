@@ -30,6 +30,7 @@ classoption:
 - listof=totoc
 top-level-division: chapter
 numbersections: true
+toc-depth: 2
 # secnumdepth: 1
 
 fontsize: 12pt
@@ -165,7 +166,9 @@ These tools are provided as binaries for Windows (EXE), macOS, and Linux, but on
 Some fragmented usage instructions can be found in forum posts such as [@heltec-cubecellflash-tool] and [@heltec-cubecell-firmware-upload], but no comprehensive official documentation is currently available.
 
 To confirm that the proprietary utilities mentioned earlier are indeed used by the Arduino IDE for compiling and flashing the firmware, and to better understand their function, a test was conducted using the IDE’s verbose logging mode.
-![arduino ideverbose settings](./images/arduino_verbose_settings.png)
+
+![Arduino settings configuring verbose output](./images/arduino_verbose_settings.png)
+
 A firmware upload was performed with verbose output enabled. The following snippet was extracted from the build log, immediately after the compiled binaries were generated. The output has been trimmed to highlight only the relevant portions of the flashing process:
 ```
 /Users/macbook/Library/Arduino15/packages/CubeCell/tools/CubeCellelftool/0.0.1/CubeCellelftool /Users/macbook/Library/Arduino15/packages/CubeCell/tools/gcc-arm-none-eabi/8-2019-q3/bin/arm-none-eabi-objcopy /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.elf /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.hex /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd
@@ -224,6 +227,7 @@ To narrow the scope and ensure a focused development effort, the team decided to
 A focused investigation was conducted to evaluate available browser APIs for programming an ESP32 device over USB/serial directly from the browser. Among these, Web Serial, currently supported only in Chromium-based browsers such as Chrome, Edge, and Brave, is the most practical option for flashing ESP32 devices without requiring additional software installation[@webserial].
 
 Several alternative APIs were also considered:
+
 - **WebUSB** provides low-level USB access but requires custom USB descriptors and is likewise limited to Chromium-based browsers, excluding Firefox and Safari [@webusb].
 - **WebHID** is intended for human interface devices (e.g., keyboards and mice) and is unsuitable for firmware flashing. It also suffers from poor cross-browser support [@webhid].
 - **WebBluetooth** is available in both Chromium and Firefox but is not viable for full firmware uploads due to BLE’s limited data rates and small payload sizes [@webbluetooth].
@@ -247,7 +251,8 @@ The candidate that best fits the requirements of this project is the official es
 As part of the esptool-js repository, Espressif provides a minimal demo web application. This example was used as a proof of concept to validate that the ESP32-S3 XIAO board can be flashed directly from the browser using the Web Serial API. The demo was successfully tested with the XIAO board, confirming that firmware flashing is possible without requiring any additional software installation.
 
 In addition to validation, the demo served as a reference for understanding how the esptool-js library works in practice. It formed the basis for developing a custom integration within the project’s web application. Further implementation details are provided in the [Web Application Frontend](#web-application) section.
-![esptool-js demo](./images/esp_tool_demo.png)
+
+![Demo of the esptool-js tool](./images/esp_tool_demo.png)
 
 # Linked Data
 
@@ -349,29 +354,29 @@ By integrating Linked Data technologies into our platform, we gain a flexible, s
 
 In any system that transmits structured data between components, there must be a clear, unambiguous way to represent and interpret that data. This is particularly relevant in IoT environments, where sensor nodes, gateways, and backend services often run on different platforms and are implemented in different programming languages. To ensure that a measurement recorded on a microcontroller can later be interpreted correctly in a cloud service or analysis tool, the transmitted data must follow a clearly defined format.
 
-Schema-based serialization formats address this problem by explicitly defining the structure and types of data. This makes it possible to validate data automatically, catch errors at compile time, and generate consistent, type-safe code across multiple programming languages. In comparison to textual formats such as JSON or XML, binary serialization formats such as Protocol Buffers additionally offer significant performance advantages [48]. They reduce message size and speed up parsing, which is particularly important in IoT environments with limited bandwidth and processing power.
+Schema-based serialization formats address this problem by explicitly defining the structure and types of data. This makes it possible to validate data automatically, catch errors at compile time, and generate consistent, type-safe code across multiple programming languages. In comparison to textual formats such as JSON or XML, binary serialization formats such as Protocol Buffers additionally offer significant performance advantages [@protobuf-performance]. They reduce message size and speed up parsing, which is particularly important in IoT environments with limited bandwidth and processing power.
 
 ## Evaluating Binary Format 
 
 To select an appropriate format for this project, several binary serialization libraries were evaluated and compared with regard to their efficiency, tooling support, and suitability for both embedded systems and backend services.
 
-- **Protocol Buffers (Protobuf)** is a widely adopted format developed by Google. It provides a well-documented schema definition language, strong cross-platform tooling, and supports efficient encoding and schema evolution. Its simplicity and broad ecosystem make it especially attractive for general-purpose use [49].
+- **Protocol Buffers (Protobuf)** is a widely adopted format developed by Google. It provides a well-documented schema definition language, strong cross-platform tooling, and supports efficient encoding and schema evolution. Its simplicity and broad ecosystem make it especially attractive for general-purpose use [@protobuf].
 
-- **Nanopb** is a minimal implementation of Protobuf for embedded systems written in C. It is optimized for extremely constrained environments, requiring less than 10 kB of flash and 1 kB of RAM, and is therefore well suited for microcontroller-based sensor nodes. It omits reflection and advanced runtime features to minimize memory usage [50].
+- **Nanopb** is a minimal implementation of Protobuf for embedded systems written in C. It is optimized for extremely constrained environments, requiring less than 10 kB of flash and 1 kB of RAM, and is therefore well suited for microcontroller-based sensor nodes. It omits reflection and advanced runtime features to minimize memory usage [@nanopb].
 
-- **FlatBuffers** offers very high performance and supports random access without full deserialization. It is commonly used in latency-sensitive applications like gaming. However, compared to Protobuf, it typically requires more manual steps to build and manage data structures, which can make development more complex in smaller-scale applications.[51].
+- **FlatBuffers** offers very high performance and supports random access without full deserialization. It is commonly used in latency-sensitive applications like gaming. However, compared to Protobuf, it typically requires more manual steps to build and manage data structures, which can make development more complex in smaller-scale applications.[@flatbuffers].
 
-- **Apache Avro** is schema-based and commonly used in big data platforms. Although powerful, it is less suited for embedded systems due to its design focus on big data infrastructure [52].
+- **Apache Avro** is schema-based and commonly used in big data platforms. Although powerful, it is less suited for embedded systems due to its design focus on big data infrastructure [@avro].
 
-- **MessagePack** is a lightweight binary format that aims to be more efficient than JSON while retaining its simplicity and compatibility [53]. However, it does not rely on an explicit schema definition, which can make data validation, versioning, and long-term maintainability more challenging in structured systems.
+- **MessagePack** is a lightweight binary format that aims to be more efficient than JSON while retaining its simplicity and compatibility [@messagepack]. However, it does not rely on an explicit schema definition, which can make data validation, versioning, and long-term maintainability more challenging in structured systems.
 
-Based on this evaluation, Protocol Buffers was selected as the binary serialization format for this project. Its strong cross-platform tooling, clear schema definition, and wide adoption make it particularly well suited for scenarios that require structured data exchange across heterogeneous components. The format's ability to generate language-specific code and support schema evolution aligns closely with the architectural goals of the system. [49]
+Based on this evaluation, Protocol Buffers was selected as the binary serialization format for this project. Its strong cross-platform tooling, clear schema definition, and wide adoption make it particularly well suited for scenarios that require structured data exchange across heterogeneous components. The format's ability to generate language-specific code and support schema evolution aligns closely with the architectural goals of the system. [@protobuf]
 
 ## Protocol Buffers
 
-Protocol Buffers (Protobuf) is a language-agnostic binary serialization format developed by Google. It allows developers to define structured data using a `.proto` schema file, which is then compiled into source code for various programming languages. In this project, edition 2023 is used, which is the most recent version and includes modern syntax improvements and clearer semantics compared to older editions [49].
+Protocol Buffers (Protobuf) is a language-agnostic binary serialization format developed by Google. It allows developers to define structured data using a `.proto` schema file, which is then compiled into source code for various programming languages. In this project, edition 2023 is used, which is the most recent version and includes modern syntax improvements and clearer semantics compared to older editions [@protobuf].
 
-A Protobuf schema defines data structures called messages. Each message contains one or more typed fields, each identified by a unique tag number. The format supports various scalar types such as `int32`, `uint64`, `bool`, `string`, and `bytes`, as well as nested messages, enumerations, and repeated fields (arrays) [49]. A minimal example looks as follows:
+A Protobuf schema defines data structures called messages. Each message contains one or more typed fields, each identified by a unique tag number. The format supports various scalar types such as `int32`, `uint64`, `bool`, `string`, and `bytes`, as well as nested messages, enumerations, and repeated fields (arrays) [@protobuf]. A minimal example looks as follows:
 
 ```
 message SensorData {
@@ -381,7 +386,7 @@ message SensorData {
 }
 ```
 
-The Protobuf compiler `protoc` is used to generate code in a target language. For instance, running `protoc` with a Python plugin produces a `.py` file that includes data classes and serialization logic. In Python, the generated module embeds the binary representation of the schema and uses metaclasses to dynamically create message classes at runtime. This makes the schema available without needing the `.proto` file at runtime, while still allowing full access to all message types [49].
+The Protobuf compiler `protoc` is used to generate code in a target language. For instance, running `protoc` with a Python plugin produces a `.py` file that includes data classes and serialization logic. In Python, the generated module embeds the binary representation of the schema and uses metaclasses to dynamically create message classes at runtime. This makes the schema available without needing the `.proto` file at runtime, while still allowing full access to all message types [@protobuf].
 
 The table below illustrates how different data types are encoded using Protocol Buffers. Each type handles value representation differently in terms of size and encoding strategy, depending on whether the data is numeric, binary, or structured.
 
@@ -395,13 +400,13 @@ Table: Binary encoding examples for different Protobuf data types.
 | bytes     | "-4"              | 0x2d34                 | 2      | encoded as ASCII             |
 
 Protocol Buffers uses **base-128 variable-length integers (varints)** to efficiently encode numeric types like `uint32` and `sint32`. These varints use only as many bytes as necessary to represent a value. For example, small integers such as `4` or the ZigZag-encoded version of `-4` require only a single byte to transmit. This compression is achieved by packing the 7 least significant bits of each byte into the payload and using the most significant bit to indicate whether more bytes follow. \
-Negative integers are handled using **ZigZag encoding**, which maps signed values to unsigned varints in a way that keeps small negative numbers compact [54].
+Negative integers are handled using **ZigZag encoding**, which maps signed values to unsigned varints in a way that keeps small negative numbers compact [@protobuf-encoding].
 
 In systems where floating-point precision is not strictly required, decimal values can alternatively be transmitted as scaled integers. For instance, the temperature `21.3 °C` could be encoded as the integer `213`, assuming one decimal digit of precision. This technique can help reduce payload size when only integer varints are used – especially since a `float` in Protobuf always requires exactly 4 bytes, regardless of the actual value. In contrast, small integers typically require only a single byte, making them much more efficient to transmit.
 
 ## Runtime Compatibility 
 
-Although Protocol Buffers is designed to support schema evolution, care must be taken to ensure runtime compatibility across different system components. In general, messages encoded with a newer version of the Protobuf library can still be parsed by an older version, as long as the schema changes follow the recommended guidelines (e.g., only adding optional fields, not reusing tag numbers). However, the reverse is not always guaranteed: messages generated by an older version may not be fully understood by newer runtimes if the schema has changed significantly [49].
+Although Protocol Buffers is designed to support schema evolution, care must be taken to ensure runtime compatibility across different system components. In general, messages encoded with a newer version of the Protobuf library can still be parsed by an older version, as long as the schema changes follow the recommended guidelines (e.g., only adding optional fields, not reusing tag numbers). However, the reverse is not always guaranteed: messages generated by an older version may not be fully understood by newer runtimes if the schema has changed significantly [@protobuf].
 
 To ensure stable operation in this project, all components that serialize or deserialize messages use either the same or a compatible runtime version of the Protobuf library. This consistency helps avoid subtle issues during development and ensures that schema changes can be rolled out in a controlled and predictable manner.
 
@@ -423,13 +428,16 @@ Given the complexity and time limitations of the project, a structured yet adapt
 The project was planned using a combination of milestones and sprints. During the initial conceptual phase, the team gathered and defined the system requirements. Based on those requirements, the team outlined rough milestones representing major project components and their estimated durations. These high-level goals helped assess the feasibility of planned features within the available timeframe. Although flexible, they provided structure and helped maintain overall direction throughout the project.
 
 For short-term planning, the team relied on two-week sprints. At the start of each sprint, the team met to define and assign tasks based on priorities, individual strengths, and workload. A shared Kanban board was used to track progress. New issues, whether created by team members or suggested by stakeholders, were added to the backlog and reviewed during sprint planning. Tasks were labeled and updated throughout the sprint to reflect their current status. This lightweight adaptation of SCRUM enabled steady progress while maintaining flexibility.
-![screenshot of kanban board](./images/kanban_board.png)
+
+![Screenshot of kanban board](./images/kanban_board.png)
 
 A review strategy was also established to ensure that all code changes were peer-reviewed before being merged into the main branch. This practice improved code quality, facilitated knowledge sharing, and helped both team members stay familiar with all parts of the system. Once a developer completed a task, a merge request was created. The merge request could only be merged after review and approval by the other team member. This enforced a clear quality standard and maintained shared ownership of the codebase.
 
 In addition to tracking technical progress, the team implemented simple but effective controlling measures to ensure the project was properly documented. Meeting protocols were maintained to record key decisions and discussions. A shared work journal was used to log who worked on what, when, and how, providing transparency, traceability, and a basis for workload reflection. Both the protocols and the journal can be found in the appendix of this document.
 
 ## Milestones
+
+Table: Project milestones during the project phase
 
 +-------------------------------------------+----------------+-------------------------------------------------------------------+
 | Milestone                                 | Duration       | Key Objectives                                                    |
@@ -479,7 +487,7 @@ The system was built using a microservice architecture, where each service is de
 
 Each microservice includes its own configuration and dependencies, allowing it to run in isolation. Services expose RESTful interfaces for communication, making them easy to integrate or replace without affecting the rest of the system. A reverse proxy handles internal routing and load balancing, enabling flexibility in scaling and deployment.
 
-From the start, each service was developed and deployed as a Docker container. Containerization ensures strong isolation between services and simplifies dependency management. It also guarantees consistency across development and production environments by replicating the same runtime conditions. More details about the deployment setup are provided in the [Deployment & Integration](#deployment--integration) section.
+From the start, each service was developed and deployed as a Docker container. Containerization ensures strong isolation between services and simplifies dependency management. It also guarantees consistency across development and production environments by replicating the same runtime conditions. More details about the deployment setup are provided in the [Deployment & Integration](#deployment-integration) section.
 
 Descriptions of the individual services can be found in the [System Architecture](#system-architecture) section.
 
@@ -569,7 +577,7 @@ Both of these interfaces are also accessible via the browser, ensuring that all 
 
 To summarize the data flow in the system, sensor nodes deployed in the field collect data and transmit it in a standardized format to the IoT gateway. The gateway then forwards this data to the main system over the internet. Within the main system, the data is processed and stored in both a time-series database (InfluxDB) and an RDF triplestore. Users can then access and analyze the data either through the browser-based web application or directly via SPARQL queries (for semantic data) and InfluxDB queries (for time-series data).
 
-![High-level System Overview](./images/general_system_architecture.png)
+![High-level system overview of the developed system](./images/general_system_architecture.png)
 
 # System Architecture
 
@@ -581,7 +589,7 @@ The infrastructure is fully containerized, with every component encapsulated as 
 
 The illustration below visualizes the system architecture in its entirety. It offers a detailed view of what was previously summarized as the "Cloud Infrastructure" in the previous section.
 
-![System Architecture](./images/system_architecture.png)
+![System architecture with all microservices and their connections](./images/system_architecture.png)
 
 Each block within the orange cloud in the diagram represents a microservice running as an isolated Docker container. The color coding of the blocks reflects their origin and function: white blocks represent third-party or open-source components that have been integrated into the system, whereas blue blocks denote custom-developed services that were specifically implemented as part of this project. These include core functionalities such as protocol conversion, data parsing, firmware compilation, and metadata management. All blue services are discussed in greater detail in the following sections of this chapter.
 
@@ -630,7 +638,7 @@ The Compiler Engine is composed of three Docker containers that work together to
 
 This architecture ensures a clean separation of concerns and allows the system to scale or evolve without tightly coupling the compiler logic to the REST interface or storage system.
 
-![Service Architecture](./images/compile_engine_architecture.png)
+![Service Architecture of Compile Engine](./images/compile_engine_architecture.png)
 
 ## Arduino Toolchain
 The primary goal of the Compiler Engine is to support compilation of Arduino sketches (source code). To achieve this, a suitable toolchain had to be selected and containerized. The following requirements were identified to guide the evaluation:
@@ -643,29 +651,31 @@ The primary goal of the Compiler Engine is to support compilation of Arduino ske
 
 Several existing toolchains were evaluated:
 
+Table: Comparison of different arduino toolchains
+
 +-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 | Tool                              | Pros                                                              | Cons                                                               |
 +===================================+===================================================================+====================================================================+
 | Arduino IDE                       | - Official support                                                | - GUI-based                                                        |
-|                                   | - Full compatibility with Arduino boards and libraries            | - Incompatible with Docker environments [39]                       |
+|                                   | - Full compatibility with Arduino boards and libraries            | - Incompatible with Docker environments [@arduino-cli]             |
 +-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 | PlatformIO                        | - Broad board and framework support                               | - Designed primarily for interactive development                   |
-|                                   | - Advanced features and cross-platform                            | - Docker and headless support are limited or complex [40]          |
+|                                   | - Advanced features and cross-platform                            | - Docker and headless support are limited or complex [@platformio] |
 +-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 | Arduino CLI                       | - Official command-line tool                                      | - Less customizable compared to PlatformIO                         |
 |                                   | - Built for headless, automated environments                      |                                                                    |
 |                                   | - Supports board and library management                           |                                                                    |
-|                                   | - Easy to integrate with Docker [41]                              |                                                                    |
+|                                   | - Easy to integrate with Docker [@arduino-cli]                    |                                                                    |
 +-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 | Makefile-Based Toolchains         | - Lightweight and fully customizable                              | - Manual board/library setup                                       |
-| (e.g., Arduino-Makefile)          | - Docker-friendly [42]                                            | - No official support                                              |
+| (e.g., Arduino-Makefile)          | - Docker-friendly [@arduino-makefile]                             | - No official support                                              |
 |                                   |                                                                   | - Higher maintenance burden                                        |
 +-----------------------------------+-------------------------------------------------------------------+--------------------------------------------------------------------+
 
 
 Based on these findings, **Arduino CLI** was selected as the most suitable tool for this project. It strikes a good balance between automation support, Docker compatibility, and official maintenance. Its lack of deep customization is not considered a limitation for the project's scope.
 
-Once Arduino CLI was chosen, efforts shifted to containerization. A brief survey of Docker Hub and GitHub revealed multiple Arduino CLI images, but none were actively maintained. The most promising candidate, `solarbotics/arduino-cli` [43], had not been updated in over two years, an unacceptable risk in terms of security and compatibility. Consequently, a custom Docker image was created from scratch.
+Once Arduino CLI was chosen, efforts shifted to containerization. A brief survey of Docker Hub and GitHub revealed multiple Arduino CLI images, but none were actively maintained. The most promising candidate, `solarbotics/arduino-cli` [solarbotics-arduino-cli], had not been updated in over two years, an unacceptable risk in terms of security and compatibility. Consequently, a custom Docker image was created from scratch.
 
 This custom image ensures control over the build environment and long-term maintainability. To ensure flexibility, the Compiler Engine expects all toolchain images, including the Arduino one, to follow a standardized Docker invocation pattern. This makes it easy to swap in new toolchain containers (e.g., for STM32, ESP32, or Microchip MCUs) without changes to the core service logic.
 
@@ -748,7 +758,7 @@ Docker-in-Docker involves running a separate Docker daemon inside the container.
 
 In contrast, Docker socket binding involves mounting the host’s Docker socket `/var/run/docker.sock` into the container, allowing the application inside to control the host’s Docker engine directly. This is the same mechanism used by the Docker CLI and official SDKs. With access to the socket, a containerized application can start and stop other containers, build images, or retrieve logs, effectively granting full control over the host Docker daemon.
 
-Here is a minimal example using the official Python Docker SDK[44]:
+Here is a minimal example using the official Python Docker SDK[@docker-sdk-python]:
 ```python
 import docker
 
@@ -756,7 +766,7 @@ client = docker.from_env()
 client.containers.run("alpine", ["echo", "hello world"])
 ```
 
-While socket binding is simpler and more resource-efficient than DinD, it introduces significant security concerns: any code running inside the container has unrestricted access to the host Docker engine, effectively equating to root access. Therefore, it must only be used in trusted and isolated environments.[45]
+While socket binding is simpler and more resource-efficient than DinD, it introduces significant security concerns: any code running inside the container has unrestricted access to the host Docker engine, effectively equating to root access. Therefore, it must only be used in trusted and isolated environments.[@docker-dangers]
 
 Given these trade-offs, Docker socket binding was selected for this project due to its lower complexity and better performance. However, a dedicated security assessment should be performed in a future development phase to evaluate potential infrastructure risks, this lies outside the scope of the current work.
 
@@ -791,9 +801,9 @@ This generated configuration file is not committed back to the Git repository. H
 
 **API Design and Specification**
 
-An OpenAPI specification[46] was created based on the defined requirements of the compiler engine. This specification served as the blueprint for the system’s REST interface. Using FastAPI’s native support for OpenAPI, the core structure of the application was automatically generated from this specification. The business logic and tooling for the compilation process were implemented manually on top of this structure.
+An OpenAPI specification[@openapi-specification] was created based on the defined requirements of the compiler engine. This specification served as the blueprint for the system’s REST interface. Using FastAPI’s native support for OpenAPI, the core structure of the application was automatically generated from this specification. The business logic and tooling for the compilation process were implemented manually on top of this structure.
 
-To ensure robust and predictable behavior across all endpoints, the project used Pydantic[47] to define strict request and response schemas. Pydantic leverages Python type hints to enforce validation rules and guarantees well-structured data both at input and output. These models were automatically integrated into the OpenAPI documentation, ensuring synchronization between the live implementation and the generated documentation. This greatly improved reliability, clarity, and maintainability during development.
+To ensure robust and predictable behavior across all endpoints, the project used Pydantic[@pydantic] to define strict request and response schemas. Pydantic leverages Python type hints to enforce validation rules and guarantees well-structured data both at input and output. These models were automatically integrated into the OpenAPI documentation, ensuring synchronization between the live implementation and the generated documentation. This greatly improved reliability, clarity, and maintainability during development.
 
 Several iterations were required to define a clean, capable, and user-friendly API that met the project’s requirements. The final specification includes endpoints for initiating builds, retrieving status updates, and downloading artifacts:
 
@@ -969,7 +979,7 @@ Beyond these foundational files, the architecture is further divided into dedica
 
 ### Dependency Injection
 
-The backend service extensively leverages the Dependency Injection (DI) pattern, a core concept inspired by frameworks like Spring Boot. DI is crucial for achieving modularity and testability by decoupling components. Instead of objects creating or managing their own dependencies, these dependencies are "injected" into them by an external entity, typically the framework itself. In Spring Boot, this is managed by the Inversion of Control (IoC) container, which instantiates and provides single instances of beans (objects) where needed [61].
+The backend service extensively leverages the Dependency Injection (DI) pattern, a core concept inspired by frameworks like Spring Boot. DI is crucial for achieving modularity and testability by decoupling components. Instead of objects creating or managing their own dependencies, these dependencies are "injected" into them by an external entity, typically the framework itself. In Spring Boot, this is managed by the Inversion of Control (IoC) container, which instantiates and provides single instances of beans (objects) where needed [@spring-boot-di].
 
 FastAPI implements DI on a request-based level. This means that for each incoming API request, FastAPI's dependency injection system instantiates the necessary objects (e.g., repositories, services, utility functions) and provides them to the route handlers. This ensures that each request operates with its own dedicated set of dependencies, avoiding potential state conflicts and simplifying concurrency management.
 
@@ -1188,9 +1198,9 @@ The Timeseries Parser is designed for flexible and secure deployment. All critic
 
 ## TTN-Mock
 
-For highly efficient and rapid backend development, a dedicated TTN-Mock microservice was created to simulate sensor data typically transmitted via The Things Network (TTN) over MQTT. This mock service addresses several practical limitations encountered when relying solely on physical LoRaWAN hardware during development. It eliminates the need to carry and install hardware, bypasses the strict duty cycle (commonly 1%) and fair use policies of actual LoRaWAN networks, which limit uplink airtime to as little as **30 seconds per day per node** [62] and severely restrict message frequency. This significantly speeds up development cycles by allowing on-the-fly configuration changes instead of requiring firmware flashes, enabling developers to test data ingestion and processing logic at a much higher cadence than real-world limitations would permit.
+For highly efficient and rapid backend development, a dedicated TTN-Mock microservice was created to simulate sensor data typically transmitted via The Things Network (TTN) over MQTT. This mock service addresses several practical limitations encountered when relying solely on physical LoRaWAN hardware during development. It eliminates the need to carry and install hardware, bypasses the strict duty cycle (commonly 1%) and fair use policies of actual LoRaWAN networks, which limit uplink airtime to as little as **30 seconds per day per node** [@lorawan-duty-cycle] and severely restrict message frequency. This significantly speeds up development cycles by allowing on-the-fly configuration changes instead of requiring firmware flashes, enabling developers to test data ingestion and processing logic at a much higher cadence than real-world limitations would permit.
 
-Built in Python, the TTN-Mock leverages the `paho-mqtt` library to establish a connection to an MQTT broker. Its core functionality involves dynamically generating random sensor data, encoded using Protobuf, and embedding this into an MQTT message that faithfully emulates the structure of an actual TTN uplink message. For full fidelity, it can also include a `"simulated": true` field in the payload, as per TTN documentation [63]. This message is then published to a configurable MQTT topic at regular intervals. The service's behavior, including the device ID, MQTT broker details, topic, and publishing interval, is fully customizable through environment variables, providing flexible and isolated testing environments for the backend's data ingestion pipeline.
+Built in Python, the TTN-Mock leverages the `paho-mqtt` library to establish a connection to an MQTT broker. Its core functionality involves dynamically generating random sensor data, encoded using Protobuf, and embedding this into an MQTT message that faithfully emulates the structure of an actual TTN uplink message. For full fidelity, it can also include a `"simulated": true` field in the payload, as per TTN documentation [@ttn-dataformats]. This message is then published to a configurable MQTT topic at regular intervals. The service's behavior, including the device ID, MQTT broker details, topic, and publishing interval, is fully customizable through environment variables, providing flexible and isolated testing environments for the backend's data ingestion pipeline.
 
 # Deployment & Integration
 The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
@@ -1394,68 +1404,21 @@ Working together as a team was also a valuable learning experience. We learned h
 
 We truly appreciated the opportunity to design and implement such an ambitious system. The experience of applying modern development practices, especially cloud-native principles, was not only aligned with our interests but also provided insights and skills that will benefit us in our future careers.
 
+<!-- Bibliography, lists -->
 \newpage
+\chapter*{References}
+\addcontentsline{toc}{chapter}{References}
 
-# Bibliography
-[1] L. Degen, "Project2: Internet of Soils Revised," unpublished student report, BFH-TI, Biel/Bienne, Jan. 2025.  
-[2] K. Schwaber and J. Sutherland, The Scrum Guide: The Definitive Guide to Scrum: The Rules of the Game, Scrum.org, Nov. 2020. [Online]. Available: https://scrumguides.org/  
-[3] A. Wiggins, The Twelve-Factor App, Heroku, 2011. [Online]. Available: https://12factor.net/
-[4] Express, “Express - Node.js web application framework,” [Online]. Available: https://expressjs.com  
-[5] Spring, “Spring Boot,” [Online]. Available: https://spring.io/projects/spring-boot  
-[6] Actix Project, “Actix Web,” [Online]. Available: https://actix.rs  
-[7] FastAPI, “FastAPI - The modern Python web framework,” [Online]. Available: https://fastapi.tiangolo.com  
-[8] Meta, React – A JavaScript library for building user interfaces, 2024. [Online]. Available: https://reactjs.org/
-[9] Vue.js, The Progressive JavaScript Framework, 2024. [Online]. Available: https://vuejs.org/
-[10] Google, Angular – The modern web developer’s platform, 2024. [Online]. Available: https://angular.io/
-[11] Triply B.V., "Yasgui – Triply Documentation," [Online]. Available: https://docs.triply.cc/yasgui/.
-[12] The Apache Software Foundation, "Fuseki – Serving RDF data over HTTP," Apache Jena Documentation, [Online] Available: https://jena.apache.org/documentation/fuseki2/.
-[19] Heltec Automation, “HTCC-AB01 V2,” [Online]. Available: https://heltec.org/project/htcc-ab01-v2/
-[20] Heltec Automation, “Programming CubeCell – HTCC-AM01,” [Online]. Available: https://docs.heltec.org/en/node/asr650x/htcc_am01/programming_cubecell.html
-[21] Heltec Automation, “Issue #80: Web Serial not working,” GitHub, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino/issues/80
-[22] Heltec Automation, “Issue #281: Serial Upload Problems,” GitHub, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino/issues/281
-[23] Heltec Automation, “CubeCell-Arduino,” GitHub repository, [Online]. Available: https://github.com/HelTecAutomation/CubeCell-Arduino
-[24] Heltec Community Forum, “CubeCell Download Tool for Raspberry Pi,” [Online]. Available: http://community.heltec.cn/t/cubecell-download-tool-for-raspberry-pi/2522/12
-[25] Heltec Community Forum, “CubeCellFlash Tool,” [Online]. Available: http://community.heltec.cn/t/cubecellflash-tool/1953/3
-[26] Heltec Community Forum, “CubeCell Firmware Upload,” [Online]. Available: http://community.heltec.cn/t/cubecell-firmware-upload/1063
-[28] Mozilla Developer Network, “Web Serial API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API
-[29] Mozilla Developer Network, “WebUSB API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/USB
-[30] Mozilla Developer Network, “WebHID API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API
-[31] Mozilla Developer Network, “Web Bluetooth API,” [Online]. Available: https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API
-[32] Infineon Technologies AG, Format of .cyacd File for PSoC 3 or PSoC 5LP Bootloader, Knowledge Base Article, Oct. 2020. [Online]. Available: https://community.infineon.com/t5/Knowledge-Base-Articles/Format-of-cyacd-File-for-PSoC-3-or-PSoC-5LP-Bootloader/ta-p/249707
-[33] Seeed Studio, “XIAO ESP32S3 - Supports CircuitPython and Arduino,” [Online]. Available: https://wiki.seeedstudio.com/XIAO_ESP32S3_Getting_Started/
-[34] Adafruit, “Adafruit WebSerial ESPTool,” GitHub, [Online]. Available: https://github.com/adafruit/Adafruit_WebSerial_ESPTool
-[35] Toit.io, “Flash your ESP32 from the Browser Using Web Serial,” Medium, [Online]. Available: https://medium.com/the-toit-take/flash-your-esp32-from-the-browser-using-web-serial-5eccb1483b9c
-[36] Espressif, “esptool-js,” GitHub, [Online]. Available: https://github.com/espressif/esptool-js
-[37] Berner Fachhochschule, "Internet of Soils – Vernetzte Bodenfeuchtesensorik in Schutzwäldern," [Online]. Available: https://www.bfh.ch/en/research/research-projects/2022-288-394-015/.
-[38] Berner Fachhochschule, "Mobile Urban Green – Kühleffekte von mobilen Stadtbäumen," [Online]. Available: https://www.bfh.ch/de/forschung/forschungsprojekte/2023-527-998-470/.
-[39] Arduino, “Arduino IDE,” [Online]. Available: https://www.arduino.cc/en/software  
-[40] PlatformIO, “PlatformIO Documentation,” [Online]. Available: https://docs.platformio.org  
-[41] Arduino, “Arduino CLI,” [Online]. Available: https://arduino.github.io/arduino-cli  
-[42] Sudar, “Arduino Makefile,” [Online]. Available: https://github.com/sudar/Arduino-Makefile  
-[43] solarbotics, “solarbotics/arduino-cli,” Docker Hub, [Online]. Available: https://hub.docker.com/r/solarbotics/arduino-cli [Accessed: Jun. 4, 2025].
-[44] Docker Inc., “Docker SDK for Python,” [Online]. Available: https://docker-py.readthedocs.io/en/stable/
-[45] R. MacDonald, “The Dangers of Docker.sock,” Rory’s Blog, Mar. 6, 2016. [Online]. Available: https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/
-[46] OpenAPI Specification, version 3.1.0, Swagger.io. [Online]. Available: https://swagger.io/specification/ [Accessed: Jun. 4, 2025].
-[47] Pydantic Documentation. pydantic-dev, [Online]. Available: https://docs.pydantic.dev/latest/ [Accessed: 4-Jun-2025].
-[48] M. Raza, “JSON vs Protobuf vs Avro – Serialization Showdown,” Auth0 Blog, 2018. [Online]. Available: https://auth0.com/blog/beating-json-performance-with-protobuf/.
-[49] Google, “Protocol Buffers,” [Online]. Available: https://protobuf.dev/.
-[50] J. Palmu, “Nanopb – Protocol Buffers for Embedded Systems,” [Online]. Available: https://jpa.kapsi.fi/nanopb/.
-[51] Google, “FlatBuffers: Memory Efficient Serialization Library,” [Online]. Available: https://google.github.io/flatbuffers/.
-[52] Apache Software Foundation, “Apache Avro,” [Online]. Available: https://avro.apache.org/.
-[53] MessagePack Project, “MessagePack: It’s like JSON. But fast and small.,” [Online]. Available: https://msgpack.org/.
-[54] Google, "Protocol Buffers: Encoding," protobuf.dev, 2023. [Online]. Available: https://protobuf.dev/programming-guides/encoding/.
-[55] C. Bizer, T. Heath, and T. Berners-Lee, “Linked Data – The Story So Far,” International Journal on Semantic Web and Information Systems, vol. 5, no. 3, pp. 1–22, 2009.  
-[56] W3C, “RDF 1.1 Concepts and Abstract Syntax,” 2014. [Online]. Available: https://www.w3.org/TR/rdf11-concepts/  
-[57] W3C, "RDF Schema 1.1," Feb. 2014. [Online]. Available: https://www.w3.org/TR/rdf-schema/  
-[58] W3C, "OWL Web Ontology Language," Feb. 2004. [Online]. Available: https://www.w3.org/TR/owl-features/  
-[59] W3C, "Semantic Sensor Network Ontology", Oct. 2017. [Online]. https://www.w3.org/TR/vocab-ssn/  
-[60] Schema.org, "Schema.org vocabulary." [Online]. Available: https://schema.org/
-[61] Spring.io, "Spring Beans and Dependency Injection," Spring Boot Reference Documentation.   [Online]. Available: https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.spring-beans-and-dependency-injection. [Accessed: Jun. 10, 2025].   
-[62] The Things Network, "LoRaWAN Duty Cycle." Accessed: Jun. 10, 2025. [Online]. Available: https://www.thethingsnetwork.org/docs/lorawan/duty-cycle/   
-[63] The Things Industries, "Integrations / Data Formats." Accessed: Jun. 10, 2025. [Online]. Available: https://www.thethingsindustries.com/docs/integrations/data-formats/   
-[99] oyso, “Forest trees fir trees woods,” Pixabay, https://pixabay.com/photos/forest-trees-fir-trees-woods-6874717/ (accessed Jun. 4, 2025).
-[100] Heylizart “Autumn forest nature simple trees,” Pixabay, https://pixabay.com/vectors/autumn-forest-nature-simple-trees-8416137/ (accessed Jun. 4, 2025).
+::: {#refs}
+:::
 
+\listoffigures
+\listoftables
+
+<!-- Appendix -->
 
 \appendix
-\chapter*{Appendix}
+
+\chapter{Time Tracking Sheet}
+
+\chapter{Supervisor Meeting Notes}
