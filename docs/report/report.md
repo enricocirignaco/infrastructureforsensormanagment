@@ -280,7 +280,7 @@ The use of RDF enables us to describe entities such as sensors, observed phenome
 
 A further advantage of Linked Data is its ability to seamlessly integrate distributed knowledge sources. In our platform, relevant metadata such as data sheets, calibration data or manufacturer specifications are often stored externally and exist in a variety of formats. Rather than importing and replicating these documents, Linked Data enables us to reference them directly via persistent URIs. This avoids duplication and enables scalable metadata enrichment.
 
-In contrast to relational databases such as InfluxDB or PostgreSQL, which rely on fixed schemas and lack native support for semantic relationships, RDF-based triple stores offer a more adaptable solution. They are inherently suited to scenarios where data structures are not known in advance or change frequently over time. The ability to link internal datasets with external ontologies further enhances interoperability and long-term maintainability.
+In contrast to relational databases such as MariaDB or PostgreSQL, which rely on fixed schemas and lack native support for semantic relationships, RDF-based triple stores offer a more adaptable solution. They are inherently suited to scenarios where data structures are not known in advance or change frequently over time. The ability to link internal datasets with external ontologies further enhances interoperability and long-term maintainability.
 
 Considering the need to manage diverse data structures, adapt to evolving project requirements and integrate distributed metadata, Linked Data proves to be a robust and future-oriented foundation for our sensor infrastructure. Its semantic flexibility supports consistent modeling across different projects, while enabling seamless integration with external ontologies and data sources. This approach not only enhances interoperability but also ensures that the platform remains maintainable and extensible as new use cases emerge.
 
@@ -288,14 +288,14 @@ Considering the need to manage diverse data structures, adapt to evolving projec
 
 In the context of Linked Data, schemas and ontologies are essential tools for adding semantic structure and meaning to data. While these terms are often used interchangeably, they differ in scope and expressiveness. A schema typically defines the structure and types of data entities, similar to a data model, whereas an ontology provides a richer semantic framework that includes relationships, constraints and inference rules. Ontologies can express not only what data exists but also how entities relate to one another and what logical conclusions can be derived from the data.
 
-The W3C has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [@rdf-schema]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [@owl-features].
+The World Wide Web Consortium (W3C) has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [@rdf-schema]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [@owl-features].
 
-A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [@ssn-ontology]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of Internet of Things (IoT) applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
+A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [@ssn-ontology]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of IoT applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
 The following diagram from the official ontology description by W3C offers a concret overview over all classes and relationships that are described within SOSA [@ssn-ontology]:
 
 ![Structure of the SOSA ontology](./images/sosa-ontology.png)
 
-The following example shows how a sensor and an observation would be described and linked with the SOSA ontology. The example is written in the turtle format.
+The following example shows how a sensor and an observation would be described and linked with the SOSA ontology. The example is written in the Turtle format, a compact and human-readable syntax specifically designed for RDF graphs, making it easier to read and write semantic data.
 
 ```turtle
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
@@ -352,13 +352,13 @@ By integrating Linked Data technologies into our platform, we gain a flexible, s
 
 # Binary Serialization for IoT Communication
 
-In any system that transmits structured data between components, there must be a clear, unambiguous way to represent and interpret that data. This is particularly relevant in IoT environments, where sensor nodes, gateways, and backend services often run on different platforms and are implemented in different programming languages. To ensure that a measurement recorded on a microcontroller can later be interpreted correctly in a cloud service or analysis tool, the transmitted data must follow a clearly defined format.
+In any system that exchanges structured data between components, there must be a clear, unambiguous way to represent and interpret that data. This is particularly relevant in IoT environments, where sensor nodes, gateways, and applications often run on different platforms and are implemented in different programming languages. To ensure that a measurement recorded on a microcontroller can later be interpreted correctly in a cloud service or analysis tool, the transmitted data must follow a clearly defined format.
 
 Schema-based serialization formats address this problem by explicitly defining the structure and types of data. This makes it possible to validate data automatically, catch errors at compile time, and generate consistent, type-safe code across multiple programming languages. In comparison to textual formats such as JSON or XML, binary serialization formats such as Protocol Buffers additionally offer significant performance advantages [@protobuf-performance]. They reduce message size and speed up parsing, which is particularly important in IoT environments with limited bandwidth and processing power.
 
 ## Evaluating Binary Format 
 
-To select an appropriate format for this project, several binary serialization libraries were evaluated and compared with regard to their efficiency, tooling support, and suitability for both embedded systems and backend services.
+To select an appropriate framework for this project, several binary serialization libraries were evaluated and compared with regard to their efficiency, tooling support, and suitability for both embedded systems and application services.
 
 - **Protocol Buffers (Protobuf)** is a widely adopted format developed by Google. It provides a well-documented schema definition language, strong cross-platform tooling, and supports efficient encoding and schema evolution. Its simplicity and broad ecosystem make it especially attractive for general-purpose use [@protobuf].
 
@@ -366,11 +366,11 @@ To select an appropriate format for this project, several binary serialization l
 
 - **FlatBuffers** offers very high performance and supports random access without full deserialization. It is commonly used in latency-sensitive applications like gaming. However, compared to Protobuf, it typically requires more manual steps to build and manage data structures, which can make development more complex in smaller-scale applications.[@flatbuffers].
 
-- **Apache Avro** is schema-based and commonly used in big data platforms. Although powerful, it is less suited for embedded systems due to its design focus on big data infrastructure [@avro].
+- **Apache Avro** is schema-based and commonly used in big data platforms. Although powerful, it is less suited for embedded systems due to its focus on big data infrastructure [@avro].
 
 - **MessagePack** is a lightweight binary format that aims to be more efficient than JSON while retaining its simplicity and compatibility [@messagepack]. However, it does not rely on an explicit schema definition, which can make data validation, versioning, and long-term maintainability more challenging in structured systems.
 
-Based on this evaluation, Protocol Buffers was selected as the binary serialization format for this project. Its strong cross-platform tooling, clear schema definition, and wide adoption make it particularly well suited for scenarios that require structured data exchange across heterogeneous components. The format's ability to generate language-specific code and support schema evolution aligns closely with the architectural goals of the system. [@protobuf]
+Based on this evaluation, **Protocol Buffers** and its specialized implementation **Nanopb** were jointly selected as the binary serialization formats for this project. Protocol Buffers provides the robust, cross-platform schema definition and code generation crucial for application services and general data exchange. Nanopb, on the other hand, is the highly optimized C implementation of Protobuf specifically designed for the resource-constrained embedded systems of the sensor nodes. This dual approach leverages the strengths of the Protobuf ecosystem for both heterogeneous components: its clear schema definition and wide adoption for structured data exchange across various services, and Nanopb's efficiency and minimal footprint for the microcontrollers. The format's ability to generate language-specific code and support schema evolution aligns closely with the architectural goals of the system. [@protobuf; @nanopb]
 
 ## Protocol Buffers
 
@@ -402,7 +402,7 @@ Table: Binary encoding examples for different Protobuf data types.
 Protocol Buffers uses **base-128 variable-length integers (varints)** to efficiently encode numeric types like `uint32` and `sint32`. These varints use only as many bytes as necessary to represent a value. For example, small integers such as `4` or the ZigZag-encoded version of `-4` require only a single byte to transmit. This compression is achieved by packing the 7 least significant bits of each byte into the payload and using the most significant bit to indicate whether more bytes follow. \
 Negative integers are handled using **ZigZag encoding**, which maps signed values to unsigned varints in a way that keeps small negative numbers compact [@protobuf-encoding].
 
-In systems where floating-point precision is not strictly required, decimal values can alternatively be transmitted as scaled integers. For instance, the temperature `21.3 °C` could be encoded as the integer `213`, assuming one decimal digit of precision. This technique can help reduce payload size when only integer varints are used – especially since a `float` in Protobuf always requires exactly 4 bytes, regardless of the actual value. In contrast, small integers typically require only a single byte, making them much more efficient to transmit.
+In systems where floating-point precision is not strictly required, decimal values can alternatively be transmitted as scaled integers. For instance, the temperature `21.3 °C` could be encoded as the integer `213`, assuming one decimal digit of precision. This technique can help reduce payload size when only integer varints are used – especially since a `float` in Protobuf always requires exactly 4 bytes, regardless of the actual value. In contrast, small integers typically require only a single byte, making them much more efficient when transmitting data.
 
 ## Runtime Compatibility 
 
@@ -1219,9 +1219,9 @@ Each logbook entry uses specific types, such as `LogEntryType/CREATED` or `LogEn
 
 ### Challenges and Limitations
 
-Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain **limitations when compared to traditional relational databases employing ORMs**.
+Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain limitations when compared to traditional relational databases employing ORMs.
 
-A primary challenge is the **absence of an Object-Relational Mapper (ORM)** for SPARQL and RDF. This necessitates **manual construction of all SPARQL queries**. Unlike ORMs, which provide type-safe query builders and automatic mapping, developers must meticulously craft each query string. This leads to:
+A primary challenge is the absence of an Object-Relational Mapper (ORM) for SPARQL and RDF. This necessitates manual construction of all SPARQL queries. Unlike ORMs, which provide type-safe query builders and automatic mapping, developers must meticulously craft each query string. This leads to:
 
 * **Lack of Compile-Time Schema Enforcement:** There is no mechanism to validate SPARQL queries against the defined ontologies at development time. A simple typo in a predicate URI or an incorrect data type in a query will not raise an error until runtime, potentially leading to silently inconsistent data rather than immediate failure.
 * **Consistency Overhead:** Developers bear a significant burden in ensuring that all repository methods for a single entity (create, read, update, delete) consistently use the *exact same RDF predicates and object types*. Any deviation, even minor, can fragment the data graph, making subsequent queries incomplete or erroneous. This requires rigorous adherence to internal conventions and thorough testing.
