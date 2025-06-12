@@ -128,3 +128,25 @@
 | 2025-06-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
 | 2025-06-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
 | 2025-06-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
+| 2025-06-01 | 15:00 - 18:00 | 3,0   | CIRIE1         |          | Docs: Methods, Journal                                            |
+| 2025-06-02 | 12:00 - 18:00 | 6,0   | CIRIE1         |          | Docs: Methods chapter                                             |
+| 2025-06-04 | 14:00 - 21:00 | 7,0   | CIRIE1, DEGEL2 |          | Docs: Methods chapter, Deployment First alpha version             |
+| 2025-06-05 | 08:00 - 12:00 | 4,0   | CIRIE1         |          | Deployment First alpha version                                    |
+| 2025-06-05 | 13:00 - 15:00 | 2,0   | CIRIE1, DEGEL2 |          | Last meeting with supervisor                                      |
+| 2025-06-06 | 13:00 - 20:00 | 7,0   | CIRIE1         |          | Docs: Research chapter                                            |
+| 2025-06-07 | 10:00 - 21:00 | 11,0  | CIRIE1, DEGEL2 |          | Making video                                                      |
+| 2025-06-08 | 16:00 - 18:00 | 2,0   | CIRIE1         |          | Docs: Research chapter                                            |
+| 2025-06-09 | 10:00 - 20:00 | 10,0  | CIRIE1         |          | Docs: Research chapter & Results Chapter                          |
+| 2025-06-10 | 10:00 - 20:00 | 10,0  | CIRIE1         |          | Docs: Results chapter & Conclusion Chapter                        |
+| 2025-06-11 | 17:00 - 00:30 | 7,5   | CIRIE1         |          | Docs: Peer Review and Improvements                                |
+| 2025-06-12 | 10:00 - 18:00 | 8,0   | CIRIE1         |          | Docs: Peer Review and Improvements. Wrap-up                       |
+
+
+
+
+
+
+
+
+
+
