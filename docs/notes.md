@@ -13,7 +13,6 @@
 - Appendix: Setup Guide
 - Abstract schreiben
 - Discussion vervollständigen
-- who has done what?
 - unterschrift dings + absatz bezüglich GPT
 - Source hochladen
 - SPARQL beispiele

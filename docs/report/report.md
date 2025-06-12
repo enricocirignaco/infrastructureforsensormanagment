@@ -1546,7 +1546,7 @@ Among these optional goals, the following were not implemented due to time const
 
 ## Workload per student
 From the beginning of the project, the team collaborated closely while maintaining a clear division of responsibilities. Tasks were distributed based on prior experience and expertise.
-Linus Degen, who had previously explored the use of RDF triplestores in the context of this project, took the lead on implementing the backend, the persistence layer, and the integration with The Things Network (TTN).
+Linus Degen, who had previously explored the use of RDF triplestores in the context of this project and possessed experience in building enterprise backends, took the lead on implementing the backend, the persistence layer, and the integration with The Things Network (TTN).
 Enrico Cirignaco, with a background in embedded systems and containerization, focused on the compiler engine, firmware programming mechanisms, the web frontend, and DevOps tasks.
 
 The following table provides a breakdown of the main responsibilities:
@@ -1565,7 +1565,7 @@ Table: Breakdown of key project responsibilities per team member
 | DevOps / CI / Deployment / Proxy  |             | X                |
 | System Architecture & Integration | X           | X                |
 
-To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This journal is included in the appendix.
+To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This [work journal](#chap:work-journal) is included in the appendix.
 
 ## Contribution to Thesis Chapters
 
@@ -1620,6 +1620,12 @@ Initially, a full continuous deployment (CD) pipeline was envisioned, where tagg
 ### Sensor Node Tagging
 Since the beginning of the project, the idea of equipping sensor nodes with a programmable identification device, such as an NFC tag, was considered. This would allow programming multiple nodes without manually tracking which firmware corresponds to which node. An NFC tag could store the direct URL to the sensor node’s page in the web application. By scanning the tag with a smartphone, users could quickly access essential information such as the node’s ID, configuration, or intended installation location.
 While this feature was ultimately deemed out of scope due to the additional workload, it remains a realistic and valuable enhancement for future development. As a practical workaround, QR codes linking to the corresponding sensor node page can be generated, printed, and physically attached to each device.
+
+### Improved State Management
+The current state management logic in the web application, particularly concerning entity lifecycle, can be somewhat restrictive and potentially hinder user workflows. Specifically, entities marked as "in-use" currently have limited modifiable attributes. Future work should focus on allowing certain data fields to remain editable even when an entity is active. Additionally, functionality should be implemented to ensure that corresponding states are properly reflected on The Things Network (TTN), such as marking devices as "archived" when they are no longer in use.
+
+### Data Repository Structure
+The current data repositories in the backend, based on RDF and a triplestore, are largely hand-crafted. This tight coupling means that any schema adjustments necessitate manual modifications across various queries and insertion logic within the backend. While stable RDF Object-Relational Mappers (ORMs) aren't widely available yet, LinkML presents a promising alternative worth exploring. LinkML allows metadata to be described in a meta-language, from which various artifacts can be generated, including Pydantic models and SPARQL queries [@linkml]. In the future, this capability could potentially extend to generating SPARQL insertion statements. Furthermore, the integration of additional ontologies could significantly enhance data richness and interoperability.
 
 ## Final thoughts
 We found this project to be extremely enriching, both technically and personally. Throughout the development, we explored and adopted a wide range of new technologies and tools, significantly expanding our skill sets. The challenge of building a complex, cloud-native system from scratch motivated us to continuously raise the bar and pursue a high level of quality and completeness, right up to the final days of the project.
