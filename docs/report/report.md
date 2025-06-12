@@ -3,9 +3,16 @@ author:
 - Enrico Cirignaco
 - Linus Degen
 title: 'Infrastructure for Sensor Management'
-date: '02.07.2025'
+subtitle: ''
+date: '12.07.2025'
 lang: en-GB
 toc: true
+
+header-includes:
+  - \institute{Berner Fachhochschule, Departement Technik und Informatik}
+  - \advisor{Pascal Mainini (BFH)}
+  - \expert{Thomas Jäggi (GIBB)}
+  - \degreeprogram{Bachelor of Science in Computer Science}
 
 citeproc: true
 cite-method: biblatex
@@ -14,12 +21,6 @@ csl: ieee.csl
 link-citations: true
 nocite: |
   @*
-
-header-includes:
-- |
-  ```{=latex}
-  ```
-
 
 documentclass: bfhthesis
 classoption:
