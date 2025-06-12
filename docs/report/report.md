@@ -55,6 +55,16 @@ toccolor: BFH-Gray
 <!-- Chapter 0: Abstract -->
 \chapter*{Abstract}
 
+This thesis presents a modular and extensible infrastructure for managing distributed sensor deployments, developed in the context of environmental monitoring projects at the Bern University of Applied Sciences (BFH). The system addresses recurring challenges such as fragmented metadata, manual provisioning, inconsistent firmware management, and limited scalability across sensor networks.
+
+To meet these challenges, the system integrates containerized microservices, a web-based user interface, and semantic data technologies. Sensor nodes are defined within the system using structured metadata, automatically provisioned on The Things Network (TTN), and linked to tailored firmware builds. Firmware is compiled from a central GitLab repository using injected configuration values, then flashed either via a browser interface (using Web Serial and esptool-js) or a CLI tool.
+
+Collected data is transmitted via LoRaWAN, parsed into a consistent structure, and stored in both InfluxDB (for time-series access) and Apache Jena Fuseki (for semantic querying). Metadata and sensor data are modeled as Linked Data using RDF and ontologies such as SOSA and Schema.org, allowing for flexible, future-proof integration and analysis.
+
+The backend is implemented in FastAPI, exposing REST interfaces and supporting asynchronous workflows. The frontend, built with Vue.js, offers intuitive project and node management. The system is fully containerized with Docker, and versioned deployments are handled through Git-based CI pipelines.
+
+By automating complex workflows and unifying data structures, the platform reduces technical overhead, improves consistency, and enables scalable deployment of sensor-based systems. Although designed for academic research, the architecture is generic and adaptable to industrial and commercial IoT use cases. It lays a robust foundation for reliable data collection, semantic integration, and streamlined device management across diverse sensor networks.
+
 <!-- Chapter 1: Introduction -->
 \chapter{Introduction}
 
