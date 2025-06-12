@@ -552,20 +552,20 @@ An overview of all key technologies used can be found in the system architecture
 <!-- Chapter 4: Results -->
 \chapter{Results}
 
-This chapter presents the results of the implementation phase in detail. It provides a comprehensive overview of the developed system and its architecture, and documents all major design decisions to make the development process transparent and reproducible. Key components, services, and their interactions are discussed extensively to illustrate how the final system was constructed. In addition, deployment, integration, and testing aspects are included to complete the picture of the implemented solution.
+This chapter presents the results of the implementation phase in detail. It provides a comprehensive overview of the developed system and its architecture, and documents all major design decisions to make the development process transparent and reproducible. Key components, services, and their interactions are discussed extensively to illustrate how the final system was constructed. In addition, deployment, integration, and testing aspects are described to provide a comprehensive overview of the implemented solution.
 
 # High-level System-overview
-The system developed in this project is designed to simplify the deployment, configuration, and monitoring of distributed IoT networks. It is intended for use by universities, research institutions, or companies seeking efficient management of sensor-based infrastructures. The architecture is modular and extensible, enabling the integration of new features or services as needed. While the design was guided by the specific case study described in the Introduction chapter, it was intentionally kept flexible to support a broad range of future use cases.
+The system developed in this project is designed to simplify the deployment, configuration, and monitoring of distributed IoT networks. It is intended for use by universities, research institutions, or companies seeking efficient management of sensor-based infrastructures. The architecture is modular and extensible, enabling the integration of new features or services as needed. While the design was guided by the specific case study described in the [Introduction](#research-projects-at-bfh) chapter, it was intentionally kept flexible to support a broad range of future use cases.
 
 The key components of the system are:
 
 - **Sensor Nodes**: These are embedded hardware devices deployed in outdoor or remote environments to measure real-world phenomena such as soil moisture, temperature, or light. Each sensor node consists of a microcontroller (e.g., ESP32 or CubeCell), one or more sensors, and a communication module,either wired or wireless, depending on the use case. Typically, the node must be programmed with custom firmware prior to deployment, defining its sensing logic and communication behavior.
-Once deployed, the nodes operate autonomously and transmit their data to the IoT Gateway. In this project, communication is handled wirelessly via LoRaWAN, a low-power wide-area network (LPWAN) protocol designed for long-range, energy-efficient data transmission,ideal for battery-powered devices in distributed sensor networks.
+Once deployed, the nodes operate autonomously and transmit their data to the IoT Gateway. In this project, communication is handled wirelessly via LoRaWAN, a low-power wide-area network (LPWAN) protocol designed for long-range, energy-efficient data transmission, ideal for battery-powered devices in distributed sensor networks.
 - **IoT Gateway**: This component serves as a bridge between the sensor nodes and the main cloud infrastructure. It receives data from the sensor nodes and forwards it to the backend system for processing and storage. In a LoRaWAN-based architecture like the one used in this project, the concept of the IoT gateway is split into two layers:
     + **LoRaWAN Gateways** are physical devices distributed across a geographic area. They receive wireless transmissions from sensor nodes using the LoRaWAN protocol and relay them over the internet via standard IP-based protocols.
-    + **The Things Network** (TTN) is a global, open LoRaWAN infrastructure that acts as the cloud-based backend for LoRaWAN gateways. It handles device management, message routing, and secure data delivery. TTN receives the sensor data from the gateways and makes it accessible to external systems like ours.
+    + **The Things Network** (TTN) is a global, open LoRaWAN framework that acts as the cloud-based backend for LoRaWAN gateways. It handles device management, message routing, and secure data delivery. TTN receives the sensor data from the gateways and makes it accessible to external systems like ours.
 In this system, the backend connects to TTN to receive real-time sensor data. Data is transmitted using the MQTT protocol, a lightweight publish-subscribe messaging protocol designed specifically for low-bandwidth and high-latency IoT networks. Sensor provisioning (i.e., registering device metadata) on the TTN platform is handled through a REST API.
-- **Main Cloud Infrastructure**: This is the core of the system where all data processing, storage, and user interaction takes place. It also represents the primary focus of this project. The infrastructure is hosted on BFH’s private cloud and is accessible to users through a web-based application. The system consists of multiple backend services, databases, and interfaces, which are discussed in detail in the following chapters.
+- **Main Cloud Infrastructure**: This is the core of the system where all data processing, storage, and user interaction takes place. It also represents the primary focus of this project. The infrastructure is hosted on BFH’s private cloud and is accessible to users through a web-based application. The system consists of multiple backend services, databases, and interfaces, which are discussed in detail in the following subchapters.
 
 - **Users**: The most important component of the system is the user base. The system supports three distinct user roles:
   - **Admin**: Responsible for managing the system and creating or maintaining user accounts.
@@ -585,7 +585,7 @@ To summarize the data flow in the system, sensor nodes deployed in the field col
 
 # System Architecture
 
-While the previous chapter provided a conceptual overview of the system and its data flow, this section presents the technical implementation of the developed architecture. It introduces all core components of the system and explains how they interact within the cloud-based infrastructure. The aim is to offer a comprehensive overview of the deployed software services and the orchestration mechanisms behind them.
+While the previous chapter provided a conceptual overview of the system and its data flow, this section presents the technical aspects of the system. It introduces all core components of the infrastructure and explains how they interact within the cloud-based infrastructure. The aim is to offer a comprehensive overview of the deployed software services and the orchestration mechanisms behind them.
 
 At the heart of the architecture lies a microservice-based design. During the course of this project, a set of lightweight, modular services was developed and deployed to realize the required functionality. These services communicate via clearly defined interfaces and protocols, enabling a clean separation of concerns and ensuring that each component can be developed, tested, and deployed independently. This approach improves maintainability, promotes scalability, and allows for flexible adaptation to future requirements or deployments.
 
@@ -599,11 +599,11 @@ Each block within the orange cloud in the diagram represents a microservice runn
 
 Together, the services form a cohesive and extensible backend platform that handles everything from sensor data ingestion to storage, metadata modeling, and user interaction. Their composition reflects a deliberate design that emphasizes interoperability, modularity, and robustness in distributed IoT deployments.
 
-The following part of this chapter provides a brief description of each service, following the typical sequence of user interaction. Starting with the creation and management of system entities through the web application, the process continues with automated schema generation, firmware compilation, and sensor configuration. As data is transmitted from the field, it is decoded, stored, and made available for querying. Each service contributes a distinct function within this workflow and is introduced in the following paragraphs.
+The following section provides a brief description of each service, following the typical sequence of user interaction. Starting with the creation and management of system entities through the web application, the process continues with automated schema generation, firmware compilation, and sensor configuration. As data is received from the field, it is decoded, stored, and made available for querying. Each service contributes a distinct function within this workflow and is introduced in the following paragraphs.
 
 **Reverse Proxy:**  The reverse proxy acts as a single public entry point to the system, bundling all externally exposed services behind one unified HTTP/HTTPS interface. This is particularly relevant in production environments where port exposure should be minimized and controlled. It also simplifies routing, centralizes TLS certificate management, and enables domain-based access to the individual components. By abstracting the internal structure, the reverse proxy improves security and makes deployment more maintainable. The system uses Caddy, a lightweight and automated reverse proxy, which is described in more detail in a later chapter.
 
-**Web Application:**  The web application serves as the central interface through which users interact with the system. It consists of a frontend built with Vue.js and a backend implemented using python FastAPI, providing a clear separation of concerns between presentation and business logic. The backend exposes a RESTful API consumed by the frontend to perform actions such as creating and editing entities, managing sensor nodes, and visualizing data. To ensure security and maintainability, most microservices are not directly accessible from outside the system. Instead, the backend selectively communicates with other internal services to delegate specific tasks, such as compiling firmware or generating data schemas. This architectural decision helps to reduce the overall complexity and potential attack surface of the system. Access to the web application is protected through user authentication and role-based authorization, ensuring that only permitted actions are available to each user group.
+**Web Application:**  The web application serves as the central interface through which users interact with the system. It consists of a frontend built with Vue.js and a backend implemented using python FastAPI, providing a clear separation of concerns between presentation and business logic. The backend exposes a RESTful API consumed by the frontend to perform actions such as creating and editing entities, managing sensor nodes, and visualizing data. To ensure security and maintainability, most microservices are not directly exposed to outside. Instead, the backend selectively communicates with other internal services to delegate specific tasks, such as compiling firmware or generating data schemas. This architectural decision helps to reduce the overall complexity and potential attack surface of the system. Access to the web application is protected through user authentication and role-based authorization, ensuring that only permitted actions are available to each user group.
 
 **Triplestore:**  The triplestore is implemented using an instance of Apache Jena Fuseki and serves as the central database of the system. It stores all relevant information including user accounts, sensor metadata, and the complete set of timeseries data. Write access to the triplestore is strictly controlled and limited to two internal services: the backend and the timeseries parser.
 
@@ -615,9 +615,9 @@ Communication with the service is handled exclusively through a well-defined RES
 
 **Compiler Engine:**  The Compiler Engine is responsible for generating customized firmware binaries based on user-defined configurations. It exposes a REST interface through which requests can specify the target hardware and desired configuration parameters. Upon receiving a request, the service accesses the BFH GitLab repository to clone the relevant source code and compiles it accordingly. To ensure that the system remains clean and resource-efficient, an auxiliary container periodically deletes old build artifacts, preventing the accumulation of unused files and preserving disk space. This setup allows for flexible, automated firmware generation while keeping the system maintainable over time.
 
-**MQTT Broker:**  The system includes a local MQTT broker based on Eclipse Mosquitto, a lightweight and widely adopted open-source broker that is well-suited for containerized environments. To meet the project’s specific requirements, a custom Docker image was created, extending the official one. This custom image allows dynamic credential configuration at runtime through environment variables – a limitation in the official image that was addressed by the project team. The broker itself is configured to mirror the credentials and topic structure of the MQTT interface provided by The Things Network, enabling seamless integration with TTN’s uplink messages.
+**MQTT Broker:**  The system includes a local MQTT broker based on Eclipse Mosquitto, a lightweight and widely adopted open-source broker that is well-suited for containerized environments. To meet the project’s specific requirements, a custom Docker image was created, extending the official one. This custom image allows dynamic credential configuration at runtime through environment variables – a limitation in the official image that was addressed by the team. The broker itself is configured to mirror the credentials and topic structure of the MQTT interface provided by The Things Network, enabling seamless integration with TTN’s uplink messages.
 
-Using a local MQTT broker in addition to the external TTN broker follows a widely recommended best practice in IoT system design. It acts as a unified internal entry point for all MQTT clients and services, allowing them to subscribe to sensor data without depending directly on external infrastructure. This architectural decision also prepares the system for integration with alternative LoRaWAN providers. For example, providers like Swisscom LPN offer data delivery exclusively via Webhooks rather than MQTT. In such cases, an internal transformation service could receive the Webhook data and publish it to the local broker in the same format as TTN messages. This way, the rest of the system remains unchanged and continues to interact solely with the local MQTT broker, ensuring consistency and reducing integration complexity.
+Using a local MQTT broker in addition to the external TTN broker follows recommended best practice in IoT system design. It acts as a unified internal entry point for all MQTT clients and services, allowing them to subscribe to sensor data without depending directly on external infrastructure. This architectural decision also prepares the system for integration with alternative LoRaWAN providers. For example, providers like Swisscom LPN offer data delivery exclusively via Webhooks rather than MQTT. In such cases, an internal transformation service could receive the Webhook data and publish it to the local broker in the same format as TTN messages. This way, the rest of the system remains unchanged and continues to interact solely with the local MQTT broker, ensuring consistency and reducing integration complexity.
 
 **Timeseries Parser:**  The Timeseries Parser is a passive service that subscribes to the local MQTT broker and listens for incoming sensor data. Upon receiving a message, it fetches the current protobuf file descriptor from the triplestore, which contains all defined message schemas in a single binary file. Based on the originating sensor node, the parser selects the correct message type from within the descriptor and decodes the binary payload accordingly. The extracted data is then written to two targets: InfluxDB for efficient time-series storage and the triplestore using the SOSA ontology to semantically represent the observations. The service does not expose a public API and reacts exclusively to incoming MQTT messages, making it an isolated but essential component for real-time data processing.
 
@@ -632,17 +632,18 @@ The Compiler Engine is a dedicated service within the system responsible for gen
 
 This service is implemented as a standalone, Dockerized application accessible via a REST API. While its primary use is compiling Arduino-based source code, it was designed to support other toolchains as well. The concept involves containerizing each required toolchain: Docker images for different platforms (e.g., STM32, ESP32, Microchip) can be integrated and passed to the Compiler Engine as needed. This design makes the service extensible for a wide range of embedded development projects.
 
-A notable feature of the Compiler Engine is that it temporarily stores compiled binaries, allowing users to download them later without relying on webhooks or other asynchronous communication methods. To manage resources efficiently, a garbage collection mechanism automatically purges outdated binaries after a defined retention period.
+A notable feature of the Compiler Engine is that it temporarily stores compiled binaries, allowing users to download them later without relying on webhooks or other asynchronous communication methods. To manage resources efficiently, a garbage collection mechanism automatically purges outdated artifacts after a defined retention period.
 
 The Compiler Engine is composed of three Docker containers that work together to provide a modular and scalable compilation service.
 
 - **Main Service**: This is the core component of the system and is always running. It exposes a REST API that allows users or external systems to interact with the compiler engine. The main service is responsible for downloading the source code from a GitLab repository using a provided URL and access token, enriching the source code with variables included in the API request, and initiating the compilation process. To compile the source code, the main service dynamically launches a dedicated toolchain container. It also manages temporary storage for the resulting binaries, enriched source code, and compilation logs.
-- **Volume Cleaner**: This service runs continuously alongside the main service. Its task is to periodically delete old or unused files, such as previously downloaded repositories or generated binaries, to free up disk space and keep the system clean.
 - **Toolchain Container**: This container is created and launched by the main service for each individual build job. It encapsulates the toolchain required to compile the given source code. The specific Docker image used for the toolchain is defined per job, making the system easily adaptable to various platforms such as ESP32, STM32, or Microchip MCUs. Once the compilation finishes, the container is stopped and removed. This design allows the system to support multiple toolchains without changes to the main logic.
+- **Volume Cleaner**: This service runs continuously alongside the main service. Its task is to periodically delete old or unused files, such as previously downloaded repositories or generated binaries, to free up disk space and keep the system clean.
+
 
 This architecture ensures a clean separation of concerns and allows the system to scale or evolve without tightly coupling the compiler logic to the REST interface or storage system.
 
-![Service Architecture of Compile Engine](./images/compile_engine_architecture.png)
+![Architecture of Compile Engine service](./images/compile_engine_architecture.png)
 
 ## Arduino Toolchain
 The primary goal of the Compiler Engine is to support compilation of Arduino sketches (source code). To achieve this, a suitable toolchain had to be selected and containerized. The following requirements were identified to guide the evaluation:
@@ -732,11 +733,11 @@ $SOURCE_FOLDER
 - **OUTPUT_FOLDER**: Path to the directory where the compiled binary will be saved.
 - **LOG_FOLDER**: Path to the directory where compilation logs will be written.
 
-To allow users to define source code dependencies for the compilation process, a build-requirements.yaml file must be placed in the root of the source code directory. This mechanism enables users to explicitly specify required libraries and board support packages, making the build process more robust and deterministic.
+To allow users to define source code dependencies for the compilation process, a build-requirements.yaml file must be placed in the source code directory. This mechanism enables users to explicitly specify required libraries and board support packages, making the build process more robust and deterministic.
 
-This file is then parsed by the compiler engine, and the relevant information is injected into the Arduino CLI command to ensure the correct environment is set up during the build.
+The **build-requirements.yaml** file is then parsed by the compiler engine, and the relevant information is injected into the Arduino CLI command to ensure the correct environment is set up during the build.
 
-Below is an example of what a typical build-requirements.yaml file might contain:
+Below is an example of what a typical **build-requirements.yaml** file might contain:
 ```yaml
 board_manager:
   additional_urls:
@@ -750,11 +751,11 @@ The core of the compilation infrastructure is a standalone Docker container runn
 
 The service is designed for modularity and automation: it pulls source code from a Git repository, integrates configuration data provided via the API request, and invokes a toolchain-specific Docker image to build the firmware. Build results are stored in docker volumes and made available for a limited time.
 
-The API was implemented using FastAPI, a framework previously assessed in the [Technology Stack](#technology-stack) chapter for its suitability and ease of integration. A lightweight image was built using python:3.10-slim, with only the necessary dependencies installed to minimize image size and startup time.
+The API was implemented using FastAPI, a framework previously assessed in the [Technology Stack](#technology-stack) chapter for its suitability and ease of integration. A lightweight image was built using **python:3.10-slim**, with only the necessary dependencies installed to minimize image size and startup time.
 
 The result is a service that is both easy to interact with and adaptable to future toolchain expansions, making it suitable for integration into larger automation pipelines.
 
-**Docker Socket Binding vs. Docker-in-Docker (DinD)**
+### Docker Socket Binding vs. Docker-in-Docker (DinD)
 
 To enable the Python-based compiler service to spawn Docker containers for compilation, two approaches were evaluated: **Docker-in-Docker** (DinD) and **Docker socket binding**.
 
@@ -774,9 +775,9 @@ While socket binding is simpler and more resource-efficient than DinD, it introd
 
 Given these trade-offs, Docker socket binding was selected for this project due to its lower complexity and better performance. However, a dedicated security assessment should be performed in a future development phase to evaluate potential infrastructure risks, this lies outside the scope of the current work.
 
-**Source code download from Gitlab**
+### Source code download from Gitlab
 
-The Compiler Engine retrieves the source code directly from GitLab using the GitLab REST API. Instead of cloning the entire repository, which includes version history and unnecessary overhead, the service uses GitLab’s archive endpoint to download a ZIP archive of a specific subdirectory. This significantly reduces the download time and bandwidth usage.
+The Compiler Engine retrieves the source code directly from GitLab using the **GitLab REST API**. Instead of cloning the entire repository, which includes version history and unnecessary overhead, the service uses GitLab’s archive endpoint to download a ZIP archive of a specific subdirectory. This significantly reduces the download time and bandwidth usage.
 
 A key feature of the archive endpoint is that it supports specifying a particular version of the code via the **sha** parameter. This can be a commit hash, branch name, or tag. However, it’s important to note that GitLab does not strictly validate this parameter: if an invalid or missing value is provided, the API defaults to the repository’s default branch. This behavior can lead to unintended results and should be carefully considered when issuing a compile request to ensure the correct code version is used.
 
@@ -784,13 +785,13 @@ To access GitLab resources such as source code archives and container images, th
 
 For cases where the source code resides outside this group, a custom compilation endpoint is provided. This endpoint allows the user to explicitly supply a repository URL and a personal or project access token, enabling the compilation of arbitrary GitLab-hosted codebases.
 
-**Integration of additional metadata**
+### Integration of additional metadata
 
 An essential feature of the Compiler Engine is its ability to dynamically inject configuration metadata into the source code prior to compilation. This metadata typically includes identifiers such as TTN (The Things Network) credentials and a firmware UUID, but the mechanism is designed to remain fully generic and extensible.
 
 The REST API accepts an optional **config** parameter within the request body. This parameter is defined as an array of key–value pairs. This approach enables maximum flexibility, allowing different builds to be created from the same base code by specifying varying configurations.
 
-During the compilation workflow, the provided configuration is parsed and used to generate a C header file. This file is automatically placed into the source code directory. To ensure the variables are correctly included during compilation, the following line is prepended to the main source file:
+During the compilation workflow, the provided configuration is parsed and used to generate a **C header file**. This file is automatically placed into the source code directory. To ensure the variables are correctly included during compilation, the following line is prepended to the main source file:
 ```c
 #include "config.h"
 ```
@@ -803,9 +804,9 @@ To avoid naming conflicts with existing include guards, the file uses a specific
 ```
 This generated configuration file is not committed back to the Git repository. However, if needed, users can download the enriched version of the source code, including the generated config.h, via a dedicated REST endpoint. This enables reproducibility and debugging without polluting the original codebase. It also facilitates use cases where the same firmware template must be built for multiple deployments, each with unique metadata values.
 
-**API Design and Specification**
+### API Design and Specification
 
-An OpenAPI specification[@openapi-specification] was created based on the defined requirements of the compiler engine. This specification served as the blueprint for the system’s REST interface. Using FastAPI’s native support for OpenAPI, the core structure of the application was automatically generated from this specification. The business logic and tooling for the compilation process were implemented manually on top of this structure.
+An OpenAPI specification[@openapi-specification] was created based on the requirements of the compiler engine. This specification served as the blueprint for the system’s REST interface. Using FastAPI’s native support for OpenAPI, the core structure of the application was automatically generated from this specification. The business logic and tooling for the compilation process were implemented manually on top of this structure.
 
 To ensure robust and predictable behavior across all endpoints, the project used Pydantic[@pydantic] to define strict request and response schemas. Pydantic leverages Python type hints to enforce validation rules and guarantees well-structured data both at input and output. These models were automatically integrated into the OpenAPI documentation, ensuring synchronization between the live implementation and the generated documentation. This greatly improved reliability, clarity, and maintainability during development.
 
@@ -834,13 +835,13 @@ The retention time and cleanup interval can be customized through environment va
 
 # Heltec Programming Utils
 
-As outlined in the research chapter Programming and Toolchain Analysis for CubeCell, the Heltec CubeCell devices used in this project do not support standard USB serial programming protocols commonly used with microcontrollers like the ESP32. Instead, Heltec provides proprietary binaries for firmware upload, requiring a custom solution to bridge the gap between firmware compilation and device programming.
+As outlined in the research chapter [Programming and Toolchain Analysis of the CubeCell Board](#programming-and-toolchain-analysis-of-the-cubecell-board), the Heltec CubeCell devices used in this project do not support standard USB serial programming protocols commonly used with microcontrollers like the ESP32. Instead, Heltec provides proprietary binaries for firmware upload, requiring a custom solution to bridge the gap between firmware compilation and device programming.
 
-To address this, a Python-based utility was developed to integrate these proprietary Heltec tools into a user-friendly programming workflow. This script enables users to programm binaries downloaded from the web application directly to CubeCell devices via USB, without the need for manual setup or external tools.
+To address this problem, a Python-based utility was developed to integrate these proprietary Heltec tools into a user-friendly programming workflow. This script enables users to programm binaries downloaded from the web application directly to CubeCell devices via USB, without the need for manual setup or external tools.
 
-The utility guides the user through the process using a simple command-line interface. It begins by detecting available serial ports, then automatically determines the user’s operating system to select the appropriate pre-shipped binary for the task. The compiled firmware is first converted into the .cyacd format using the CubeCellElfTool. Once the conversion is complete, the resulting file is programmed to the board using the CubeCellFlashTool.
+The utility guides the user through the process using a simple command-line interface. It begins by detecting available serial ports, then automatically determines the user’s operating system to select the appropriate pre-shipped binary for the task. The compiled firmware is first converted into the **.cyacd** format using the **CubeCellElfTool**. Once the conversion is complete, the resulting file is programmed to the board using the **CubeCellFlashTool**.
 
-The utility is a self-contained, platform-independent command-line tool designed to simplify firmware deployment to CubeCell devices. All necessary binaries for major operating systems are bundled with the script, eliminating the need for additional installations or dependencies. It requires only the path to a directory containing the compiled .elf and .hex files and supports a minimal set of arguments to ensure ease of use. Users can invoke the script with the -h flag to display a help message that outlines the expected input format and available options. The usage is as follows:
+The utility is a self-contained, platform-independent command-line tool designed to simplify firmware deployment to CubeCell devices. All necessary binaries for major operating systems are bundled with the script, eliminating the need for additional installations or dependencies. It only requires Python 3 and the path to a directory containing the compiled .elf and .hex files and supports a minimal set of arguments to ensure ease of use. Users can invoke the script with the **-h** flag to display a help message that outlines the expected input format and available options. The usage is as follows:
 ```bash
 usage: main.py [-h] binary_dir
 
@@ -854,10 +855,7 @@ options:
 ```
 
 # Webapp-Frontend
-The frontend of the web application is implemented as a single-page application (SPA) using the Vue.js framework. Serving as the centralized interface for managing the entire lifecycle of the sensor network, it handles everything from node provisioning and firmware programming to deployment monitoring and data visualization. It adopts the Vuetify component library to provide a consistent design system and accelerate UI development. Application state is managed using Pinia, which offers a reactive and modular store architecture, allowing components to efficiently share and synchronize data.
-
-Communication with the backend occurs via a REST API, enabling real-time interaction and data updates without full page reloads. The project is built and managed using Vite, a modern frontend toolchain that ensures fast development workflows and optimized production builds.
-The following sections describe the key features of the frontend interface, its structure, and the deployment approach.
+The frontend of the web application is implemented as a single-page application (SPA) using the **Vue.js** framework. Serving as the centralized interface for managing the entire lifecycle of the sensor network, it handles everything from node provisioning and firmware programming to deployment monitoring and data visualization. It adopts the Vuetify component library to provide a consistent design and accelerate UI development. 
 
 ## Architecture and Design
 Although the development team was already experienced with Vue.js, the project began with a review of current best practices and recent advancements in the Vue ecosystem. A key priority was choosing a component library to accelerate UI development and allow the team to focus on the application's core logic.
@@ -884,29 +882,29 @@ The application structure follows Vue 3 best practices, designed to be modular, 
 For state management, the team used Pinia, the official state library for Vue 3. Pinia provides a simple and modular API that supports reactivity and efficient state sharing across components, making it ideal for handling data such as user sessions and shared resources.
 Communication with the backend is handled via a REST API, with authentication managed through JSON Web Tokens (JWT). The JWT is securely stored in the Pinia store, enabling persistent sessions and controlled access to protected resources.
 
-**Main Layout Nesting**
+### Main Layout Nesting
 In Vue applications, shared elements such as headers, footers, and navigation bars are often placed directly in App.vue. However, in this project, these elements are required on most, but not all views. For instance, the login page intentionally omits both the footer and navigation bar. As a result, placing these components in App.vue would make it difficult to exclude them on specific routes. To solve this, a dedicated MainLayout.vue component was created. This layout acts as a wrapper for all authenticated or primary views of the application. It includes the shared interface components (header, footer, nav bar) and wraps the dynamic content using `<router-view />`. All primary routes (such as /projects) are defined as child routes of the root path '/'. Each of these child routes is rendered within the MainLayout.vue wrapper, ensuring consistent UI structure while dynamically loading the corresponding view. For routes like the login page or error views, where no layout elements should be displayed, standalone routes are defined outside of the MainLayout.vue context. This modular routing structure offers flexibility and enforces a clean separation between public and authenticated parts of the interface, while keeping the core UI consistent where needed.
 
 ## Core Features
 The frontend application is structured around a single-page (SPA) layout consisting of a login screen and a main interface. Once authenticated, users are presented with a unified layout that includes a header, footer, and navigation drawer. This layout wraps all main views of the application to ensure a consistent user experience across different sections.
 
-The application provides different functionalities depending on the user’s role:
-
-- **Researchers** have read-only access to data and can only change their password.
-- **Technicians** can modify system elements (e.g., nodes, sensors) and update their password.
-- **Administrators** have full access, including user management capabilities such as creating new accounts.
-
+The application provides different functionalities depending on the user’s role
 The core of the application is organized around four main entities:
 
-1. **Commercial Sensors**: Commercial Sensors serve as standardized, reusable definitions for real-world sensor types. They are used exclusively for documentation purposes and do not directly influence the behavior of sensor templates or sensor nodes. Instead, they function as centralized metadata containers that help organize and describe sensor characteristics in a consistent and reusable manner across the application. For example, a Commercial Sensor entry could represent a typical temperature sensor, including its expected measurement range (e.g., -40°C to +85°C), unit (°C), and a link to its datasheet. Similarly, a more complex Commercial Sensor could represent an entire meteorological station, listing each measured variable (temperature, humidity, wind speed), the expected ranges for each channel, calibration notes, and even field-specific deployment considerations. By storing this information in a dedicated Commercial Sensor entity, technicians and researchers can avoid redundancy, maintain traceability, and ensure that sensor definitions are consistent throughout the system. This also enables teams to quickly understand which type of hardware a given sensor node is designed to work with, without having to consult scattered documentation or external resources.
+### Commercial Sensors
+Commercial Sensors serve as standardized, reusable definitions for real-world sensor types. They are used exclusively for documentation purposes and do not directly influence the behavior of sensor templates or sensor nodes. Instead, they function as centralized metadata containers that help organize and describe sensor characteristics in a consistent and reusable manner across the application. For example, a Commercial Sensor entry could represent a typical temperature sensor, including its expected measurement range (e.g., -40°C to +85°C), unit (°C), and a link to its datasheet. Similarly, a more complex Commercial Sensor could represent an entire meteorological station, listing each measured variable (temperature, humidity, wind speed), the expected ranges for each channel, calibration notes, and even field-specific deployment considerations. By storing this information in a dedicated Commercial Sensor entity, technicians and researchers can avoid redundancy, maintain traceability, and ensure that sensor definitions are consistent throughout the system. This also enables teams to quickly understand which type of hardware a given sensor node is designed to work with, without having to consult scattered documentation or external resources.
 
-2. **Sensor Templates**: Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define Configurables, parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The Protobuf schema generated from this definition can be previewed in the template overview, and the corresponding NanoPB-compatible code can be downloaded by developers to embedded in the source code.
+### Sensor Templates
+Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define **Configurables**, parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The **Protobuf schema** generated from this definition can be previewed in the template overview, and the corresponding **NanoPB**-compatible code can be downloaded by developers to embedded in the source code.
 
-3.  **Sensor Nodes**: Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as GPS coordinates, altitude and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. TThe overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and do not need to be modified by the user. These system Configurables are required for network-level communication and typically include LoRa and TTN credentials. Their values are pre-filled and managed by the backend to ensure consistency and prevent misconfiguration. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The overview also includes a Firmware Tools section (described in detail in a later chapter), which provides direct access to firmware binaries and programming utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
+### Sensor Nodes
+Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as location and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. The overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and can't be modified by the user. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The sensor node overview also includes a Firmware [Tools section](#firmware-tools), which provides direct access to firmware binaries and programming utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
 
-4. **Projects**: Projects act as containers for organizing sensor nodes into meaningful groups. Each project typically corresponds to a field study, deployment site, or research objective. Projects simplify management by grouping related nodes under a shared context and allow researchers to monitor aggregated data. Projects can also store metadata in form of links such as wiki pages, documentation.
+### Projects
+Projects act as containers for organizing sensor nodes into meaningful groups. Each project typically corresponds to a field study, deployment site, or research objective. Projects simplify management by grouping related nodes under a shared context and allow researchers to monitor aggregated data. Projects can also store metadata in form of links such as wiki pages or documentation.
 
 Each entity follows a standardized view structure:
+
 - **List View**: Displays a searchable list of items (e.g., all sensor nodes). Allows navigation to detail or create views.
 - **Detail View**: Shows all properties of a selected item, with contextual actions (edit, delete).
 - **Create View**: Presents a form for adding a new item.
@@ -920,7 +918,7 @@ Additionally, a dashboard view provides a high-level overview of key system metr
 
 The Firmware Tool section allows users to initiate a compilation job for the selected sensor node. During the build process, logs are displayed in real time, and upon completion, the outcome is shown. If the compilation is successful, artifacts become available for download. Users can choose to download only the binary files or include the compilation logs and enriched source code.
 
-Additionally, for ESP32-based nodes, successful compilation enables firmware programming directly via the browser using WebSerial. This feature requires a Chromium-based browser. Once a compatible board is connected and a serial port is selected, the programming process can be launched.
+Additionally, for ESP32-based nodes, successful compilation enables firmware programming directly via the browser using **WebSerial**. This feature requires a Chromium-based browser. Once a compatible board is connected and a serial port is selected, the programming process can be launched.
 
 A Serial Monitor is also available independently of the build process. It allows users to connect to an already-programmed board and view its serial output in real time.
 ![Firmware Tools Overview](./images/firmaware-tools.jpg)
@@ -930,12 +928,12 @@ Vue applications can be developed and deployed using NPM, which simplifies setup
 ```bash
 npm create vue@latest
 ```
-To ensure a consistent and reproducible development environment across machines, the project uses Dev Containers, a feature of Visual Studio Code. A Dev Container is a Docker-based workspace that encapsulates all required tools, runtimes, and extensions. The configuration is defined in the .devcontainer directory, with the devcontainer.json specifying the container image and setup details. When opened in VS Code, the project runs automatically inside this container, eliminating environment inconsistencies and simplifying onboarding. Developers only need Docker and VS Code installed.
+To ensure a consistent and reproducible development environment across machines, the project uses **Dev Containers**, a feature of **Visual Studio Code**. A Dev Container is a Docker-based workspace that encapsulates all required tools, runtimes, and extensions. The configuration is defined in the .devcontainer directory, with the devcontainer.json specifying the container image and setup details. When opened in VS Code, the project runs automatically inside this container, eliminating environment inconsistencies and simplifying onboarding. Developers only need Docker and VS Code installed.
 
 The frontend is built using Vite, a modern build tool that offers fast startup times and hot module replacement (HMR), allowing developers to preview code changes in real time without refreshing the page. This results in a more efficient and responsive development process.
 
 To install dependencies:
- ```bash
+```bash
 npm install
 ```
 To run the application locally:
@@ -965,7 +963,7 @@ While MVC is traditionally applied to applications with a graphical user interfa
 - **Views (in a REST context)**: Represented by the Routers, which expose the RESTful API endpoints. They are solely responsible for receiving HTTP requests, delegating tasks to services, and returning HTTP responses. They do not contain business logic.
 - **Controllers**: Embodied by the Services layer, which encapsulates the core business logic. These services process requests, interact with repositories for data persistence, and orchestrate complex workflows.
 
-This structure contrasts with frameworks like Spring Boot, which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
+This structure contrasts with frameworks like **Spring Boot**, which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
 
 ### Project-Root Structure
 
@@ -1042,7 +1040,7 @@ async def read_specific_user(uuid: UUID,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
 ```
 
-This example showcases a more complex router definition. It utilizes a UUID as a path parameter, leveraging Pydantic's automatic type validation for robust input handling. Crucially, the _: parameter, combined with Depends(require_roles_or_owner(...)), demonstrates the implementation of role-based authorization and ownership checking. This dependency ensures that only users holding the ADMIN role, or the user who is the owner of the requested resource, are granted access to this specific endpoint. Furthermore, the try...except block illustrates robust error handling: a custom NotFoundError raised by the AuthService when a user is not found, is caught and directly translated into an HTTP 404 Not Found response, providing clear and standardized feedback to the client.
+This example showcases a more complex router definition. It utilizes a UUID as a path parameter, leveraging Pydantic's automatic type validation for robust input handling. Crucially, the _: parameter, combined with Depends(require_roles_or_owner(...)), demonstrates the implementation of role-based authorization and ownership checking. This dependency ensures that only users holding the ADMIN role, or the user who is the owner of the requested resource, are granted access to this specific endpoint. Furthermore, the try...except block illustrates robust error handling: a custom **NotFoundError** raised by the AuthService when a user is not found, is caught and directly translated into an **HTTP 404 Not Found** response, providing clear and standardized feedback to the client.
 
 FastAPI automatically generates OpenAPI documentation based on these defined endpoints and their associated Pydantic models. This documentation, exposed via the /docs endpoint, serves as a crucial contract for frontend developers, clearly outlining the expected request and response structures. It also provides an interactive UI (Swagger UI) invaluable for testing and debugging API interactions directly within the browser, significantly streamlining the development and integration process.
 
@@ -1116,7 +1114,7 @@ The system leverages several established ontologies to define the structure and 
 
 It's important to note that these ontologies, including the custom BFH namespace, offer a much broader range of properties and classes than those specifically mentioned here. The listed examples illustrate their core usage within this system. These ontologies enable a rich, interconnected graph of data. For instance, a **SensorNode** is modeled as a `bfh:SensorNode`, incorporating `schema:name`, `bfh:state`, and relationships to associated **`bfh:NodeTemplate`** (via `bfh:usesNodeTemplate`) and **`schema:Project`** (via `bfh:partOfProject`) entities, as well as linking to `sosa:Observation` instances it has made.
 
-To ensure consistency and semantic correctness, **Python `Enum` types** are persisted as **RDF URIs** in the Triplestore. This is achieved by having all relevant Enums inherit from an `RDFEnumMixin`. This mixin automatically generates a unique RDF URI for each enum member, based on a defined base URI and the enum's name and value. For example, an enum member representing a specific state would be stored as a URI like `http://data.bfh.ch/SensorNodeStateEnum/ACTIVE`. The `rdf_uri` property facilitates this conversion:
+To ensure consistency and semantic correctness, **Python `Enum` types** are persisted as **RDF URIs** in the Triplestore. This is achieved by having all relevant Enums inherit from an `RDFEnumMixin`. This mixing automatically generates a unique RDF URI for each enum member, based on a defined base URI and the enum's name and value. For example, an enum member representing a specific state would be stored as a URI like `http://data.bfh.ch/SensorNodeStateEnum/ACTIVE`. The `rdf_uri` property facilitates this conversion:
 
 ```python
 class RDFEnumMixin:
@@ -1225,16 +1223,16 @@ Each logbook entry uses specific types, such as `LogEntryType/CREATED` or `LogEn
 
 ### Challenges and Limitations
 
-Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain limitations when compared to traditional relational databases employing ORMs.
+Despite the semantic richness offered by RDF and Triplestores, the development experience presents certain limitations when compared to traditional relational databases employing ORMs (Object-Relational Mappers).
 
-A primary challenge is the absence of an Object-Relational Mapper (ORM) for SPARQL and RDF. This necessitates manual construction of all SPARQL queries. Unlike ORMs, which provide type-safe query builders and automatic mapping, developers must meticulously craft each query string. This leads to:
+A primary challenge is the absence of an ORM for SPARQL and RDF. This necessitates manual construction of all SPARQL queries. Unlike ORMs, which provide type-safe query builders and automatic mapping, developers must meticulously craft each query string. This leads to:
 
 * **Lack of Compile-Time Schema Enforcement:** There is no mechanism to validate SPARQL queries against the defined ontologies at development time. A simple typo in a predicate URI or an incorrect data type in a query will not raise an error until runtime, potentially leading to silently inconsistent data rather than immediate failure.
 * **Consistency Overhead:** Developers bear a significant burden in ensuring that all repository methods for a single entity (create, read, update, delete) consistently use the *exact same RDF predicates and object types*. Any deviation, even minor, can fragment the data graph, making subsequent queries incomplete or erroneous. This requires rigorous adherence to internal conventions and thorough testing.
-* **Complexity of Updates:** In relational databases, updating a few fields is straightforward with a single `UPDATE` statement. In RDF, a partial update often requires deleting the old triples associated with the property and then inserting the new ones, which adds considerable boilerplate and complexity, particularly for frequently changing data.
+* **Complexity of Updates:** In relational databases, updating a few fields is straightforward with a single `UPDATE` query. In RDF, a partial update often requires deleting the old triples associated with the property and then inserting the new ones, which adds considerable boilerplate and complexity, particularly for frequently changing data.
 * **Debugging Challenges:** Debugging data inconsistencies or incorrect query results can be intricate. The Triplestore may accept syntactically valid but semantically incorrect data, making it difficult to pinpoint the source of logical errors within the graph. This often requires direct inspection of the Triplestore content, which can be time-consuming.
 
-These challenges highlight areas where the development experience with Triplestores can be more demanding than with traditional relational databases. Potential approaches to address these limitations will be further discussed in the **Future work** section.
+These challenges highlight areas where the development experience with Triplestores can be more demanding than with traditional relational databases. Potential approaches to address these limitations will be further discussed in the [Future work](#future-work) section.
 
 ## Security
 
@@ -1251,7 +1249,7 @@ Authentication is the process of confirming a user's identity. In this backend, 
 
 Authorization determines what an authenticated user is permitted to do or access. The system employs a combination of Role-Based Access Control (RBAC) and Ownership-Based Access Control.
 
-- **Role-Based Access Control (RBAC)**: Users are assigned specific roles, and these roles are granted predefined permissions to access certain resources or perform specific actions. This simplifies access management by grouping users with similar responsibilities. For instance, an admin role is allowed to create new used accounts, while the researcher role is only allowed to read data.
+- **Role-Based Access Control (RBAC)**: Users are assigned specific roles, and these roles are granted predefined permissions to access certain resources or perform specific actions. This simplifies access management by grouping users with similar responsibilities. For instance, an admin role is allowed to create new user accounts, while the researcher role is only allowed to read data.
 - **Ownership-Based Access Control**: In addition to roles, certain resources are protected based on ownership. This means a user can only perform actions (e.g., update, delete) on resources they explicitly own, even if their role might generally allow such actions on other resources. This fine-grained control adds an extra layer of security, preventing users from inadvertently or maliciously affecting data belonging to others. This logic is typically enforced within the services layer, where business rules are applied.
 
 ### Secure Communication
@@ -1260,7 +1258,7 @@ In production, all communication with the backend API is enforced over HTTPS (Hy
 
 ### Sensitive Data Handling
 
-- **Password Hashing**: User passwords are never stored in plain text. Instead, a strong, computationally intensive hashing algorithm, specifically Argon2, is used to hash passwords before storage. Each password is also hashed with a unique, randomly generated salt. This prevents common attacks like rainbow table attacks and makes brute-force attempts significantly more difficult, even if the database is compromised.
+- **Password Hashing**: User passwords are never stored in plain text. Instead, a strong, computationally intensive hashing algorithm, specifically **Argon2**, is used to hash passwords before storage. Each password is also hashed with a unique, randomly generated **salt**. This prevents common attacks like rainbow table attacks and makes brute-force attempts significantly more difficult, even if the database is compromised.
 - **API Key Management**: API keys used for external service integrations (e.g., with the Compiler Engine, Protobuf Service, or TTN) are treated as sensitive secrets. They are stored securely as environment variables and are never hardcoded directly into the codebase or committed to version control.
 
 ### Initial Admin User Provisioning
@@ -1274,11 +1272,12 @@ As discussed in the Services chapter, custom exceptions are utilized to manage e
 # Reverse Proxy
 Because the system consists of multiple services, many of which must be accessible to users, a common, centralized entry point is required. Exposing each service on a separate port was not a feasible option, especially considering the need for TLS encryption, which is essential for any modern web application. To address this, a reverse proxy was used.
 
-A reverse proxy is a server that sits in front of multiple backend services and forwards client requests to the appropriate service based on criteria like request paths or subdomains. This allows all traffic to go through a single exposed service, simplifying networking and improving security.
+A reverse proxy is a service that sits in front of multiple backend services and forwards client requests to the appropriate service based on criteria like request paths or subdomains. This allows all traffic to go through a single exposed service, simplifying networking and improving security.
 
 In this project, the reverse proxy also serves as a static web server for the frontend application, an important factor when choosing the proxy software. Popular tools that support both static file serving and reverse proxying include Nginx, Apache, and Caddy.
 
-Caddy was selected due to:
+Caddy was selected due to the following advantages:
+
 - Built-in TLS support with automatic certificate generation.
 - A simple configuration format (Caddyfile).
 - Prior experience of the development team.
@@ -1288,7 +1287,7 @@ The Caddyfile defines how Caddy handles routing and encryption. Once a domain an
 2.	Enable TLS encryption using Caddy’s internal certificate authority.
 3.	Serve the frontend application as static content.
 
-This design exposes only the HTTPS port (4443) to the network, with all other services accessible exclusively through the reverse proxy, reducing attack surface and simplifying the overall setup.
+This design exposes only the HTTPS port (443) to the network, with all other services accessible exclusively through the reverse proxy, reducing attack surface and simplifying the overall setup.
 An example Caddyfile rule:
 ```caddyfile
 https://influx.leaflink.ti.bfh.ch {
@@ -1306,9 +1305,9 @@ The **Protobuf Service** is a pivotal component within the system architecture, 
 
 The Protobuf Service offers three distinct, yet interconnected, functionalities, each addressing a specific need within the system's data processing and sensor integration pipeline.
 
-First, it provides **Protobuf Schema Generation**. This functionality allows for the dynamic generation of `.proto` schema files. Based on structured input, such as a JSON definition of message types and fields, the service constructs the plain-text Protobuf schema using string templating. While not directly compiled or used for data encoding/decoding within the service itself, this `.proto` file is primarily intended for **display purposes on the frontend**, offering users a human-readable representation of their defined data structures. This serves as a valuable tool for user validation and understanding of the underlying data model.
+1. It provides **Protobuf Schema Generation**. This functionality allows for the dynamic generation of `.proto` schema files. Based on structured input, such as a JSON definition of message types and fields, the service constructs the plain-text Protobuf schema using string templating. While not directly compiled or used for data encoding/decoding within the service itself, this `.proto` file is primarily intended for **display purposes on the frontend**, offering users a human-readable representation of their defined data structures. This serves as a valuable tool for user validation and understanding of the underlying data model.
 
-Second, a critical functionality for runtime data processing is **File Descriptor Compilation**. The service compiles one or more generated `.proto` schemas into a **binary File Descriptor Set**. A File Descriptor is a compiled, self-describing representation of a Protobuf schema. It contains all the necessary metadata about the defined messages, fields, and enumerations in a compact binary format. The following code snippet illustrates the subprocess call used for this compilation:
+2. A critical functionality for runtime data processing is **File Descriptor Compilation**. The service compiles one or more generated `.proto` schemas into a **binary File Descriptor Set**. A File Descriptor is a compiled, self-describing representation of a Protobuf schema. It contains all the necessary metadata about the defined messages, fields, and enumerations in a compact binary format. The following code snippet illustrates the subprocess call used for this compilation:
 
 ```python
 # Compile with protoc
@@ -1321,11 +1320,11 @@ subprocess.run([
 ], check=True)
 ```
 
-Finally, the service performs **Nanopb Code Generation**, streamlining the development process for embedded systems, such as sensor firmware. It generates highly optimized C header and implementation files (`.pb.h`, `.pb.c`) using the **Nanopb** framework, which is specifically designed for resource-constrained environments. By providing these pre-generated source files, the service significantly simplifies the development workflow for end-users or firmware developers. Instead of manually implementing Protobuf serialization/deserialization logic or complex build configurations, they can simply download the generated source code (along with the necessary Nanopb runtime library files), integrate it into their firmware project, and immediately use the provided functions to encode their sensor data into the correct binary Protobuf message format.
+3. The service performs **Nanopb Code Generation**, streamlining the development process for embedded systems, such as sensor firmware. It generates highly optimized C header and implementation files (`.pb.h`, `.pb.c`) using the **Nanopb** framework, which is specifically designed for resource-constrained environments. By providing these pre-generated source files, the service significantly simplifies the development workflow for end-users or firmware developers. Instead of manually implementing Protobuf serialization/deserialization logic or complex build configurations, they can simply download the generated source code (along with the necessary Nanopb runtime library files), integrate it into their firmware project, and immediately use the provided functions to encode their sensor data into the correct binary Protobuf message format.
 
 ## Necessity of Dynamic File Descriptors
 
-The system's design, particularly the flexible "Node Templates" for sensor configuration, necessitates a dynamic approach to Protobuf message parsing. Unlike typical Protobuf implementations where specific message types are known at development time and corresponding code is statically generated, our system handles a diverse array of sensor data formats and messages that are **defined at runtime**. Consequently, the traditional method of generating dedicated parsing code for each message type during development is infeasible.
+The system's design, particularly the flexible "Node Templates" for sensor configuration, necessitates a dynamic approach to Protobuf message parsing. Unlike typical Protobuf implementations where specific message types are known at development time and corresponding code is statically generated, our system handles multiple different sensor data formats and messages that are **defined at runtime**. Consequently, the traditional method of generating dedicated parsing code for each message type during development is infeasible.
 
 This is where the **binary File Descriptor Set** becomes indispensable. It allows the **Timeseries Parser** to dynamically load and interpret any incoming binary Protobuf message without requiring *a priori* knowledge of its exact schema. The File Descriptor provides all the necessary structural information (field names, data types, message hierarchies) at runtime [@protobuf-filedescriptor]. This capability ensures that the parser can correctly deserialize data from a multitude of sensor configurations as they are introduced or updated. The process is initiated by the web application's backend, which triggers the File Descriptor compilation, thereby consistently ensuring that the Timeseries Parser always operates with the most current version of the schema definitions. This dynamic loading mechanism is crucial for the system's flexibility and extensibility.
 
@@ -1351,7 +1350,7 @@ The **Protobuf Service** is deployed as a Docker container, ensuring environment
 
 This service functions as an internal API for the backend, offloading complex schema management tasks. The generated **File Descriptors** are critical for the **Timeseries Parser** to dynamically decode incoming sensor data. Concurrently, the **Nanopb code** directly supports the firmware development process, enabling sensors to correctly encode data according to the defined schemas before transmission.
 
-Ultimately, this dedicated service offers several key benefits to the overall system. It enforces a clear **separation of concerns**, abstracting complex Protobuf operations from other services and centralizing all related tasks, which in turn promotes reusability. Furthermore, its independent design enhances scalability, allowing the service to adapt flexibly to varying demands.
+Ultimately, this dedicated service offers several key benefits to the overall system. It enforces a clear **separation of concerns**, abstracting complex Protobuf operations from other services and centralizing all related tasks, which in turn promotes reusability.
 
 # Timeseries Parser
 
@@ -1382,7 +1381,7 @@ Robust error handling is integrated throughout this flow, ensuring that issues l
 
 ## Configuration and Deployment
 
-The Timeseries Parser is designed for flexible and secure deployment. All critical configurations, such as MQTT broker addresses, database credentials, and topic subscriptions, are managed through environment variables. This approach enhances security by keeping sensitive information out of the codebase and simplifies deployment across different environments (development, testing, production). The entire service is containerized using Docker, providing a self-contained, portable, and reproducible runtime environment. This facilitates consistent operation, simplifies dependency management, and enables easy integration into container orchestration platforms like Kubernetes, ensuring scalability and reliability.
+The Timeseries Parser is designed for flexible and secure deployment. All critical configurations, such as MQTT broker addresses, database credentials, and topic subscriptions, are managed through environment variables. This approach enhances security by keeping sensitive information out of the codebase and simplifies deployment across different environments (development, testing, production). The entire service is containerized using Docker, providing a self-contained, portable, and reproducible runtime environment. This facilitates consistent operation, simplifies dependency management, and enables easy integration.
 
 ## TTN-Mock 
 
