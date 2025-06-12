@@ -522,7 +522,8 @@ For persistent storage and querying of RDF data, the team evaluated multiple tri
 While commercial tools like Stardog or Amazon Neptune were briefly surveyed to provide a broader overview, they were not considered viable options due to the project's scale and cost constraints. Fuseki had already been used successfully in a previous project, where it proved effective and simple to work with. The only notable limitation is the lack of built-in role-based access control for managing users and permissions [@fuseki].
 
 ## SPARQL Query Editor
-To enable users to interact with the triplestore, a graphical SPARQL query editor was also required. The team evaluated several tools and selected YASGUI, a widely used and actively maintained editor. YASGUI offers helpful features such as syntax highlighting, validation, and autocompletion [@yasgui]. One of its most valuable capabilities is its plugin architecture, which allows for custom extensions, for example, rendering query results directly on a map, making it ideal for enhancing user experience in this project.
+To enable users to interact with the triplestore, a graphical SPARQL query editor was also required. The team evaluated several tools and selected YASGUI, a widely used and actively maintained editor. YASGUI offers helpful features such as syntax highlighting, validation, and autocompletion [@yasgui]. One of its most valuable capabilities is its plugin architecture, which allows for custom extensions, for example, rendering query results directly on a map, making it ideal for enhancing user experience in this project. \
+[Exemplary SPARQL Queries](#chap:sparql-queries) can be found in the appendix to showcase the data model's structure and the flexibility of data retrieval.
 
 ## REST Framework
 To implement REST services, several frameworks were evaluated with a focus on performance, ease of development, Docker compatibility, and ecosystem maturity. While the programming language was not fixed, the team had experience with Python, Java, Rust, and JavaScript. The following options were considered:
@@ -623,7 +624,7 @@ Using a local MQTT broker in addition to the external TTN broker follows recomme
 
 **InfluxDB:**  InfluxDB is a time-series database used for storing all incoming sensor data in a format optimized for time-based queries and analysis. All data is written into a single bucket, following InfluxDB’s internal model of measurements, tags, fields, and timestamps. The database exposes its web interface via the reverse proxy, allowing researchers to easily browse and visualize data without additional tools. Its selection was driven by stakeholder requirements, as InfluxDB was already in use in earlier research projects and offered a proven solution for time-series data handling.
 
-**YASGUI:**  YASGUI is a browser-based SPARQL editor used to query the triplestore and explore its contents. It is exposed via the reverse proxy, making it accessible without additional software installation. Through YASGUI, users can write and execute SPARQL queries to retrieve metadata, link contextual information, and aggregate time-series observations. This enables complex analysis directly on the RDF graph and supports cross-domain exploration of the semantically structured data. The editor offers features such as syntax highlighting and query history, which facilitate working with larger or more advanced queries.
+**YASGUI:**  YASGUI is a browser-based SPARQL editor used to query the triplestore and explore its contents. It is exposed via the reverse proxy, making it accessible without additional software installation. Through YASGUI, users can write and execute SPARQL queries to retrieve metadata, link contextual information, and aggregate time-series observations. This enables complex analysis directly on the RDF graph and supports cross-domain exploration of the semantically structured data. The editor offers features such as syntax highlighting and query history, which facilitate working with larger or more advanced queries. You can find [exemplary SPARQL queries](#chap:sparql-queries) in the appendix to explore the triplestore's contents and capabilities using YASGUI.
 
 The system architecture consists of modular and containerized services, each fulfilling a specific role in data acquisition, processing, and interaction. By combining open-source tools with custom components and clearly defined interfaces, the system remains flexible, maintainable, and ready for future extension. This architectural foundation supports the implementation and operation of the developed platform and is further examined in the following chapters.
 
@@ -1648,6 +1649,79 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 
 \appendix
 
+\chapter{Exemplary SPARQL Queries}\label{chap:sparql-queries}
+
+These SPARQL queries showcase the strengths and interconnectedness of the project's semantic data model. They demonstrate how diverse data points, spanning sensor nodes, projects, and commercial sensors, can be efficiently queried and combined through their RDF relationships. They can also be found in the project under `docs/queries/`.
+
+\section*{Latest Observation Time for Sensor Nodes within Projects}
+
+This query retrieves the latest observation time for each sensor node, providing key details like its associated project, name, and current state. It highlights the capability to aggregate temporal data across different entities.
+
+```sparql
+PREFIX schema: <http://schema.org/>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX bfh: <http://data.bfh.ch/>
+
+SELECT ?projectName ?nodeName ?state ?latestResultTime
+WHERE {
+  ?project a schema:Project ;
+           schema:name ?projectName .
+
+  ?node a bfh:SensorNode ;
+        schema:name ?nodeName ;
+        bfh:state ?state ;
+        bfh:partOfProject ?project .
+  {
+    SELECT ?node (MAX(?resultTime) AS ?latestResultTime)
+    WHERE {
+      ?obs a sosa:Observation ;
+           sosa:madeBySensor ?node ;
+           sosa:resultTime ?resultTime .
+    }
+    GROUP BY ?node
+  }
+}
+ORDER BY ?projectName ?nodeName
+```
+
+\section*{Consolidated List of External Links}
+
+This query provides a comprehensive list of all external web links associated with both projects and commercial sensors. It clearly indicates the type of entity each link belongs to, offering a centralized overview of linked documentation and resources.
+
+```sparql
+PREFIX schema: <http://schema.org/>
+PREFIX bfh: <http://data.bfh.ch/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?entityType ?entityName ?linkUrl ?linkName ?linkType
+WHERE {
+  {
+    ?entity a schema:Project ;
+            schema:name ?entityName ;
+            schema:hasPart ?link .
+    BIND ("Project" AS ?entityType)
+
+    ?link a schema:WebPage ;
+          schema:url ?linkUrl ;
+          bfh:linkType ?linkType .
+    OPTIONAL { ?link schema:name ?linkName . }
+  }
+  UNION
+  {
+    ?entity a bfh:CommercialSensor ;
+            schema:name ?entityName ;
+            schema:hasPart ?link .
+    BIND ("Commercial Sensor" AS ?entityType)
+
+    ?link a schema:WebPage ;
+          schema:url ?linkUrl ;
+          bfh:linkType ?linkType .
+    OPTIONAL { ?link schema:name ?linkName . }
+  }
+}
+ORDER BY ?entityType ?entityName ?linkName
+```
+
 \chapter{Project Requirements}\label{chap:requirements}
 
 | Priorität | Requirement                                                              |
@@ -2173,3 +2247,30 @@ Priorität liegt auf einem Gesamtsystem, statt die einzelnen Komponenten zu perf
 \subsection*{Terminplanung}
 - Keine weiteren Meetings mehr bis zum Projektabschluss
 - Präsentation am Finaltag: 13.05.25 um 12:25
+
+<!-- Declaration of Independence -->
+
+\chapter{Declaration of Independence}
+
+\section*{Declaration of Independence}
+
+I confirm with my signature that I have completed this Bachelor thesis independently. All sources of
+information (specialist literature, discussions with experts, etc.) and other resources that have
+contributed significantly to my work are listed in full in my work report in the appendix. All content
+that does not originate from me is marked with a precise reference to its source.
+
+I further confirm that I have worked in a controlling manner throughout the preparation of this
+student research project and have not adopted content generated by an AI without reflection.
+
+\vspace{1cm}
+
+\noindent
+\begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+    Biel/Bienne, \today & \hfill \\[0.5cm]
+    % Student 1 Unterschrift
+    \raisebox{-0.5\height}{\includegraphics[height=1.5cm]{images/signatures/signature-degel2.jpg}} & 
+    % Student 2 Unterschrift
+    \raisebox{-0.5\height}{\includegraphics[height=1.5cm]{images/signatures/signature-degel2.jpg}} \\ % Zeilenumbruch nur am Ende der Reihe
+    \rule{0.9\linewidth}{0.5pt} & \rule{0.9\linewidth}{0.5pt} \\ 
+    \textbf{Linus Degen} & \textbf{Enrico Cirignaco} \\
+\end{tabular}

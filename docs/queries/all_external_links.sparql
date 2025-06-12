@@ -1,0 +1,33 @@
+# Queries all external links from projects and commercial sensors and unions them
+
+PREFIX schema: <http://schema.org/>
+PREFIX bfh: <http://data.bfh.ch/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?entityType ?entityName ?linkUrl ?linkName ?linkType
+WHERE {
+  {
+    ?entity a schema:Project ;
+            schema:name ?entityName ;
+            schema:hasPart ?link .
+    BIND ("Project" AS ?entityType)
+
+    ?link a schema:WebPage ;
+          schema:url ?linkUrl ;
+          bfh:linkType ?linkType .
+    OPTIONAL { ?link schema:name ?linkName . }
+  }
+  UNION
+  {
+    ?entity a bfh:CommercialSensor ;
+            schema:name ?entityName ;
+            schema:hasPart ?link .
+    BIND ("Commercial Sensor" AS ?entityType)
+
+    ?link a schema:WebPage ;
+          schema:url ?linkUrl ;
+          bfh:linkType ?linkType .
+    OPTIONAL { ?link schema:name ?linkName . }
+  }
+}
+ORDER BY ?entityType ?entityName ?linkName
