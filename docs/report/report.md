@@ -1497,9 +1497,9 @@ This chapter critically reflects on the development process, outcomes, and techn
 # Summary
 This chapter provides a concise overview of the work completed throughout the project.
 
-The goal of the project was to design and implement an integrated platform for managing, deploying, and monitoring distributed sensor networks, with a particular focus on LoRaWAN-based systems. The result is a modular and extensible infrastructure composed of multiple interconnected services, each running in isolated containers and orchestrated via Docker Compose.
+The goal of the project was to design and implement an integrated platform for managing, deploying, and monitoring *Distributed IoT Systems* , with a particular focus on LoRaWAN-based systems. The result is a modular and extensible infrastructure composed of multiple interconnected services, each running in isolated containers and orchestrated via Docker Compose.
 
-At its core, the system features a modern web application that enables users to register and configure sensor nodes, initiate firmware compilations, and visualize deployment metrics. The frontend, built with Vue.js and Vuetify, offers a clean and responsive interface, while the backend handles API logic, authentication, and communication with auxiliary services.
+At its core, the system features a modern web application that enables users to register and configure sensor nodes, initiate firmware compilations, and visualize deployment metrics. The frontend, built with Vue.js and Vuetify, offers a clean and responsive interface, while the FastAPI backend handles API logic, authentication, and communication with auxiliary services.
 
 A custom compiler engine, triggered via REST API, automates the firmware build process. It supports multiple target platforms and produces binaries that users can download or program directly via the browser using WebSerial. As an alternative, a standalone programming utility is available for offline use, offering greater flexibility for fieldwork scenarios.
 
@@ -1606,6 +1606,45 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 \appendix
 
 \chapter{Project Requirements}\label{chap:requirements}
+
+| Priorität | Requirement                                                              |
+|-----------|--------------------------------------------------------------------------|
+|           | **Verwaltung und Darstellung von Sensorknoten und Projekten** |
+| Hoch      | Die Webapplikation soll eine zentrale Verwaltung der Sensorknoten und Projekte ermöglichen und diese übersichtlich darstellen. |
+| Mittel    | Projekte sollen als zentrale Organisationseinheit für Sensorknoten und Vorlagen verwendet werden. |
+| Hoch      | Sensorknoten-Vorlagen sollen die einheitliche Erfassung von Sensorknoten gewährleisten und bieten die Möglichkeit Sensorknoten-spezifischen Konfiguration. |
+| Hoch      | Sensorknoten sollen anhand von Vorlagen erstellt und mit relevanten Informationen verwaltet werden (z.B. Standort, Kalibrationsdaten). |
+| *Optional*  | *Sensordaten sollen in der Webapplikation visualisiert werden und als CSV exportiert werden können.* |
+|           |                                      |
+|           | **Benutzer- und Zugriffsverwaltung** |
+| Mittel    | In der Webapplikation werden zwischen drei verschiedenen Rollen unterschieden: |
+|           | **Admin**: Kann neue Benutzer erfassen, Passwörter von Benutzern setzen und Rollen den Benutzern zuweisen.
+|           | **Technician**: Write-Access, kann Sensorknoten und Projekte erstellen und bearbeiten. |
+|           | **Researcher**: Read-Access, kann die erstellten Daten nur lesen. |
+| Mittel    | Die Nutzung der Webapplikation und der unterliegenden REST-Schnittstelle erfordert eine Authentifizierung. |
+| Niedrig   | Ein Authentifizierungs- und Autorisierungskonzept soll implementiert werden. |
+| Niedrig   | Benutzer sollen ihre Passwörter ändern können. |
+|           |                                        |
+|           | **Firmware-Management und Deployment** |
+| Hoch      | Firmware für die Sensorknoten soll serverseitig parametrisiert und kompiliert werden. |
+| Niedrig   | Die Compile-Engine soll auch für das Kompilieren von Firmware mit anderen Toolchains eingesetzt werden können. Das generische Kompilieren erfolgt über die Angabe eines konkreten Dockerbefehls. |
+| Niedrig   | Die projektspezifische und die generische Kompilationsvarianten werden über separate Endpoints angesprochen. |
+| Hoch      | Benutzer sollen Firmware über die Webapplikation direkt auf den Sensorknoten flashen können (WebSerial API). |
+| Mittel    | Alternativ soll die parametrisierte Firmware heruntergeladen (Arduino-Code und Binary) und später manuell über die Arduino IDE geflasht werden können (z.B. bei fehlender Internetverbindung). |
+| Hoch      | Beim Erfassen einer neuen Sensorknoten-Vorlage muss ein GitLab-Repository, sowie ein spezifischer Git-Tag als Default angegeben werden. Der Sourcecode soll vor dem Kompilieren aus diesem Repository bezogen werden. |
+| Niedrig   | Beim Erfassen eines Sensorknoten kann die Version der Firmware (Git-Tag in der Vorlage) übersteuert werden. |
+| *Optional*  | *Ein Sensorknoten kann ein Update auf eine neue Firmware-Version erhalten. Die Messdaten sind an eine bestimmte Firmware-Version gebunden.* |
+|           |                                               |
+|           | **Schnittstelle zu The Things Network (TTN)** |
+| Hoch      | Projekte (Applikationen) und Sensorknoten (End Devices) sollen automatisch über die REST API von TTN provisioniert werden. |
+| Hoch      | Erfasste Sensordaten sollen über LoRaWAN und TTN übertragen und per MQTT an das System übertragen werden. |
+| *Optional*  | *Sensordaten sollen nicht nur über MQTT, sondern auch über Webhooks an das Backend gesendet werden können.* |
+|           |                                       |
+|           | **Datenpersistenz und -verarbeitung** |
+| Hoch      | Relevante Projektdaten sollen in einem Linked Data Triple Store gespeichert werden. |
+| Hoch      | Sensordaten sollen weiterhin zusätzlich in einer InfluxDB gespeichert werden. |
+| Mittel    | Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht. |
+| *Optional*  | *Änderungen von Entitäten werden mit Zeitpunkt und Benutzer in einem Logbook im Triple Store gespeichert.* |
 
 \chapter{Setup Instructions}\label{chap:setup-instructions}
 
@@ -1735,6 +1774,8 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 | 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
 
 \chapter{Supervisor Meeting Protocols}\label{chap:meeting-protocols}
+Da die Meetings auf Deutsch abgehalten wurden, sind die beigefügten Protokolle der Einfachheit halber ebenfalls in dieser Sprache verfasst, obgleich die Arbeit selbst in englischer Sprache gehalten ist.
+
 \section*{Meeting 17.02.2025}
 
 \subsection*{Intro}
