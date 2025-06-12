@@ -16,7 +16,10 @@
                 "report.md"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/docs/report"
+                "cwd": "${workspaceFolder}/docs/report",
+                "env": {
+                    "TEXINPUTS": "/home/vscode/texmf:"
+                }
             },
             "group": {
                 "kind": "build",

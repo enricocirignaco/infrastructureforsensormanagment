@@ -140,13 +140,9 @@
 | 2025-06-10 | 10:00 - 20:00 | 10,0  | CIRIE1         |          | Docs: Results chapter & Conclusion Chapter                        |
 | 2025-06-11 | 17:00 - 00:30 | 7,5   | CIRIE1         |          | Docs: Peer Review and Improvements                                |
 | 2025-06-12 | 10:00 - 18:00 | 8,0   | CIRIE1         |          | Docs: Peer Review and Improvements. Wrap-up                       |
-
-
-
-
-
-
-
-
-
-
+| 2025-06-06 | 13:00 - 19:00 | 6,0   | DEGEL2         |          | Docs: Introduction                                                |
+| 2025-06-08 | 09:00 - 20:00 | 11,0  | DEGEL2         |          | Docs: State of Research                                           |
+| 2025-06-09 | 09:30 - 19:00 | 9,5   | DEGEL2         |          | Docs: State of Research                                           |
+| 2025-06-10 | 09:00 - 19:30 | 10,5  | DEGEL2         |          | Docs: Backend, Protobuf Service                                   |
+| 2025-06-11 | 09:30 - 23:30 | 14,0  | DEGEL2         |          | Docs: Timeseries Parser, Conclusion                               |
+| 2025-06-12 | 09:00 - 18:00 | 9,0   | DEGEL2         |          | Docs: Peer Review, Formatting                                     |

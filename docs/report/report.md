@@ -7,14 +7,16 @@ subtitle: 'Bachelor Thesis'
 date: '12.07.2025'
 lang: en-GB
 toc: true
+classoption:
+  - language=de_fr_en
+  - variant=C
 
 header-includes:
   - \institute{Berner Fachhochschule, Departement Technik und Informatik}
   - \advisor{Pascal Mainini (BFH)}
   - \expert{Thomas Jäggi (GIBB)}
   - \degreeprogram{Bachelor of Science in Computer Science}
-
-#\titlegraphic*{\includegraphics[width=\paperwidth]{images/esp_tool_demo.png}}
+  - \titlegraphic*{\includegraphics[width=\paperwidth]{images/forest.jpg}}
 
 citeproc: true
 cite-method: biblatex
@@ -898,7 +900,7 @@ Commercial Sensors serve as standardized, reusable definitions for real-world se
 Sensor Templates act as configuration blueprints that define how a sensor node should behave and how its firmware should be compiled. Each template encapsulates essential information such as the microcontroller platform (e.g., CubeCell, ESP32) and the GitLab repository URL where the firmware is stored. One of the key features of Sensor Templates is the ability to define **Configurables**, parameter placeholders that must be set individually for each sensor node instantiated from the template. For example, a template might define a configurable called SENDING_INTERVAL, which must then be explicitly set to a concrete value (e.g., 60 seconds) for each sensor node. This enables flexible per-device customization while preserving a shared structural definition. Another critical feature of Sensor Templates is the Node Template Field system. This mechanism defines which specific data points the sensor node is expected to measure and transmit back to the infrastructure. Each field in this data contract includes a name, a Protobuf-compatible data type (e.g., float, int32), an unit (e.g., °C, %), and an optional link to the corresponding Commercial Sensor. This formal contract ensures that the system knows what kind of data to expect from each node and how to process or visualize it. The **Protobuf schema** generated from this definition can be previewed in the template overview, and the corresponding **NanoPB**-compatible code can be downloaded by developers to embedded in the source code.
 
 ### Sensor Nodes
-Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as location and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. The overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and can't be modified by the user. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The sensor node overview also includes a Firmware [Tools section](#firmware-tools), which provides direct access to firmware binaries and programming utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
+Sensor Nodes represent the actual IoT devices deployed in the field. Each node is instantiated from a Sensor Template, inheriting its firmware configuration, expected data schema, and associated Commercial Sensors. In addition to this inherited structure, each node stores deployment-specific metadata such as location and firmware version. These nodes serve as the primary unit for provisioning firmware, tracking deployment status, and monitoring sensor activity. When a new node is created, the backend automatically provisions a corresponding device on the TTN platform. This ensures the node is ready to transmit data using LoRaWAN. A direct link to the device’s TTN management page is available in the node’s overview for easy access. Location data is visualized using an interactive map, allowing users to inspect deployment distribution at a glance. The overview also displays two types of Configurables. User-defined Configurables are values that must be set manually for each node, for example, the data transmission interval. These are defined at the template level and filled in per node. System Configurables, on the other hand, are injected automatically by the backend and are common to all nodes. They typically include identifiers and credentials needed for LoRa and TTN communication and can't be modified by the user. To assist developers, a preview of the auto-generated config.h file is shown directly in the UI. This file consolidates both user and system Configurables and is embedded into the source code during compilation. The sensor node overview also includes a Firmware [Tools section](#programming-and-toolchain-analysis-of-the-cubecell-board), which provides direct access to firmware binaries and programming utilities. Additionally, the most recent values received from the sensor node are listed alongside timestamps, offering a quick snapshot of the node’s current operational status.
 
 ### Projects
 Projects act as containers for organizing sensor nodes into meaningful groups. Each project typically corresponds to a field study, deployment site, or research objective. Projects simplify management by grouping related nodes under a shared context and allow researchers to monitor aggregated data. Projects can also store metadata in form of links such as wiki pages or documentation.
@@ -1005,21 +1007,15 @@ A key design principle here is the use of distinct model formats for different p
 
 This clear separation ensures a well-defined and secure API, where external clients only interact with the necessary data. The models frequently incorporate Enums for fields with predefined choices, promoting consistency and making these types explicit within the API documentation and frontend.
 
-The backend service manages the following core business entities, each represented by a set of these Pydantic models:
+The backend service manages the following core business entities, each represented by a set of Pydantic models:
 
-**Users**: This model defines user accounts within the system, which are central to its security and operational integrity. User accounts are differentiated by specific roles that control their access and permissions across the application, ensuring that only authorized actions are performed. These roles are fundamental for authenticating users and enforcing granular access control. Furthermore, every creation or update of an entity within the system automatically logs the initiating user, ensuring full traceability and accountability. The defined roles within the system are:
+* **Users**: Define user accounts with differentiated roles (Researcher, Technician, Administrator) to control access permissions and ensure traceability.
+* **Projects**: Logical containers for grouping related sensor nodes, typically representing field studies and storing metadata.
+* **Commercial Sensors**: Standardized definitions of real-world sensor types for documenting measurement ranges, units, and datasheets.
+* **Node Templates**: Blueprints for configuring sensor nodes and their firmware, including `Configurables` and formally defined data points (`Node Template Field`).
+* **Sensor Nodes**: Represent actual deployed IoT devices, instantiated from a `Node Template`, storing deployment-specific metadata and displaying the latest sensor readings.
 
-- **Researcher**: Has read-only access to all data and can only modify their own password.
-- **Technician**: Possesses write access to system elements such as nodes and sensors, and can manage associated metadata. They also have password modification capabilities.
-- **Administrator**: Holds full access, including the ability to manage user accounts, create new users, and oversee all system configurations. 
-
-**Projects**: Serve as logical containers for grouping related sensor nodes, typically representing field studies, deployment sites, or research initiatives. They also store metadata like links to documentation.
-
-**Commercial Sensors**: Represent standardized, reusable definitions of real-world sensor types. These are primarily for documentation, detailing characteristics like measurement ranges, units, and links to datasheets, thereby ensuring consistent sensor descriptions across the system.
-
-**Node Templates**: Act as blueprints for configuring sensor nodes and their firmware. They define the microcontroller platform, GitLab repository URLs, and customizable `Configurables` (parameter placeholders like `SENDING_INTERVAL`). Crucially, they also specify the `Node Template Field` system, which formally outlines the data points a sensor is expected to measure, including name, Protobuf-compatible data type, and unit.
-
-**Sensor Nodes**: Represent the actual IoT devices deployed in the field. Each node is instantiated from a `Sensor Template` and stores deployment-specific metadata such as GPS coordinates and firmware versions. Upon creation, the backend automatically provisions a corresponding device on The Things Network (TTN). Nodes manage both user-defined Configurables (set per node) and system-injected Configurables (for LoRa/TTN credentials). They also display the latest sensor readings and provide access to firmware programming tools.
+For a detailed description of these entities, please refer to the [Core Features](#core-features) chapter.
 
 ## Routers
 
@@ -1114,7 +1110,7 @@ The system leverages several established ontologies to define the structure and 
 
 It's important to note that these ontologies, including the custom BFH namespace, offer a much broader range of properties and classes than those specifically mentioned here. The listed examples illustrate their core usage within this system. These ontologies enable a rich, interconnected graph of data. For instance, a **SensorNode** is modeled as a `bfh:SensorNode`, incorporating `schema:name`, `bfh:state`, and relationships to associated **`bfh:NodeTemplate`** (via `bfh:usesNodeTemplate`) and **`schema:Project`** (via `bfh:partOfProject`) entities, as well as linking to `sosa:Observation` instances it has made.
 
-To ensure consistency and semantic correctness, **Python `Enum` types** are persisted as **RDF URIs** in the Triplestore. This is achieved by having all relevant Enums inherit from an `RDFEnumMixin`. This mixing automatically generates a unique RDF URI for each enum member, based on a defined base URI and the enum's name and value. For example, an enum member representing a specific state would be stored as a URI like `http://data.bfh.ch/SensorNodeStateEnum/ACTIVE`. The `rdf_uri` property facilitates this conversion:
+To ensure consistency and semantic correctness, **Python `Enum` types** are persisted as **RDF URIs** in the Triplestore. This is achieved by having all relevant Enums inherit from an `RDFEnumMixin`. This base class automatically generates a unique RDF URI for each enum member, based on a defined base URI and the enum's name and value. For example, an enum member representing a specific state would be stored as a URI like `http://data.bfh.ch/SensorNodeStateEnum/ACTIVE`. The `rdf_uri` property facilitates this conversion:
 
 ```python
 class RDFEnumMixin:
@@ -1305,9 +1301,9 @@ The **Protobuf Service** is a pivotal component within the system architecture, 
 
 The Protobuf Service offers three distinct, yet interconnected, functionalities, each addressing a specific need within the system's data processing and sensor integration pipeline.
 
-1. It provides **Protobuf Schema Generation**. This functionality allows for the dynamic generation of `.proto` schema files. Based on structured input, such as a JSON definition of message types and fields, the service constructs the plain-text Protobuf schema using string templating. While not directly compiled or used for data encoding/decoding within the service itself, this `.proto` file is primarily intended for **display purposes on the frontend**, offering users a human-readable representation of their defined data structures. This serves as a valuable tool for user validation and understanding of the underlying data model.
+First, it provides **Protobuf Schema Generation**. This functionality allows for the dynamic generation of `.proto` schema files. Based on structured input, such as a JSON definition of message types and fields, the service constructs the plain-text Protobuf schema using string templating. While not directly compiled or used for data encoding/decoding within the service itself, this `.proto` file is primarily intended for **display purposes on the frontend**, offering users a human-readable representation of their defined data structures. This serves as a valuable tool for user validation and understanding of the underlying data model.
 
-2. A critical functionality for runtime data processing is **File Descriptor Compilation**. The service compiles one or more generated `.proto` schemas into a **binary File Descriptor Set**. A File Descriptor is a compiled, self-describing representation of a Protobuf schema. It contains all the necessary metadata about the defined messages, fields, and enumerations in a compact binary format. The following code snippet illustrates the subprocess call used for this compilation:
+Second, a critical functionality for runtime data processing is **File Descriptor Compilation**. The service compiles one or more generated `.proto` schemas into a **binary File Descriptor Set**. A File Descriptor is a compiled, self-describing representation of a Protobuf schema. It contains all the necessary metadata about the defined messages, fields, and enumerations in a compact binary format. The following code snippet illustrates the subprocess call used for this compilation:
 
 ```python
 # Compile with protoc
@@ -1320,7 +1316,7 @@ subprocess.run([
 ], check=True)
 ```
 
-3. The service performs **Nanopb Code Generation**, streamlining the development process for embedded systems, such as sensor firmware. It generates highly optimized C header and implementation files (`.pb.h`, `.pb.c`) using the **Nanopb** framework, which is specifically designed for resource-constrained environments. By providing these pre-generated source files, the service significantly simplifies the development workflow for end-users or firmware developers. Instead of manually implementing Protobuf serialization/deserialization logic or complex build configurations, they can simply download the generated source code (along with the necessary Nanopb runtime library files), integrate it into their firmware project, and immediately use the provided functions to encode their sensor data into the correct binary Protobuf message format.
+Finally, the service performs **Nanopb Code Generation**, streamlining the development process for embedded systems, such as sensor firmware. It generates highly optimized C header and implementation files (`.pb.h`, `.pb.c`) using the **Nanopb** framework, which is specifically designed for resource-constrained environments. By providing these pre-generated source files, the service significantly simplifies the development workflow for end-users or firmware developers. Instead of manually implementing Protobuf serialization/deserialization logic or complex build configurations, they can simply download the generated source code (along with the necessary Nanopb runtime library files), integrate it into their firmware project, and immediately use the provided functions to encode their sensor data into the correct binary Protobuf message format.
 
 ## Necessity of Dynamic File Descriptors
 
@@ -1361,9 +1357,9 @@ The Timeseries Parser is a crucial, standalone microservice designed to efficien
 The parser's robust architecture is built around several key components, each playing a vital role in the data processing chain:
 
 - **MQTT Client**: At its foundation, an MQTT Client maintains a persistent connection to the MQTT Broker, actively subscribing to topics where LoRaWAN uplink messages are published. This client is responsible for reliable message reception and the initial extraction of essential metadata, such as the `device_id` and the Base64-encoded binary payload.
-- **Protobuf Parser**: A sophisticated Protobuf Parser handles the complex task of decoding binary sensor data. Crucially, it doesn't rely on pre-compiled schemas. Instead, it dynamically loads Protobuf File Descriptors at runtime, allowing the system to adapt seamlessly to evolving sensor data structures without requiring redeployment of the parser itself. This dynamic reflection ensures high flexibility for managing diverse and changing sensor templates.
-- **Fuseki Client**: The Fuseki Client serves as the interface to the Apache Jena Fuseki Triplestore. Its responsibilities include retrieving the necessary Protobuf schemas (as file descriptors) and dynamically querying for the specific message name associated with a given sensor device. More importantly, it is responsible for writing decoded sensor observations into the Triplestore, semantically annotating them using the SOSA (Sensor, Observation, Sample, and Actuator) ontology. This enables powerful semantic querying and contextual understanding of the sensor data.
-- **InfluxDB Handler**: For efficient storage and retrieval of high-volume, time-stamped numeric data, the InfluxDB Handler manages interactions with the InfluxDB time-series database. It's optimized for rapid writes and complex time-series queries, making it ideal for visualizing trends and performing time-based analytics on the raw sensor readings.
+- **Protobuf Parser**: A sophisticated Protobuf Parser handles the complex task of decoding binary sensor data. Crucially, it doesn't rely on pre-compiled schemas. Instead, it dynamically loads Protobuf File Descriptors generated by the [Protobuf Service](#protobuf-service) at runtime, allowing the system to adapt seamlessly to evolving sensor data structures without requiring redeployment of the parser itself. This dynamic reflection ensures high flexibility for managing diverse and changing sensor templates.
+- **Fuseki Client**: The Fuseki Client serves as the interface to the Apache Jena Fuseki Triplestore. Its responsibilities include retrieving the necessary Protobuf schemas (as file descriptors) and dynamically querying for the specific message name associated with a given sensor device. More importantly, it is responsible for writing decoded datapoints into the Triplestore, semantically annotating them using the SOSA (Sensor, Observation, Sample, and Actuator) ontology. This enables powerful semantic querying and contextual understanding of the sensor data.
+- **InfluxDB Handler**: This component manages interactions with the InfluxDB time-series database. It's optimized for rapid writes and complex time-series queries, making it ideal for storing and retrieving high-volume, time-stamped numeric sensor data.
 
 ## Detailed Data Flow
 
@@ -1385,12 +1381,12 @@ The Timeseries Parser is designed for flexible and secure deployment. All critic
 
 ## TTN-Mock 
 
-For highly efficient and rapid backend development, a dedicated TTN-Mock microservice was created to simulate sensor data typically transmitted via The Things Network (TTN) over MQTT. This mock service addresses several practical limitations encountered when relying solely on physical LoRaWAN hardware during development. It eliminates the need to carry and install hardware, bypasses the strict duty cycle (commonly 1%) and fair use policies of actual LoRaWAN networks, which limit uplink airtime to as little as **30 seconds per day per node** [@lorawan-duty-cycle] and severely restrict message frequency. This significantly speeds up development cycles by allowing on-the-fly configuration changes instead of requiring firmware flashes, enabling developers to test data ingestion and processing logic at a much higher cadence than real-world limitations would permit.
+For highly efficient and rapid backend development, a dedicated TTN-Mock microservice was created to simulate sensor data typically transmitted via The Things Network (TTN) over MQTT. This mock service addresses several practical limitations encountered when relying solely on physical LoRaWAN hardware during development. It eliminates the need to carry and install hardware, bypasses the strict duty cycle (commonly 1%) and fair use policies of actual LoRaWAN networks, which limit uplink airtime to as little as **30 seconds per day per node** [@lorawan-duty-cycle] and severely restrict message frequency. This significantly speeds up development cycles by allowing on-the-fly configuration changes instead of requiring firmware programming, enabling developers to test data ingestion and processing logic at a much higher cadence than real-world limitations would permit.
 
 Built in Python, the TTN-Mock leverages the `paho-mqtt` library to establish a connection to an MQTT broker. Its core functionality involves dynamically generating random sensor data, encoded using Protobuf, and embedding this into an MQTT message that faithfully emulates the structure of an actual TTN uplink message. For full fidelity, it can also include a `"simulated": true` field in the payload, as per TTN documentation [@ttn-dataformats]. This message is then published to a configurable MQTT topic at regular intervals. The service's behavior, including the device ID, MQTT broker details, topic, and publishing interval, is fully customizable through environment variables, providing flexible and isolated testing environments for the backend's data ingestion pipeline.
 
 # Deployment & Integration
-The system consists of several interconnected services, frontend, backend, compiler engine, database, and reverse proxy, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
+The system implemented in this project consists of several interconnected services, frontend, backend, compiler engine and database, all containerized using Docker. Containerization ensures isolated execution, consistent environments, and simplified dependency management.
 
 To avoid manual setup and promote reproducibility, the team followed an Infrastructure as Code (IaC) approach, aiming to define and automate as much of the deployment process as possible. The infrastructure is described through several key components:
 
@@ -1400,7 +1396,7 @@ To avoid manual setup and promote reproducibility, the team followed an Infrastr
 - **Environment Files (.env)**: Each service has a dedicated .env file that defines environment-specific variables, such as secrets and configuration settings. These are treated as part of the infrastructure definition.
 
 ## Dockerfiles
-Each service in the system has its own Dockerfile, defining how the application is built and executed. Most Dockerfiles follow a standard pattern, specifying a base image, dependencies, and runtime instructions. The Dockerfile for the reverse proxy is notable for using a **multi-stage build**: it first uses a Node.js image to compile the frontend application, then copies the resulting static files into a lightweight Caddy image for serving. This approach keeps the final image clean and efficient.
+Each service in the system has its own Dockerfile, defining how the application is built and executed. Most Dockerfiles follow a standard pattern, specifying a base image, dependencies, and runtime instructions. The Dockerfiles for the **reverse proxy** and the **Protobuf Service** are notable for using a **multi-stage build**: they first use a builder image (like Node.js for the frontend or a specific environment for Protobuf compilation), then copy the resulting compiled or static files into a lightweight final image for serving or execution. This approach keeps the final images clean and efficient.
 
 ### Docker Compose Setup
 The project is structured to support two main Docker Compose configurations: a standard **compose.yaml** for local development and a **compose-prod.yaml** for production deployment.
@@ -1413,18 +1409,18 @@ To use the compose-prod.yaml file, Docker must first authenticate with the GitLa
 docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
 ```
 ## CI Pipeline
-The project uses GitLab CI/CD to automate the Docker image build and deployment process. This is defined in the **.gitlab-ci.yml** file, which outlines the pipeline stages and associated jobs. For this project, only the build stage was implemented. The pipeline builds Docker images for all services, tags them, and pushes them to the GitLab Container Registry.
+The project uses GitLab CI/CD to automate the Docker image build and deployment process. The process is defined in the **.gitlab-ci.yml** file, which outlines the pipeline stages and associated jobs. For this project, only the build stage was implemented. The pipeline builds Docker images for all services, tags them, and pushes them to the GitLab Container Registry.
 
-The pipeline is triggered by pushing a Git tag to the repository. The resulting Docker images are tagged using the same version string, ensuring traceability between source code and deployed containers.
+The pipeline is triggered by pushing a Git tag to the repository. The resulting Docker images are tagged using the same version tag, ensuring traceability between source code and deployed containers.
 
-To streamline the configuration, a shared template job was created for defining the build environment in GitLab runners. This setup uses **Docker-in-Docker** to enable image building inside the CI environment. Before pushing to the registry, the runner authenticates using environment variables (non-interactively), following the same principle described in the previous section. Once authenticated, the images are built, tagged, and uploaded to the registry.
+To streamline the configuration, a shared template job was created for defining the build environment in GitLab runners. This setup uses **Docker-in-Docker** to enable image building inside the CI environment. Before pushing to the registry, the runner authenticates using environment variables (non-interactively), following the same principle described above. Once authenticated, the images are built, tagged, and uploaded to the registry.
 
 ## Secrets Management
 Secrets management is a crucial part of the deployment strategy. Secrets include any sensitive information such as API keys, admin credentials, and access tokens. For security reasons, these values must not be hardcoded into Docker images or committed to version control.
 
-To handle this, the team adopted a simple and reliable approach using environment variables. Each service is configured to load its secrets from a dedicated .env file at runtime. To guide setup without exposing secrets, template files with the .example extension are included in the repository. These .env.example files list all required environment variables, allowing users to copy and rename them to .env, and fill in the actual values before deployment.
+To handle this problem, the team adopted a simple and reliable approach using environment variables. Each service is configured to load its secrets from a dedicated `.env` file at runtime. To guide setup without exposing secrets, template files with the `.example` extension are included in the repository. These .env.example files list all required environment variables, allowing users to copy and rename them to .env, and fill in the actual values before deployment.
 
-This step must be completed before the first production deployment, as the system relies on these variables for correct operation.
+This step must be completed before the first deployment, as the system relies on these variables for correct operation.
 
 To enforce this workflow and avoid accidental leaks, the following rules were added to .gitignore:
 ```gitignore
@@ -1432,7 +1428,7 @@ To enforce this workflow and avoid accidental leaks, the following rules were ad
 **/.env-*
 !**/.env-*.example
 ```
-This setup ensures that real secrets remain untracked, while providing version-controlled templates for reproducibility and onboarding. However, care must still be taken to avoid accidental leaks.
+This setup ensures that real secrets remain untracked, while providing version-controlled templates for reproducibility and onboarding.
 
 ## Production Deployment
 This section guides DevOps engineers through the process of deploying the system to a production environment. It covers the essential steps, prerequisites, and configuration details for launching all services on a production server.
@@ -1444,9 +1440,9 @@ Before beginning the deployment process, ensure the following:
 
 Follow these steps to deploy the system:
 
-1. Transfer Docker Compose File: Copy the compose-prod.yaml file to your production server. You can use scp or any other secure file transfer method.
-2. Create Environment Files and Populate Secrets: Create the necessary environment files and populate them with the required secrets and configuration variables.
-3. Log in to GitLab Container Registry: Authenticate Docker with your GitLab Container Registry to pull the necessary images.
+1. **Transfer Docker Compose File**: Copy the compose-prod.yaml file to your production server. You can use scp or any other secure file transfer method.
+2. **Create Environment Files and Populate Secrets**: Create the necessary environment files and populate them with the required secrets and configuration variables.
+3. **Log in to GitLab Container Registry**: Authenticate Docker with your GitLab Container Registry to pull the necessary images.
 
 ```bash
 docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
@@ -1457,14 +1453,14 @@ docker login registry.gitlab.ti.bfh.ch -u <username> -p <personal_access_token>
 ```bash
 export TAG=v1.0.0 && docker compose -f compose-prod.yaml up -d --pull
 ```
-After deployment, you can inspect the system's logs to ensure all services are running correctly.
+After deployment, you can inspect the system's logs to ensure all services are running correctly with the following command:
 
 ```bash
 docker compose logs
 ```
 
 # Quality Assurance and Testing
-For any software system of this scale, continuous testing is paramount to ensure long-term stability and reliability. While the primary focus of this thesis was on the complete implementation of the overall system and the successful achievement of its defined objectives, a robust approach to quality assurance remains a critical consideration. Although automated tests were not implemented during this project, it is crucial to document the testing methodologies employed and to outline how future testing efforts could be systematized. This chapter describes the testing approach applied within the project and conceptualizes a more comprehensive quality assurance strategy for the developed infrastructure.
+For any software system of this scale, continuous testing is paramount to ensure long-term stability and reliability. While the primary focus of this thesis was on the complete implementation of the overall system and the successful achievement of its defined objectives, a robust approach to quality assurance remains a critical consideration. Although automated tests were out of scope during this project, it is crucial to document the testing methodologies employed and to outline how future testing efforts could be systematized. This chapter describes the testing approach applied within the project and conceptualizes a more comprehensive quality assurance strategy for the developed infrastructure.
 
 ## Manual Testing and Functional Validation
 
@@ -1481,14 +1477,12 @@ Manual testing was conducted by the development team itself. Each implementation
 
 While automated tests were not implemented as part of this Bachelor's thesis, their introduction is of significant importance for the long-term maintainability and extensibility of the infrastructure. A robust testing concept would typically encompass the following layers:
 
-- **Unit Tests:** For each individual microservice, unit tests should be developed to isolate and test the smallest logical units, such as functions or methods. The clean separation into layers and classes already achieved within the services significantly facilitates the introduction of unit tests, allowing for direct component-level testing. This would ensure the correct functioning of internal algorithms and logic before their integration into the overall architectural context. Languages like Python and JavaScript offer established frameworks for this purpose, including pytest for the Python FastAPI Backend and Jest or Vue Test Utils for the Vue.js frontend components.
+- **Unit Tests:** For each individual microservice, unit tests should be developed to isolate and test the smallest logical units, such as functions or methods. The clean separation into layers and classes already achieved within the services significantly facilitates the introduction of unit tests, allowing for direct component-level testing. This would ensure the correct functioning of internal algorithms and logic before their integration into the overall architectural context. Languages like Python and JavaScript offer established frameworks for this purpose, including pytest [@pytest] for the Python FastAPI Backend and Jest [@jest] for the Vue.js frontend components.
 - **Integration Tests:** These tests would verify the interactions between individual services. For example, a test case could cover the complete chain from sensor registration via the web application to metadata storage in the Triplestore and the automated compilation of firmware. The existing feature flag in the web application's Backend, which allows for mocking and disabling the direct connection to The Things Network, exemplifies how such modularity can be achieved. Similar feature flags could be readily implemented to further enhance system modularity and facilitate comprehensive integration testing without relying on external live systems.
-- **End-to-End (E2E) Tests:** These tests would validate the entire system from a user's perspective. An E2E test could simulate the complete sensor commissioning process: from user login, through sensor data acquisition, firmware compilation and programming, to the reception and storage of the first measurement values. Tools like Cypress could be employed for this purpose to automate UI interactions and API calls.
-- **Performance and Load Tests:** For future operation, it would be crucial to assess the scalability and robustness of the system under load. This would involve examining how the system responds to a high number of concurrently active sensors or a high data throughput. Tools such as Apache JMeter or Locust could be used to simulate load scenarios.
+- **End-to-End (E2E) Tests:** These tests would validate the entire system from a user's perspective. An E2E test could simulate the complete sensor commissioning process: from user login, through sensor data acquisition, firmware compilation and programming, to the reception and storage of the first measurement values. Tools like Cypress [@cypress] could be employed for this purpose to automate UI interactions and API calls.
+- **Performance and Load Tests:** For future operation, it would be crucial to assess the scalability and robustness of the system under load. This would involve examining how the system responds to a high number of concurrently active sensors or a high data throughput. Tools such as Locust [@locust] could be used to simulate load scenarios.
 
-Integrating these automated tests into the already existing Continuous Integration (CI/CD) pipelines would ensure that every code change is automatically validated against defined test cases. For instance, tests could be executed before merging a feature branch into the main branch, effectively blocking the merge if tests fail. This would facilitate early error detection, secure long-term code quality, and significantly reduce manual testing effort.
-
-This chapter has detailed the manual testing approach employed during the development of the sensor infrastructure, highlighting its iterative nature and comprehensive coverage of functional, integration, and usability aspects. Furthermore, it has outlined a strategic concept for the future implementation of automated testing, spanning unit, integration, end-to-end, and performance test layers. While the project's primary focus was on system implementation, these insights into quality assurance provide a clear path for ensuring the long-term stability, maintainability, and extensibility of the developed platform.
+Integrating these automated tests into the already existing Continuous Integration (CI/CD) pipelines would ensure that every code change is automatically validated against defined test cases. For instance, tests could be executed before merging a feature branch into the main branch, effectively blocking the merge if tests fail. This would facilitate early error detection, secure long-term code quality, and significantly reduce manual testing effort. While the project's primary focus was on system implementation, these insights into quality assurance provide a clear path for ensuring the long-term stability, maintainability, and extensibility of the developed platform.
 
 <!-- Chapter 5: Discussion -->
 \chapter{Discussion}
