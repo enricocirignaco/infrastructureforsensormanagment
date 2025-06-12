@@ -961,7 +961,7 @@ While MVC is traditionally applied to applications with a graphical user interfa
 - **Views (in a REST context)**: Represented by the Routers, which expose the RESTful API endpoints. They are solely responsible for receiving HTTP requests, delegating tasks to services, and returning HTTP responses. They do not contain business logic.
 - **Controllers**: Embodied by the Services layer, which encapsulates the core business logic. These services process requests, interact with repositories for data persistence, and orchestrate complex workflows.
 
-This structure contrasts with frameworks like **Spring Boot**, which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
+This structure contrasts with frameworks like **Spring Boot** [@springboot], which explicitly enforce MVC with annotations and predefined component types. Spring Boot's clear conventions and robust ecosystem provide a strong guiding hand for developers, ensuring consistent project layouts and simplifying dependency management. While FastAPI offers more flexibility and is less opinionated about project structure, the project deliberately adopted an MVC-inspired separation to achieve similar benefits regarding clarity and maintainability. The recommendations from the FastAPI documentation regarding "Bigger Applications" were leveraged to establish a scalable and organized codebase.
 
 ### Project-Root Structure
 
@@ -1214,7 +1214,7 @@ The `update_sensor_node` method highlights that a full "delete and re-insert" st
 
 ### Centralized Logbook for Entities
 
-A crucial aspect of data management is the **Logbook**, which records significant events for **every entity** in the system. While the example above focuses on `SensorNode` operations, analogous logbook entries are created for other entities like `Project` or `User`. These log entries share a consistent URI pattern and structure, making them universally accessible across the system.
+A crucial aspect of data management is the **Logbook**, which records significant events for **every entity** (like `Project` or `NodeTemplate`) in the system. These log entries share a consistent URI pattern and structure, making them universally accessible across the system.
 
 Each logbook entry uses specific types, such as `LogEntryType/CREATED` or `LogEntryType/UPDATED`, implemented as `Enum` values and persisted as URIs via the `RDFEnumMixin`. This design provides a flexible and extensible mechanism for tracking entity lifecycle events; new log entry types can be easily added as required. The shared structure and URI schema for logbook entries across all entities ensure a unified historical record and simplify querying for audit trails.
 
