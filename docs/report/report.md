@@ -483,7 +483,7 @@ Git tags were used to mark key integration points in the project timeline, espec
 - The second number for minor releases (typically used for new deployments to production), and
 - The third number for bugfixes and small patches.
 
-These tags also served as triggers for the CI pipeline, which is discussed in detail in the section [Multistaged GitHub CI Pipeline](#multistaged-github-ci-pipeline).
+These tags also served as triggers for the CI pipeline, which is discussed in detail in the section [CI/CD Pipeline and Deployment Strategy](#sec:ci-cd-pipeline).
 
 ## Containerized Microservice Architecture
 The system was built using a microservice architecture, where each service is dedicated to a specific responsibility within the overall system. This approach promotes modularity, simplifies maintenance, and enables independent development, testing, and deployment of individual components.
@@ -494,7 +494,7 @@ From the start, each service was developed and deployed as a Docker container. C
 
 Descriptions of the individual services can be found in the [System Architecture](#system-architecture) section.
 
-## CI/CD Pipeline and Deployment Strategy
+## CI/CD Pipeline and Deployment Strategy {#sec:ci-cd-pipeline}
 A clear separation between the build and deployment phases is a key principle of modern application architecture [@twelvefactor]. In this project, each service was packaged as a custom Docker image. The build phase was fully automated using a GitHub CI pipeline, while the deployment phase consisted of deploying these images as containers on the production server.
 
 The pipeline is triggered by the creation of a new Git tag. Once triggered, parallel jobs build the Docker images for each service. This dedicated build server is also responsible for building images for the appropriate target architectures. The resulting images are tagged according to the Git version and pushed to a private container registry hosted on BFH’s GitLab. From there, the server can securely pull the images and run the containers.
@@ -1735,3 +1735,357 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 | 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
 
 \chapter{Supervisor Meeting Protocols}\label{chap:meeting-protocols}
+\section*{Meeting 17.02.2025}
+
+\subsection*{Intro}
+Enrico wurde von Linus soweit bereits in die Aufgabenstellung eingeführt.
+Der Experte wird voraussichtlich nächste Woche (SW2) definiert. Linus und Enrico werden dann ein Gesprächstermin in der Mitte des
+Semesters definieren. Im Normalfall gibt es 1 - 2 Meetings, um sich kennenzulernen und ein Einblick in das Projekt zu bieten.
+Ausserdem wird das Datum der Verteidigung bald definiert.
+
+\subsection*{Organisation}
+Bündige Sitzungsprotokolle schreiben und wieder als Anhang in den Bericht packen.
+Stundenerfassung muss nicht auf die Minute genau gemacht werden, kann aber interessant sein um Übersicht zu erhalten. Fokus liegt jedoch
+auf qualitativer Arbeit und dabei die Aufgabenstellung abzudecken. Falls etwas nicht implementiert werden konnte, dann sollte das so im
+Bericht begründet werden.
+
+Enrico und Linus führen ein Weekly durch, um die Woche zu planen und sich gegenseitig auf den aktuellsten Stand zu bringen.
+Meetings mit Pascal Mainini sind anfänglich im Drei-Wochen-Takt geplant. Es sind möglichst kurze Feedback-Loops geplant, um bereits früh
+Meinungen zu den erstellten Produkten zu erhalten. Ausserdem sind Gespräche mit der AHB und HAFL geplant, damit die Benutzersicht genauer
+verstanden werden kann.
+
+Bis zum nächsten Meeting sollen in einem ersten Sprint verschiedene ganzeheitliche Architekturvorschläge gesammelt werden. Ausserdem sollten
+die Requirements der verschiedenen Endbenutzer erfasst werden. Im gleichen Schritt werden Technologien evaluiert, welche für die Lösung verwendet
+werden sollen.
+
+\subsection*{Technische Diskussion}
+Die Firmware (als Git Repo) könnte mit Git-Tags verwaltet werden, damit verschiedene Sensorknoten mit der richtigen Firmware bespielt werden.
+Am Beispiel von MUG ist zu sehen, dass nicht bei jedem Baum die gleiche Firmware/Funktinalität erwünscht ist.
+
+Frage: Wie werden Sensoren physisch identifiziert? Z.B. über einen QR-Code?
+Mit einem mobilen Gerät (Raspi/Smartphone) könnten Devices auch im Feld neu bespielt werden.
+
+Zu definieren aus Datensicht: Wie lange lebt ein Sensorknoten? Beim Einsatz in einem neuen Gebiet ein neuer Identifier?
+Oder möglicherweise eine History der Firmwares pro Sensorknoten, um wiederkehrende Fehlerquellen zu identifizieren.
+
+\subsection*{Offene Fragen}
+- Bericht auf Deutsch/English?
+- Latex/Word?
+
+\subsection*{Stichworte}
+- UF2 Bootloader
+- Webserial
+- OTG-USB Cable
+- FastAPI (Python Framework)
+- Hydra Hypermedia
+- Triplestores: Fuseki, Oxigraph
+
+\subsection*{Terminplanung}
+- 20.02.2025 10:00 Requirements-Aufnahme an der AHB
+- 05.03.2025 15:30 Projektrahmen genauer definieren
+- 12.03.2025 09:00 - 10:00 Requirements-Aufnahme der HAFL
+
+\section*{Meeting 20.02.2025}
+
+Das Meeting fand an der AHB statt, damit die Hardware noch einmal genauer angeschaut werden kann und die Requirements aufgenommen werden können.
+Dafür wurden im Vorab Fragen gesammelt, welche im Meeting zwingend geklärt werden sollten.
+
+\subsection*{Offene Fragen}
+- Testen mit Live-Daten? Laufendes Deployment irgendwo? Wann Release von TTN?
+- MQTT oder Webhooks? Präferenz?
+- User Auth? Braucht es Rollen? Welche?
+- Offener Graph gegen aussen (Internet)?
+- Wie machen wir das mit Excel Files etc? Referenzierung durch uns/euch...?
+- Read Only InfluxDB? Sonst Inkonsistenzen mit Linked Data Graph.
+- Bestehende Infrastruktur, was wird migriert von den Daten/Services?
+- Welche Daten interessiert die Auswertung?
+- Firmware-Update überhaupt ein mögliches Szenario?
+
+\subsection*{Besprechung}
+- TTN immer wenn möglich brauchen, Swisscom nur wenn nötig (Kostenpunkt)
+- Wenn es geht Webhooks verwenden, da von beiden unterstützt
+- InfluxDB wird sowieso Read only verwendet, Löschung von Daten gescheht eh nicht im Detail, wenn dann der ganze Bucket, nicht einzelne Datenpunkte
+- Grafana wird momentan eingesetzt mit InfluxDB
+- Zwei Rollen: Admin / Read-only wäre okay
+- Graph muss nicht zwingend direkt dereferenziert können
+- Gezeigte Infrastruktur soweit in Ordnung, Chrome wär in Ordnung (für Webserial)
+- Provisionierung soll flexibel genug sein, dass auch andere Toolchain noch funktioniert. 
+- Bei einem Berg ohne Empfang muss man trotzdem flashen können. Z.B. Vorkomplierte Binaries herunterladen
+- Im Field flashen (Firmware Update) ist ein Use Case 
+ 
+\subsection*{Todo}
+- Issue an Nikita: Infrastruktur / TTN-Zugriff / Server-Zugriff
+- Issue an Nikita: Brainstorming zum Graphen, was könnte alles verlinkt werden?
+
+\section*{Meeting 05.03.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Besprechung}
+- Momentan kein aktives Projekt mit Daten. Bestehende Station bei der AHB wieder in Betrieb nehmen, so können Live-Daten generiert werden.
+- Hardware von Linus kann für das Flashen von Firmware verwendet werden, damit Enrico arbeiten kann.
+- Anmerkung von Pascal: Es muss klar ersichtlich sein, wer was geschrieben und bearbeitet hat
+- User-Handling auch in einem Triplestore? Mit Named Graph? Vielleicht zwei Triplestores. Flat Files?
+    - Theoretisch gäbe es eine Beziehung zwischen Benutzer/Person und den Projekte/Sensorknoten.
+    - Pro User ein Account wäre gewünscht, statt nur zwei User --> Logging, wer hat wann was gemacht? Prozess-Log führen.
+    - Trotzdem weiterhin einfach zwei/drei Rollen, welche sich durch Read/Write unterscheiden
+    - Erfassung von neuen Benutzer über Web-UI, oder shellscript
+    - Klar dokumentiert, wo liegen die Gefahren? Wer könnte auf was zugeifen?
+    - Auth primär auf Frontend/Backend-Seite beachten, später wenn Zeit auf Triplestore-Ebene (wenn keine Zeit dann sicher Gedanken in Bericht aufnehmen)
+- Bemerkung zu Compilation von Pascal: Wieso nicht Gitlab-Runner statt eigener Service bauen? UI triggered Gitlab-Pipeline, holt Daten, baut Binary, stellt als Artifact zur Verfügung.
+    - Artifact-Aufräumen wäre bereits implementiert
+    - UI würde Gitlab-REST verwenden um Informationen darzustellen
+    - Versionierung wäre dabei, auch Error-Logs, Status etc.
+    - *Müsste abstrakt gebaut werden:* z.B. beim Post-Request verschiedene Build-Environemnts (Arduino, Cargo, ..) Konkret, welches Image zum builden verwenden? Templating für config.h
+- Wenn möglich offen designen
+- Termine beim End-to-End Testing festlegen mit Nikita. Bis zu diesem Termin sollte es dann stehen . Genügend Vorlaufzeit einplanen
+- Fokus auf QR-Code und nicht NFC, NFC könnte sehr zeitintensiv sein (Prio 0)
+    - QR-Code + kleiner Text (vielleicht einfach DevEUI?)
+    - Was könnte sonst noch im QR-Code stehen? Name, URL etc.
+- Update/Neue Sensorknoten-Thematik:
+    - Primär technisch einfach erfassen
+    - Konzeptionelle Frage: Wann ist es ein Update? Wann ein neuer Sensorknoten?
+    - Solange keine Sensoren kommen/gehen und Standort nicht ändert ist es der selbe Knoten.
+    - Pragmatisch lösen, möglicherweise Firmware-Version der Vorlage übersteuern?
+- Besprechungsdetails im Voraus versenden, damit man bereits Einblick erhält.
+
+\subsection*{ToDo}
+- Anpassung am System Overview: Grüner Bereich für MUG einfügen mit Baum in der Stadt, sowie Namensgebung einfügen
+- Diagramm: Compilation Workflow anpassen
+    - Hat noch alte Artifakte von vorheriger Struktur übrig
+    - Protobuf-check, ist das File inkludiert?
+    - Job-Handling ergänzen mit Job-ID
+- Deadlines für Buch, Plakat etc. nachschauen und möglicherweise Milestones anpassen
+- Bericht mehr in den Milestones integrieren, Stunde pro Woche
+- Anpassung Researcher Workflow: Access Token auf Projektebene pro Gruppe/Repository
+- Requirement: Beliebige key/value Paare erfassen können pro SensorNode
+
+\subsection*{Termine}
+- Nächstes Meeting: 19. März von 13:00 bis 14:00 Uhr
+
+\subsection*{Offene Fragen}
+- Optionale Anforderungen besprechen
+- Brauchts eine UI für linked data visualisierung? Hier auch bei Michael Luggen nachfragen.
+
+\section*{Meeting 12.03.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+- Christine Moos
+
+\subsection*{Besprechung / Input Christine}
+
+- R wird verwendet für die Datenauswertung, GIS-Systeme bei räumlichen Daten
+- Datenbankzugriff bis jetzt selten/nie direkt über Christine, Option besteht jedoch
+- Daten auch besonders längerfristig interessant in Internet of Soils
+- Christine sieht Vernetzung mit Daten von beispielsweise LINDAS (Meteoswiss, Waldbrandgefahr, ...) als sehr interessant
+
+\subsubsection*{Konkrete Fragen}
+**Frage:** Wie oft passiert es, dass verschiedenste Daten (Tabellen, CSV, Bilder, etc.) zusammengeführt werden müssen?  
+**Antwort:** Passiert oft, typischer Anwendungsfall. Oft auch in Kombination mit einem GIS-System.
+
+**Frage:** Bevorzugtes Format beim Import in R?   
+**Antwort:** CSV oder Text-File.
+
+**Rückfrage:** Könnte man in R auch eine Datenbank einbinden?   
+**Antwort:** Sollte solche Datenbanken geben. Aber auch SparQL-Einbindung mit CSV-Generierung direkt möglich.
+
+**Frage:** Ist es erwünscht, beim Download des CSVs diese direkt schon filtern zu können?   
+**Antwort:** Wahrscheinlich besonders dann erwünscht, wenn Datenmengen gross werden. Momentan sind die Datenreihen aber überschaubar.
+
+**Frage:** Welche Daten werden bei der Auswertung von IoS konkret verwendet?   
+**Antwort:** Entwicklung der Zeitreihen, in Abhängigkeit von Topografie (Höhemodell), Daten zur Vegetation (Waldbestand) in Bietsch Daten von der (WSL), klimatische Daten
+
+**Frage:** Darstellung der Zeitserien im Web-UI?   
+**Antwort:** Einen öffentlichen Zugang auf die Daten wäre interessant, damit auch Forstbetriebe oder so darauf zugreifen könnten. 
+Immernoch explorative Phase, sind die Daten so sinnvoll?
+In einem späteren Schritt dann vielleicht sinnvoll. Jedoch out of Scope, würde den Rahmen sprengen innerhalb der Bachelorarbeit.
+Fokus auf effektives Verwalten und Ausbringen von Sensorknoten. Vielleicht später sogar Integration in LINDAS?
+
+**Frage:** Sollte der SparQL-Endpoint zur Verfügung stehen?   
+**Antwort:** Ja definitiv. Natürlich nicht ins Internet, aber die Idee ist es ja komplexe Queries auf den Triplestore abzusetzen.
+
+Thema Export der Daten: Einfach ein beispielhafter Export bereitstellen, welcher ausgeführt werden kann.
+Integration mit R im Hinterkopf behalten. Jedoch sollte alles im RDF-Bereich mit R möglich sein.
+
+Erstmals den Graphen bauen (Sensordaten, Metadaten etc.). Der Export kann dann auch über ein Python-Script funktionieren, welches über SparQL in CSV konvertiert.
+
+\subsection*{Nachbesprechung Nikita/Pascal}
+
+Thema Logging: Wenn ein Benutzer eine Aktion/Mutation durchführt, soll ein Logbook 
+History pro Sensornode/Projekt. Dann gibt es Aktionen wie z.B. "Projekt erstellt", "Sensorknoten-Namen angepasst"
+
+Zu wenig in Requirements abgebildet:
+- Datenerfassung, Linked-Data Ansatz.
+- Etwas zu wenig abgebildet, wie Daten wirklich ab- und angelegt werden sollen
+- Hohe Priorität: Projektdaten in Linked-Data
+- Nikita hat definitiv Interesse an der Datenstruktur im Linked-Data Format und möchte das auch so weiterverwenden
+
+Möglichst früh beginnen Daten zu modellieren. Kann auch einfach über Turtle sein. Damit man möglichst schnell von einem konkreten Modell.
+Separates Git-Repo, um Daten zu modellieren und austauschen zu können (z.B. Turtle-File).
+Konkrete Projekte, Benutzer etc. erfassen, danach kann man von Ontologien und Schemas beginenn zu sprechen.
+Intern brauchen wir formelle Ontologien nicht unbedingt, Daten-zentrisch arbeiten.
+
+Ziel: End-to-End lauffähiges System. Sensor erfassen, Firmware builden und flashen, Datenmodell ersichtbar. Fokus auf Einsetzbarkeit, welches Nikita auch konkret verwenden kann und dass alle Aspekte abgebildet sind.
+
+\section*{Meeting 19.03.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Besprechung Requirements-Mail}
+- Verwaltung und Darstellung sollte beides Hoch sein
+- REST-Schnittstelle der Compile Engine unterscheidet zwischen generischer und projektspezifischer Kompilation
+- Thematik: Webserial als Prio Mittel? Denn evt. ist Webserial immer noch im Working-Draft? Ausserdem nur über Chrome möglich. Prio Mittel wäre als Schutz, da es unklar ist wie der technische Stand von Webserial ist.
+- Priorität liegt für Nikita generell mehr im konzeptionellen also z.B. wie wird der Graph genau dargestellt? Fokus auf das Backend d.h. die Kompilation des Binaries funktioniert, die Datenabfrage aus dem Triplestore etc.
+- Flashen der Firmware: Der Fokus liegt nicht auf Webserial, aber es sollte dann sicher ein Script geben, welches den Flashprozess mit dem Binary der Compile-Engine anwirft. Alternativ wäre UF2-Bootloader wäre interessant. Könnte man zwischen dev/prod wechseln und je nach Umgebung den Bootloader wechseln? Der Fokus muss darauf liegen, dass der manuelle Prozess des Flashens (inkl. Anpassen der DevEUI etc.) vereinfacht wird. Arduino-Cli würde die Requirements erfüllen, vielleicht aber ohne Bonuspunkte. Priorität liegt auf Webserial, es soll einfach möglichst bedienbar sein. **In requirements so abbilden mit minimum/bonus**
+- Update-Thematik. Es wäre wünschenswert ein History zu haben, welche Firmware-Version zu welchem Zeitpunkt auf welchen Sensorknoten geflasht wurde. Update eines Sensorknoten mit der selben DevEUI nicht unbedingt nötig. 
+- Datenlöschung: Löschung von noch ungebrauchten Datenentitäten (Projekte ohne Templates, Template ohne konkrete Knoten, Knoten ohne Sensorknoten) als tiefe Prio
+
+\subsection*{Besprechung}
+Unklarheiten bezüglich Projektrollen von Pascal und Nikita, wer spricht wo mit?
+Wie sehr fliesst die Erfüllung der Anforderungen dann in die Bewertung ein?
+Es kommen viele Wünsche/Idee von der Seite der Betreuer. Genau an dieser Stelle ist eine Feedback-Loop sehr wünschenswert, so kann bei grossen Workloads die Priorisierung auch während des Projekts sich wieder ändern.
+In die Bewertung fliesst vorallem der Arbeitseinsatz ein, also wie funktioniert die Kommunikation, sind kreative Ideen eingebracht etc.
+Priorität liegt auf einem Gesamtsystem, statt die einzelnen Komponenten zu perfekt zu designen, wenn dafür viele relevante Dinge fehlen.
+
+\subsection*{ToDo}
+- Mail bezüglich RDF Playground
+- Requirements updaten, ergänzen
+
+\subsection*{Terminplanung}
+- Nächstes Meeting: 3. April 2025 um 13:00
+
+\section*{Meeting 03.04.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Update Stand}
+- Compile Engine soweit fertig.
+    - Volume Cleaner löscht alte Artefakte
+    - Dummy Projekt benötigt main/main.ino File
+    - Caddy Webserver liefer static files aus und dient als Reverse Proxy
+- Lokaler MQTT Broker welcher TTN mirrored
+- TTN-Mock welcher Werte im Format von TTN simuliert
+- Timeseries-Parser extrahiert Metadaten, decoded Flatbuf und schreibt in Datenbanken
+- API-Definition der Compiler Engine fertiggestellt
+
+\subsection*{Besprechung}
+- Spreading Factor etc. werden über Ardunio-IDE gesetzt, müssen von Hand gesetzt werden
+- Thema Webserial:
+    - Nikita sagt Webserial wäre ein Plus, über ein Script wäre auch in Ordnung (Browser keine Priorität)
+    - "Script" um zu flashen ist jedoch ein Muss
+    - Webserial wäre aber auch ein schöner Präsentationseffekt
+- "build" ist eigentlich auch ein generischer Name für einen Endpoint, "arduino-build" wäre auch gut
+- Heltec haben proprietären Bootloader, Flashing daher schwierig.
+- Arduino Cloud nicht möglich, da sie das Board nicht unterstützen
+- Lokales Script mit proprietären Binaries genügt
+- Argon2 Hashes für Passwörter
+- Möglicherweise RDF hochladen können, welches dann in Triplestore eingefügt wird
+
+\subsection*{ToDo}
+- Heltec-Microcontroller Link (Auch ARV?) an Pascal für Bestellung
+- Safe-Guard mit eindeutigem Namen damit diese nicht korrelieren
+- Integrationsumgebung aufsetzen für Feedback-Loop zu ermöglichen
+
+\subsection*{Terminplanung}
+- 29.04.2025 am Morgen: Nächstes Meeting + Übergabe Integrationsumgebung
+- 13.06.2025 Finatag: Pascal voraussichtlich nicht vor Ort.
+
+\section*{Meeting 29.04.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Update Stand}
+- Aktueller Stand der Applikation wird gezeigt und zur Verfügung gestellt
+- User, Projekte und Commercial Sensor sind implementiert und können verwaltet werden
+- Git Tags können gesetzt werden um Images mit CI/CD zu builden und auf dem Server manuell zu pullen
+- Hostname ist noch ausstehend, sollte bald verfügbar sein
+
+\subsection*{Besprechung}
+- Tags wären interessant (vielleicht sogar statt State). So könnten Sensoren mit beliebigen Tags erfasst werden ohne vordefinierte Kategorien einhalten zu müssen.
+- Dokumentation angehen, provisorisches Inhaltsverzeichnis wird bald geschickt zur Überprüfung
+- Weiteres vorgehen sind die Entitäten Sensor Node Template und Sensor Node
+
+\subsection*{Terminplanung}
+- 19.06.2025 13:00 im SIPBB (nächstes Meeting)
+
+\section*{Meeting 19.05.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Update Stand}
+- Pascal hat am Sonntag per Mail eine Liste an Bugs/Verbesserungsvorschläge mitgeteilt. Diese wurden bereits gefixt
+- Statemanagement wurde bei verschiedenen Typen angespasst und verbessert.
+
+\subsection*{Besprechung}
+- Protobuf Datenty int16 gibt es nicht, wird jedoch meistens verwendet bisher. Int32 ist halt doppel so gross. Jedoch: In Protobuf werden immer nur die Bits übertragen, welche benötigt werden. Das heisst uint32 macht vermutlich am meisten Sinn.
+- Script für Flashing genügt auch wenn es nur im Git liegt, muss nicht in Applikation integriert sein.
+- Priorität liegt auf das Script, damit es brauchbar und funktional ist. Webserial ist somit ein Nice-to-have, .
+
+\subsection*{ToDo}
+- Farbe Tooltip bei Configurable etwas lesbarer machen
+- "Archive Sensor Node" im Projekt editieren
+- YASGUI mit Queries vorbereiten
+- Save Button deaktivieren sobald gespeichert wird, damit nicht mehrfach erfasst wird
+- "Save + Create New" Button um direkt nächste Entität zu erfassen  
+- Banner unten etwas kleiner und weniger prägnant
+- "Home"-Page für Dashboard einfügen
+- BUG: 422 bei Erfassen von Commercial Sensor
+
+\subsubsection*{Tiefe Prio / Anmkerungen}
+- "Commercial Sensor" macht als Namen nicht mega Sinn.
+- Units im Datastore, im Frontend dann über REST abholen
+- Info anzeigen wenn Commercial Sensor ausgewählt wird 
+- APP_KEY usw. in beiden Formaten ausliefern 
+
+\subsection*{Terminplanung}
+- 05.06.2025 um 13:00 im Rolex
+
+\section*{Meeting 19.05.2025}
+
+\subsection*{Teilnehmer}
+- Linus Degen
+- Enrico Cirignaco
+- Nikita Aigner
+- Pascal Mainini
+
+\subsection*{Update Stand}
+- System ist auf dem aktuellen Stand deployed und am Vortag End-zu-End getestet
+- Problem mit Heltec LoRaWAN_Minimal Sketch, da gewisse LoRaWAN-Flags direkt an gcc übergeben werden müssen
+- Webserial funktioniert im Chrome für ESP32-Geräte, Heltec-Script liegt vor
+- Protobuf-Service generiert Nanopb-Code und File-Descriptor
+
+\subsection*{Besprechung}
+- Workflow wird einmal komplett durchgespielt (Erfassung der Metadaten, Kompilation, Flashen, Datenvisualisierung)
+
+\subsection*{ToDo}
+- Subdomain von Yasgui fixen
+- Setup des Systems in Readme dokumentieren und als Anhang in Report
+- Bug wenn URL in commercial sensor without http
+
+\subsection*{Terminplanung}
+- Keine weiteren Meetings mehr bis zum Projektabschluss
+- Präsentation am Finaltag: 13.05.25 um 12:25
