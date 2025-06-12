@@ -3,7 +3,7 @@ author:
 - Enrico Cirignaco
 - Linus Degen
 title: 'Infrastructure for Sensor Management'
-subtitle: ''
+subtitle: 'Bachelor Thesis'
 date: '12.07.2025'
 lang: en-GB
 toc: true
@@ -13,6 +13,8 @@ header-includes:
   - \advisor{Pascal Mainini (BFH)}
   - \expert{Thomas Jäggi (GIBB)}
   - \degreeprogram{Bachelor of Science in Computer Science}
+
+#\titlegraphic*{\includegraphics[width=\paperwidth]{images/esp_tool_demo.png}}
 
 citeproc: true
 cite-method: biblatex
