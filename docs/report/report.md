@@ -250,7 +250,7 @@ The candidate that best fits the requirements of this project is the official es
 
 As part of the esptool-js repository, Espressif provides a minimal demo web application. This example was used as a proof of concept to validate that the ESP32-S3 XIAO board can be programmed directly from the browser using the Web Serial API. The demo was successfully tested with the ESP32 XIAO board, confirming that firmware programming is possible without requiring any additional software installation.
 
-In addition to validation, the demo served as a reference for understanding how the esptool-js library works in practice. It formed the basis for developing a custom integration within the project’s web application. Further implementation details are provided in the [Web Application Frontend](#frontend) section.
+In addition to validation, the demo served as a reference for understanding how the esptool-js library works in practice. It formed the basis for developing a custom integration within the project’s web application. Further implementation details are provided in the [Web Application Frontend](#webapp-frontend) section.
 
 ![Demo of the esptool-js tool](./images/esp_tool_demo.png)
 
@@ -427,17 +427,19 @@ Given the complexity and time limitations of the project, a structured yet adapt
 
 The project was planned using a combination of milestones and sprints. During the initial conceptual phase, the team gathered and defined the system requirements. Based on those requirements, the team outlined rough milestones representing major project components and their estimated durations. These high-level goals helped assess the feasibility of planned features within the available timeframe. Although flexible, they provided structure and helped maintain overall direction throughout the project.
 
-For short-term planning, the team relied on two-week sprints. At the start of each sprint, the team met to define and assign tasks based on priorities, individual strengths, and workload. A shared Kanban board was used to track progress. New issues, whether created by team members or suggested by stakeholders, were added to the backlog and reviewed during sprint planning. Tasks were labeled and updated throughout the sprint to reflect their current status. This lightweight adaptation of SCRUM enabled steady progress while maintaining flexibility.
+For short-term planning, the team relied on two-week sprints. At the start of each sprint, the team met to define and assign tasks based on priorities, individual strengths, and workload. A shared Kanban board was used to track progress. Kanban is a visual workflow management method that enabled transparent tracking of tasks from conception to completion [@kanban]. New issues, whether created by team members or suggested by stakeholders, were added to the backlog and reviewed during sprint planning. Tasks were labeled and updated throughout the sprint to reflect their current status. This lightweight adaptation of SCRUM enabled steady progress while maintaining flexibility.
 
-![Screenshot of kanban board](./images/kanban_board.png)
+![Screenshot of the kanban board during development](./images/kanban_board.png)
 
-A review strategy was also established to ensure that all code changes were peer-reviewed before being merged into the main branch. This practice improved code quality, facilitated knowledge sharing, and helped both team members stay familiar with all parts of the system. Once a developer completed a task, a merge request was created. The merge request could only be merged after review and approval by the other team member. This enforced a clear quality standard and maintained shared ownership of the codebase.
+To maintain high code quality and foster shared understanding, a peer code review strategy was implemented. All code changes required review and approval from the other team member before being merged into the main branch. This practice, initiated through a merge request upon task completion, not only ensured a clear quality standard but also facilitated knowledge sharing and helped both developers stay familiar with all parts of the system.
 
-In addition to tracking technical progress, the team implemented simple but effective controlling measures to ensure the project was properly documented. Meeting protocols were maintained to record key decisions and discussions. A shared work journal was used to log who worked on what, when, and how, providing transparency, traceability, and a basis for workload reflection. Both the protocols and the journal can be found in the appendix of this document.
+In addition to tracking technical progress, the team implemented simple but effective controlling measures to ensure the project was properly documented. Meeting protocols were maintained to record key decisions and discussions. A shared work journal was used to log who worked on what, when, and how. This provided transparency, traceability, and a basis for workload reflection. Both the [meeting protocols](#chap:meeting-protocols) and the [work journal](#chap:work-journal) can be found in the appendix of this document.
 
 ## Milestones
 
-Table: Project milestones during the project phase
+With the project's requirements established, development proceeded through clearly defined milestones. The following table presents an overview of each milestone, including its duration and key objectives.
+
+Table: Overview of project milestones with associated timelines and goals
 
 +-------------------------------------------+----------------+-------------------------------------------------------------------+
 | Milestone                                 | Duration       | Key Objectives                                                    |
@@ -449,7 +451,7 @@ Table: Project milestones during the project phase
 +-------------------------------------------+----------------+-------------------------------------------------------------------+
 | Infrastructure Setup & Proof of Concept   | 3 weeks        | - Set up development and production environment                   |
 |                                           |                | - Live data flow from sensor nodes to triplestore via Flatbuffers |
-|                                           |                | - PoC: Compile and programm firmware via browser                     |
+|                                           |                | - PoC: Compile and programm firmware via browser                  |
 +-------------------------------------------+----------------+-------------------------------------------------------------------+
 | Webapp Frontend & Backend                 | 4 weeks        | - User authentication                                             |
 |                                           |                | - Frontend UI for data entry and visualization                    |
@@ -473,9 +475,10 @@ The project followed modern application development principles, drawing inspirat
 ## Version Control with Git
 The codebase was managed using Git, with a single project repository hosted on BFH’s GitLab instance. This enabled effective version control, collaborative development, and reduced the risk of code loss. Each feature was developed in a dedicated branch and merged into the main branch only after review and approval by the other team member.
 
-Not only the source code, but also all project-related documents, such as documentation, diagrams, and presentation materials, were versioned in the same repository. Non-code files were allowed to be pushed directly to the main branch.
+Not only the source code, but also all project-related documents, such as documentation, diagrams, and presentation materials, were versioned in the same repository. Non-code files were allowed to be pushed directly to the main branch, as they rarely lead to merge conflicts and typically don't require peer review.
 
-Git tags were used to mark key integration points in the project timeline, especially when the system was successfully deployed to the production server. This tagging allowed for easy rollback if needed. A three-part versioning scheme was adopted:
+Git tags were used to mark key integration points in the project timeline, especially when the system was successfully deployed to the production server. This tagging allowed for easy rollback if needed. A three-part versioning scheme was adopted, following the principles of Semantic Versioning [@semver]:
+
 - The first number indicated major versions (e.g., 0.x.x during development, incremented to 1.0.0 for the first alpha release),
 - The second number for minor releases (typically used for new deployments to production), and
 - The third number for bugfixes and small patches.
@@ -491,29 +494,30 @@ From the start, each service was developed and deployed as a Docker container. C
 
 Descriptions of the individual services can be found in the [System Architecture](#system-architecture) section.
 
-## Multistaged GitHub CI Pipeline
-A clear separation between the build and run stages is a key principle of modern application architecture [@twelvefactor]. In this project, each service was packaged as a custom Docker image. The build stage was fully automated using a GitHub CI pipeline, while the run stage consisted of deploying these images as containers on the production server.
+## CI/CD Pipeline and Deployment Strategy
+A clear separation between the build and deployment phases is a key principle of modern application architecture [@twelvefactor]. In this project, each service was packaged as a custom Docker image. The build phase was fully automated using a GitHub CI pipeline, while the deployment phase consisted of deploying these images as containers on the production server.
 
-The pipeline is triggered by the creation of a new Git tag. Once triggered, parallel jobs build the Docker images for each service. The resulting images are tagged according to the Git version and pushed to a private container registry hosted on BFH’s GitLab. From there, the server can securely pull the images and run the containers.
+The pipeline is triggered by the creation of a new Git tag. Once triggered, parallel jobs build the Docker images for each service. This dedicated build server is also responsible for building images for the appropriate target architectures. The resulting images are tagged according to the Git version and pushed to a private container registry hosted on BFH’s GitLab. From there, the server can securely pull the images and run the containers.
 
 This approach ensures reproducible, versioned deployments and centralized control over image distribution. Using a private registry improves reliability and avoids dependency on public registries. Versioning with Git tags also allows for easy rollbacks in case of errors or regressions.
 
-Because the build stage does not run on the deployment environment, it avoids spreading the full Git repository across multiple systems, reducing the risk of accidental source code leakage. Although this is not a critical point for this project, since the codebase is not proprietary, it reflects good practice. It’s worth noting, however, that this protection does not apply to services written in interpreted languages, where source code remains accessible within the container.
+Because the build phase does not run on the deployment environment, it avoids spreading the full Git repository across multiple systems, reducing the risk of accidental source code leakage. Although this is not a critical point for this project, since the codebase is not proprietary, it reflects good practice. It’s worth noting, however, that this protection does not apply to services written in interpreted languages, where source code remains accessible within the container.
 
 # Technology Stack
-This section provides an overview of the technologies and tools used in the project, along with the reasoning behind their selection. Choices were guided by factors such as developer familiarity, compatibility, community support, and alignment with the project’s goals and constraints.
+This section provides an overview of the technologies and tools used in the project, along with the reasoning behind their selection. Choices were guided by factors such as developer familiarity, compatibility, community support, open-source availability, and alignment with the project’s goals and constraints.
 
 ## MQTT Broker
-The team selected Eclipse Mosquitto as the MQTT broker. It is lightweight, widely used in IoT systems, and offers excellent community support. Its reliability and ease of integration made it a good choice. Additionally, the team had prior training with Mosquitto through the IoT specialization course.
+The team selected Eclipse Mosquitto as the MQTT broker. It is lightweight, widely used in IoT systems, and offers excellent community support. Its reliability and ease of integration made it a good choice. Additionally, the team had prior training with Mosquitto through the IoT specialization course [@mosquitto].
 
 ## Reverse Proxy
-Although several reverse proxy solutions were briefly considered (e.g., NGINX, Traefik), the team opted for Caddy, as the project only required a small number of simple reverse proxy rules. Caddy offers automatic HTTPS, a user-friendly configuration syntax, and minimal maintenance overhead, features that aligned well with the project’s goals and time constraints.
+Although several reverse proxy solutions were briefly considered (e.g., NGINX, Traefik), the team opted for Caddy, as the project only required a small number of simple reverse proxy rules. Caddy offers automatic HTTPS, a user-friendly configuration syntax, and minimal maintenance overhead, features that aligned well with the project’s goals and time constraints [@caddy].
 
 ## Time-Series Database
 The use of InfluxDB as the time-series database was a requirement defined by the stakeholder from the outset. InfluxDB was already familiar to the stakeholder and provided a good fit for the type and volume of time-series data collected by the system.
 
 ## RDF Triplestore
-For persistent storage and querying of RDF data, the team evaluated multiple triplestore options and ultimately selected Apache Jena Fuseki. Fuseki is open-source, lightweight, and easy to set up, either as a standalone Docker container or integrated into Java applications via Maven. Compared to alternatives such as Blazegraph, which is no longer actively maintained, or GraphDB Free, which imposes limitations in its free version, Fuseki provided a more reliable and unrestricted solution. Commercial tools like Stardog or Amazon Neptune were also considered but were outside the scope of the project in terms of scale and cost. Fuseki had already been used successfully in a previous project, where it proved effective and simple to work with. The only notable limitation is the lack of built-in role-based access control for managing users and permissions [@fuseki].
+For persistent storage and querying of RDF data, the team evaluated multiple triplestore options and ultimately selected Apache Jena Fuseki. Fuseki is open-source, lightweight, and easy to set up, either as a standalone Docker container or integrated into Java applications via Maven. Compared to alternatives such as Blazegraph, which is no longer actively maintained, or GraphDB Free, which imposes limitations in its free version, Fuseki provided a more reliable and unrestricted solution. \
+While commercial tools like Stardog or Amazon Neptune were briefly surveyed to provide a broader overview, they were not considered viable options due to the project's scale and cost constraints. Fuseki had already been used successfully in a previous project, where it proved effective and simple to work with. The only notable limitation is the lack of built-in role-based access control for managing users and permissions [@fuseki].
 
 ## SPARQL Query Editor
 To enable users to interact with the triplestore, a graphical SPARQL query editor was also required. The team evaluated several tools and selected YASGUI, a widely used and actively maintained editor. YASGUI offers helpful features such as syntax highlighting, validation, and autocompletion [@yasgui]. One of its most valuable capabilities is its plugin architecture, which allows for custom extensions, for example, rendering query results directly on a map, making it ideal for enhancing user experience in this project.
@@ -528,7 +532,7 @@ To implement REST services, several frameworks were evaluated with a focus on pe
 | Actix-Web         | Rust        | - High performance and low memory usage  <br> - Strong type safety                      | - Steep learning curve  <br> - Smaller ecosystem  <br> - Less mature tooling [@actix]          |
 | FastAPI           | Python      | - Clean syntax and fast development cycle  <br> - Built-in OpenAPI documentation  <br> - Asynchronous support  <br> - Strong typing with Pydantic | - Slightly lower raw performance compared to Actix or Spring [@fastapi] |
 
-FastAPI was ultimately chosen for its balance between developer ergonomics and powerful features. Its automatic documentation generation, async support, and strong typing accelerated development and testing. It also aligned well with the team’s prior experience in Python and the need for quick iteration. All REST-based services in the project, such as the backend of the web application, were implemented using FastAPI and deployed in Docker containers.
+FastAPI was ultimately chosen for its balance between developer ergonomics and powerful features. Its automatic documentation generation, async support, and strong typing accelerated development and testing. It also aligned well with the team’s prior experience in Python and the need for quick iteration. All REST-based services in the project, most notably the backend of the web application, were implemented using FastAPI and deployed in Docker containers.
 
 ## Frontend Framework
 Given the requirements for an interactive and maintainable web interface, the use of a modern frontend framework was considered essential. The team evaluated several established frameworks, each with its own strengths and trade-offs:
@@ -539,7 +543,7 @@ Given the requirements for an interactive and maintainable web interface, the us
 | Vue       | - Easy to learn  <br> - Excellent documentation  <br> - Small bundle size  <br> - Good performance               | - Smaller community compared to React  <br> - Fewer third-party libraries [@vuejs]          |
 | Angular   | - Large community  <br> - Strong tooling  <br> - Robust performance  <br> - Built-in features                    | - Heavy bundle size  <br> - Steep learning curve  <br> - Complex state handling [@angular]    |
 
-The team ultimately selected Vue, as it offered the best balance between simplicity and capability for the project’s needs. Additionally, one team member was concurrently taking a university course on JavaScript frameworks, which included Vue, providing valuable hands-on experience during development.
+The team ultimately selected Vue, as it offered the best balance between simplicity and capability for the project’s needs. This decision was further supported by the team's combined expertise: one member already had strong prior experience with the framework, while the other was concurrently gaining valuable hands-on experience through a university course on JavaScript frameworks, which included Vue.
 
 An overview of all key technologies used can be found in the system architecture diagram in the [System Architecture](#system-architecture) section. The following sections provide more details on the individual components and their interactions.
 
@@ -1601,11 +1605,11 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 
 \appendix
 
-\chapter{Project Requirements}
+\chapter{Project Requirements}\label{chap:requirements}
 
-\chapter{Setup Instructions}
+\chapter{Setup Instructions}\label{chap:setup-instructions}
 
-\chapter{Time Tracking Sheet}
+\chapter{Work Journal}\label{chap:work-journal}
 
 | Datum      | Uhrzeit       | Dauer | Bearbeiter     | Issue    | Tätigkeit                                                         |
 |------------|---------------|-------|----------------|----------|-------------------------------------------------------------------|
@@ -1730,4 +1734,4 @@ We truly appreciated the opportunity to design and implement such an ambitious s
 | 2025-09-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
 | 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
 
-\chapter{Supervisor Meeting Notes}
+\chapter{Supervisor Meeting Protocols}\label{chap:meeting-protocols}
