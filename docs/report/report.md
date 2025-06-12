@@ -13,10 +13,13 @@ classoption:
 
 header-includes:
   - \institute{Berner Fachhochschule, Departement Technik und Informatik}
-  - \advisor{Pascal Mainini (BFH)}
+  - \advisor{Pascal Mainini}
   - \expert{Thomas Jäggi (GIBB)}
   - \degreeprogram{Bachelor of Science in Computer Science}
   - \titlegraphic*{\includegraphics[width=\paperwidth]{images/forest.jpg}}
+  - |
+    \usepackage{listings}
+    \lstset{breaklines=true}
 
 citeproc: true
 cite-method: biblatex
@@ -151,7 +154,7 @@ This chapter provides an overview of research carried out and available technolo
 
 This thesis builds directly upon the insights and results of a prior *Project 2* semester assignment, titled *Internet of Soils – Revised* [@project2-degel2], which examined the existing sensor architecture used in the *Internet of Soils* and *Mobile Urban Green* research projects. The goal of that work was to identify technical and organizational limitations in areas such as metadata management, data transmission, and system scalability, and to explore potential improvements.
 
-To better understand the current system setup, a fully functional sensor node was reconstructed based on the existing architecture. The prototype included a microcontroller, several analog sensors, an external ADC, and a wireless LoRaWAN connection via The Things Network. Collected data was transmitted to a central backend and processed using a Node-RED pipeline, before being stored in an InfluxDB time-series database. This practical replication enabled a detailed analysis of system behavior and exposed key weaknesses in scalability and maintainability.
+To better understand the current system setup, a fully functional sensor node was reconstructed based on the existing architecture. The prototype included a microcontroller, several analog sensors, an external analog-digital-converter (ADC), and a wireless LoRaWAN connection via The Things Network. Collected data was transmitted to a central backend and processed using a Node-RED pipeline, before being stored in an InfluxDB time-series database. This practical replication enabled a detailed analysis of system behavior and exposed key weaknesses in scalability and maintainability.
 
 Among the identified issues were the use of manually flashed firmware, the reliance on hardcoded transmission keys, the absence of centralized metadata tracking, and the dependency on custom, undocumented binary formats. These aspects proved manageable in small deployments but would create significant friction in larger-scale systems. Additionally, important project data such as calibration files, location metadata, and firmware versions were stored in various unlinked formats and locations.
 
@@ -163,13 +166,18 @@ A key requirement of the project was to reuse existing hardware from previous in
 As described in the official documentation[@heltec-am01], the CubeCell board supports two different bootloaders, one of which is Arduino-compatible. However, as visible in the screenshots provided on the same page, this bootloader is closed-source and not publicly available. Several related issues have already been discussed on GitHub, such as [@heltec-issue80], where users express concerns about the lack of transparency. In another thread [@heltec-issue281], a user even accuses Heltec of violating the GPL license by misusing the GCC compiler. These concerns indicate that Heltec is not interested in open-sourcing its development tools, making it necessary to find a workaround.
 
 To better understand the programming process, the behavior of the Arduino IDE must first be analyzed. Before any code can be compiled for the CubeCell board, the hardware-specific configuration must be installed via the Arduino Board Manager. This manager downloads configuration files from the Heltec GitHub repository [@heltec-cubecell-github]. In particular, the get.py script in the tools folder contains the following line:
+
 ```python
-tools_to_download = load_tools_list(current_dir + '/../package/package_CubeCell_index.template.json', identified_platform)
+tools_to_download = load_tools_list(current_dir + 
+'/../package/package_CubeCell_index.template.json', identified_platform)
 ```
+
 This suggests that the actual download URLs are listed in the package_CubeCell_index.template.json file. Indeed, the json file contains multiple links pointing to Heltec’s download server, such as:
 ```json
-    "url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0-BoardManager.zip",
+"url": "https://resource.heltec.cn/download/ASR650x-Arduino-1.2.0
+        -BoardManager.zip",
 ```
+
 Browsing this file server reveals not only the expected binaries, but also scattered PDF documents, some of which may contain useful technical information.
 
 As far as could be determined, since no official documentation was found, the Arduino IDE relies on three proprietary tools for compiling and programming firmware onto the board:
@@ -185,25 +193,26 @@ To confirm that the proprietary utilities mentioned earlier are indeed used by t
 
 ![Arduino settings configuring verbose output](./images/arduino_verbose_settings.png)
 
+\newpage
+
 A firmware upload was performed with verbose output enabled. The following snippet was extracted from the build log, immediately after the compiled binaries were generated. The output has been trimmed to highlight only the relevant portions of the programming process:
 ```
-/Users/macbook/Library/Arduino15/packages/CubeCell/tools/CubeCellelftool/0.0.1/CubeCellelftool /Users/macbook/Library/Arduino15/packages/CubeCell/tools/gcc-arm-none-eabi/8-2019-q3/bin/arm-none-eabi-objcopy /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.elf /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.hex /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd
-/Users/macbook/Library/Arduino15/packages/CubeCell/tools/gcc-arm-none-eabi/8-2019-q3/bin/arm-none-eabi-size -A /Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/sketch_jun6a.ino.elf
-Sketch uses 23380 bytes (17%) of program storage space. Maximum is 131072 bytes.
-"/Users/macbook/Library/Arduino15/packages/CubeCell/tools/CubeCellflash/0.0.1/CubeCellflash" -serial "/dev/cu.usbserial-0001" "/Users/macbook/Library/Caches/arduino/sketches/C0F716AC671CF6A6916D9A86A1AFEBF5/CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd"
+.../CubeCellelftool
+.../arm-none-eabi-objcopy
+.../sketch_jun6a.ino.elf
+.../sketch_jun6a.ino.hex
+.../CubeCell_Board_REGION_AS923_AS1_RGB_1.cyacd
+.../arm-none-eabi-size -A
+.../sketch_jun6a.ino.elf
+Sketch uses 23380 B (17%) of 131072 B.
+.../CubeCellflash /dev/cu.usbserial-0001 ...Board.cyacd
 Initialising bootloader.
 Silicon ID 0x256a11b5, revision 0.
 Verifying rows.
 Array 0: first row 34, last row 511.
 Starting upload.
 Uploading  ( 10 / 100 )
-Uploading  ( 20 / 100 )
-Uploading  ( 30 / 100 )
-Uploading  ( 40 / 100 )
-Uploading  ( 50 / 100 )
-Uploading  ( 60 / 100 )
-Uploading  ( 70 / 100 )
-Uploading  ( 80 / 100 )
+....
 Uploading  ( 90 / 100 )
 Uploading  ( 100 / 100 )
 Checksum verifies OK.
@@ -212,7 +221,8 @@ Total upload time 3.07s
 ```
 A more detailed analysis of the build logs revealed that the **CubeCellElfTool** utility is used to merge the ELF and HEX files into a .cyacd file. Its usage appears to follow the syntax:
 ```bash
-CubeCellelftool <path_to_objcopy> <path_to_elf_file> <path_to_hex_file> <output_cyacd_file>
+CubeCellelftool <path_to_objcopy> <path_to_elf_file> <path_to_hex_file> 
+<output_cyacd_file>
 ```
 The objcopy utility, part of the GCC toolchain, converts the ELF file into a HEX file, which is then combined with additional metadata into the .cyacd format. Further research indicated that .cyacd stands for Cypress Application Code, a firmware update format originally developed by Cypress (now part of Infineon) for their PSoC (Programmable System-on-Chip) devices. It includes both application code and metadata required by the bootloader for programming flash memory [@infineon-cyacd]. This suggests that the Heltec CubeCell board might rely on a variant of a Cypress bootloader.
 
@@ -269,6 +279,8 @@ In addition to validation, the demo served as a reference for understanding how 
 
 ![Demo of the esptool-js tool](./images/esp_tool_demo.png)
 
+\newpage
+
 # Linked Data
 
 The term Linked Data denotes a set of best practices for publishing and interconnecting structured data on the Web. According to Bizer et al., these practices have led in the past three years to the emergence of a global data space containing billions of assertions, commonly referred to as the Web of Data [@linked-data-story].
@@ -305,10 +317,13 @@ In the context of Linked Data, schemas and ontologies are essential tools for ad
 
 The World Wide Web Consortium (W3C) has established standards for semantic modeling with RDF Schema (RDFS) and the Web Ontology Language (OWL). RDFS extends RDF by introducing basic vocabulary for defining classes, properties and hierarchies [@rdf-schema]. OWL goes further by supporting more complex constructs such as class equivalence, property restrictions and logical axioms. These features enable semantic reasoning and consistency checking across datasets. Semantic reasoning allows new knowledge to be inferred from existing data, while validation mechanisms can help ensure data integrity and coherence [@owl-features].
 
-A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [@ssn-ontology]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of IoT applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems. \
+A domain-specific example of such an ontology is the SOSA (Sensor, Observation, Sample, and Actuator) ontology, developed by the W3C Spatial Data on the Web Working Group [@ssn-ontology]. SOSA is specifically designed to describe sensors, the observations they make, and the processes and platforms involved. It is well-aligned with the needs of IoT applications, where metadata about sensor deployments, measurement procedures and observed properties must be consistently modeled. In our platform, SOSA concepts are used to represent sensor nodes, their deployments in the field and the observations they produce. This enables consistent semantic annotation of sensor metadata and supports data integration across different types of sensing systems.
+
 The following diagram from the official ontology description by W3C offers a concret overview over all classes and relationships that are described within SOSA [@ssn-ontology]:
 
 ![Structure of the SOSA ontology](./images/sosa-ontology.png)
+
+\newpage
 
 The following example shows how a sensor and an observation would be described and linked with the SOSA ontology. The example is written in the Turtle format, a compact and human-readable syntax specifically designed for RDF graphs, making it easier to read and write semantic data.
 
@@ -338,7 +353,7 @@ In addition to SOSA, general-purpose vocabularies such as Schema.org are useful 
 ex:InternetOfSoils a schema:Project ;
   schema:name "Internet of Soils" ;
   schema:alternateName "IoS" ;
-  schema:description "A project to monitor soil moisture in protection forests." ;
+  schema:description "Let's monitor soil moisture in protection forests." ;
 ```
 
 Using well-established ontologies provides several concrete advantages. First, they are typically developed and maintained by expert communities, ensuring conceptual clarity and practical relevance. Second, they enable semantic alignment across datasets, allowing data to be linked meaningfully across systems that follow the same ontological models. This is a core strength of Linked Data: enabling the integration of decentralized data sources through shared semantic structures. Furthermore, leveraging existing ontologies accelerates development, reduces modeling errors and supports long-term maintainability of data systems.
@@ -403,7 +418,9 @@ message SensorData {
 
 The Protobuf compiler `protoc` is used to generate code in a target language. For instance, running `protoc` with a Python plugin produces a `.py` file that includes data classes and serialization logic. In Python, the generated module embeds the binary representation of the schema and uses metaclasses to dynamically create message classes at runtime. This makes the schema available without needing the `.proto` file at runtime, while still allowing full access to all message types [@protobuf].
 
-The table below illustrates how different data types are encoded using Protocol Buffers. Each type handles value representation differently in terms of size and encoding strategy, depending on whether the data is numeric, binary, or structured.
+The table on the next page illustrates how different data types are encoded using Protocol Buffers. Each type handles value representation differently in terms of size and encoding strategy, depending on whether the data is numeric, binary, or structured.
+
+\newpage
 
 Table: Binary encoding examples for different Protobuf data types.
 
@@ -543,23 +560,51 @@ To enable users to interact with the triplestore, a graphical SPARQL query edito
 ## REST Framework
 To implement REST services, several frameworks were evaluated with a focus on performance, ease of development, Docker compatibility, and ecosystem maturity. While the programming language was not fixed, the team had experience with Python, Java, Rust, and JavaScript. The following options were considered:
 
-| Framework         | Language    | Pros                                                                                   | Cons                                                                                      |
-|------------------|-------------|-----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| Express.js        | JavaScript  | - Lightweight and minimalistic  <br> - Large ecosystem and community  <br> - Fast prototyping | - No built-in type safety  <br> - Requires manual setup for validation and documentation [@express] |
-| Spring Boot       | Java        | - Enterprise-ready features  <br> - Mature ecosystem and tooling  <br> - Integrated validation and DI | - Heavy for small services  <br> - Slower startup time [@springboot] |
-| Actix-Web         | Rust        | - High performance and low memory usage  <br> - Strong type safety                      | - Steep learning curve  <br> - Smaller ecosystem  <br> - Less mature tooling [@actix]          |
-| FastAPI           | Python      | - Clean syntax and fast development cycle  <br> - Built-in OpenAPI documentation  <br> - Asynchronous support  <br> - Strong typing with Pydantic | - Slightly lower raw performance compared to Actix or Spring [@fastapi] |
+Table: Evaluation of different REST frameworks
+
++------------+-----------+------------------------------+---------------------------------------+
+| Framework  | Language  | Pros                         | Cons                                  |
++============+===========+==============================+=======================================+
+| Express.js | JS        | - Leicht, minimalistisch     | - Keine Typsicherheit                 |
+|            |           | - Grosses Ökosystem, Comm.   | - Manuelles Setup [@express]          |
+|            |           | - Schnelles Prototyping      |                                       |
++------------+-----------+------------------------------+---------------------------------------+
+| Spring Boot| Java      | - Enterprise-fähig           | - Schwer f. kleine Services           |
+|            |           | - Reifes Ökosystem           | - Lange Startzeiten [@springboot]     |
+|            |           | - Int. Validierung, DI       |                                       |
++------------+-----------+------------------------------+---------------------------------------+
+| Actix-Web  | Rust      | - High-Perf., Low-Mem.       | - Steile Lernkurve                    |
+|            |           | - Starke Typsicherheit       | - Kleineres Ökosystem                 |
+|            |           |                              | - Weniger reife Tools [@actix]        |
++------------+-----------+------------------------------+---------------------------------------+
+| FastAPI    | Python    | - Saubere Syntax, schnell    | - Etwas geringere Roh-Perf. [@fastapi]|
+|            |           | - Int. OpenAPI-Doku          |                                       |
+|            |           | - Asynchron                  |                                       |
+|            |           | - Starke Typisierung         |                                       |
++------------+-----------+------------------------------+---------------------------------------+
 
 FastAPI was ultimately chosen for its balance between developer ergonomics and powerful features. Its automatic documentation generation, async support, and strong typing accelerated development and testing. It also aligned well with the team’s prior experience in Python and the need for quick iteration. All REST-based services in the project, most notably the backend of the web application, were implemented using FastAPI and deployed in Docker containers.
 
 ## Frontend Framework
 Given the requirements for an interactive and maintainable web interface, the use of a modern frontend framework was considered essential. The team evaluated several established frameworks, each with its own strengths and trade-offs:
 
-| Framework | Pros                                                                                   | Cons                                                                                   |
-|-----------|-----------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| React     | - Very popular  <br> - Large community  <br> - Rich ecosystem of libraries and tools  <br> - Strong documentation | - Large bundle size  <br> - Complex state management  <br> - Steep learning curve [@react]  |
-| Vue       | - Easy to learn  <br> - Excellent documentation  <br> - Small bundle size  <br> - Good performance               | - Smaller community compared to React  <br> - Fewer third-party libraries [@vuejs]          |
-| Angular   | - Large community  <br> - Strong tooling  <br> - Robust performance  <br> - Built-in features                    | - Heavy bundle size  <br> - Steep learning curve  <br> - Complex state handling [@angular]    |
++-----------+--------------------------+--------------------------------------+
+| Framework | Pros                     | Cons                                 |
++===========+==========================+======================================+
+| React     | - Sehr populär           | - Grosses Bundle                     |
+|           | - Grosse Community       | - Komplexe State-M.                  |
+|           | - Reiches Ökosystem      | - Steile Lernkurve [@react]          |
+|           | - Starke Doku            |                                      |
++-----------+--------------------------+--------------------------------------+
+| Vue       | - Einfach zu lernen      | - Exzellente Doku                    |
+|           | - Kleines Bundle         | - Kleinere Community                 |
+|           | - Gute Performance       | - Weniger 3rd-Party Libs [@vuejs]    |
++-----------+--------------------------+--------------------------------------+
+| Angular   | - Grosse Community       | - Schweres Bundle                    |
+|           | - Starke Tools           | - - Steile Lernkurve                 |
+|           | - Robuste Performance    | - Komplexe State-H. [@angular]       |
+|           | - Eingeb. Features       |                                      |
++-----------+--------------------------+--------------------------------------+
 
 The team ultimately selected Vue, as it offered the best balance between simplicity and capability for the project’s needs. This decision was further supported by the team's combined expertise: one member already had strong prior experience with the framework, while the other was concurrently gaining valuable hands-on experience through a university course on JavaScript frameworks, which included Vue.
 
@@ -933,6 +978,7 @@ The Firmware Tool section allows users to initiate a compilation job for the sel
 Additionally, for ESP32-based nodes, successful compilation enables firmware programming directly via the browser using **WebSerial**. This feature requires a Chromium-based browser. Once a compatible board is connected and a serial port is selected, the programming process can be launched.
 
 A Serial Monitor is also available independently of the build process. It allows users to connect to an already-programmed board and view its serial output in real time.
+
 ![Firmware Tools Overview](./images/firmaware-tools.jpg)
 
 ## Development Workflow
@@ -1038,12 +1084,14 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/{uuid}", response_model=UserOut)
 async def read_specific_user(uuid: UUID, 
-                             _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], check_ownership=True)),
-                             auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
+      _: UserInDB = Depends(require_roles_or_owner([RoleEnum.ADMIN], 
+          check_ownership=True)),
+      auth_service: AuthService = Depends(get_auth_service)) -> UserOut:
     try:
         return auth_service.find_user_uuid(uuid)
     except NotFoundError as err:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+            detail=str(err))
 ```
 
 This example showcases a more complex router definition. It utilizes a UUID as a path parameter, leveraging Pydantic's automatic type validation for robust input handling. Crucially, the _: parameter, combined with Depends(require_roles_or_owner(...)), demonstrates the implementation of role-based authorization and ownership checking. This dependency ensures that only users holding the ADMIN role, or the user who is the owner of the requested resource, are granted access to this specific endpoint. Furthermore, the try...except block illustrates robust error handling: a custom **NotFoundError** raised by the AuthService when a user is not found, is caught and directly translated into an **HTTP 404 Not Found** response, providing clear and standardized feedback to the client.
@@ -1094,6 +1142,8 @@ The services layer extensively utilizes custom exceptions, which are defined in 
 
 These custom exceptions are designed to be caught by the routers layer, where they are then consistently translated into appropriate HTTP status codes, as previously discussed. This mapping ensures a standardized API response for various error scenarios. The following table illustrates the mapping between common custom exceptions and their corresponding HTTP status codes:
 
+Table: Mapping of exceptions to status codes
+
 | Exception Name       | Status Code | Status Name  |
 |----------------------|-------------|--------------|
 | NotFoundException    | 404         | Not Found    |
@@ -1127,7 +1177,7 @@ class RDFEnumMixin:
     # ...
     @property
     def rdf_uri(self) -> str:
-        return f'{self._rdf_base_uri}{self.__class__.__name__}/{self.value}'
+        return f'{self._rdf_uri}{self.__class__.__name__}/{self.value}'
 ```
 
 This approach ensures that enum values are semantically well-defined and can be consistently resolved within the graph.
@@ -1144,21 +1194,20 @@ When creating a new entity, the repository method converts the Python object int
 # Simplified example for creating a SensorNode
 from rdflib import Graph, URIRef, Literal, RDF
 
-def create_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
-    g = Graph()
-    sensor_uri = URIRef(f"http://data.bfh.ch/sensorNodes/{sensor_node.uuid}")
+g = Graph()
+uri = URIRef(f"http://data.bfh.ch/sensorNodes/{node.uuid}")
 
-    g.add((sensor_uri, RDF.type, URIRef(self.bfh + "SensorNode")))
-    g.add((sensor_uri, URIRef(self.schema + "name"), Literal(sensor_node.name)))
-    g.add((sensor_uri, URIRef(self.bfh + "state"), URIRef(sensor_node.state.rdf_uri)))
-    # ... additional triples for relationships and other properties
-    
-    query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
-    self.triplestore_client.update(query)
-    return self.find_sensor_node_by_uuid(sensor_node.uuid)
+g.add((uri, RDF.type, URIRef(self.bfh + "SensorNode")))
+g.add((uri, URIRef(self.schema + "name"), Literal(node.name)))
+g.add((uri, URIRef(self.bfh + "state"), URIRef(node.state.rdf_uri)))
+# ... additional triples for relationships and other properties
+
+query = f"""INSERT DATA {{ {g.serialize(format='nt')} }}"""
+self.triplestore_client.update(query)
+return self.find_sensor_node_by_uuid(node.uuid)
 ```
 
-This snippet illustrates how `rdflib.Graph` builds the RDF representation. Each property of the Python object translates into an RDF triple using defined URIs from `schema.org` or the custom BFH ontology. Notice how `sensor_node.state.rdf_uri` is used to store the enum value as a URI.
+This snippet illustrates how `rdflib.Graph` builds the RDF representation. Each property of the Python object translates into an RDF triple using defined URIs from `schema.org` or the custom BFH ontology. Notice how `node.state.rdf_uri` is used to store the enum value as a URI.
 
 #### Reading Entities (SELECT Queries)
 
@@ -1169,25 +1218,25 @@ Reading complex entities often requires multiple `SELECT` queries to gather all 
 ```python
 # Simplified example for reading a SensorNode
 def find_sensor_node_by_uuid(self, uuid: UUID) -> SensorNodeDB | None:
-    sensor_uri = f"<http://data.bfh.ch/sensorNodes/{uuid}>"
+  sensor_uri = f"<http://data.bfh.ch/sensorNodes/{uuid}>"
 
-    sparql_query = f"""
-    PREFIX schema: <http://schema.org/>
-    PREFIX bfh: <http://data.bfh.ch/>
+  sparql_query = f"""
+  PREFIX schema: <http://schema.org/>
+  PREFIX bfh: <http://data.bfh.ch/>
 
-    SELECT ?name ?state ?templateUri ?projectUri
-    WHERE {{
-        {sensor_uri} a bfh:SensorNode ;
-                    schema:name ?name ;
-                    bfh:state ?state ;
-                    bfh:usesNodeTemplate ?templateUri ;
-                    bfh:partOfProject ?projectUri .
-    }}
-    """
-    result = self.triplestore_client.query(sparql_query)
-    # ... manual parsing of result into SensorNodeDB object,
-    #     including conversion of URI for 'state' back to Python Enum
-    return sensor_node # once fully populated
+  SELECT ?name ?state ?templateUri ?projectUri
+  WHERE {{
+      {sensor_uri} a bfh:SensorNode ;
+                  schema:name ?name ;
+                  bfh:state ?state ;
+                  bfh:usesNodeTemplate ?templateUri ;
+                  bfh:partOfProject ?projectUri .
+  }}
+  """
+  result = self.triplestore_client.query(sparql_query)
+  # ... manual parsing of result into SensorNodeDB object,
+  #     including conversion of URI for 'state' back to Python Enum
+  return sensor_node # once fully populated
 ```
 
 The `find_sensor_node_by_uuid` method highlights the need for SPARQL queries to reconstruct a complex Python object. The raw dictionary-like results are manually parsed and mapped back into the Pydantic models. Notably, the `from_rdf_uri` class method of the `RDFEnumMixin` is used to convert the retrieved state URI back into its corresponding Python Enum member.
@@ -1199,23 +1248,23 @@ Updating entities typically involves a **two-step process**: first, deleting all
 ```python
 # Example for deleting a SensorNode
 def delete_sensor_node(self, uuid: UUID) -> None:
-    sparql_query = f"""
-    PREFIX bfh: <http://data.bfh.ch/>
+  sparql_query = f"""
+  PREFIX bfh: <http://data.bfh.ch/>
 
-    DELETE WHERE {{
-        ?s ?p ?o .
-        FILTER (
-            STRSTARTS(STR(?s), "http://data.bfh.ch/sensorNodes/{uuid}/") ||
-            STR(?s) = "http://data.bfh.ch/sensorNodes/{uuid}"
-        )
-    }}
-    """
-    self.triplestore_client.update(sparql_query)
+  DELETE WHERE {{
+    ?s ?p ?o .
+    FILTER (
+      STRSTARTS(STR(?s), "http://data.bfh.ch/sensorNodes/{uuid}/") ||
+      STR(?s) = "http://data.bfh.ch/sensorNodes/{uuid}"
+    )
+  }}
+  """
+  self.triplestore_client.update(sparql_query)
 
 def update_sensor_node(self, sensor_node: SensorNodeDB) -> SensorNodeDB:
-    # Deleting all old triples and re-creating with new data
-    self.delete_sensor_node(sensor_node.uuid)
-    return self.create_sensor_node(sensor_node)
+  # Deleting all old triples and re-creating with new data
+  self.delete_sensor_node(sensor_node.uuid)
+  return self.create_sensor_node(sensor_node)
 ```
 
 The `update_sensor_node` method highlights that a full "delete and re-insert" strategy is often employed for updates due to the nature of RDF graph modifications.
@@ -1570,6 +1619,8 @@ Table: Breakdown of key project responsibilities per team member
 
 To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This [work journal](#chap:work-journal) is included in the appendix.
 
+\newpage
+
 ## Contribution to Thesis Chapters
 
 This table details the primary authorship of each chapter and section in this thesis, highlighting the contributions of each team member. Our goal was to ensure a fair distribution of work, leveraging individual strengths and interests. Consequently, each author primarily focused on describing the aspects of the project they were most involved with.
@@ -1601,6 +1652,8 @@ Table: Primary authorship of thesis chapters and sections
 | **Discussion**                    | X           | X                |
 
 Despite this initial division of labor, all sections of the thesis underwent thorough peer review by both team members. This collaborative review process was crucial for incorporating external perspectives, significantly enhancing readability and overall quality.
+
+\newpage
 
 # Conclusion
 This chapter reflects on the outcomes of the project and discusses potential future directions. It begins by outlining areas for improvement and possible extensions. It then presents final thoughts, which represent the team’s subjective perspective on the project, summarizing key lessons learned and evaluating its overall impact and feasibility.
@@ -1769,8 +1822,6 @@ ORDER BY ?entityType ?entityName ?linkName
 | Mittel    | Die Webapplikation soll eine REST API bereitstellen, die CRUD-Operationen für Projekte und Sensorknoten ermöglicht. |
 | *Optional*  | *Änderungen von Entitäten werden mit Zeitpunkt und Benutzer in einem Logbook im Triple Store gespeichert.* |
 
-\chapter{Setup Instructions}\label{chap:setup-instructions}
-
 \chapter{Work Journal}\label{chap:work-journal}
 
 | Datum      | Uhrzeit       | Dauer | Bearbeiter     | Issue    | Tätigkeit                                                         |
@@ -1861,7 +1912,7 @@ ORDER BY ?entityType ?entityName ?linkName
 | 2025-05-11 | 13:00 - 22:30 | 9,5   | CIRIE1         | 77, 48   | Edit New sensor node pages, version banner                        |
 | 2025-05-12 | 08:30 - 11:30 | 3,0   | CIRIE1         | 49       | sesnor node finished, dashboard updated                           |
 | 2025-05-15 | 09:00 - 19:00 | 9,0   | CIRIE1         | 49       | working on frontend, node, template, project                      |
-| 2025-05-16 | 13:00 - 16:00 | 3,0   | CIRIE1         | 81       | testing esp32 programming and webserial / esptools.js                |
+| 2025-05-16 | 13:00 - 16:00 | 3,0   | CIRIE1         | 81       | testing esp32 flashing and webserial / esptools.js                |
 | 2025-05-19 | 09:00 - 12:00 | 3,0   | CIRIE1, DEGEL2 |          | implementing feedback from supervisor and fixing various bugs in the app |
 | 2025-05-19 | 13:00 - 14:30 | 1,5   | CIRIE1, DEGEL2 |          | Meeting with supervison and stakeholder                           |
 | 2025-05-20 | 09:00 - 12:00 | 3,0   | CIRIE1         |          | Research and development of compile engine integration with backend |
@@ -1873,7 +1924,7 @@ ORDER BY ?entityType ?entityName ?linkName
 | 2025-05-23 | 13:00 - 16:00 | 3,0   | CIRIE1         |          | finalizing frontend, implementing minor features                  |
 | 2025-05-26 | 09:00 - 14:30 | 5,5   | CIRIE1         |  84, 14  | poster, working on webserial frontend                             |
 | 2025-05-27 | 08:00 - 12:30 | 4,5   | CIRIE1         |          | Merge requests and app deployment to production server            |
-| 2025-05-27 | 14:00 - 19:00 | 5,0   | CIRIE1         |  82, 83  | testing programming heltec, script for heltec                        |
+| 2025-05-27 | 14:00 - 19:00 | 5,0   | CIRIE1         |  82, 83  | testing flashing heltec, script for heltec                        |
 | 2025-05-29 | 12:00 - 17:00 | 5,0   | CIRIE1, DEGEL2 |          | book                                                              |
 | 2025-05-30 | 10:00 - 11:00 | 1,0   | CIRIE1, DEGEL2 |          | Merge all dev branches in main                                    |
 | 2025-05-10 | 10:00 - 15:00 | 5,0   | DEGEL2         | 56       | Sketch out sensor node model and service                          |
@@ -1889,12 +1940,30 @@ ORDER BY ?entityType ?entityName ?linkName
 | 2025-05-28 | 09:00 - 18:00 | 10,0  | DEGEL2         | 62       | Protobuf Service, dynamic parser, data in frontend                |
 | 2025-05-29 | 09:00 - 12:00 | 3,0   | DEGEL2         | 62       | Compile nanopb code over protobuf service                         |
 | 2025-05-30 | 09:00 - 10:00 | 1,0   | DEGEL2         | 62       | Small fixed when integrating protobuf service                     |
-| 2025-09-01 | 10:00 - 12:30 | 2,5   | DEGEL2         |          | Docs: Sketch out backend architecture                             |
-| 2025-09-02 | 10:00 - 12:00 | 2,0   | DEGEL2         | 10       | Pandoc/Pipeline in VSCode                                         |
-| 2025-09-02 | 14:00 - 15:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
-| 2025-09-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
-| 2025-09-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
-| 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
+| 2025-06-01 | 10:00 - 12:30 | 2,5   | DEGEL2         |          | Docs: Sketch out backend architecture                             |
+| 2025-06-02 | 10:00 - 12:00 | 2,0   | DEGEL2         | 10       | Pandoc/Pipeline in VSCode                                         |
+| 2025-06-02 | 14:00 - 15:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-06-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-06-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
+| 2025-06-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
+| 2025-06-01 | 15:00 - 18:00 | 3,0   | CIRIE1         |          | Docs: Methods, Journal                                            |
+| 2025-06-02 | 12:00 - 18:00 | 6,0   | CIRIE1         |          | Docs: Methods chapter                                             |
+| 2025-06-04 | 14:00 - 21:00 | 7,0   | CIRIE1, DEGEL2 |          | Docs: Methods chapter, Deployment First alpha version             |
+| 2025-06-05 | 08:00 - 12:00 | 4,0   | CIRIE1         |          | Deployment First alpha version                                    |
+| 2025-06-05 | 13:00 - 15:00 | 2,0   | CIRIE1, DEGEL2 |          | Last meeting with supervisor                                      |
+| 2025-06-06 | 13:00 - 20:00 | 7,0   | CIRIE1         |          | Docs: Research chapter                                            |
+| 2025-06-07 | 10:00 - 21:00 | 11,0  | CIRIE1, DEGEL2 |          | Making video                                                      |
+| 2025-06-08 | 16:00 - 18:00 | 2,0   | CIRIE1         |          | Docs: Research chapter                                            |
+| 2025-06-09 | 10:00 - 20:00 | 10,0  | CIRIE1         |          | Docs: Research chapter & Results Chapter                          |
+| 2025-06-10 | 10:00 - 20:00 | 10,0  | CIRIE1         |          | Docs: Results chapter & Conclusion Chapter                        |
+| 2025-06-11 | 17:00 - 00:30 | 7,5   | CIRIE1         |          | Docs: Peer Review and Improvements                                |
+| 2025-06-12 | 10:00 - 18:00 | 8,0   | CIRIE1         |          | Docs: Peer Review and Improvements. Wrap-up                       |
+| 2025-06-06 | 13:00 - 19:00 | 6,0   | DEGEL2         |          | Docs: Introduction                                                |
+| 2025-06-08 | 09:00 - 20:00 | 11,0  | DEGEL2         |          | Docs: State of Research                                           |
+| 2025-06-09 | 09:30 - 19:00 | 9,5   | DEGEL2         |          | Docs: State of Research                                           |
+| 2025-06-10 | 09:00 - 19:30 | 10,5  | DEGEL2         |          | Docs: Backend, Protobuf Service                                   |
+| 2025-06-11 | 09:30 - 23:30 | 14,0  | DEGEL2         |          | Docs: Timeseries Parser, Conclusion                               |
+| 2025-06-12 | 09:00 - 18:00 | 9,0   | DEGEL2         |          | Docs: Peer Review, Formatting                                     |
 
 \chapter{Supervisor Meeting Protocols}\label{chap:meeting-protocols}
 Da die Meetings auf Deutsch abgehalten wurden, sind die beigefügten Protokolle der Einfachheit halber ebenfalls in dieser Sprache verfasst, obgleich die Arbeit selbst in englischer Sprache gehalten ist.
@@ -2276,7 +2345,7 @@ student research project and have not adopted content generated by an AI without
     % Student 1 Unterschrift
     \raisebox{-0.5\height}{\includegraphics[height=1.5cm]{images/signatures/signature-degel2.jpg}} & 
     % Student 2 Unterschrift
-    \raisebox{-0.5\height}{\includegraphics[height=1.5cm]{images/signatures/signature-degel2.jpg}} \\ % Zeilenumbruch nur am Ende der Reihe
+    \raisebox{-0.5\height}{\includegraphics[height=1.5cm]{images/signatures/signature-cirie1.jpg}} \\
     \rule{0.9\linewidth}{0.5pt} & \rule{0.9\linewidth}{0.5pt} \\ 
     \textbf{Linus Degen} & \textbf{Enrico Cirignaco} \\
 \end{tabular}
