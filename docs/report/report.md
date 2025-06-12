@@ -420,6 +420,8 @@ The project was carried out by a two-person team, which required proactive plann
 
 After a joint planning and conceptualization phase, where the system architecture and project requirements were defined, each team member assumed roles aligned with their strengths and interests. Tasks were managed using Git branches, with each feature developed independently and later merged into the main branch upon completion. This workflow enabled parallel progress without conflicts.
 
+After a joint planning and conceptualization phase, the team, together with the supervisor and stakeholders, collaboratively defined and approved the project's system architecture and requirements. These requirements were then structured by **priorities**, including the definition of *optional* features (see Appendix: [Project Requirements](#chap:requirements)). With these foundational elements in place, each team member assumed roles aligned with their strengths and interests. Tasks were managed using Git branches, with each feature developed independently and later merged into the main branch upon completion. This workflow enabled parallel progress without conflicts.
+
 To maintain alignment, the team held regular internal meetings to discuss progress and synchronize development. A recurring practice called the “marriage” ensured that frontend and backend components were periodically integrated and tested together. Approximately every two weeks, the team also met with the project supervisor and stakeholder to demonstrate the current state of the system and gather feedback. Before these sessions, the latest features were merged, tested, and deployed to the server to provide a working prototype for review. This iterative process supported rapid, incremental improvements.
 
 # Project Management Methodology
@@ -1532,7 +1534,7 @@ An intuitive and modern web interface was developed to manage sensors, view meta
 All core objectives outlined in the original project scope were successfully implemented, resulting in a fully functional, integrated system that meets both technical and usability requirements. The final solution addresses each aspect of the specified tasks with a strong emphasis on automation, modularity, and future scalability.
 
 ## Unachieved goals
-While all original requirements specified by the supervisor were fulfilled, the team decided early in the conceptual phase to revise and extend the project scope by adding technically detailed, optional features based on internal priorities and architectural considerations. These additions aimed to increase the system’s versatility and real-world applicability but were not critical for fulfilling the baseline project goals.
+While all original requirements specified by the supervisor were fulfilled, the team decided early in the conceptual phase to revise and extend the project scope. This extension involved adding technically detailed, optional features (as outlined in Appendix: [Project Requirements](#chap:requirements)) based on internal priorities and architectural considerations. These additions aimed to increase the system’s versatility and real-world applicability but were not critical for fulfilling the baseline project goals.
 
 Among these optional goals, the following were not implemented due to time constraints:
 
@@ -1540,12 +1542,16 @@ Among these optional goals, the following were not implemented due to time const
 
 - **In-App Sensor Data Visualization and Export**: The application currently allows users to view the latest sensor readings along with timestamps, data types, and units. However, more advanced visualization tools (e.g., time series plots) and a CSV export feature were not developed. These tasks were deprioritized, as both can be performed directly via the InfluxDB web interface with minimal effort.
 
+- **Firmware Versioning for Sensor Data**: Sensor nodes can be updated with new firmware versions at any time, and they retain their The Things Network credentials. However, the collected measurement data is currently not linked to a specific firmware version, meaning it's not possible to trace data back to the exact firmware state of the sensor node at the time of collection. This feature was deemed optional and postponed due to time constraints.
+
 ## Workload per student
 From the beginning of the project, the team collaborated closely while maintaining a clear division of responsibilities. Tasks were distributed based on prior experience and expertise.
 Linus Degen, who had previously explored the use of RDF triplestores in the context of this project, took the lead on implementing the backend, the persistence layer, and the integration with The Things Network (TTN).
 Enrico Cirignaco, with a background in embedded systems and containerization, focused on the compiler engine, firmware programming mechanisms, the web frontend, and DevOps tasks.
 
 The following table provides a breakdown of the main responsibilities:
+
+Table: Breakdown of key project responsibilities per team member
 
 | Area                              | Linus Degen | Enrico Cirignaco |
 |-----------------------------------|-------------|------------------|
@@ -1555,11 +1561,43 @@ The following table provides a breakdown of the main responsibilities:
 | Backend API                       | X           |                  |
 | Frontend Web Application          |             | X                |
 | Compiler Engine                   |             | X                |
-| Firmware programming Tools           |             | X                |
+| Firmware programming Tools        |             | X                |
 | DevOps / CI / Deployment / Proxy  |             | X                |
 | System Architecture & Integration | X           | X                |
 
 To ensure full transparency, a shared work journal was maintained throughout the project. Each team member documented when and what they worked on. This journal is included in the appendix.
+
+## Contribution to Thesis Chapters
+
+This table details the primary authorship of each chapter and section in this thesis, highlighting the contributions of each team member. Our goal was to ensure a fair distribution of work, leveraging individual strengths and interests. Consequently, each author primarily focused on describing the aspects of the project they were most involved with.
+
+Table: Primary authorship of thesis chapters and sections
+
+| Chapter                           | Linus Degen | Enrico Cirignaco |
+|-----------------------------------|-------------|------------------|
+| **Abstract**                      | X           | X                |
+| **Introduction**                  | X           |                  |
+| **State of Research**             | X           | X                |
+| - Retrospective Project2          | X           |                  |
+| - Toolchain Analysis CubeCell     |             | X                |
+| - Webserial                       |             | X                |
+| - Linked Data                     | X           |                  |
+| - Binary Serialization            | X           |                  |
+| **Methods**                       |             | X                |
+| **Results**                       | X           | X                |
+| - High-level System-overview      |             | X                |
+| - System Architecture             | X           |                  |
+| - Heltec Programming Utils        |             | X                |
+| - Webapp-Frontend                 |             | X                |
+| - Webapp-Backend                  | X           |                  |
+| - Reverse Proxy                   |             | X                |
+| - Protobuf Service                | X           |                  |
+| - Timeseries Parser               | X           |                  |
+| - Deployment & Integration        |             | X                |
+| - Quality Assurance & Testing     | X           |                  |
+| **Discussion**                    | X           | X                |
+
+Despite this initial division of labor, all sections of the thesis underwent thorough peer review by both team members. This collaborative review process was crucial for incorporating external perspectives, significantly enhancing readability and overall quality.
 
 # Conclusion
 This chapter reflects on the outcomes of the project and discusses potential future directions. It begins by outlining areas for improvement and possible extensions. It then presents final thoughts, which represent the team’s subjective perspective on the project, summarizing key lessons learned and evaluating its overall impact and feasibility.
