@@ -1,0 +1,26 @@
+# This query returns all sensor nodes with state, the project they belong and the timestamp of their last measurement
+
+PREFIX schema: <http://schema.org/>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+PREFIX bfh: <http://data.bfh.ch/>
+
+SELECT ?projectName ?nodeName ?state ?latestResultTime
+WHERE {
+  ?project a schema:Project ;
+           schema:name ?projectName .
+
+  ?node a bfh:SensorNode ;
+        schema:name ?nodeName ;
+        bfh:state ?state ;
+        bfh:partOfProject ?project .
+  {
+    SELECT ?node (MAX(?resultTime) AS ?latestResultTime)
+    WHERE {
+      ?obs a sosa:Observation ;
+           sosa:madeBySensor ?node ;
+           sosa:resultTime ?resultTime .
+    }
+    GROUP BY ?node
+  }
+}
+ORDER BY ?projectName ?nodeName

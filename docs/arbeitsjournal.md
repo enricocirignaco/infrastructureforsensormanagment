@@ -122,9 +122,9 @@
 | 2025-05-28 | 09:00 - 18:00 | 10,0  | DEGEL2         | 62       | Protobuf Service, dynamic parser, data in frontend                |
 | 2025-05-29 | 09:00 - 12:00 | 3,0   | DEGEL2         | 62       | Compile nanopb code over protobuf service                         |
 | 2025-05-30 | 09:00 - 10:00 | 1,0   | DEGEL2         | 62       | Small fixed when integrating protobuf service                     |
-| 2025-09-01 | 10:00 - 12:30 | 2,5   | DEGEL2         |          | Docs: Sketch out backend architecture                             |
-| 2025-09-02 | 10:00 - 12:00 | 2,0   | DEGEL2         | 10       | Pandoc/Pipeline in VSCode                                         |
-| 2025-09-02 | 14:00 - 15:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
-| 2025-09-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
-| 2025-09-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
-| 2025-09-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
+| 2025-06-01 | 10:00 - 12:30 | 2,5   | DEGEL2         |          | Docs: Sketch out backend architecture                             |
+| 2025-06-02 | 10:00 - 12:00 | 2,0   | DEGEL2         | 10       | Pandoc/Pipeline in VSCode                                         |
+| 2025-06-02 | 14:00 - 15:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-06-03 | 19:00 - 20:00 | 1,0   | DEGEL2         | 10       | Docs: Introduction                                                |
+| 2025-06-04 | 14:00 - 21:00 | 9,0   | CIRIE1, DEGEL2 |          | Productive deployment, end-to-end testing, bugfixes               |
+| 2025-06-04 | 09:30 - 10:00 | 0,5   | DEGEL2         |          | Journal                                                           |
